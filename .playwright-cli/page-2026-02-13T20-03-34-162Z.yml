@@ -1,0 +1,65 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: About
+      - heading "The Arc" [level=1] [ref=e22]
+    - generic [ref=e23]:
+      - paragraph [ref=e25]: "I graduated from Duke University with a B.S. in Computer Science and a minor in Visual & Media Studies — a combination that shaped how I think about software: the engineering has to work, and the experience has to feel right."
+      - paragraph [ref=e27]: After graduating, I was hired as the first engineer at a startup. No playbook, no senior engineers to shadow — just a real product, real users, and a mandate to figure it out. I built scalable multi-tenant integration systems from scratch, migrated platforms when they stopped serving the product, and learned that good engineering is relentless attention to the user's actual problem.
+      - paragraph [ref=e29]: My work centers on transforming complex, scattered processes into reliable, intuitive systems. I reject the idea of “user error” — if users are struggling, the system needs to be better. That philosophy drives every decision I make, from data mapping strategy to UI hierarchy.
+    - heading "Philosophy" [level=2] [ref=e33]
+    - blockquote [ref=e35]: “Design for the user first. Every abstraction, every API contract, every data model should ultimately serve the person on the other end of the interface.”
+    - heading "Outside the Terminal" [level=2] [ref=e39]
+    - paragraph [ref=e41]: "When I'm not building software, I'm usually on a mountain or a skateboard. I coached snowboarding at High Cascade Snowboard Camp for two summers — working with 12–18 athletes per session, designing drills, and figuring out how to explain complex movement patterns simply. That experience shaped how I approach collaboration and technical communication: meet people where they are, be patient, and break it down."
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: 🏔
+        - text: Snowboarder
+      - generic [ref=e46]:
+        - generic [ref=e47]: 🛹
+        - text: Skateboarder
+      - generic [ref=e48]:
+        - generic [ref=e49]: 🏄
+        - text: Wakeboarder
+      - generic [ref=e50]:
+        - generic [ref=e51]: 🎿
+        - text: Snowboard Coach
+  - contentinfo [ref=e52]:
+    - generic [ref=e53]:
+      - paragraph [ref=e54]: Michael Herron © 2026
+      - list [ref=e55]:
+        - listitem [ref=e56]:
+          - link "GitHub" [ref=e57] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e58]:
+          - link "LinkedIn" [ref=e59] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e60]:
+          - link "Email" [ref=e61] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e67] [cursor=pointer]:
+    - img [ref=e68]
+  - alert [ref=e71]

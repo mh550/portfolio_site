@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: Work
+      - heading "Projects" [level=1] [ref=e22]
+      - paragraph [ref=e23]: A selection of professional and personal builds — integrations, full-stack apps, and tools.
+    - generic [ref=e24]:
+      - group "Filter projects by category" [ref=e25]:
+        - button "All" [pressed] [ref=e26]
+        - button "Integration" [ref=e27]
+        - button "Full-Stack" [ref=e28]
+        - button "AI" [ref=e29]
+        - button "Education" [ref=e30]
+      - generic [ref=e31]:
+        - article [ref=e33]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Builder Clarity
+            - heading "GoHighLevel ↔ JobTread Integration" [level=2] [ref=e36]
+          - paragraph [ref=e37]: Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.
+          - generic [ref=e38]:
+            - generic [ref=e39]: Pipedream
+            - generic [ref=e40]: JavaScript
+            - generic [ref=e41]: OAuth
+            - generic [ref=e42]: REST APIs
+            - generic [ref=e43]: Webhooks
+          - link "Deep dive →" [ref=e45] [cursor=pointer]:
+            - /url: /projects/ghl-jobtread-integration
+        - article [ref=e47]:
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: Builder Clarity
+            - heading "RingCentral ↔ JobTread Integration" [level=2] [ref=e50]
+          - paragraph [ref=e51]: Synced calls and texts from RingCentral VoIP into JobTread contact threads — establishing a single source of truth for contractor communications.
+          - generic [ref=e52]:
+            - generic [ref=e53]: n8n
+            - generic [ref=e54]: Zapier
+            - generic [ref=e55]: REST APIs
+            - generic [ref=e56]: Webhooks
+            - generic [ref=e57]: JavaScript
+          - link "Deep dive →" [ref=e59] [cursor=pointer]:
+            - /url: /projects/ringcentral-jobtread-integration
+        - article [ref=e61]:
+          - generic [ref=e62]:
+            - paragraph [ref=e63]: Freelance
+            - heading "Mirrored Google Calendars" [level=2] [ref=e64]
+          - paragraph [ref=e65]: Rebuilt a broken Google Calendar sync app from scratch — mirrors events across calendars for availability blocking.
+          - generic [ref=e66]:
+            - generic [ref=e67]: Next.js
+            - generic [ref=e68]: Supabase
+            - generic [ref=e69]: Pipedream
+            - generic [ref=e70]: Google Calendar API
+            - generic [ref=e71]: TypeScript
+          - link "Deep dive →" [ref=e73] [cursor=pointer]:
+            - /url: /projects/mirrored-google-calendars
+        - article [ref=e75]:
+          - generic [ref=e76]:
+            - paragraph [ref=e77]: Duke University
+            - heading "Cherished" [level=2] [ref=e78]
+          - paragraph [ref=e79]: Wellness-centered social media platform built in an AGILE team — featuring messaging, profiles, search, and email notifications.
+          - generic [ref=e80]:
+            - generic [ref=e81]: Next.js
+            - generic [ref=e82]: MongoDB
+            - generic [ref=e83]: TypeScript
+            - generic [ref=e84]: AGILE/Scrum
+          - link "Deep dive →" [ref=e86] [cursor=pointer]:
+            - /url: /projects/cherished
+  - contentinfo [ref=e87]:
+    - generic [ref=e88]:
+      - paragraph [ref=e89]: Michael Herron © 2026
+      - list [ref=e90]:
+        - listitem [ref=e91]:
+          - link "GitHub" [ref=e92] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e93]:
+          - link "LinkedIn" [ref=e94] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e95]:
+          - link "Email" [ref=e96] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e102] [cursor=pointer]:
+    - img [ref=e103]

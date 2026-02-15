@@ -1,0 +1,104 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: Experience
+      - heading "History" [level=1] [ref=e22]
+    - generic [ref=e25]:
+      - article [ref=e27]:
+        - paragraph [ref=e29]: March 2025 – November 2025
+        - heading "Founding Full-Stack Software Engineer" [level=2] [ref=e30]
+        - paragraph [ref=e31]: Builder Clarity
+        - list [ref=e32]:
+          - listitem [ref=e33]:
+            - generic [ref=e34]: —
+            - text: First engineer hired. Drove strategic pivot from custom per-client automation to scalable, product-based integration solutions.
+          - listitem [ref=e35]:
+            - generic [ref=e36]: —
+            - text: "Architected multi-tenant integrations: GoHighLevel ↔ JobTread, RingCentral ↔ JobTread."
+          - listitem [ref=e37]:
+            - generic [ref=e38]: —
+            - text: Led technical migration from Zapier to n8n and Pipedream — reduced technical debt, enabled rapid prototyping.
+          - listitem [ref=e39]:
+            - generic [ref=e40]: —
+            - text: Self-directed AGILE using Linear for sprint planning and stakeholder communication.
+      - article [ref=e42]:
+        - paragraph [ref=e44]: February 2025
+        - heading "AI Workflow Engineer" [level=2] [ref=e45]
+        - paragraph [ref=e46]: Tahoma Films
+        - list [ref=e47]:
+          - listitem [ref=e48]:
+            - generic [ref=e49]: —
+            - text: Refined AI image generation workflows using Invoke.AI (control nets, denoising, regional guidance).
+          - listitem [ref=e50]:
+            - generic [ref=e51]: —
+            - text: Trained LoRAs for art style and character consistency across generated images.
+      - article [ref=e53]:
+        - paragraph [ref=e55]: Summers 2023 & 2024
+        - heading "Snowboard Coach" [level=2] [ref=e56]
+        - paragraph [ref=e57]: High Cascade Snowboard Camp
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - generic [ref=e60]: —
+            - text: Mentored 12–18 snowboarders per session; designed targeted drills, prioritized safe progression.
+          - listitem [ref=e61]:
+            - generic [ref=e62]: —
+            - text: Coaching approach — clear instruction, patient feedback, tailored communication — translates directly to how I collaborate and communicate in engineering teams.
+    - heading "Education" [level=2] [ref=e66]
+    - generic [ref=e68]:
+      - paragraph [ref=e69]: Graduated December 2024
+      - heading "Duke University" [level=3] [ref=e70]
+      - paragraph [ref=e71]: B.S. Computer Science, Visual & Media Studies Minor
+      - paragraph [ref=e72]: "GPA: 3.3"
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: Honors
+          - list [ref=e76]:
+            - listitem [ref=e77]: George Scholar
+            - listitem [ref=e78]: Duke True North Leadership Program
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Relevant Coursework
+          - list [ref=e81]:
+            - listitem [ref=e82]: Algorithm Design & Analysis
+            - listitem [ref=e83]: Database Systems
+            - listitem [ref=e84]: Computer Security
+            - listitem [ref=e85]: Server-side Web Apps
+            - listitem [ref=e86]: Data Science
+            - listitem [ref=e87]: AGILE
+  - contentinfo [ref=e88]:
+    - generic [ref=e89]:
+      - paragraph [ref=e90]: Michael Herron © 2026
+      - list [ref=e91]:
+        - listitem [ref=e92]:
+          - link "GitHub" [ref=e93] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e94]:
+          - link "LinkedIn" [ref=e95] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e96]:
+          - link "Email" [ref=e97] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e103] [cursor=pointer]:
+    - img [ref=e104]

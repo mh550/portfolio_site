@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - link "← Projects" [ref=e21] [cursor=pointer]:
+        - /url: /projects
+      - paragraph [ref=e22]: Builder Clarity
+      - heading "GoHighLevel ↔ JobTread Integration" [level=1] [ref=e23]
+      - paragraph [ref=e24]: Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.
+      - generic [ref=e25]:
+        - generic [ref=e26]: Pipedream
+        - generic [ref=e27]: JavaScript
+        - generic [ref=e28]: OAuth
+        - generic [ref=e29]: REST APIs
+        - generic [ref=e30]: Webhooks
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - heading "The Problem" [level=2] [ref=e35]
+        - paragraph [ref=e36]: Contractors were managing jobs in JobTread and leads/clients in GoHighLevel with zero data flow between them — double entry, missed follow-ups, and no unified view of a customer journey.
+      - generic [ref=e37]:
+        - heading "The Approach" [level=2] [ref=e38]
+        - paragraph [ref=e39]: "Designed a bidirectional data mapping strategy across hierarchical data structures in both platforms. Implemented waterfall smart record matching to prevent duplicates. Built with Pipedream using custom JavaScript components for nearly every step. Managed multi-tenant auth: Agency OAuth token for GoHighLevel with subaccount token logic, and Connected Organizations for JobTread."
+      - generic [ref=e40]:
+        - heading "Challenges" [level=2] [ref=e41]
+        - paragraph [ref=e42]: Mapping strategy required mid-milestone refinement to meet dynamic stakeholder requirements. Handling multi-tenant auth across two platforms with different OAuth models added significant complexity. Preventing duplicate records during bidirectional sync required careful ordering and idempotency logic.
+      - generic [ref=e43]:
+        - heading "Outcome" [level=2] [ref=e44]
+        - paragraph [ref=e45]: Delivered a scalable, multi-tenant integration product that became the foundation for Builder Clarity's productized offering — enabling contractors to keep their CRM and project management in sync without manual data entry.
+    - link "← Back to all projects" [ref=e48] [cursor=pointer]:
+      - /url: /projects
+  - contentinfo [ref=e49]:
+    - generic [ref=e50]:
+      - paragraph [ref=e51]: Michael Herron © 2026
+      - list [ref=e52]:
+        - listitem [ref=e53]:
+          - link "GitHub" [ref=e54] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e55]:
+          - link "LinkedIn" [ref=e56] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e57]:
+          - link "Email" [ref=e58] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e64] [cursor=pointer]:
+    - img [ref=e65]

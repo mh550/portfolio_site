@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: Contact
+      - heading "Let's Talk" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Whether you have a project in mind, a role to fill, or just want to connect — I'm always up for a good conversation.
+    - generic [ref=e24]:
+      - 'link "Email: mherron734@gmail.com" [ref=e26] [cursor=pointer]':
+        - /url: mailto:mherron734@gmail.com
+        - generic [ref=e27]:
+          - paragraph [ref=e28]: Email
+          - paragraph [ref=e29]: mherron734@gmail.com
+          - paragraph [ref=e30]: Best way to reach me
+        - generic [ref=e31]: →
+      - 'link "LinkedIn: linkedin.com/in/mherron734" [ref=e33] [cursor=pointer]':
+        - /url: https://linkedin.com/in/mherron734
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: LinkedIn
+          - paragraph [ref=e36]: linkedin.com/in/mherron734
+          - paragraph [ref=e37]: Connect professionally
+        - generic [ref=e38]: →
+      - 'link "GitHub: github.com/mherron734" [ref=e40] [cursor=pointer]':
+        - /url: https://github.com/mherron734
+        - generic [ref=e41]:
+          - paragraph [ref=e42]: GitHub
+          - paragraph [ref=e43]: github.com/mherron734
+          - paragraph [ref=e44]: See my code
+        - generic [ref=e45]: →
+    - paragraph [ref=e48]: Based in the Pacific Northwest. Open to remote, hybrid, or relocation for the right opportunity.
+  - contentinfo [ref=e49]:
+    - generic [ref=e50]:
+      - paragraph [ref=e51]: Michael Herron © 2026
+      - list [ref=e52]:
+        - listitem [ref=e53]:
+          - link "GitHub" [ref=e54] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e55]:
+          - link "LinkedIn" [ref=e56] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e57]:
+          - link "Email" [ref=e58] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e64] [cursor=pointer]:
+    - img [ref=e65]

@@ -1,0 +1,53 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e22]:
+        - paragraph [ref=e23]: Full-Stack & Integration Engineer
+        - heading "Michael Herron" [level=1] [ref=e24]
+        - paragraph [ref=e25]: I build systems that connect things.
+        - generic [ref=e26]:
+          - link "View Projects" [ref=e27] [cursor=pointer]:
+            - /url: /projects
+          - link "About Me" [ref=e28] [cursor=pointer]:
+            - /url: /about
+      - generic "Scroll down" [ref=e29]:
+        - generic [ref=e30]: Scroll
+  - contentinfo [ref=e32]:
+    - generic [ref=e33]:
+      - paragraph [ref=e34]: Michael Herron © 2026
+      - list [ref=e35]:
+        - listitem [ref=e36]:
+          - link "GitHub" [ref=e37] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e38]:
+          - link "LinkedIn" [ref=e39] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e40]:
+          - link "Email" [ref=e41] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e47] [cursor=pointer]:
+    - img [ref=e48]
+  - alert [ref=e51]

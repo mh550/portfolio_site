@@ -1,0 +1,97 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: Skills
+      - heading "Tech Stack" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Tools and technologies I use to build reliable systems.
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "Integration & Automation" [level=2] [ref=e29]
+        - generic [ref=e30]: Differentiator
+      - generic [ref=e31]:
+        - generic [ref=e32]: Pipedream
+        - generic [ref=e33]: n8n
+        - generic [ref=e34]: Zapier
+        - generic [ref=e35]: RESTful APIs
+        - generic [ref=e36]: OAuth
+        - generic [ref=e37]: Webhooks
+    - generic [ref=e38]:
+      - generic [ref=e40]:
+        - heading "Languages" [level=2] [ref=e41]
+        - generic [ref=e42]:
+          - generic [ref=e43]: Python
+          - generic [ref=e44]: JavaScript
+          - generic [ref=e45]: TypeScript
+          - generic [ref=e46]: Java
+          - generic [ref=e47]: C/C++
+          - generic [ref=e48]: Ruby
+          - generic [ref=e49]: R
+      - generic [ref=e51]:
+        - heading "Frontend" [level=2] [ref=e52]
+        - generic [ref=e53]:
+          - generic [ref=e54]: React
+          - generic [ref=e55]: Next.js
+          - generic [ref=e56]: Tailwind CSS
+          - generic [ref=e57]: Framer Motion
+      - generic [ref=e59]:
+        - heading "Backend" [level=2] [ref=e60]
+        - generic [ref=e61]:
+          - generic [ref=e62]: Node.js
+          - generic [ref=e63]: Flask
+          - generic [ref=e64]: Ruby on Rails
+          - generic [ref=e65]: PostgreSQL
+          - generic [ref=e66]: MongoDB
+      - generic [ref=e68]:
+        - heading "Tools & Platforms" [level=2] [ref=e69]
+        - generic [ref=e70]:
+          - generic [ref=e71]: Supabase
+          - generic [ref=e72]: Vercel
+          - generic [ref=e73]: Git
+          - generic [ref=e74]: Linux CLI
+          - generic [ref=e75]: Claude Code
+          - generic [ref=e76]: Linear
+      - generic [ref=e78]:
+        - heading "Practices" [level=2] [ref=e79]
+        - generic [ref=e80]:
+          - generic [ref=e81]: AGILE/Scrum
+          - generic [ref=e82]: User-driven design
+          - generic [ref=e83]: AI-assisted development
+          - generic [ref=e84]: Test-driven development
+  - contentinfo [ref=e85]:
+    - generic [ref=e86]:
+      - paragraph [ref=e87]: Michael Herron © 2026
+      - list [ref=e88]:
+        - listitem [ref=e89]:
+          - link "GitHub" [ref=e90] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e91]:
+          - link "LinkedIn" [ref=e92] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e93]:
+          - link "Email" [ref=e94] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e100] [cursor=pointer]:
+    - img [ref=e101]
