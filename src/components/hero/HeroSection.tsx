@@ -3,6 +3,7 @@
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import NodeGraph from './NodeGraph';
+import FloatingLogos from './FloatingLogos';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
@@ -19,10 +20,13 @@ export default function HeroSection() {
       {/* Animated node graph background */}
       <NodeGraph />
 
+      {/* Floating skill logos */}
+      <FloatingLogos />
+
       {/* Radial gradient overlay for depth */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-radial-gradient pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
             'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, var(--color-background) 100%)',
@@ -83,24 +87,6 @@ export default function HeroSection() {
           </Link>
         </motion.div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        aria-label="Scroll down"
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-      >
-        <span className="text-[var(--color-muted)] text-xs font-mono tracking-widest uppercase">
-          Scroll
-        </span>
-        <motion.div
-          className="w-0.5 h-8 bg-gradient-to-b from-[var(--color-accent)] to-transparent"
-          animate={{ scaleY: [1, 0.4, 1], opacity: [1, 0.4, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
     </section>
   );
 }

@@ -4,7 +4,7 @@ import AboutPage from '@/app/about/page';
 describe('AboutPage', () => {
   it('renders the heading', () => {
     render(<AboutPage />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The Arc');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Story');
   });
 
   it('renders Philosophy section', () => {
@@ -22,16 +22,20 @@ describe('AboutPage', () => {
     expect(screen.getByText(/Duke University/)).toBeInTheDocument();
   });
 
-  it('renders High Cascade Snowboard Camp mention', () => {
+  it('renders headshot image', () => {
     render(<AboutPage />);
-    expect(screen.getByText(/High Cascade Snowboard Camp/)).toBeInTheDocument();
+    expect(screen.getByAltText('Michael Herron')).toBeInTheDocument();
   });
 
-  it('renders trait badges', () => {
+  it('renders mount hood photo', () => {
     render(<AboutPage />);
-    expect(screen.getByText('Snowboarder')).toBeInTheDocument();
-    expect(screen.getByText('Skateboarder')).toBeInTheDocument();
-    expect(screen.getByText('Wakeboarder')).toBeInTheDocument();
-    expect(screen.getByText('Snowboard Coach')).toBeInTheDocument();
+    expect(screen.getByAltText('Michael at Mount Hood')).toBeInTheDocument();
+  });
+
+  it('philosophy does not have surrounding quotation marks', () => {
+    render(<AboutPage />);
+    const blockquote = screen.getByRole('blockquote');
+    expect(blockquote.textContent).not.toMatch(/^[""]/);
+    expect(blockquote.textContent).not.toMatch(/["""]$/);
   });
 });

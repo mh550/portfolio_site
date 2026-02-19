@@ -28,8 +28,8 @@ describe('HeroSection', () => {
     expect(link).toHaveAttribute('href', '/about');
   });
 
-  it('renders scroll indicator', () => {
+  it('does not render scroll indicator', () => {
     render(<HeroSection />);
-    expect(screen.getByText(/scroll/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^scroll$/i)).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,60 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic:
+        - img [ref=e24]
+        - img [ref=e28]
+        - img [ref=e32]
+        - img [ref=e36]
+        - img [ref=e40]
+        - img [ref=e44]
+        - img [ref=e48]
+        - generic [ref=e52]: PD
+      - generic [ref=e53]:
+        - paragraph [ref=e54]: Full-Stack & Integration Engineer
+        - heading "Michael Herron" [level=1] [ref=e55]
+        - paragraph [ref=e56]: I build systems that connect things.
+        - generic [ref=e57]:
+          - link "View Projects" [ref=e58] [cursor=pointer]:
+            - /url: /projects
+          - link "About Me" [ref=e59] [cursor=pointer]:
+            - /url: /about
+  - contentinfo [ref=e60]:
+    - generic [ref=e61]:
+      - paragraph [ref=e62]: Michael Herron © 2026
+      - list [ref=e63]:
+        - listitem [ref=e64]:
+          - link "GitHub" [ref=e65] [cursor=pointer]:
+            - /url: https://github.com/mherron734
+        - listitem [ref=e66]:
+          - link "LinkedIn" [ref=e67] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e68]:
+          - link "Email" [ref=e69] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e75] [cursor=pointer]:
+    - img [ref=e76]
+  - alert [ref=e79]
