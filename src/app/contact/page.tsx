@@ -77,7 +77,7 @@ export default function ContactPage() {
       <ScrollReveal delay={0.2}>
         <div className="mt-14 pt-8 border-t border-white/5">
           <p className="text-[var(--color-muted)] text-sm leading-relaxed">
-            Based in the Pacific Northwest. Open to remote, hybrid, or relocation for the right opportunity.
+            Currently based in Durham, NC. Open to remote, hybrid, or relocation for the right opportunity.
           </p>
         </div>
       </ScrollReveal>

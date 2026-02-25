@@ -155,7 +155,7 @@ export default function AboutPage() {
           </div>
 
           {/* Video — right side */}
-          <div className="w-full md:w-52 lg:w-60 shrink-0">
+          <div className="w-full md:w-[14.3rem] lg:w-[16.5rem] shrink-0">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]">
               <video
                 autoPlay
