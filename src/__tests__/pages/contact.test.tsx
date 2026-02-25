@@ -22,7 +22,7 @@ describe('ContactPage', () => {
   it('renders GitHub link', () => {
     render(<ContactPage />);
     const link = screen.getByRole('link', { name: /github/i });
-    expect(link).toHaveAttribute('href', 'https://github.com/mherron734');
+    expect(link).toHaveAttribute('href', 'https://github.com/mh550');
   });
 
   it('renders email address text', () => {

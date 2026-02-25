@@ -16,7 +16,7 @@ const fadeUp: Variants = {
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative -mt-16 h-screen flex items-center justify-center overflow-hidden">
       {/* Animated node graph background */}
       <NodeGraph />
 
@@ -34,7 +34,7 @@ export default function HeroSection() {
       />
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pb-4 pointer-events-none">
         <motion.p
           custom={0}
           initial="hidden"
@@ -71,7 +71,7 @@ export default function HeroSection() {
           initial="hidden"
           animate="visible"
           variants={fadeUp}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center pointer-events-auto"
         >
           <Link
             href="/projects"

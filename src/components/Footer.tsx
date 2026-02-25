@@ -10,7 +10,7 @@ export default function Footer() {
         <ul className="flex items-center gap-6">
           <li>
             <Link
-              href="https://github.com/mherron734"
+              href="https://github.com/mh550"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"

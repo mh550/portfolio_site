@@ -22,8 +22,8 @@ const links = [
   },
   {
     label: 'GitHub',
-    value: 'github.com/mherron734',
-    href: 'https://github.com/mherron734',
+    value: 'github.com/mh550',
+    href: 'https://github.com/mh550',
     description: 'See my code',
   },
 ];

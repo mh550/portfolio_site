@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { projects, type ProjectCategory } from '@/lib/data';
 import ProjectCard from './ProjectCard';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -10,7 +11,6 @@ const FILTERS: { label: string; value: ProjectCategory | 'all' }[] = [
   { label: 'Integration', value: 'integration' },
   { label: 'Full-Stack', value: 'full-stack' },
   { label: 'AI', value: 'ai' },
-  { label: 'Education', value: 'education' },
 ];
 
 export default function ProjectsGrid() {
@@ -21,8 +21,15 @@ export default function ProjectsGrid() {
 
   return (
     <div>
-      {/* Filter bar */}
-      <div className="flex flex-wrap gap-3 mb-10" role="group" aria-label="Filter projects by category">
+      {/* Filter bar — entrance animation on mount */}
+      <motion.div
+        className="flex flex-wrap gap-3 mb-10"
+        role="group"
+        aria-label="Filter projects by category"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
         {FILTERS.map(({ label, value }) => (
           <button
             key={value}
@@ -37,7 +44,7 @@ export default function ProjectsGrid() {
             {label}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Grid */}
       <div className="grid sm:grid-cols-2 gap-6">

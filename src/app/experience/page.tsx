@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { roles, education } from '@/lib/data';
 import ScrollReveal from '@/components/ScrollReveal';
+import TimelineLine from '@/components/TimelineLine';
 
 export const metadata: Metadata = {
   title: 'Experience — Michael Herron',
@@ -21,11 +22,8 @@ export default function ExperiencePage() {
 
       {/* Work timeline */}
       <div className="relative">
-        {/* Vertical line */}
-        <div
-          aria-hidden="true"
-          className="absolute left-0 top-2 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-white/10 to-transparent"
-        />
+        {/* Vertical line — animated */}
+        <TimelineLine />
 
         <div className="space-y-14 pl-8">
           {roles.map((role, i) => (

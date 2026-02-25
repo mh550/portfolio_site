@@ -4,7 +4,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export const metadata: Metadata = {
   title: 'About — Michael Herron',
-  description: 'Duke CS grad, full-stack developer, and integration engineer. I build systems that connect things.',
+  description: 'Duke CS grad turned full-stack and integration engineer. I build systems that are reliable and make sense to the people using them.',
 };
 
 export default function AboutPage() {
@@ -23,47 +23,87 @@ export default function AboutPage() {
       {/* Story — photo floated right, text wraps alongside and continues below */}
       <ScrollReveal delay={0.05}>
         <div className="mb-8">
-          {/* Photo — floated right; replace /public/photos/headshot.jpg with your headshot */}
+          {/* Headshot photo — floated right */}
           <div className="float-right ml-8 mb-4 w-36 sm:w-44 md:w-52 lg:w-60 shrink-0">
             <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]">
               <Image
-                src="/photos/headshot.jpg"
-                alt="Michael Herron"
+                src="/photos/headshot.png"
+                alt="Michael Herron headshot"
                 fill
                 className="object-cover object-top"
                 sizes="(max-width: 640px) 144px, (max-width: 768px) 176px, (max-width: 1024px) 208px, 240px"
+                quality={100}
                 priority
               />
             </div>
           </div>
 
-          {/* Text — flows alongside the float, spans full width below it */}
+          {/* Text — flows alongside the float, and spans full width below it */}
           <div className="space-y-8 text-lg leading-relaxed text-[var(--color-muted)]">
             <p>
-              I graduated from{' '}
+              I started at{' '}
               <span className="text-[var(--color-foreground)] font-medium">Duke University</span>{' '}
-              with a B.S. in Computer Science and a minor in Visual & Media Studies —
-              a combination that shaped how I think about software: the engineering has to work,
-              and the experience has to feel right.
+              studying Engineering — understanding how things work has always driven me. Covid hit
+              during my first year, and online learning wasn&apos;t it. I failed two classes, took
+              a leave, moved to Colorado, worked at a coffee shop, and snowboarded. I came back,
+              switched to Computer Science, and graduated with my B.S.
             </p>
 
             <p>
-              After graduating, I was hired as the{' '}
+              After graduating, I joined{' '}
+              <span className="text-[var(--color-foreground)] font-medium">Builder Clarity</span>{' '}
+              as their{' '}
               <span className="text-[var(--color-foreground)] font-medium">first engineer</span>{' '}
-              at a startup. No playbook, no senior engineers to shadow — just a real product,
-              real users, and a mandate to figure it out. I built scalable multi-tenant integration
-              systems from scratch, migrated platforms when they stopped serving the product,
-              and learned that good engineering is relentless attention to the user&apos;s actual problem.
+              — a small consulting business helping contractors automate and integrate their
+              systems. No tutorials, no senior engineers, no existing product. Just real clients
+              and a directive to figure it out. I built low-code automations in Zapier, ETL
+              pipelines feeding custom dashboards in Supabase and Metabase, and eventually tackled
+              our most complex project: a{' '}
+              <span className="text-[var(--color-accent)] font-medium">
+                multi-tenant JobTread↔GoHighLevel integration
+              </span>{' '}
+              that connected CRM leads directly to job records, eliminating manual entry and data
+              drift across client accounts. Building it taught me as much about managed auth and
+              credential handling at scale as it did about what contractors actually need from
+              their software.
             </p>
 
             <p>
-              My work centers on{' '}
-              <span className="text-[var(--color-accent)] font-medium">
-                transforming complex, scattered processes into reliable, intuitive systems
-              </span>
-              . I reject the idea of &ldquo;user error&rdquo; — if users are struggling, the system
-              needs to be better. That philosophy drives every decision I make, from data mapping
-              strategy to UI hierarchy.
+              The company didn&apos;t scale fast enough, and I was let go. I&apos;m okay with
+              that. It was a real engineering environment, and I learned more there than I would
+              have anywhere else.
+            </p>
+
+            <p>
+              I&apos;m currently an apprentice at{' '}
+              <span className="text-[var(--color-foreground)] font-medium">MAXX Potential</span>
+              , continuing to build my skills through structured mentorship and client-facing
+              project work.
+            </p>
+
+            <p>
+              I&apos;m also building projects where I&apos;m the target user. The first is a{' '}
+              <span className="text-[var(--color-accent)] font-medium">skate video classifier</span>
+              : submit a long session video, and the app automatically identifies and tracks each
+              individual skater across clips using{' '}
+              <span className="text-[var(--color-foreground)] font-medium">
+                multi-object tracking and person re-identification
+              </span>{' '}
+              — no facial recognition required. Each skater&apos;s footage gets bucketed and
+              distributed to the right person. The second is a{' '}
+              <a
+                href="https://github.com/mh550/hit-list"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                <span className="text-[var(--color-accent)] font-medium">
+                  snowboard street spot tracker
+                </span>
+              </a>{' '}
+              — a mobile-first app for logging and organizing street spots, with structured data
+              on approach speed, gear combinations, feature specs, and security risk, built for
+              the way snowboarders actually scout and plan sessions.
             </p>
           </div>
 
@@ -83,8 +123,8 @@ export default function AboutPage() {
 
       <ScrollReveal delay={0.1}>
         <blockquote className="border-l-2 border-[var(--color-accent)] pl-6 text-xl text-[var(--color-foreground)] font-light leading-relaxed mb-12">
-          Design for the user first. Every abstraction, every API contract, every data
-          model should ultimately serve the person on the other end of the interface.
+          I care about building systems that are reliable and make sense to the people
+          using them. If users are struggling, that&apos;s an engineering problem.
         </blockquote>
       </ScrollReveal>
 
@@ -93,7 +133,7 @@ export default function AboutPage() {
         <div className="my-16 h-px bg-gradient-to-r from-[var(--color-accent)]/30 via-[var(--color-accent)]/10 to-transparent" />
       </ScrollReveal>
 
-      {/* Outside the Terminal — media left, text right */}
+      {/* Outside the Terminal — text left, video right */}
       <ScrollReveal delay={0.05}>
         <h2 className="text-3xl font-bold mb-6">Outside the Terminal</h2>
       </ScrollReveal>
@@ -101,53 +141,32 @@ export default function AboutPage() {
       <ScrollReveal delay={0.1}>
         <div className="flex flex-col md:flex-row gap-8 items-start">
 
-          {/* Media column — left side
-              Drop files at:
-                /public/photos/mount-hood.jpg  (4:3, landscape)
-                /public/videos/snowboarding-1.mp4
-                /public/videos/snowboarding-2.mp4
-                /public/videos/snowboarding-3.mp4 */}
-          <div className="w-full md:w-64 lg:w-72 shrink-0 space-y-2">
-            {/* Main photo — 4:3 */}
-            <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]">
-              <Image
-                src="/photos/mount-hood.jpg"
-                alt="Michael at Mount Hood"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 288px"
-              />
-            </div>
-
-            {/* 3 snowboarding clips — portrait 3:4 */}
-            <div className="grid grid-cols-3 gap-2">
-              {(['snowboarding-1', 'snowboarding-2', 'snowboarding-3'] as const).map((clip) => (
-                <div
-                  key={clip}
-                  className="relative aspect-[3/4] rounded-lg overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]"
-                >
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                  >
-                    <source src={`/videos/${clip}.mp4`} type="video/mp4" />
-                  </video>
-                </div>
-              ))}
-            </div>
+          {/* Text — left side */}
+          <div className="flex-1 text-lg leading-relaxed text-[var(--color-muted)] space-y-4">
+            <p>
+              I fell in love with snowboarding when I was 16, even though I sucked at it for a while.
+            </p>
+            <p>
+              It&apos;s taught me to let myself fail. To follow my curiousity, trust my gut, 
+              and put the process over the outcome. To keep working at my weak points 
+              until they become my strengths. The people who handle failure with grace are the ones who
+              learn the fastest.
+            </p>
           </div>
 
-          {/* Text — right side
-              REWRITE THIS: replace the paragraph(s) below with your own story.
-              Keep the wrapping <div> and className as-is for consistent styling. */}
-          <div className="flex-1 text-lg leading-relaxed text-[var(--color-muted)]">
-            <p>
-              {/* Your text goes here. */}
-              When I&apos;m not building software, I&apos;m usually on a mountain or a skateboard.
-            </p>
+          {/* Video — right side */}
+          <div className="w-full md:w-52 lg:w-60 shrink-0">
+            <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src="/videos/snowboarding-2.mp4" type="video/mp4" />
+              </video>
+            </div>
           </div>
 
         </div>

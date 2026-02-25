@@ -8,6 +8,16 @@ export interface Role {
 
 export const roles: Role[] = [
   {
+    title: 'Apprentice',
+    company: 'MAXX Potential',
+    period: 'February 2026 – Present',
+    type: 'work',
+    bullets: [
+      'Technology apprenticeship with structured mentorship and client-facing project work.',
+      'Continuing to develop skills across full-stack, automation, and integration domains through real client environments.',
+    ],
+  },
+  {
     title: 'Founding Full-Stack Software Engineer',
     company: 'Builder Clarity',
     period: 'March 2025 – November 2025',

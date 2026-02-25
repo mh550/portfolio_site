@@ -24,12 +24,13 @@ describe('AboutPage', () => {
 
   it('renders headshot image', () => {
     render(<AboutPage />);
-    expect(screen.getByAltText('Michael Herron')).toBeInTheDocument();
+    expect(screen.getByAltText('Michael Herron headshot')).toBeInTheDocument();
   });
 
-  it('renders mount hood photo', () => {
+  it('renders street spot tracker link', () => {
     render(<AboutPage />);
-    expect(screen.getByAltText('Michael at Mount Hood')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /snowboard street spot tracker/i });
+    expect(link).toHaveAttribute('href', 'https://github.com/mh550/hit-list');
   });
 
   it('philosophy does not have surrounding quotation marks', () => {
