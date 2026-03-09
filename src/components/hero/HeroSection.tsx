@@ -63,7 +63,7 @@ export default function HeroSection() {
           variants={fadeUp}
           className="text-xl sm:text-2xl text-[var(--color-muted)] font-light tracking-wide mb-10"
         >
-          I build systems that connect things.
+          I build simple, elegant systems that fit the humans who run them.
         </motion.p>
 
         <motion.div

@@ -7,7 +7,7 @@ export default function TimelineLine() {
   return (
     <motion.div
       aria-hidden="true"
-      className="absolute top-2 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-white/10 to-transparent"
+      className="absolute top-2 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent)]/50 via-[var(--color-accent)]/25 to-[var(--color-accent)]/5"
       style={{ left: '5.5px', transformOrigin: 'top' }}
       initial={{ opacity: 0, y: 40, scaleY: 0 }}
       whileInView={{ opacity: 1, y: 0, scaleY: 1 }}

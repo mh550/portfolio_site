@@ -123,8 +123,9 @@ export default function AboutPage() {
 
       <ScrollReveal delay={0.1}>
         <blockquote className="border-l-2 border-[var(--color-accent)] pl-6 text-xl text-[var(--color-foreground)] font-light leading-relaxed mb-12">
-          I care about building systems that are reliable and make sense to the people
-          using them. If users are struggling, that&apos;s an engineering problem.
+          I build and connect things: simply, elegantly, and effectively. I find where
+          processes break down, then architect automations and integrations to fix them
+          — systems built around the humans who run them.
         </blockquote>
       </ScrollReveal>
 
