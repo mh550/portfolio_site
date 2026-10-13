@@ -13,7 +13,7 @@ describe('HeroSection', () => {
 
   it('renders the tagline', () => {
     render(<HeroSection />);
-    expect(screen.getByText(/I build systems that connect things/i)).toBeInTheDocument();
+    expect(screen.getByText(/I build simple, elegant systems that fit the humans who run them/i)).toBeInTheDocument();
   });
 
   it('renders View Projects link pointing to /projects', () => {

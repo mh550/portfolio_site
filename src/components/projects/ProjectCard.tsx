@@ -1,13 +1,55 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Project } from '@/lib/data';
 
 interface ProjectCardProps {
   project: Project;
 }
 
+/** Top preview band: thumbnail image when available, else a gradient that
+ *  surfaces the headline metric so the card still leads with evidence. */
+function PreviewBand({ project }: { project: Project }) {
+  if (project.thumbnail) {
+    return (
+      <div className="relative -mx-6 -mt-6 mb-4 aspect-[16/9] overflow-hidden rounded-t-xl border-b border-white/8 bg-[var(--color-surface-alt)]">
+        <Image
+          src={project.thumbnail.src}
+          alt={project.thumbnail.alt}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          sizes="(max-width: 640px) 100vw, 50vw"
+        />
+      </div>
+    );
+  }
+
+  const headline = project.metrics?.[0];
+  return (
+    <div className="relative -mx-6 -mt-6 mb-4 flex aspect-[16/9] items-center justify-center overflow-hidden rounded-t-xl border-b border-white/8 bg-gradient-to-br from-[var(--color-surface-alt)] to-[var(--color-surface)]">
+      <div
+        aria-hidden="true"
+        className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[var(--color-accent)]/10 blur-2xl"
+      />
+      {headline ? (
+        <div className="relative text-center">
+          <p className="text-3xl font-bold text-[var(--color-accent)]">{headline.value}</p>
+          <p className="mt-1 text-xs text-[var(--color-muted)]">{headline.label}</p>
+        </div>
+      ) : (
+        <p className="relative font-mono text-xs uppercase tracking-[0.3em] text-[var(--color-muted)]">
+          {project.categories[0]}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <article className="flex flex-col h-full p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30 transition-colors group">
+      {/* Preview */}
+      <PreviewBand project={project} />
+
       {/* Header */}
       <div className="mb-4">
         <p className="font-mono text-xs text-[var(--color-muted)] tracking-widest uppercase mb-2">

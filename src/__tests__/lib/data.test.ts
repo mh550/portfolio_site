@@ -8,8 +8,8 @@ import {
 } from '@/lib/data';
 
 describe('projects data', () => {
-  it('exports an array with 4 projects', () => {
-    expect(projects).toHaveLength(4);
+  it('exports an array with 6 projects', () => {
+    expect(projects).toHaveLength(6);
   });
 
   it('each project has required fields', () => {

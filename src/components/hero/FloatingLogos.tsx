@@ -9,6 +9,7 @@ import {
   siZapier,
   siN8n,
   siClaude,
+  siLinear,
 } from 'simple-icons';
 
 // Extracted from /public/pipedream.svg (viewBox="0 0 512 100")
@@ -86,6 +87,14 @@ const logos: LogoEntry[] = [
     style: { bottom: '25%', left: '24%' },
     floatDuration: 6.6,
     floatY: 9,
+  },
+  {
+    id: 'linear',
+    label: 'Linear',
+    svgPath: siLinear.path,
+    style: { top: '14%', left: '44%' },
+    floatDuration: 6.0,
+    floatY: 12,
   },
   {
     // Pipedream wordmark — viewBox 512×100, rendered as a wide short mark

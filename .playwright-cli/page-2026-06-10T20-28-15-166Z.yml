@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: About
+      - heading "My Story" [level=1] [ref=e22]
+    - generic [ref=e24]:
+      - img "Michael Herron headshot" [ref=e27]
+      - generic [ref=e28]:
+        - paragraph [ref=e29]: I started at Duke University studying Engineering — understanding how things work has always driven me. Covid hit during my first year, and online learning wasn't it. I failed two classes, took a leave, moved to Colorado, worked at a coffee shop, and snowboarded. I came back, switched to Computer Science, and graduated with my B.S.
+        - paragraph [ref=e30]: "After graduating, I joined Builder Clarity as their first engineer — a small consulting business helping contractors automate and integrate their systems. No tutorials, no senior engineers, no existing product. Just real clients and a directive to figure it out. I built low-code automations in Zapier, ETL pipelines feeding custom dashboards in Supabase and Metabase, and eventually tackled our most complex project: a multi-tenant JobTread↔GoHighLevel integration that connected CRM leads directly to job records, eliminating manual entry and data drift across client accounts. Building it taught me as much about managed auth and credential handling at scale as it did about what contractors actually need from their software."
+        - paragraph [ref=e31]: The company didn't scale fast enough, and I was let go. I'm okay with that. It was a real engineering environment, and I learned more there than I would have anywhere else.
+        - paragraph [ref=e32]: I'm currently a full-stack software engineer at MAXX Potential, where I diagnosed a broken QA process and rebuilt it around Linear and an AI-agent workflow that automates bug filing and triage — and where I'm building full-stack React Native features for client products.
+    - heading "Philosophy" [level=2] [ref=e36]
+    - blockquote [ref=e38]: "I build and connect things: simply, elegantly, and effectively. I find where processes break down, then architect automations and integrations to fix them — systems built around the humans who run them."
+    - heading "Outside the Terminal" [level=2] [ref=e42]
+    - generic [ref=e45]:
+      - paragraph [ref=e46]: I fell in love with snowboarding when I was 16, even though I sucked at it for a while.
+      - paragraph [ref=e47]: It's taught me to let myself fail. To follow my curiousity, trust my gut, and put the process over the outcome. To keep working at my weak points until they become my strengths. The people who handle failure with grace are the ones who learn the fastest.
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - paragraph [ref=e53]: Michael Herron © 2026
+      - list [ref=e54]:
+        - listitem [ref=e55]:
+          - link "GitHub" [ref=e56] [cursor=pointer]:
+            - /url: https://github.com/mh550
+        - listitem [ref=e57]:
+          - link "LinkedIn" [ref=e58] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e59]:
+          - link "Email" [ref=e60] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e66] [cursor=pointer]:
+    - img [ref=e67]

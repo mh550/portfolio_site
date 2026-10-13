@@ -27,10 +27,16 @@ describe('AboutPage', () => {
     expect(screen.getByAltText('Michael Herron headshot')).toBeInTheDocument();
   });
 
-  it('renders street spot tracker link', () => {
+  it('no longer links to the inactive hit-list repo', () => {
     render(<AboutPage />);
-    const link = screen.getByRole('link', { name: /snowboard street spot tracker/i });
-    expect(link).toHaveAttribute('href', 'https://github.com/mh550/hit-list');
+    expect(screen.queryByRole('link', { name: /snowboard street spot tracker/i })).not.toBeInTheDocument();
+    const links = screen.queryAllByRole('link');
+    expect(links.some((l) => l.getAttribute('href')?.includes('hit-list'))).toBe(false);
+  });
+
+  it('mentions current MAXX Potential role', () => {
+    render(<AboutPage />);
+    expect(screen.getByText(/MAXX Potential/)).toBeInTheDocument();
   });
 
   it('philosophy does not have surrounding quotation marks', () => {

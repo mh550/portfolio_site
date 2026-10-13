@@ -1,5 +1,32 @@
 export type ProjectCategory = 'integration' | 'full-stack' | 'ai' | 'education';
 
+/** A key that maps a project to an authored, theme-styled diagram component. */
+export type DiagramKey =
+  | 'ghl-jobtread'
+  | 'ringcentral'
+  | 'linear-flow'
+  | 'paint-hierarchy'
+  | 'calendar-sync';
+
+export interface ProjectMedia {
+  type: 'image' | 'video';
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+/** A big-number impact callout, e.g. { value: '~80%', label: 'less bug-filing time' }. */
+export interface Metric {
+  value: string;
+  label: string;
+}
+
+export interface CodeSnippet {
+  title: string;
+  language: string;
+  code: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -10,11 +37,21 @@ export interface Project {
   githubUrl?: string;
   demoUrl?: string;
   featured: boolean;
+  /** Card preview + detail-page hero image/video. Optional until assets are captured. */
+  thumbnail?: ProjectMedia;
+  /** Impact callouts surfaced on the card and at the top of the detail page. */
+  metrics?: Metric[];
   detail: {
     problem: string;
     approach: string;
     challenges: string;
     outcome: string;
+    /** Authored architecture/process diagram rendered after "The Approach". */
+    architectureDiagram?: DiagramKey;
+    /** Screenshot / screen-recording gallery (filled once assets exist). */
+    media?: ProjectMedia[];
+    /** Inline code/config excerpts that prove the engineering is real. */
+    codeSnippets?: CodeSnippet[];
   };
 }
 
@@ -26,17 +63,72 @@ export const projects: Project[] = [
     shortDescription:
       'Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.',
     categories: ['integration'],
-    techStack: ['Pipedream', 'JavaScript', 'OAuth', 'REST APIs', 'Webhooks'],
+    techStack: ['Pipedream', 'Supabase', 'JavaScript', 'OAuth', 'REST APIs', 'Webhooks'],
     featured: true,
+    metrics: [
+      { value: '2 days → ~6 hrs', label: 'client onboarding time' },
+      { value: 'Bidirectional', label: 'GHL ↔ JobTread sync' },
+      { value: '0', label: 'manual re-entry of leads' },
+    ],
     detail: {
       problem:
-        'Contractors were managing jobs in JobTread and leads/clients in GoHighLevel with zero data flow between them — double entry, missed follow-ups, and no unified view of a customer journey.',
+        'Contractors were managing jobs in JobTread and leads/clients in GoHighLevel with zero data flow between them — double entry, missed follow-ups, and no unified view of a customer journey. The core challenge was an ETL problem across two platforms paired with a deduplication problem: the same human exists in both systems, under different schemas, and must never be created twice.',
       approach:
-        'Designed a bidirectional data mapping strategy across hierarchical data structures in both platforms. Implemented waterfall smart record matching to prevent duplicates. Built with Pipedream using custom JavaScript components for nearly every step. Managed multi-tenant auth: Agency OAuth token for GoHighLevel with subaccount token logic, and Connected Organizations for JobTread.',
+        'I mapped the full entity model of each platform, then designed a bidirectional sync keyed on a waterfall match (phone → email → name). On a GoHighLevel pipeline-stage change, the integration finds-or-creates down JobTread\'s hierarchy in dependency order — customer, then contact, then location, then job — wiring each record to the ones above it. Built on Pipedream with custom JavaScript at nearly every step, Supabase bridging state between the platforms, and GoHighLevel\'s native automations driving the proof-of-concept triggers.',
       challenges:
-        'Mapping strategy required mid-milestone refinement to meet dynamic stakeholder requirements. Handling multi-tenant auth across two platforms with different OAuth models added significant complexity. Preventing duplicate records during bidirectional sync required careful ordering and idempotency logic.',
+        'JobTread and GoHighLevel model the same business differently — in JobTread a location belongs to a customer and carries one contact; in GoHighLevel an opportunity carries one contact and moves through tenant-specific pipeline stages. I originally matched a GHL contact to a JobTread customer, then refined mid-milestone to match contact-to-contact for robustness. Multi-tenant auth added real complexity: an Agency OAuth token with per-subaccount logic for GoHighLevel, and Connected Organizations for JobTread.',
       outcome:
-        'Delivered a scalable, multi-tenant integration product that became the foundation for Builder Clarity\'s productized offering — enabling contractors to keep their CRM and project management in sync without manual data entry.',
+        'Delivered a scalable, multi-tenant integration that became the foundation of Builder Clarity\'s productized offering — replacing per-client buildouts and cutting onboarding from roughly two days to about six hours, with leads flowing straight into job records and no manual re-entry.',
+      architectureDiagram: 'ghl-jobtread',
+      codeSnippets: [
+        {
+          title: 'Waterfall find-or-create (phone → email → name)',
+          language: 'javascript',
+          code: `// Match an incoming GHL contact to an existing JobTread record
+// in priority order, so the same person is never created twice.
+async function findOrCreateContact(ghlContact, jobtread) {
+  const candidates = [
+    () => jobtread.findContactByPhone(ghlContact.phone),
+    () => jobtread.findContactByEmail(ghlContact.email),
+    () => jobtread.findContactByName(ghlContact.name),
+  ];
+
+  for (const lookup of candidates) {
+    const match = await lookup();
+    if (match) return match; // first hit wins — phone is strongest
+  }
+
+  // No match anywhere in the waterfall → safe to create.
+  return jobtread.createContact(ghlContact);
+}`,
+        },
+      ],
+    },
+  },
+  {
+    slug: 'linear-ai-workflow',
+    title: 'Linear Adoption + Agentic Bug Workflow',
+    company: 'MAXX Potential',
+    shortDescription:
+      'Replaced scattered per-person QA spreadsheets with Linear and an AI-agent workflow that automates bug filing, triage, and deduplication.',
+    categories: ['integration', 'ai'],
+    techStack: ['Linear', 'MCP', 'Claude Code', 'AI Agents', 'Git'],
+    featured: true,
+    metrics: [
+      { value: '2×', label: 'sprint throughput' },
+      { value: '~80%', label: 'less bug-filing time' },
+      { value: 'Automated', label: 'triage & dedup' },
+    ],
+    detail: {
+      problem:
+        'QA ran on a patchwork of Google Sheets — each team member kept their own sheet with their own columns. Issues had no status history, no categories or tags, and no record of when anything moved between states. The lead engineer wasn\'t marking issues complete, so the team had to manually re-test each build to figure out what had actually been fixed.',
+      approach:
+        'I championed Linear as a single source of truth, chosen specifically for its strong API, Git integration, full issue timeline, and — critically — its MCP server and community CLI tooling. Since the lead engineer was already using Claude Code to convert spreadsheet rows into markdown for triage, I wired Linear directly into that agentic workflow so the AI could fetch and update issues in place instead of copy-pasting.',
+      challenges:
+        'The win wasn\'t just adopting a tool — it was redesigning the bug lifecycle around automation. Filing and triage are now hands-off: duplicates are detected automatically and appended as comments to the existing issue rather than spawning new ones, and triage surfaces a likely root cause plus the context a developer needs to decide how to approach the fix.',
+      outcome:
+        'The team went from fragmented sheets to an organized, automated pipeline across filing, triage, and implementation — roughly doubling sprint throughput and cutting bug-filing time by about 80%.',
+      architectureDiagram: 'linear-flow',
     },
   },
   {
@@ -48,15 +140,45 @@ export const projects: Project[] = [
     categories: ['integration'],
     techStack: ['n8n', 'Zapier', 'REST APIs', 'Webhooks', 'JavaScript'],
     featured: true,
+    metrics: [
+      { value: '1 thread', label: 'per customer' },
+      { value: 'Zapier → n8n', label: 'platform migration' },
+    ],
     detail: {
       problem:
-        'Contractors\' phone calls and texts in RingCentral were siloed from their project communication in JobTread, making it impossible to see the full picture of a client relationship.',
+        'Contractors\' phone calls and texts in RingCentral were siloed from their project communication in JobTread, making it impossible to see the full picture of a client relationship from one place.',
       approach:
-        'Built smart matching logic to correlate each call/text to one or multiple JobTread contacts by phone number. Established automated logging of communication events into JobTread contact threads.',
+        'I matched the phone number on every inbound and outbound call or text to JobTread contacts, logging the event to each contact that matched. Communications land in JobTread\'s comment-thread API as a single per-customer thread, with call summaries, transcriptions, and action items appended as comments.',
       challenges:
-        'Started on Zapier and hit platform limitations around conditional logic and API rate handling. Led the technical migration to n8n, enabling more robust workflow control and reduced operational overhead.',
+        'Started on Zapier and hit platform limits around conditional logic and API rate handling. I led the technical migration to n8n, which gave us robust workflow control and reduced operational overhead.',
       outcome:
-        'Contractors gained a unified communication history per contact, eliminating the need to cross-reference two platforms when reviewing a client\'s history.',
+        'Contractors gained one unified communication history per customer — no more cross-referencing two platforms to reconstruct a client\'s history.',
+      architectureDiagram: 'ringcentral',
+    },
+  },
+  {
+    slug: 'paint-estimator',
+    title: 'React Native Paint Estimator',
+    company: 'MAXX Potential',
+    shortDescription:
+      'Full-stack mobile app that lets paint estimators price a job by breaking it down into areas, features, and tasks.',
+    categories: ['full-stack'],
+    techStack: ['React Native', 'TypeScript', 'Node.js'],
+    featured: true,
+    metrics: [
+      { value: '3 levels', label: 'job → area → feature → task' },
+      { value: 'Go-live', label: 'joined at launch' },
+    ],
+    detail: {
+      problem:
+        'Estimators needed a fast, structured way to price a paint job on-site. Pricing isn\'t one number — a job is a hierarchy of areas (rooms), each with multiple features (paint, carpentry, and so on), each broken into individual tasks.',
+      approach:
+        'I built the estimator around that exact hierarchy — job → areas → features → tasks — so an estimator can decompose a walkthrough into priced line items quickly. I joined at go-live with limited React Native experience and established the team\'s development paradigms, consolidating overlapping features into simpler, reusable modules.',
+      challenges:
+        'React Native\'s cross-platform quirks were the real learning curve — concepts like KeyboardAvoidingView need different implementations on iOS and Android. Wrapping my head around those while shipping at launch pace pushed me to design for reuse instead of duplicating screen logic.',
+      outcome:
+        'Delivered a working estimator that turns an on-site walkthrough into a structured, itemized quote — and leveled up my React Native fluency from a single side project to production paradigms the team could build on.',
+      architectureDiagram: 'paint-hierarchy',
     },
   },
   {
@@ -67,7 +189,7 @@ export const projects: Project[] = [
       'Rebuilt a broken Google Calendar sync app from scratch — mirrors events across calendars for availability blocking.',
     categories: ['full-stack', 'integration'],
     techStack: ['Next.js', 'Supabase', 'Pipedream', 'Google Calendar API', 'TypeScript'],
-    featured: true,
+    featured: false,
     detail: {
       problem:
         'A client needed a working Google Calendar mirroring tool but had inherited a codebase with fundamental architectural flaws that made it unreliable and unmaintainable.',
@@ -77,6 +199,7 @@ export const projects: Project[] = [
         'Inheriting broken code without documentation required careful forensic analysis before any rebuilding could begin. Designing idempotent sync logic for Google Calendar\'s eventual-consistency model required several iterations.',
       outcome:
         'Delivered a stable, maintainable sync tool the client could rely on. The rebuild also served as a case study in diagnosing architectural failures and designing for reliability over speed.',
+      architectureDiagram: 'calendar-sync',
     },
   },
   {

@@ -13,9 +13,9 @@ export const roles: Role[] = [
     period: 'February 2026 – Present',
     type: 'work',
     bullets: [
-      'Joined project at go-live and immediately diagnosed critical process bottleneck: manual issue tracking across siloed Engineering and QA data.',
-      'Implemented Linear as the unified platform; configured an AI Agent tool to enable natural-language issue queries and updates.',
-      'Outcome: consolidated data across teams, reduced manual entry, and accelerated issue resolution.',
+      'Diagnosed a critical QA/Engineering issue-tracking bottleneck and deployed Linear with an AI-agent workflow — doubled sprint throughput and cut bug-filing time by ~80%.',
+      'Pioneered agentic coding workflows across triage, implementation, and testing via Linear\'s MCP server, automating duplicate detection and root-cause triage.',
+      'Built full-stack React Native features for a paint-estimator app, establishing development paradigms and reusable modules from go-live.',
     ],
   },
   {
@@ -24,10 +24,10 @@ export const roles: Role[] = [
     period: 'March 2025 – November 2025',
     type: 'work',
     bullets: [
-      'First engineer hired. Drove strategic pivot from custom per-client automation to scalable, product-based integration solutions.',
-      'Architected multi-tenant integrations: GoHighLevel ↔ JobTread, RingCentral ↔ JobTread.',
-      'Led technical migration from Zapier to n8n and Pipedream — reduced technical debt, enabled rapid prototyping.',
-      'Self-directed AGILE using Linear for sprint planning and stakeholder communication.',
+      'First engineer hired. Architected a multi-tenant integration platform that eliminated per-client buildouts — scaling to 3 clients and cutting onboarding from ~2 days to ~6 hours.',
+      'Integrated CRM, VoIP, and internal systems via secure data pipelines (GoHighLevel ↔ JobTread, RingCentral ↔ JobTread), eliminating manual data entry and saving ~8 hrs/week per client.',
+      'Built and maintained ETL pipelines ingesting and normalizing data from 7+ sources into Postgres for a previously fragmented dataset.',
+      'Led the technical migration from Zapier to n8n and Pipedream, and self-directed AGILE/Scrum in Linear to improve stakeholder visibility.',
     ],
   },
   {

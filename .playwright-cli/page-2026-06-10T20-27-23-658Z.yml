@@ -1,0 +1,139 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]: Work
+      - heading "Projects" [level=1] [ref=e22]
+      - paragraph [ref=e23]: A selection of professional and personal builds — integrations, full-stack apps, and tools.
+    - generic [ref=e24]:
+      - group "Filter projects by category" [ref=e25]:
+        - button "All" [pressed] [ref=e26]
+        - button "Integration" [ref=e27]
+        - button "Full-Stack" [ref=e28]
+        - button "AI" [ref=e29]
+      - generic [ref=e30]:
+        - article [ref=e32]:
+          - generic [ref=e35]:
+            - paragraph [ref=e36]: 2 days → ~6 hrs
+            - paragraph [ref=e37]: client onboarding time
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Builder Clarity
+            - heading "GoHighLevel ↔ JobTread Integration" [level=2] [ref=e40]
+          - paragraph [ref=e41]: Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.
+          - generic [ref=e42]:
+            - generic [ref=e43]: Pipedream
+            - generic [ref=e44]: Supabase
+            - generic [ref=e45]: JavaScript
+            - generic [ref=e46]: OAuth
+            - generic [ref=e47]: REST APIs
+            - generic [ref=e48]: Webhooks
+          - link "Deep dive →" [ref=e50] [cursor=pointer]:
+            - /url: /projects/ghl-jobtread-integration
+        - article [ref=e52]:
+          - generic [ref=e55]:
+            - paragraph [ref=e56]: 2×
+            - paragraph [ref=e57]: sprint throughput
+          - generic [ref=e58]:
+            - paragraph [ref=e59]: MAXX Potential
+            - heading "Linear Adoption + Agentic Bug Workflow" [level=2] [ref=e60]
+          - paragraph [ref=e61]: Replaced scattered per-person QA spreadsheets with Linear and an AI-agent workflow that automates bug filing, triage, and deduplication.
+          - generic [ref=e62]:
+            - generic [ref=e63]: Linear
+            - generic [ref=e64]: MCP
+            - generic [ref=e65]: Claude Code
+            - generic [ref=e66]: AI Agents
+            - generic [ref=e67]: Git
+          - link "Deep dive →" [ref=e69] [cursor=pointer]:
+            - /url: /projects/linear-ai-workflow
+        - article [ref=e71]:
+          - generic [ref=e74]:
+            - paragraph [ref=e75]: 1 thread
+            - paragraph [ref=e76]: per customer
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: Builder Clarity
+            - heading "RingCentral ↔ JobTread Integration" [level=2] [ref=e79]
+          - paragraph [ref=e80]: Synced calls and texts from RingCentral VoIP into JobTread contact threads — establishing a single source of truth for contractor communications.
+          - generic [ref=e81]:
+            - generic [ref=e82]: n8n
+            - generic [ref=e83]: Zapier
+            - generic [ref=e84]: REST APIs
+            - generic [ref=e85]: Webhooks
+            - generic [ref=e86]: JavaScript
+          - link "Deep dive →" [ref=e88] [cursor=pointer]:
+            - /url: /projects/ringcentral-jobtread-integration
+        - article [ref=e90]:
+          - generic [ref=e93]:
+            - paragraph [ref=e94]: 3 levels
+            - paragraph [ref=e95]: job → area → feature → task
+          - generic [ref=e96]:
+            - paragraph [ref=e97]: MAXX Potential
+            - heading "React Native Paint Estimator" [level=2] [ref=e98]
+          - paragraph [ref=e99]: Full-stack mobile app that lets paint estimators price a job by breaking it down into areas, features, and tasks.
+          - generic [ref=e100]:
+            - generic [ref=e101]: React Native
+            - generic [ref=e102]: TypeScript
+            - generic [ref=e103]: Node.js
+          - link "Deep dive →" [ref=e105] [cursor=pointer]:
+            - /url: /projects/paint-estimator
+        - article [ref=e107]:
+          - paragraph [ref=e110]: full-stack
+          - generic [ref=e111]:
+            - paragraph [ref=e112]: Freelance
+            - heading "Mirrored Google Calendars" [level=2] [ref=e113]
+          - paragraph [ref=e114]: Rebuilt a broken Google Calendar sync app from scratch — mirrors events across calendars for availability blocking.
+          - generic [ref=e115]:
+            - generic [ref=e116]: Next.js
+            - generic [ref=e117]: Supabase
+            - generic [ref=e118]: Pipedream
+            - generic [ref=e119]: Google Calendar API
+            - generic [ref=e120]: TypeScript
+          - link "Deep dive →" [ref=e122] [cursor=pointer]:
+            - /url: /projects/mirrored-google-calendars
+        - article [ref=e124]:
+          - paragraph [ref=e127]: full-stack
+          - generic [ref=e128]:
+            - paragraph [ref=e129]: Duke University
+            - heading "Cherished" [level=2] [ref=e130]
+          - paragraph [ref=e131]: Wellness-centered social media platform built in an AGILE team — featuring messaging, profiles, search, and email notifications.
+          - generic [ref=e132]:
+            - generic [ref=e133]: Next.js
+            - generic [ref=e134]: MongoDB
+            - generic [ref=e135]: TypeScript
+            - generic [ref=e136]: AGILE/Scrum
+          - link "Deep dive →" [ref=e138] [cursor=pointer]:
+            - /url: /projects/cherished
+  - contentinfo [ref=e139]:
+    - generic [ref=e140]:
+      - paragraph [ref=e141]: Michael Herron © 2026
+      - list [ref=e142]:
+        - listitem [ref=e143]:
+          - link "GitHub" [ref=e144] [cursor=pointer]:
+            - /url: https://github.com/mh550
+        - listitem [ref=e145]:
+          - link "LinkedIn" [ref=e146] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e147]:
+          - link "Email" [ref=e148] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com

@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import FloatingLogos from '@/components/hero/FloatingLogos';
 
 describe('FloatingLogos', () => {
-  it('renders all 8 skill logos', () => {
+  it('renders all skill logos', () => {
     render(<FloatingLogos />);
-    const labels = ['TypeScript', 'React', 'Supabase', 'Vercel', 'n8n', 'Zapier', 'Claude', 'Pipedream'];
+    const labels = ['TypeScript', 'React', 'Supabase', 'Vercel', 'n8n', 'Zapier', 'Claude', 'Pipedream', 'Linear'];
     for (const label of labels) {
       // Either an SVG with aria-label or a div with the monogram text
       const el = screen.queryByRole('img', { name: label }) ?? screen.queryByText('PD');

@@ -1,0 +1,112 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - link "← Projects" [ref=e21] [cursor=pointer]:
+        - /url: /projects
+      - paragraph [ref=e22]: MAXX Potential
+      - heading "Linear Adoption + Agentic Bug Workflow" [level=1] [ref=e23]
+      - paragraph [ref=e24]: Replaced scattered per-person QA spreadsheets with Linear and an AI-agent workflow that automates bug filing, triage, and deduplication.
+      - generic [ref=e25]:
+        - generic [ref=e26]: Linear
+        - generic [ref=e27]: MCP
+        - generic [ref=e28]: Claude Code
+        - generic [ref=e29]: AI Agents
+        - generic [ref=e30]: Git
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - term [ref=e35]: sprint throughput
+        - definition [ref=e36]: 2×
+        - paragraph [ref=e37]: sprint throughput
+      - generic [ref=e38]:
+        - term [ref=e39]: less bug-filing time
+        - definition [ref=e40]: ~80%
+        - paragraph [ref=e41]: less bug-filing time
+      - generic [ref=e42]:
+        - term [ref=e43]: triage & dedup
+        - definition [ref=e44]: Automated
+        - paragraph [ref=e45]: triage & dedup
+    - generic [ref=e48]:
+      - generic [ref=e50]:
+        - heading "The Problem" [level=2] [ref=e51]
+        - paragraph [ref=e52]: QA ran on a patchwork of Google Sheets — each team member kept their own sheet with their own columns. Issues had no status history, no categories or tags, and no record of when anything moved between states. The lead engineer wasn't marking issues complete, so the team had to manually re-test each build to figure out what had actually been fixed.
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "The Approach" [level=2] [ref=e55]
+          - paragraph [ref=e56]: I championed Linear as a single source of truth, chosen specifically for its strong API, Git integration, full issue timeline, and — critically — its MCP server and community CLI tooling. Since the lead engineer was already using Claude Code to convert spreadsheet rows into markdown for triage, I wired Linear directly into that agentic workflow so the AI could fetch and update issues in place instead of copy-pasting.
+        - figure "From scattered per-person spreadsheets to an automated file → dedup → triage → implement pipeline." [ref=e59]:
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - paragraph [ref=e62]: Before — scattered sheets
+              - generic [ref=e63]:
+                - generic [ref=e64]: Per-person Google Sheets
+                - generic [ref=e65]: No status history
+                - generic [ref=e66]: Manual re-test every build
+                - generic [ref=e67]: Duplicates everywhere
+            - generic [ref=e69]:
+              - generic [ref=e70]: Linear + AI agent
+              - generic [ref=e71]: →
+            - generic [ref=e72]:
+              - paragraph [ref=e73]: After — automated pipeline
+              - generic [ref=e74]:
+                - generic [ref=e75]:
+                  - text: File
+                  - generic [ref=e76]: auto-created in Linear
+                - generic [ref=e78]: ↓
+                - generic [ref=e79]:
+                  - text: Dedup
+                  - generic [ref=e80]: comment on existing issue
+                - generic [ref=e82]: ↓
+                - generic [ref=e83]:
+                  - text: Triage
+                  - generic [ref=e84]: root cause + context
+                - generic [ref=e86]: ↓
+                - generic [ref=e87]:
+                  - text: Implement
+                  - generic [ref=e88]: agentic via MCP
+          - generic [ref=e89]: From scattered per-person spreadsheets to an automated file → dedup → triage → implement pipeline.
+      - generic [ref=e91]:
+        - heading "Challenges" [level=2] [ref=e92]
+        - paragraph [ref=e93]: "The win wasn't just adopting a tool — it was redesigning the bug lifecycle around automation. Filing and triage are now hands-off: duplicates are detected automatically and appended as comments to the existing issue rather than spawning new ones, and triage surfaces a likely root cause plus the context a developer needs to decide how to approach the fix."
+      - generic [ref=e95]:
+        - heading "Outcome" [level=2] [ref=e96]
+        - paragraph [ref=e97]: The team went from fragmented sheets to an organized, automated pipeline across filing, triage, and implementation — roughly doubling sprint throughput and cutting bug-filing time by about 80%.
+    - link "← Back to all projects" [ref=e100] [cursor=pointer]:
+      - /url: /projects
+  - contentinfo [ref=e101]:
+    - generic [ref=e102]:
+      - paragraph [ref=e103]: Michael Herron © 2026
+      - list [ref=e104]:
+        - listitem [ref=e105]:
+          - link "GitHub" [ref=e106] [cursor=pointer]:
+            - /url: https://github.com/mh550
+        - listitem [ref=e107]:
+          - link "LinkedIn" [ref=e108] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e109]:
+          - link "Email" [ref=e110] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e116] [cursor=pointer]:
+    - img [ref=e117]
