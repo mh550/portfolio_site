@@ -9,6 +9,18 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 21:25 · M1-06 · passes
+
+- New `docs/screenshots/v2/M1-card-390.png` (75 KB, 390 × 844 viewport), `M1-card-1280.png` (99 KB, full page),
+  `M1-card-qr-390.png` (10 KB); the plan's "What Michael will see" table and Measurements line are filled. No code
+  changed; 150 → 150 tests.
+- Measured with Playwright (`$HARNESS_SCRATCH/m1-measure.mjs`) against :7800: h1 bottom 200, Save contact bottom 384
+  (fold 844); heights Save contact 48, LinkedIn/Email/GitHub/Full portfolio/Show QR 44 each, /card/qr Back 44; main at
+  1280 = 520 px wide, 380 px each side; QR 312 px at 390; scroll overflow at 390 = 0. Smoke 28/28 PASS; check.sh green.
+- Nothing looked wrong. The `next dev` "N" badge was hidden with injected CSS before the shots (production has none).
+- Next: M1-07 (review) is unblocked; its Minor list from M1-04 (aria-hidden arrow on "Full portfolio →", sr-only
+  "opens in new tab") is still open. Questions: none. Proposed changes: none.
+
 ### 2026-10-18 21:05 · M1-05 · passes
 
 - New `src/app/card/qr/page.tsx` (static server component: white `min-h-screen` main, plain `<img src="/card/qr.svg">`
