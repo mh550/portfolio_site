@@ -19,7 +19,7 @@ describe('ScrollReveal — reduced motion', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.doMock('framer-motion', () => ({
-      ...jest.requireActual('@/__mocks__/framer-motion'),
+      ...jest.requireActual<object>('@/__mocks__/framer-motion'),
       useReducedMotion: () => true,
     }));
   });

@@ -2,6 +2,7 @@ import {
   projects,
   getProjectBySlug,
   getProjectsByCategory,
+  getTopProjects,
   skillCategories,
   roles,
   education,
@@ -45,6 +46,56 @@ describe('projects data', () => {
   it('slugs are unique', () => {
     const slugs = projects.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it('carries the D12 order on every project', () => {
+    const orders = Object.fromEntries(projects.map((p) => [p.slug, p.order]));
+    expect(orders).toEqual({
+      'linear-ai-workflow': 2,
+      'ghl-jobtread-integration': 5,
+      'paint-estimator': 6,
+      'ringcentral-jobtread-integration': 7,
+      'mirrored-google-calendars': 8,
+      cherished: 9,
+    });
+  });
+
+  it('order values are unique', () => {
+    const orders = projects.map((p) => p.order);
+    expect(new Set(orders).size).toBe(orders.length);
+  });
+
+  it('cherished and mirrored-google-calendars are not featured (D12, D25)', () => {
+    expect(getProjectBySlug('cherished')?.featured).toBe(false);
+    expect(getProjectBySlug('mirrored-google-calendars')?.featured).toBe(false);
+  });
+});
+
+describe('getTopProjects', () => {
+  it('returns the first n featured projects by order', () => {
+    expect(getTopProjects(3).map((p) => p.slug)).toEqual([
+      'linear-ai-workflow',
+      'ghl-jobtread-integration',
+      'paint-estimator',
+    ]);
+  });
+
+  it('returns every featured project, sorted by order, when n exceeds the count', () => {
+    const slugs = getTopProjects(10).map((p) => p.slug);
+    expect(slugs).toEqual([
+      'linear-ai-workflow',
+      'ghl-jobtread-integration',
+      'paint-estimator',
+      'ringcentral-jobtread-integration',
+    ]);
+    expect(slugs).not.toContain('cherished');
+  });
+
+  it('returns an empty list for n <= 0 and does not reorder projects', () => {
+    const before = projects.map((p) => p.slug);
+    expect(getTopProjects(0)).toEqual([]);
+    expect(getTopProjects(-1)).toEqual([]);
+    expect(projects.map((p) => p.slug)).toEqual(before);
   });
 });
 

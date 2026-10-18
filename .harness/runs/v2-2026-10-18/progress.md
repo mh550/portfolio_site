@@ -9,6 +9,22 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 18:40 · M0-02 · passes
+
+- `Project.order` (required) set per D12 on the 6 projects; `cherished` is now `featured: false` (mirrored stays
+  false, D25). `getTopProjects(n)` in `projects.ts` (featured, by order, first n, n ≤ 0 → []). New
+  `src/lib/data/approach.ts` (`methodSteps`, 5 first-person lines of 38–67 chars), both from the barrel. Tests: data.test.ts +6,
+  new approach.test.ts (5). Jest 101 → 112, 14 → 15 suites.
+- `npx tsc --noEmit` failed before this session on every test file (the repo has no `@types/jest`). Fixed without new
+  deps: `src/__tests__/jest-globals.d.ts` declares the globals from `@jest/globals` + jest-dom matchers, and
+  ScrollReveal.test uses `requireActual<object>`. tsc now exits 0.
+- Verified: check.sh green (112 tests), smoke 24/24 PASS, tsc 0, content guard unchanged since M0-01 (`git diff 6e45680`).
+  Opus review of the whole M0 diff: no bugs. I took 4 of its 6 suggestions (exact-slug assertion for getTopProjects(10), clamp negative n,
+  two comments in the .d.ts).
+- Next sessions: the `projects` array is **not** in `order` order and `ProjectsGrid` renders it as-is. M8 must
+  sort the index by `order` and keep non-featured projects (don't use `getTopProjects` there). M1/M2 use
+  `getTopProjects(3)`, which today gives linear-ai-workflow, ghl-jobtread-integration and paint-estimator.
+
 ### 2026-10-18 18:24 · M0-01 · passes
 
 - Added `src/lib/data/profile.ts` (typed `Profile`, values from brand.md "Contact facts"), re-exported from

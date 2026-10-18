@@ -37,6 +37,8 @@ export interface Project {
   githubUrl?: string;
   demoUrl?: string;
   featured: boolean;
+  /** Display order across the site, lower first (spec D12). Unique per project. */
+  order: number;
   /** Card preview + detail-page hero image/video. Optional until assets are captured. */
   thumbnail?: ProjectMedia;
   /** Impact callouts surfaced on the card and at the top of the detail page. */
@@ -65,6 +67,7 @@ export const projects: Project[] = [
     categories: ['integration'],
     techStack: ['Pipedream', 'Supabase', 'JavaScript', 'OAuth', 'REST APIs', 'Webhooks'],
     featured: true,
+    order: 5,
     metrics: [
       { value: '2 days → ~6 hrs', label: 'client onboarding time' },
       { value: 'Bidirectional', label: 'GHL ↔ JobTread sync' },
@@ -114,6 +117,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['integration', 'ai'],
     techStack: ['Linear', 'MCP', 'Claude Code', 'AI Agents', 'Git'],
     featured: true,
+    order: 2,
     metrics: [
       { value: '2×', label: 'sprint throughput' },
       { value: '~80%', label: 'less bug-filing time' },
@@ -140,6 +144,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['integration'],
     techStack: ['n8n', 'Zapier', 'REST APIs', 'Webhooks', 'JavaScript'],
     featured: true,
+    order: 7,
     metrics: [
       { value: '1 thread', label: 'per customer' },
       { value: 'Zapier → n8n', label: 'platform migration' },
@@ -165,6 +170,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['full-stack'],
     techStack: ['React Native', 'TypeScript', 'Node.js'],
     featured: true,
+    order: 6,
     metrics: [
       { value: '3 levels', label: 'job → area → feature → task' },
       { value: 'Go-live', label: 'joined at launch' },
@@ -190,6 +196,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['full-stack', 'integration'],
     techStack: ['Next.js', 'Supabase', 'Pipedream', 'Google Calendar API', 'TypeScript'],
     featured: false,
+    order: 8,
     detail: {
       problem:
         'A client needed a working Google Calendar mirroring tool but had inherited a codebase with fundamental architectural flaws that made it unreliable and unmaintainable.',
@@ -211,6 +218,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['full-stack', 'education'],
     techStack: ['Next.js', 'MongoDB', 'TypeScript', 'AGILE/Scrum'],
     featured: false,
+    order: 9,
     detail: {
       problem:
         'Course project: design and build a social platform centered on positive, wellness-focused interactions rather than engagement-maximizing mechanics.',
@@ -230,4 +238,12 @@ export function getProjectBySlug(slug: string): Project | undefined {
 
 export function getProjectsByCategory(category: ProjectCategory): Project[] {
   return projects.filter((p) => p.categories.includes(category));
+}
+
+/** The first `n` featured projects, lowest `order` first. */
+export function getTopProjects(n: number): Project[] {
+  return projects
+    .filter((p) => p.featured)
+    .sort((a, b) => a.order - b.order)
+    .slice(0, Math.max(0, n));
 }

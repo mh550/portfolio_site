@@ -24,7 +24,7 @@
         "`git diff f86ad9f..HEAD --stat` shows changes only under src/lib/data, src/__tests__, .harness/runs and docs (no component edits); the content guard test file is unchanged since M0-01",
         ".harness/check.sh is green"
       ],
-      "passes": false
+      "passes": true
     },
 
     {
