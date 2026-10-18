@@ -11,6 +11,8 @@ const config: Config = {
     '^framer-motion$': '<rootDir>/src/__mocks__/framer-motion.tsx',
   },
   testMatch: ['**/__tests__/**/*.test.{ts,tsx}'],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/.claude/', '<rootDir>/.next-check/'],
+  modulePathIgnorePatterns: ['<rootDir>/.claude/', '<rootDir>/.next-check/'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
 };
 

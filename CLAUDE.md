@@ -25,9 +25,9 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 
 ```bash
 npm run dev          # start dev server (localhost:3000)
-npm run build        # production build (TypeScript check + static export)
+npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (66 tests, 11 suites)
+npm test             # Jest unit/integration tests (70 tests, 12 suites on 2026-10-18)
 npm run test:watch   # watch mode
 ```
 
@@ -37,6 +37,8 @@ npm test -- src/__tests__/components/Navbar.test.tsx
 ```
 
 ## E2E Testing with playwright-cli
+
+In harness runs `playwright-cli` is not installed: use `node .harness/smoke.mjs` (see How to verify).
 
 Use the `playwright-cli` skill for all E2E tests. **Always use `-s=portfolio`** so multiple Claude Code instances don't collide:
 
@@ -92,3 +94,33 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - `vercel-composition-patterns` — when designing component APIs
 - `web-design-guidelines` — when reviewing UI for accessibility
 - `playwright-cli` — for all browser-based E2E testing
+
+## Code rules
+- Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
+  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency.
+- Content lives in `src/lib/data/*.ts` (projects, experience, skills, profile, approach, competencies); components
+  render it. Reuse `ScrollReveal`, `ProjectCard`, `MetricStrip`, `MediaGallery`, `CodeBlock` and the diagrams in
+  `src/components/projects/diagrams/` rather than re-implementing them.
+- Server Components by default; `"use client"` only where interaction needs it.
+- Copy follows `docs/notes/brand.md` (voice, never-publish list, metrics bank). Every number traces to `docs/notes/`.
+
+## How to verify
+- Suite: `.harness/check.sh` = `eslint` + `jest --silent` + `next build` (into `.next-check`, so it never clobbers
+  the dev server). About 1 min. A subset: `npx jest src/__tests__/pages/about.test.tsx`.
+- Harness init: `.harness/init.sh` installs deps and starts `next dev` on `$HARNESS_PORT`.
+- Smoke: `node .harness/smoke.mjs` loads every route (static routes, `.harness/smoke-routes.txt`, every
+  `/projects/<slug>`) at 1280 and 390 px; fails on HTTP ≥ 400, page/console errors, or horizontal scroll at 390.
+  Screenshots go to `$HARNESS_SCRATCH`. A page added by a milestone goes into `.harness/smoke-routes.txt`.
+- Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).
+
+## Decisions and plans
+- Spec: `docs/specs/2026-10-18-portfolio-v2.md` (settled: D1–D14; new defaults appended there as `D<n> *default*`).
+- Context: `docs/notes/brand.md`, `docs/notes/evidence-*.md`; older groundwork in `docs/notes/SITE_UPDATE_PLAN.md`.
+- Plans: `docs/plans/<date>-<milestone>-<topic>.md`.
+
+## Off-limits
+- Never deploy: no `vercel` CLI, never push or merge to `main` (pushing `main` deploys production). Michael merges.
+- Other repos (`~/projects/agent-harness`, `hit_list`, `dj-crate-streaming`) are read-only sources, only at the
+  paths the evidence briefs name. Never read `.env` files, `/srv`, `/etc/restic`, or `agent-harness/journal/raw/`.
+- Never weaken `src/__tests__/lib/content-guard.test.ts` (once M0 adds it) to make content pass.
+

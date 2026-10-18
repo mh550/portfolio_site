@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // .harness/check.sh build output, and Claude Code worktrees nested in a checkout
+    ".next-check/**",
+    ".claude/**",
   ]),
 ]);
 
