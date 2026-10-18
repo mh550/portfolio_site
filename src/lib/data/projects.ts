@@ -1,3 +1,5 @@
+import { methodSteps } from './approach';
+
 export type ProjectCategory = 'integration' | 'full-stack' | 'ai' | 'education' | 'systems' | 'process';
 
 /** A key that maps a project to an authored, theme-styled diagram component. */
@@ -292,4 +294,18 @@ export function getTopProjects(n: number): Project[] {
     .filter((p) => p.featured)
     .sort((a, b) => a.order - b.order)
     .slice(0, Math.max(0, n));
+}
+
+/** Every anchor id a project's case-study page renders (the five method steps first); [] without one. M7's link test uses it. */
+export function getCaseStudyAnchors(project: Project): string[] {
+  const cs = project.caseStudy;
+  if (!cs) return [];
+  return [
+    ...methodSteps.map((step) => step.id),
+    'method',
+    ...(cs.decisions.length > 0 ? ['decisions'] : []),
+    ...(cs.iterations && cs.iterations.length > 0 ? ['iterations'] : []),
+    ...(cs.lessons.length > 0 ? ['lessons'] : []),
+    ...(cs.links.length > 0 ? ['links'] : []),
+  ];
 }
