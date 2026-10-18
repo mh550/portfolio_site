@@ -9,6 +9,21 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 21:05 · M1-05 · passes
+
+- New `src/app/card/qr/page.tsx` (static server component: white `min-h-screen` main, plain `<img src="/card/qr.svg">`
+  at `min(80vw, 420px)`, alt built from `profile.siteUrl`'s host, h1 name + positioning below, `← Back` to `/card` with
+  the arrow aria-hidden, `robots: { index: false }`, title `QR — Michael Herron`). New `card-qr.test.tsx` (6).
+  `/card/qr` appended to `.harness/smoke-routes.txt`. New `docs/conference-kit.md` (40 lines, 3 sections). 144 → 150.
+- Verified: the test failed first (module missing); a 420 → 400 px mutation fails the width assertion; `curl :7800/card/qr`
+  → 200, `<nav` 0, `<meta name="robots" content="noindex"/>`; `/card/qr.svg` 200 image/svg+xml; smoke `/card` and
+  `/card/qr` PASS at 1280 and 390, full smoke 28/28; all 11 content-guard regexes run over the kit: 0 hits; check.sh
+  green (150). 390 screenshot: QR ≈ 280 px square centered, name, positioning and Back below, no overflow.
+- Opus review: 0 Critical/Important. Took 5 Minors: name is now an h1 (test checks h1 and DOM order img → name →
+  positioning, failed first); kit says "featured, lowest order", that the PNG test checks only size, and that Android
+  needs one more tap. Left: none.
+- Next: M1-06 (screenshots + measurements) is unblocked. Questions: none. Proposed changes: none.
+
 ### 2026-10-18 20:40 · M1-04 · passes
 
 - New `src/components/SiteChrome.tsx` (plan code verbatim; hides Navbar, `pt-16` and Footer on `/card` and `/card/*`,

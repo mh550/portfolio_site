@@ -1,1 +1,2 @@
 /card
+/card/qr
