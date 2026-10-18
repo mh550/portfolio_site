@@ -72,6 +72,34 @@ don't redo it.
   with zero code, and the spec records the trip-wires for when building it would become worth it. Use it as the
   "Simplify / what I chose not to build" example. No link (private).
 
+- **D15** *default* Site chrome is one client component, `src/components/SiteChrome.tsx`, wrapping `{children}` in the
+  root layout. By pathname it renders the Navbar, the 64 px top offset and the Footer: none of the three on `/card`
+  and `/card/*`; the existing no-footer rule on `/` until D19; all three everywhere else. `ConditionalFooter` folds
+  into it. (Initializer, 2026-10-18: the layout's `pt-16` wrapper would otherwise leave a gap above the card.)
+- **D16** *default* In case-study mode `/projects/[slug]` does not render `detail.approach` or `detail.challenges`
+  (MethodSteps and LessonList take their place). Both fields stay required and hold one-sentence summaries for the
+  new projects. The page body moves to `src/components/projects/ProjectDetail.tsx` (takes `project`) so tests can
+  render a fixture.
+- **D17** *default* Diagrams on a case study: `detail.architectureDiagram` renders after Problem;
+  `caseStudy.extraDiagrams?: DiagramKey[]` render after IterationTimeline (evolution and before/after diagrams).
+  `ProjectDiagram` gains `role="img"` and an `aria-label` per key for every diagram, existing ones included.
+- **D18** *default* M5's verify excerpt replaces the `/srv/incoming/…` path with `incoming/…` and is otherwise
+  quoted exactly from `docs/download-validation.md`. The fourth media-server metric reads "Nothing deleted" /
+  "every removal reversible" (a "0" reads oddly).
+- **D19** *default* Once the home page has a "Recent work" section (M2), the Footer shows on `/` again.
+- **D20** *default* After the M2 skills regroup the single featured group is **Process & delivery**.
+- **D21** *default* `scripts/make-qr.mjs` imports `src/lib/data/profile.ts` directly (Node ≥ 22.18 strips types; this
+  box runs Node 24), so the site URL exists once (D4). The script is run by hand; its outputs are committed.
+- **D22** *default* `/card` "Selected work" one-liners are each project's `shortDescription`.
+- **D23** *default* The shared method strip is `src/components/MethodStrip.tsx` (reads `methodSteps`), created by
+  whichever of M2 (hero) and M7 (`/approach`) runs first; the other reuses it.
+- **D24** *default* Root metadata sets `metadataBase` to `profile.siteUrl` so Open Graph image paths resolve.
+- **D25** *default* `mirrored-google-calendars` keeps `featured: false` (as today) with order 8. Before the case
+  studies land, the top three are linear-ai-workflow, ghl-jobtread-integration, paint-estimator.
+- **D26** *default* Stretch items are milestones S1–S3, one feature each, ordered after M9 in the feature list.
+- **D27** *default* The agent-harness iterations may keep the brief's row 1b as its own entry (6 or 7 iterations);
+  the M4 plan decides, the test accepts either.
+
 ## Dependencies between milestones
 
 M0 first. M1 after M0. M2 after M1. **M3 needs only M0.** **M4, M5 and M6 each need only M3** (independent of each
