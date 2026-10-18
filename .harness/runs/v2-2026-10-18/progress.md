@@ -9,6 +9,24 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:40 · M1-04 · passes
+
+- New `src/components/SiteChrome.tsx` (plan code verbatim; hides Navbar, `pt-16` and Footer on `/card` and `/card/*`,
+  no Footer on `/`), `ConditionalFooter.tsx` deleted, `layout.tsx` renders `<SiteChrome>` and adds `metadataBase`
+  (D24). New static `src/app/card/page.tsx` (headshot 112 px, h1, positioning, subline, Save contact, LinkedIn/Email/
+  GitHub, getTopProjects(3), Full portfolio →, Show QR; metadata per plan). `.harness/smoke-routes.txt` = `/card`.
+  D28 *default* appended to the spec. Tests: SiteChrome.test.tsx (5) + card.test.tsx (11). 128 → 144.
+- Verified: both suites failed first (modules missing), then passed; `curl :7800/card` → 200, `<nav` count 0, `<footer`
+  0, title "Michael Herron — Systems & Process Engineer", og:image absolute; `/about` still has its nav; the build
+  prerenders `.next-check/server/app/card.html`; smoke `/card` PASS at 1280 and 390, full smoke 26/26 PASS; check.sh
+  green (144). 390 screenshot: Save contact ends ≈ 384 px, all three projects visible, nothing wraps or overflows.
+- Opus review: 0 Critical/Important. Minor, left for M1-07: "Full portfolio →" reads the arrow aloud (wrap it in
+  aria-hidden and update the test's name); LinkedIn/GitHub `target=_blank` without an sr-only "opens in new tab";
+  the no-`<nav>` page test is trivially true (SiteChrome test + curl are the real guard); the button test pins only
+  `min-h-[44px]`.
+- Next: M1-05 (/card/qr + conference kit) is unblocked; append `/card/qr` to `.harness/smoke-routes.txt`.
+- Questions: none. Proposed changes: none.
+
 ### 2026-10-18 20:05 · M1-03 · passes
 
 - New `scripts/make-qr.mjs` (imports profile.ts per D21, writes `public/card/qr.svg` as returned and a 1024 px

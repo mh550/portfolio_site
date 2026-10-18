@@ -99,6 +99,9 @@ don't redo it.
 - **D26** *default* Stretch items are milestones S1–S3, one feature each, ordered after M9 in the feature list.
 - **D27** *default* The agent-harness iterations may keep the brief's row 1b as its own entry (6 or 7 iterations);
   the M4 plan decides, the test accepts either.
+- **D28** *default* `/card` has no `ScrollReveal` or other entrance animation (it would delay the 30-second read);
+  the vCard has no `PHOTO` (tiny file, simple encoding; the headshot is on the page) and is served
+  `Content-Disposition: inline` so iOS shows "Add to Contacts".
 
 ## Dependencies between milestones
 

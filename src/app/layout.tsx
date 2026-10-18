@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import ConditionalFooter from '@/components/ConditionalFooter';
+import SiteChrome from '@/components/SiteChrome';
+import { profile } from '@/lib/data';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,6 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Resolves relative Open Graph image paths (D24)
+  metadataBase: new URL(profile.siteUrl),
   title: 'Michael Herron — Full-Stack & Integration Engineer',
   description:
     'Portfolio of Michael Herron — full-stack developer and automation/integration engineer. I build systems that connect things.',
@@ -28,9 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar />
-        <div className="pt-16">{children}</div>
-        <ConditionalFooter />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
