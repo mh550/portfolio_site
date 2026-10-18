@@ -1,0 +1,144 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MH" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - link "Home" [ref=e7] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e8]:
+          - link "About" [ref=e9] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e10]:
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /skills
+        - listitem [ref=e12]:
+          - link "Projects" [ref=e13] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e14]:
+          - link "Experience" [ref=e15] [cursor=pointer]:
+            - /url: /experience
+        - listitem [ref=e16]:
+          - link "Contact" [ref=e17] [cursor=pointer]:
+            - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - link "← Projects" [ref=e21] [cursor=pointer]:
+        - /url: /projects
+      - paragraph [ref=e22]: Builder Clarity
+      - heading "GoHighLevel ↔ JobTread Integration" [level=1] [ref=e23]
+      - paragraph [ref=e24]: Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.
+      - generic [ref=e25]:
+        - generic [ref=e26]: Pipedream
+        - generic [ref=e27]: Supabase
+        - generic [ref=e28]: JavaScript
+        - generic [ref=e29]: OAuth
+        - generic [ref=e30]: REST APIs
+        - generic [ref=e31]: Webhooks
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - term [ref=e36]: client onboarding time
+        - definition [ref=e37]: 2 days → ~6 hrs
+        - paragraph [ref=e38]: client onboarding time
+      - generic [ref=e39]:
+        - term [ref=e40]: GHL ↔ JobTread sync
+        - definition [ref=e41]: Bidirectional
+        - paragraph [ref=e42]: GHL ↔ JobTread sync
+      - generic [ref=e43]:
+        - term [ref=e44]: manual re-entry of leads
+        - definition [ref=e45]: "0"
+        - paragraph [ref=e46]: manual re-entry of leads
+    - generic [ref=e49]:
+      - generic [ref=e51]:
+        - heading "The Problem" [level=2] [ref=e52]
+        - paragraph [ref=e53]: "Contractors were managing jobs in JobTread and leads/clients in GoHighLevel with zero data flow between them — double entry, missed follow-ups, and no unified view of a customer journey. The core challenge was an ETL problem across two platforms paired with a deduplication problem: the same human exists in both systems, under different schemas, and must never be created twice."
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - heading "The Approach" [level=2] [ref=e56]
+          - paragraph [ref=e57]: I mapped the full entity model of each platform, then designed a bidirectional sync keyed on a waterfall match (phone → email → name). On a GoHighLevel pipeline-stage change, the integration finds-or-creates down JobTread's hierarchy in dependency order — customer, then contact, then location, then job — wiring each record to the ones above it. Built on Pipedream with custom JavaScript at nearly every step, Supabase bridging state between the platforms, and GoHighLevel's native automations driving the proof-of-concept triggers.
+        - figure "Entity mapping across both platforms, and the waterfall match that prevents duplicates." [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - paragraph [ref=e64]: GoHighLevel (CRM)
+                - generic [ref=e65]:
+                  - generic [ref=e66]:
+                    - text: Subaccount
+                    - generic [ref=e67]: tenant
+                  - generic [ref=e69]: ↓
+                  - generic [ref=e70]:
+                    - text: Opportunity
+                    - generic [ref=e71]: → pipeline stage
+                  - generic [ref=e73]: ↓
+                  - generic [ref=e74]:
+                    - text: Contact
+                    - generic [ref=e75]: phone · email · name
+              - generic [ref=e77]:
+                - generic [ref=e78]: on stage change
+                - generic [ref=e79]: →
+              - generic [ref=e80]:
+                - paragraph [ref=e81]: JobTread (PM)
+                - generic [ref=e82]:
+                  - generic [ref=e83]:
+                    - text: Customer
+                    - generic [ref=e84]: "find-or-create #1"
+                  - generic [ref=e86]: ↓
+                  - generic [ref=e87]:
+                    - text: Contact
+                    - generic [ref=e88]: "find-or-create #2"
+                  - generic [ref=e90]: ↓
+                  - generic [ref=e91]:
+                    - text: Location
+                    - generic [ref=e92]: "#3 · holds the contact"
+                  - generic [ref=e94]: ↓
+                  - generic [ref=e95]:
+                    - text: Job
+                    - generic [ref=e96]: "#4"
+            - generic [ref=e97]:
+              - paragraph [ref=e98]: Waterfall match — never create the same person twice
+              - generic [ref=e99]:
+                - generic [ref=e100]: phone
+                - generic [ref=e101]:
+                  - generic [ref=e102]: no match
+                  - generic [ref=e103]: →
+                - generic [ref=e104]: email
+                - generic [ref=e105]:
+                  - generic [ref=e106]: no match
+                  - generic [ref=e107]: →
+                - generic [ref=e108]: name
+                - generic [ref=e109]:
+                  - generic [ref=e110]: no match
+                  - generic [ref=e111]: →
+                - generic [ref=e112]: create
+          - generic [ref=e113]: Entity mapping across both platforms, and the waterfall match that prevents duplicates.
+      - generic [ref=e115]:
+        - heading "Challenges" [level=2] [ref=e116]
+        - paragraph [ref=e117]: "JobTread and GoHighLevel model the same business differently — in JobTread a location belongs to a customer and carries one contact; in GoHighLevel an opportunity carries one contact and moves through tenant-specific pipeline stages. I originally matched a GHL contact to a JobTread customer, then refined mid-milestone to match contact-to-contact for robustness. Multi-tenant auth added real complexity: an Agency OAuth token with per-subaccount logic for GoHighLevel, and Connected Organizations for JobTread."
+      - generic [ref=e119]:
+        - heading "Outcome" [level=2] [ref=e120]
+        - paragraph [ref=e121]: Delivered a scalable, multi-tenant integration that became the foundation of Builder Clarity's productized offering — replacing per-client buildouts and cutting onboarding from roughly two days to about six hours, with leads flowing straight into job records and no manual re-entry.
+      - generic [ref=e122]:
+        - heading "In the Code" [level=2] [ref=e123]
+        - figure "Waterfall find-or-create (phone → email → name) javascript" [ref=e125]:
+          - generic [ref=e126]:
+            - generic [ref=e127]: Waterfall find-or-create (phone → email → name)
+            - generic [ref=e128]: javascript
+          - code [ref=e130]: "// Match an incoming GHL contact to an existing JobTread record // in priority order, so the same person is never created twice. async function findOrCreateContact(ghlContact, jobtread) { const candidates = [ () => jobtread.findContactByPhone(ghlContact.phone), () => jobtread.findContactByEmail(ghlContact.email), () => jobtread.findContactByName(ghlContact.name), ]; for (const lookup of candidates) { const match = await lookup(); if (match) return match; // first hit wins — phone is strongest } // No match anywhere in the waterfall → safe to create. return jobtread.createContact(ghlContact); }"
+    - link "← Back to all projects" [ref=e133] [cursor=pointer]:
+      - /url: /projects
+  - contentinfo [ref=e134]:
+    - generic [ref=e135]:
+      - paragraph [ref=e136]: Michael Herron © 2026
+      - list [ref=e137]:
+        - listitem [ref=e138]:
+          - link "GitHub" [ref=e139] [cursor=pointer]:
+            - /url: https://github.com/mh550
+        - listitem [ref=e140]:
+          - link "LinkedIn" [ref=e141] [cursor=pointer]:
+            - /url: https://linkedin.com/in/mherron734
+        - listitem [ref=e142]:
+          - link "Email" [ref=e143] [cursor=pointer]:
+            - /url: mailto:mherron734@gmail.com
+  - button "Open Next.js Dev Tools" [ref=e149] [cursor=pointer]:
+    - img [ref=e150]

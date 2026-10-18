@@ -25,7 +25,7 @@ describe('SkillsPage', () => {
     render(<SkillsPage />);
     expect(screen.getByText('Pipedream')).toBeInTheDocument();
     expect(screen.getByText('n8n')).toBeInTheDocument();
-    expect(screen.getByText('OAuth')).toBeInTheDocument();
+    expect(screen.getByText('OAuth 2.0')).toBeInTheDocument();
   });
 
   it('renders language skills', () => {

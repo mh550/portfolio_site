@@ -75,35 +75,11 @@ export default function AboutPage() {
             </p>
 
             <p>
-              I&apos;m currently an apprentice at{' '}
+              I&apos;m currently a full-stack software engineer at{' '}
               <span className="text-[var(--color-foreground)] font-medium">MAXX Potential</span>
-              , continuing to build my skills through structured mentorship and client-facing
-              project work.
-            </p>
-
-            <p>
-              I&apos;m also building projects where I&apos;m the target user. The first is a{' '}
-              <span className="text-[var(--color-accent)] font-medium">skate video classifier</span>
-              : submit a long session video, and the app automatically identifies and tracks each
-              individual skater across clips using{' '}
-              <span className="text-[var(--color-foreground)] font-medium">
-                multi-object tracking and person re-identification
-              </span>{' '}
-              — no facial recognition required. Each skater&apos;s footage gets bucketed and
-              distributed to the right person. The second is a{' '}
-              <a
-                href="https://github.com/mh550/hit-list"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                <span className="text-[var(--color-accent)] font-medium">
-                  snowboard street spot tracker
-                </span>
-              </a>{' '}
-              — a mobile-first app for logging and organizing street spots, with structured data
-              on approach speed, gear combinations, feature specs, and security risk, built for
-              the way snowboarders actually scout and plan sessions.
+              , where I diagnosed a broken QA process and rebuilt it around Linear and an
+              AI-agent workflow that automates bug filing and triage — and where I&apos;m
+              building full-stack React Native features for client products.
             </p>
           </div>
 
