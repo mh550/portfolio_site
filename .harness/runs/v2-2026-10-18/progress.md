@@ -9,6 +9,19 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:20 · M3-01 · passes
+
+- Wrote docs/plans/2026-10-18-M3-case-study-template.md (plan only, no code; 154 → 154 tests): Types (spec verbatim +
+  `extraDiagrams`, D17), Components (props, anchors, empty cases, one shared `CaseStudySection`), Page order (13 steps,
+  D16/D17), Testing (fixture in `src/__tests__/fixtures/`, test files to create/update), empty WMWS and Review.
+- Verified: plan has all six required sections; check.sh green (154); smoke all routes PASS at 1280 and 390.
+- Next (M3-04) must know: write the snapshot test `project-page-unchanged.test.tsx` *before* moving page.tsx, so the
+  "renders exactly as today" proof is real. The plan also gives M3-04 `getCaseStudyAnchors()` (for M7's link test) and
+  the D17 `role="img"` on `ProjectDiagram` — no M3 feature step named the D17 a11y change.
+- Proposed changes: M3-02 step 3 says "compiles under ts-jest"; Jest here is next/jest (SWC, no type check) — the real
+  check is `npx tsc --noEmit` / `next build`. M3-04 should list the D17 diagram a11y and the snapshot test as steps.
+- Questions for Michael: none.
+
 ### 2026-10-18 verify M1
 
 check.sh green (154 tests); smoke all routes PASS at 1280 and 390.
