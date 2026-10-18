@@ -9,6 +9,23 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M0 · verify M0
+
+check.sh green (112 tests, cached); smoke all PASS at 1280 and 390.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M0-01 | 1 | Read src/lib/data/profile.ts, index.ts (`export * from './profile'`), profile.test.ts | All 10 values match exactly; test asserts toEqual on the full object plus each key | yes |
+| M0-01 | 2 | Read content-guard.test.ts PATTERNS, listFiles, tree test; compared with the spec regexes | Walks src/ and public/ with the listed extensions, skips itself, reports file:line pattern. Covers all 11 patterns the step enumerates (the step says "12" but lists 11, as does the spec) | yes |
+| M0-01 | 3 | `npx jest src/__tests__/lib/content-guard.test.ts` | 20/20 pass: a sample per pattern (15 samples) asserted with the right pattern name, clean-sample test passes | yes |
+| M0-01 | 4 | Tree test in content-guard.test.ts; `git log -- content-guard.test.ts` | Tree test green; file has a single commit (6e45680), so nothing was loosened afterwards | yes |
+| M0-01 | 5 | `/home/mh550/projects/agent-harness/lib/check.sh` | green (112 tests) | yes |
+| M0-02 | 1 | grep order/featured in projects.ts; `npx tsc --noEmit` | orders linear 2, ghl 5, paint 6, ringcentral 7, mirrored 8, cherished 9; both mirrored and cherished featured:false; `order: number` required; tsc exit 0 | yes |
+| M0-02 | 2 | Read projects.ts getTopProjects, index.ts barrel (`export *`), data.test.ts lines 51-97 | Test asserts getTopProjects(3) slugs, (10) excludes cherished, order values unique; lib suites 55/55 pass | yes |
+| M0-02 | 3 | Read approach.ts, approach.test.ts | 5 steps in order with the right labels, lines 38-67 chars, first person; barrel re-exports; test asserts ids, labels, 20-90 length | yes |
+| M0-02 | 4 | `git diff f86ad9f..HEAD --stat` | Changes only in src/lib/data, src/__tests__ (incl. ScrollReveal.test.tsx, a test), .harness/runs, docs; no component edits; content-guard.test.ts has one commit | yes |
+| M0-02 | 5 | `/home/mh550/projects/agent-harness/lib/check.sh` | green | yes |
+
 ### 2026-10-18 18:40 · M0-02 · passes
 
 - `Project.order` (required) set per D12 on the 6 projects; `cherished` is now `featured: false` (mirrored stays
