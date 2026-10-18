@@ -157,7 +157,7 @@
         "None of the five files contains `\"use client\"`; ESLint passes; .harness/check.sh is green"
       ],
       "after": ["M3-02"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M3-04", "milestone": "M3", "kind": "build", "model": "opus",

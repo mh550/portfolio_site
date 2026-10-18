@@ -9,6 +9,21 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:10 · M3-03 · passes
+
+- New `src/components/projects/case-study/`: `CaseStudySection` (shared section + h2, `aria-labelledby`, `scroll-mt-24`),
+  `MethodSteps` (#method, `<li id>` diagnose…simplify, label as h3), `DecisionLog` (#decisions), `IterationTimeline`
+  (#iterations), `LessonList` (#lessons), `ProjectLinks` (#links). All server components, null on empty. 161 → 189 tests
+  (6 new suites in `src/__tests__/components/case-study/`).
+- Verified: tests red (module not found) then green; Opus review of the diff found 2 Important (`//host` and `/\host`
+  hrefs counted as internal; the test couldn't catch it), fixed test-first, plus Minor fixes (index keys, U+FE0E on ●/▶ for
+  iOS, the lesson arrow turns down on mobile, label/text spaces, method label as h3, stricter order/exact-text asserts).
+  ESLint + `tsc --noEmit` clean; no `"use client"`; check.sh green (189); smoke 28/28 PASS. No page mounts these yet, so there are no screenshots.
+- Next (M3-04): mount them in `ProjectDetail` in the plan's order. Write the snapshot test before touching page.tsx.
+  Differences from the plan's Components table, for M3-05 to fold in: internal = `/^\/(?![/\\])/`, not `startsWith('/')`;
+  MethodSteps labels are `<h3>` with an aria-hidden `01`…`05` prefix.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:45 · M3-02 · passes
 
 - `projects.ts` exports `Decision`, `Iteration`, `Lesson`, `ProjectLink`, `CaseStudy` (spec fields + `extraDiagrams?:
