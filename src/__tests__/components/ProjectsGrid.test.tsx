@@ -18,6 +18,29 @@ describe('ProjectsGrid', () => {
     expect(screen.getByRole('button', { name: 'Full-Stack' })).toBeInTheDocument();
   });
 
+  it('offers six filters in order, Systems and Process after AI', () => {
+    render(<ProjectsGrid />);
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'All',
+      'Integration',
+      'Full-Stack',
+      'AI',
+      'Systems',
+      'Process',
+    ]);
+  });
+
+  it('filtering by Systems on the current data shows the empty state', async () => {
+    const user = userEvent.setup();
+    render(<ProjectsGrid />);
+    await user.click(screen.getByRole('button', { name: 'Systems' }));
+    expect(screen.getByRole('button', { name: 'Systems' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('No projects in this category yet.')).toBeInTheDocument();
+    for (const p of projects) {
+      expect(screen.queryByText(p.title)).not.toBeInTheDocument();
+    }
+  });
+
   it('All filter is active by default', () => {
     render(<ProjectsGrid />);
     expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');

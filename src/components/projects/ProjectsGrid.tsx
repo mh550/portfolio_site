@@ -11,6 +11,8 @@ const FILTERS: { label: string; value: ProjectCategory | 'all' }[] = [
   { label: 'Integration', value: 'integration' },
   { label: 'Full-Stack', value: 'full-stack' },
   { label: 'AI', value: 'ai' },
+  { label: 'Systems', value: 'systems' },
+  { label: 'Process', value: 'process' },
 ];
 
 export default function ProjectsGrid() {

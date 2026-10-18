@@ -9,6 +9,20 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:45 · M3-02 · passes
+
+- `projects.ts` exports `Decision`, `Iteration`, `Lesson`, `ProjectLink`, `CaseStudy` (spec fields + `extraDiagrams?:
+  DiagramKey[]`, D17) and `Project.caseStudy?`; `ProjectCategory` gains `systems`, `process`; no project entry changed.
+  `ProjectsGrid` FILTERS gain Systems, Process after AI. 154 → 161 tests.
+- New: `src/__tests__/fixtures/case-study-project.ts` (`fixtureProject`, full caseStudy per the M3 plan, not in
+  `projects`) and `src/__tests__/lib/case-study-types.test.ts` (fixture + minimal literal, 7 `@ts-expect-error` lines
+  that make `tsc` fail if the types loosen, systems/process → []). ProjectsGrid test: six filters in order, Systems → empty state.
+- Verified: tests red then green; `npx tsc --noEmit` failed before the types (TS2305/TS2578), passes after; check.sh
+  green (161); smoke 28/28 PASS; /projects at 390: filters wrap to two rows, no horizontal scroll.
+- Next (M3-03): import `fixtureProject` for component tests. Note: the "systems returns []" assertion must change
+  when M4–M6 add a systems/process project.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:20 · M3-01 · passes
 
 - Wrote docs/plans/2026-10-18-M3-case-study-template.md (plan only, no code; 154 → 154 tests): Types (spec verbatim +

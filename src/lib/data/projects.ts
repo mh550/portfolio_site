@@ -1,4 +1,4 @@
-export type ProjectCategory = 'integration' | 'full-stack' | 'ai' | 'education';
+export type ProjectCategory = 'integration' | 'full-stack' | 'ai' | 'education' | 'systems' | 'process';
 
 /** A key that maps a project to an authored, theme-styled diagram component. */
 export type DiagramKey =
@@ -25,6 +25,51 @@ export interface CodeSnippet {
   title: string;
   language: string;
   code: string;
+}
+
+/** A recorded choice in a case study: what was chosen, over what, why, and what it cost. */
+export interface Decision {
+  id: string;
+  title: string;
+  chose: string;
+  over?: string;
+  because: string;
+  cost?: string;
+}
+
+/** One step in how a project evolved. */
+export interface Iteration {
+  when: string;
+  label: string;
+  what: string;
+  why: string;
+}
+
+/** Something that broke and the rule it left behind. */
+export interface Lesson {
+  broke: string;
+  rule: string;
+}
+
+export interface ProjectLink {
+  label: string;
+  href: string;
+  kind: 'repo' | 'live' | 'doc' | 'demo';
+}
+
+/** The case-study body (spec M3). A project with one renders the case-study page order (D16). */
+export interface CaseStudy {
+  role: string;
+  timeframe: string;
+  method: { diagnose: string; decide: string; build: string; verify: string; simplify: string };
+  decisions: Decision[];
+  iterations?: Iteration[];
+  lessons: Lesson[];
+  links: ProjectLink[];
+  /** The honest one-line "how it was built" (D10). */
+  builtWith?: string;
+  /** Diagrams rendered after the iteration timeline (D17). */
+  extraDiagrams?: DiagramKey[];
 }
 
 export interface Project {
@@ -55,6 +100,7 @@ export interface Project {
     /** Inline code/config excerpts that prove the engineering is real. */
     codeSnippets?: CodeSnippet[];
   };
+  caseStudy?: CaseStudy;
 }
 
 export const projects: Project[] = [
