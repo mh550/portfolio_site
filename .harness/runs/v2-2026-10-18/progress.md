@@ -9,6 +9,19 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:05 · M1-03 · passes
+
+- New `scripts/make-qr.mjs` (imports profile.ts per D21, writes `public/card/qr.svg` as returned and a 1024 px
+  `qr.png`; margin 2, ECC M, #0a0a0f on #ffffff; paths from `import.meta.url`), `npm run qr`, devDeps qrcode 1.5.4 +
+  @types/qrcode 1.5.6 (lock `dev: true`, `dependencies` untouched), new `src/__tests__/lib/qr.test.ts` (2). 126 → 128.
+- Verified: test failed first (ENOENT), then passed; changing siteUrl makes the SVG test fail (mutation checked);
+  `npm run qr` twice, and once from /tmp, leaves `git status` unchanged; the PNG decodes with jsQR (scratch install) to
+  `https://michael-herron.vercel.app/card?src=qr` at 1024×1024; check.sh green (128); smoke 24/24 PASS.
+- An Opus review found 0 Critical/Important; took the Minor "Node ≥ 22.18" note (script header). Left the
+  MODULE_TYPELESS warning (plan says don't add `"type": "module"`).
+- Next: M1-04 (/card) is independent; M1-05 needs M1-03 + M1-04 and can use `/card/qr.svg` now.
+- Questions: none. Proposed changes: none.
+
 ### 2026-10-18 19:45 · M1-02 · passes
 
 - New `src/lib/vcard.ts` (`buildVCard(profile)`: vCard 3.0, CRLF everywhere, RFC 6350 escaping of N/FN/TITLE/ADR, no
