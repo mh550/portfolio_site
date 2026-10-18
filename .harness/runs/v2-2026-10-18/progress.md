@@ -9,6 +9,19 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 19:45 · M1-02 · passes
+
+- New `src/lib/vcard.ts` (`buildVCard(profile)`: vCard 3.0, CRLF everywhere, RFC 6350 escaping of N/FN/TITLE/ADR, no
+  TEL, no PHOTO) and `src/app/michael-herron.vcf/route.ts` (force-static GET, `text/vcard; charset=utf-8`,
+  `inline; filename="michael-herron.vcf"`). Tests: new vcard.test.ts (9) + app/vcf-route.test.ts (5, node env). 112 → 126.
+- Verified: check.sh green (126); the build prerenders `.next-check/server/app/michael-herron.vcf.{body,meta}` with both
+  headers and CRLF bytes (od -c); `curl -si :7800/michael-herron.vcf` shows both headers, body starts BEGIN:VCARD; smoke 24/24 PASS.
+- An Opus review caught a real bug: `';'` was replaced by `'\;'` written with one backslash (a no-op in TS), and the test
+  literal had the same slip, so it passed. Fixed test-first; added a `;`-in-ADR case and a backslash-before-comma
+  ordering case. Reverting the fix makes 2 tests fail (mutation checked).
+- Next: M1-03 and M1-04 are independent. M1-04 still appends D28 *default* (no PHOTO, inline disposition, no ScrollReveal).
+- Questions: none. Proposed changes: none.
+
 ### 2026-10-18 19:05 · M1-01 · passes
 
 - New `docs/plans/2026-10-18-M1-card.md` (plan only, no code): Files, Selected work (linear-ai-workflow,

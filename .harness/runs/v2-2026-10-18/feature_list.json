@@ -51,7 +51,7 @@
         ".harness/check.sh is green (the build prerenders the route)"
       ],
       "after": ["M1-01"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M1-03", "milestone": "M1", "kind": "build", "model": "opus",
