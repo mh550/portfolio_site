@@ -171,7 +171,7 @@
         "`node .harness/smoke.mjs` is green for every /projects/<slug>; .harness/check.sh is green"
       ],
       "after": ["M3-03"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M3-05", "milestone": "M3", "kind": "review", "model": "opus",

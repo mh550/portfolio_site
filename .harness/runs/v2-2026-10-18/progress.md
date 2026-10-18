@@ -9,6 +9,26 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:45 · M3-04 · passes
+
+- New `src/components/projects/ProjectDetail.tsx` (server) holds the page body; `page.tsx` only resolves slug → `notFound()` or
+  `<ProjectDetail>` (metadata/params byte-identical). Case-study mode follows the plan's 13 steps (D16/D17), no header
+  GitHub/Live links. `getCaseStudyAnchors()` in projects.ts gates sections (no empty `space-y` gaps). D17: `ProjectDiagram`
+  wraps the diagram in `role="img"` + a per-key `LABELS` record. 189 → 219 tests (5 new suites).
+- Verified: `project-page-unchanged` snapshot of the 6 pages written *before* the refactor, passed untouched after it (sha
+  match). It was then updated once, deliberately, for D17: a script showed the only diff is 5 `role="img"` wrappers (cherished
+  has no diagram). Fixture exposed temporarily on dev, then reverted. Sonnet screenshots at 390/1280: h2 order right, all
+  10 ids, no h-scroll. Opus review: 0 Critical/Important, 4 Minor fixed (index key on extraDiagrams, Live Demo assert,
+  distinct labels, figure lookup). check.sh green (219), smoke 28/28.
+- Next (M3-05): screenshots need scrolling or the reveals stay at opacity 0 (smoke's full-page shots are blank below the
+  metrics). Fold into the plan: the case-study role line is `-mt-4 mb-6` between description and chips.
+- Proposed changes: (1) pre-existing bug: with `prefers-reduced-motion: reduce`, `ScrollReveal` renders a plain div on the
+  client but SSR emits the `motion.div` with `opacity:0`, so React logs a hydration mismatch and **the page body stays
+  invisible**. Probably every page, for every reduced-motion visitor. Worth a small feature (e.g. always render `motion.div`
+  and set `initial={false}` when reduced). (2) The harness's check summary says "6 tests"; the real count is 219 (it reads
+  the snapshot line).
+- Questions for Michael: none.
+
 ### 2026-10-18 23:10 · M3-03 · passes
 
 - New `src/components/projects/case-study/`: `CaseStudySection` (shared section + h2, `aria-labelledby`, `scroll-mt-24`),

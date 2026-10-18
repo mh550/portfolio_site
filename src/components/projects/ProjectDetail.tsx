@@ -172,8 +172,8 @@ function CaseStudyBody({ project, caseStudy }: { project: Project; caseStudy: Ca
         </ScrollReveal>
       )}
 
-      {caseStudy.extraDiagrams?.map((diagram) => (
-        <ScrollReveal key={diagram} delay={0.1}>
+      {caseStudy.extraDiagrams?.map((diagram, i) => (
+        <ScrollReveal key={`${i}-${diagram}`} delay={0.1}>
           <ProjectDiagram diagram={diagram} />
         </ScrollReveal>
       ))}

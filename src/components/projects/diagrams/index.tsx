@@ -250,13 +250,29 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'calendar-sync': 'Idempotent, event-driven mirroring from a source calendar to an availability calendar.',
 };
 
+// What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).
+const LABELS: Record<DiagramKey, string> = {
+  'ghl-jobtread':
+    'A GoHighLevel opportunity changes stage and its contact flows into JobTread, where the customer, contact, location and job are each found or created in turn; a contact is matched by phone, then email, then name, and created only when nothing matches.',
+  'linear-flow':
+    'Before: bugs lived in per-person Google Sheets with no status history, manual re-tests and duplicates. After: each bug is filed in Linear automatically, deduplicated, triaged with its root cause, then implemented by an agent over MCP.',
+  'paint-hierarchy':
+    'A paint job breaks into areas or rooms, each area into features such as paint or carpentry, and each feature into individually priced tasks.',
+  ringcentral:
+    'A RingCentral call or text is matched by phone number to one or more JobTread contacts and logged to each, building one thread with a summary, transcript and action items.',
+  'calendar-sync':
+    'Events on a source Google Calendar pass through an idempotent, event-driven sync engine to a mirror calendar that blocks the same time as unavailable.',
+};
+
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {
   const Component = DIAGRAMS[diagram];
   if (!Component) return null;
 
   return (
     <figure className="rounded-2xl border border-white/8 bg-[var(--color-surface)]/30 p-5 sm:p-6">
-      <Component />
+      <div role="img" aria-label={LABELS[diagram]}>
+        <Component />
+      </div>
       <figcaption className="mt-4 text-center text-xs text-[var(--color-muted)]">
         {CAPTIONS[diagram]}
       </figcaption>

@@ -66,10 +66,11 @@ describe('ProjectDetail with a caseStudy', () => {
 
   it('puts the architecture diagram after The Problem and before The Method (D17)', () => {
     const { container } = render(<ProjectDetail project={fixtureProject} />);
-    const figures = container.querySelectorAll('figure');
     const problem = screen.getByRole('heading', { level: 2, name: 'The Problem' });
-    const architecture = figures[0];
-    expect(within(architecture as HTMLElement).getByText(/waterfall match that prevents duplicates/)).toBeInTheDocument();
+    const architecture = Array.from(container.querySelectorAll('figure')).find((f) =>
+      f.textContent?.includes('waterfall match that prevents duplicates'),
+    )!;
+    expect(architecture).toBeDefined();
     expect(precedes(problem, architecture)).toBe(true);
     expect(precedes(architecture, container.querySelector('#method')!)).toBe(true);
   });
@@ -110,8 +111,13 @@ describe('ProjectDetail with a caseStudy', () => {
   });
 
   it('has no GitHub / Live Demo header links: ProjectLinks is the one link list', () => {
-    render(<ProjectDetail project={{ ...fixtureProject, githubUrl: 'https://example.com/gh' }} />);
+    render(
+      <ProjectDetail
+        project={{ ...fixtureProject, githubUrl: 'https://example.com/gh', demoUrl: 'https://example.com/demo-site' }}
+      />,
+    );
     expect(screen.queryByRole('link', { name: /GitHub/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /Live Demo/ })).toBeNull();
   });
 });
 
