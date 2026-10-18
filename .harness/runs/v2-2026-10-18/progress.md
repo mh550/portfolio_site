@@ -9,6 +9,51 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M1
+
+check.sh green (154 tests); smoke all routes PASS at 1280 and 390.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M1-01 | 1 | `grep '^## '` on docs/plans/2026-10-18-M1-card.md; read Layout at 390 | Sections Layout at 390, Chrome, vCard, QR, Tests, What Michael will see, Review all present; 112 px, 44 px, 844 mentioned | yes |
+| M1-01 | 2 | grep the plan for the slugs and "change automatically" | Selected-work section names the three slugs; line 36 says they change automatically as case studies merge | yes |
+| M1-01 | 3 | `git diff --stat 18a6003~1 18a6003` | docs/plans/ file plus .harness/runs files only, no code | yes |
+| M1-01 | 4 | check.sh | green (cached, 154 tests) | yes |
+| M1-02 | 1 | read src/lib/vcard.ts; ran vcard.test.ts | exports buildVCard; "builds the exact vCard for the real profile" and the CRLF test pass; curl output shows the exact lines in order | yes |
+| M1-02 | 2 | vcard.test.ts escaping cases | "escapes comma, semicolon and newline in N and FN" and "doubles a backslash in the location" pass | yes |
+| M1-02 | 3 | vcard.test.ts "has no phone line (D5)" | passes; curl body has no TEL | yes |
+| M1-02 | 4 | read route.ts; ran vcf-route.test.ts | force-static and GET present; 5 tests assert 200, both headers, body equals buildVCard | yes |
+| M1-02 | 5 | `curl -si localhost:7800/michael-herron.vcf` | 200, content-type text/vcard; charset=utf-8, content-disposition inline; filename="michael-herron.vcf", body starts BEGIN:VCARD | yes |
+| M1-02 | 6 | check.sh | green | yes |
+| M1-03 | 1 | read package.json and lock | qrcode and @types/qrcode only in devDependencies (dependencies has none); "qr" script present; lock mentions qrcode | yes |
+| M1-03 | 2 | read scripts/make-qr.mjs; `npm run qr` twice, `git status --short`, xxd of PNG | imports profile.ts, margin 2, M, colours, width 1024; exit 0 both times; status clean; IHDR 0x400 x 0x400 | yes |
+| M1-03 | 3 | qr.test.ts | "committed qr.svg encodes ${profile.siteUrl}/card?src=qr" and "qr.png is 1024 × 1024" pass | yes |
+| M1-03 | 4 | `git ls-files public/card` | qr.png, qr.svg | yes |
+| M1-03 | 5 | check.sh | green | yes |
+| M1-04 | 1 | read SiteChrome.tsx; SiteChrome.test.tsx | client component; hides chrome on /card and /card/*, no footer on /; no ConditionalFooter file; tests cover /card, /card/qr, /, /about (plus /cardigan) | yes |
+| M1-04 | 2 | read src/app/card/page.tsx | 112 px next/image, h1, positioning, subline, Save contact, LinkedIn/Email/GitHub, h2 Selected work from getTopProjects(3), Full portfolio, Show QR, min-h-[44px] | yes |
+| M1-04 | 3 | read metadata; card.test.tsx "metadata title and description" | title, description, openGraph.images and twitter.images with headshot, card 'summary' | yes |
+| M1-04 | 4 | card.test.tsx (13 tests pass) | assert name, positioning, hrefs, 3 project links equal getTopProjects(3) in order, no nav | yes |
+| M1-04 | 5 | smoke-routes.txt; smoke on /card; `curl /card | grep -c '<nav'` | file lists /card and /card/qr; PASS at 1280 and 390; grep count 0 | yes |
+| M1-04 | 6 | check.sh | green | yes |
+| M1-05 | 1 | read src/app/card/qr/page.tsx | bg-white text-black min-h-screen, img /card/qr.svg, alt names michael-herron.vercel.app/card, width min(80vw,420px), name, positioning, Back to /card, robots index false | yes |
+| M1-05 | 2 | card-qr.test.tsx (7 tests pass) | img src/alt, back href, text, robots, no nav asserted | yes |
+| M1-05 | 3 | smoke on /card /card/qr | PASS both at both widths; routes file has both | yes |
+| M1-05 | 4 | read docs/conference-kit.md; grep for phone-like numbers | 40 lines, three sections, content as required, no phone number; content-guard test in suite passes | yes |
+| M1-05 | 5 | check.sh | green | yes |
+| M1-06 | 1 | `ls -l docs/screenshots/v2` | M1-card-390 75 KB, M1-card-1280 99 KB, M1-card-qr-390 10 KB, all under 400 KB | yes |
+| M1-06 | 2 | Playwright at 390x844 against :7800 | h1 bottom 200, Save contact bottom 384, both ≤ 844; same numbers in the plan | yes |
+| M1-06 | 3 | Playwright heights at 390 | Save 48, LinkedIn 44, Email 44, GitHub 44, Full portfolio 44, Show QR 44; listed in the plan | yes |
+| M1-06 | 4 | read plan table | three rows (page, on screen, anything wrong) | yes |
+| M1-06 | 5 | Playwright at 1280 | main x 380, width 520, centered | yes |
+| M1-06 | 6 | check.sh | green | yes |
+| M1-07 | 1 | read plan ## Review | review of the diff with Critical/Important/Minor items one line each | yes |
+| M1-07 | 2 | read Review; ran card/card-qr/vcard tests | no Critical/Important; Minor fixes name their tests and those pass | yes |
+| M1-07 | 3 | read Review; Playwright heading list, nav count | h1 then h2 only; focus outline test passes; Review records the checks and fixes | yes |
+| M1-07 | 4 | `grep -rn 'mherron734\|Systems & Process Engineer' src --include=*.tsx` excluding tests | no hits | yes |
+| M1-07 | 5 | grep CLAUDE.md and plan | routes table has /card, /card/qr, /michael-herron.vcf; plan line 353 "Ready to merge: yes" | yes |
+| M1-07 | 6 | smoke all routes; check.sh | all PASS; green | yes |
+
 ### 2026-10-18 21:55 · M1-07 · passes
 
 - Opus review of `$HARNESS_SCRATCH/M1.diff` (2473db6..HEAD, 1395 lines): 0 Critical, 0 Important, 13 Minor. Fixed 8
