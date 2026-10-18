@@ -9,6 +9,35 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 · verify M3
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M3-01 | 1 | Read docs/plans/2026-10-18-M3-case-study-template.md headings | Has Types (spec interfaces + extraDiagrams, D17), Components, Page order, Testing (fixture, ProjectDetail, ghl unchanged proof), What Michael will see (table), Review (now filled by M3-05) | yes |
+| M3-01 | 2 | Read plan Files table and Testing section | Lists fixture, ProjectDetail, case-study component tests, ProjectsGrid, snapshot test; ProjectsGrid test exists and was updated | yes |
+| M3-01 | 3 | `git show --stat c3056df` | Only docs/plans/ and .harness/runs/ files touched | yes |
+| M3-01 | 4 | check.sh; `npx jest --silent`, `tsc --noEmit`, eslint; `node .harness/smoke.mjs` | check green; 228/228 tests, 34 suites; tsc ok; eslint clean; smoke no non-PASS lines | yes |
+| M3-02 | 1 | Read projects.ts diff vs c3056df; `npx tsc --noEmit` | Decision/Iteration/Lesson/ProjectLink/CaseStudy match spec + extraDiagrams; Project.caseStudy?; categories include systems, process; tsc passes; diff is additions only (no project entry changed) | yes |
+| M3-02 | 2 | Read ProjectsGrid.tsx FILTERS and ProjectsGrid.test.tsx lines 21-38 | FILTERS All, Integration, Full-Stack, AI, Systems, Process; test asserts that order, Systems click shows 'No projects in this category yet.' | yes |
+| M3-02 | 3 | Read src/__tests__/lib/case-study-types.test.ts | Full-caseStudy fixture and no-caseStudy literal, @ts-expect-error checks (tsc ok); jest passes | yes |
+| M3-02 | 4 | check.sh / jest / tsc / eslint | green, 228 pass | yes |
+| M3-03 | 1 | Read MethodSteps.test.tsx tests; ls case-study dir | 'ordered list with the five step ids in order' and 'label above the project's text' tests pass | yes |
+| M3-03 | 2 | Read DecisionLog.test.tsx | Tests: #decisions section, every field, omits over/cost when absent, null on empty | yes |
+| M3-03 | 3 | Read IterationTimeline.test.tsx and LessonList.test.tsx | Both assert section ids, row/pair content in order, empty (and undefined for iterations) renders nothing | yes |
+| M3-03 | 4 | Read ProjectLinks.tsx and ProjectLinks.test.tsx | it.each over repo/live/doc/demo checks label, aria-hidden glyph, target=_blank rel; internal '/' uses next/link without target; text glyphs, no new dependency | yes |
+| M3-03 | 5 | `grep -l 'use client' case-study/*`; eslint | No matches; eslint clean | yes |
+| M3-04 | 1 | git diff of src/app/projects/[slug]/page.tsx; read ProjectDetail.tsx usage | page.tsx shrank by 144 lines to slug resolve + notFound + ProjectDetail; ProjectDetail takes {project} | yes |
+| M3-04 | 2 | Read ProjectDetail.test.tsx order tests (lines 25-135) | Tests assert header, Problem, diagram, method, decisions, iterations, extraDiagrams, lessons, Outcome, code/media, links, builtWith order; no approach/challenges | yes |
+| M3-04 | 3 | Read ProjectDetail.test.tsx lines 1-60 | h2 order, ids diagnose..simplify/decisions/iterations/lessons, builtWith, absence of 'The Approach' and 'Challenges' asserted; passes | yes |
+| M3-04 | 4 | Read ProjectDetail.test.tsx lines 145-160 | ghl h2s equal ['The Problem','The Approach','Challenges','Outcome','In the Code']; no case-study ids; project-page-unchanged snapshots (6) pass | yes |
+| M3-04 | 5 | Read project-metadata.test.ts | Asserts title 'GoHighLevel ↔ JobTread Integration — Michael Herron' and description = shortDescription; passes | yes |
+| M3-04 | 6 | `node .harness/smoke.mjs`; check.sh | All routes incl. every /projects/<slug> PASS at 1280 and 390; check green | yes |
+| M3-05 | 1 | ls /tmp/harness/.../M3.diff; read plan ## Review | M3.diff exists (29 KB); Review table has 7 Minor, 0 Critical/Important, all fixed | yes |
+| M3-05 | 2 | ls -la docs/screenshots/v2/M3-*; read 'What Michael will see' | 390 = 286 KB, 1280 = 318 KB (<400 KB); table describes contents and 'nothing added or missing' | yes |
+| M3-05 | 3 | Read ProjectLinks.tsx, CaseStudySection usage, plan Review | Shared CaseStudySection and DiagramReveal; vercel-react-best-practices consulted (plan line 247) | yes |
+| M3-05 | 4 | Read plan Components section; grep CLAUDE.md | Components marked updated to shipped props; CLAUDE.md names case-study/ and ProjectDetail | yes |
+| M3-05 | 5 | check.sh, jest, smoke | green; 228 pass; smoke all PASS | yes |
+
 ### 2026-10-18 23:59 · M3-05 · passes
 
 - Review of `git diff 78010ea..HEAD -- src ':!src/__tests__'` ($HARNESS_SCRATCH/M3.diff, Opus): 0 Critical/Important, 7 Minor, all
