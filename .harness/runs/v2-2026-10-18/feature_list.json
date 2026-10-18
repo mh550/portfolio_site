@@ -12,7 +12,7 @@
         "The guard is green on the current tree with no content edits (if a file had to change, the commit message names it and the guard itself was not loosened)",
         ".harness/check.sh is green"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M0-02", "milestone": "M0", "kind": "build", "model": "opus",

@@ -9,6 +9,23 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 18:24 · M0-01 · passes
+
+- Added `src/lib/data/profile.ts` (typed `Profile`, values from brand.md "Contact facts"), re-exported from
+  `src/lib/data/index.ts`; `src/__tests__/lib/profile.test.ts` (11 tests); `src/__tests__/lib/content-guard.test.ts`
+  (20 tests: 15 in-memory samples, a clean near-miss sample, a file:line test, a sample-coverage test, a walk test,
+  and the tree scan). Jest 70 → 101 tests, 12 → 14 suites. No content files changed: the tree was already clean.
+- Verified: `check.sh` green (101 tests); smoke PASS on all 18 route×width; I planted `TODO` in `src/zz-plant.ts`,
+  a Spotify playlist URL in `public/zz-plant.svg` and a symlinked `public/zz-link.MD`, and the guard failed
+  naming `src/zz-plant.ts:2 TODO`, `public/zz-plant.svg:1 Spotify playlist` and `public/zz-link.MD:1 TODO`
+  (all planted files removed). An Opus review checked the regexes against the spec character by character and
+  found no problems. I took two of its minor suggestions: the walk follows symlinks, and extensions are compared
+  in lower case.
+- Next session: the guard's patterns and samples live only in the test file, which skips itself. Keep
+  `TODO`, `[X]` and `lorem ipsum` out of every other file in `src/` and `public/`, including test strings.
+- Proposed change: the M0-01 steps say "12 spec M0 patterns" and "12 samples", but the spec (and the step's own
+  list) has **11** patterns. The guard has the spec's 11 patterns exactly, plus 15 samples that cover all 11.
+
 ## 2026-10-18 · Initializer (Fable)
 
 ### Feature counts
