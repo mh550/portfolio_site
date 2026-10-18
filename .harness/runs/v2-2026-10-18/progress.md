@@ -9,6 +9,22 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 19:05 · M1-01 · passes
+
+- New `docs/plans/2026-10-18-M1-card.md` (plan only, no code): Files, Selected work (linear-ai-workflow,
+  ghl-jobtread-integration, paint-estimator today; they change by themselves as case studies merge), Layout at 390
+  (element table with estimated bottoms, fold 844), Choices, Chrome (SiteChrome code per D15), vCard (exact CRLF output,
+  escaping rules, the test fixture as both file text and TS literals), QR, Tests (6 files, ~30 named cases), an empty
+  What Michael will see table, and an empty Review section. Tests 112 → 112.
+- Verified: I installed qrcode 1.5.4 in scratch and checked the facts the plan relies on: the code is 33 modules, the
+  PNG is exactly 1024², two runs give byte-identical PNGs, and the SVG trips no content-guard pattern. Node 24 imports
+  profile.ts from .mjs, printing only a MODULE_TYPELESS warning. check.sh is green (112), smoke is all PASS.
+- An Opus review found 0 Critical and 2 Important issues (TS-literal backslashes in the escape test, next/image
+  rewriting `src` in Jest), both now fixed in the plan, plus 6 Minor, all applied.
+- Next session (M1-02/03/04 are independent): follow the plan. M1-04 appends **D28 *default*** to the spec (no
+  ScrollReveal on /card, no vCard PHOTO, inline disposition) and adds `metadataBase` (D24).
+- Proposed change: none.
+
 ### 2026-10-18 verify M0 · verify M0
 
 check.sh green (112 tests, cached); smoke all PASS at 1280 and 390.
