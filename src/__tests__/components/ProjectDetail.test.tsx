@@ -3,7 +3,7 @@ import ProjectDetail from '@/components/projects/ProjectDetail';
 import { getProjectBySlug, getCaseStudyAnchors, type Project } from '@/lib/data';
 import { fixtureProject } from '../fixtures/case-study-project';
 
-const CASE_STUDY_IDS = ['diagnose', 'decide', 'build', 'verify', 'simplify', 'method', 'decisions', 'iterations', 'lessons', 'links'];
+const CASE_STUDY_IDS = ['problem', 'outcome', 'diagnose', 'decide', 'build', 'verify', 'simplify', 'method', 'decisions', 'iterations', 'lessons', 'links'];
 
 const h2Texts = (container: HTMLElement) =>
   Array.from(container.querySelectorAll('h2')).map((h) => h.textContent);
@@ -108,6 +108,28 @@ describe('ProjectDetail with a caseStudy', () => {
     expect(screen.queryByText('How it was built')).toBeNull();
     expect(container.querySelector('#iterations')).toBeNull();
     expect(container.textContent).not.toContain('mirroring from a source calendar');
+  });
+
+  it('makes The Problem and Outcome labelled sections like the other case-study blocks', () => {
+    const { container } = render(<ProjectDetail project={fixtureProject} />);
+    for (const [id, name] of [['problem', 'The Problem'], ['outcome', 'Outcome']]) {
+      const section = container.querySelector(`section#${id}`)!;
+      expect(section).not.toBeNull();
+      expect(screen.getByRole('region', { name })).toBe(section);
+    }
+  });
+
+  it('leaves no empty wrapper behind when decisions, lessons and links are empty', () => {
+    const sparse: Project = {
+      ...fixtureProject,
+      caseStudy: { ...fixtureProject.caseStudy!, decisions: [], lessons: [], links: [] },
+    };
+    const { container } = render(<ProjectDetail project={sparse} />);
+    for (const id of ['decisions', 'lessons', 'links']) expect(container.querySelector(`#${id}`)).toBeNull();
+    const body = container.querySelector('#problem')!.closest('.space-y-12')!;
+    // problem, architecture diagram, method, iterations, extra diagram, outcome, code, builtWith
+    expect(body.children).toHaveLength(8);
+    for (const child of Array.from(body.children)) expect(child).not.toBeEmptyDOMElement();
   });
 
   it('has no GitHub / Live Demo header links: ProjectLinks is the one link list', () => {

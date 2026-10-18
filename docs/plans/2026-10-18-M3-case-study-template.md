@@ -51,26 +51,52 @@ export interface CaseStudy {
 
 ## Components
 
-All in `src/components/projects/case-study/`, all server components (no `"use client"`), no new dependencies,
-Tailwind classes in the existing style (`text-[var(--color-muted)]`, `border-white/8`, `bg-[var(--color-surface)]`).
-Copy that is not data (headings, "Chose … over … because …", "Cost:", "What broke", "The rule") is fixed template
-text, the spec's own wording.
+*Updated by M3-05 to match the shipped code exactly; M4–M6 author data against this without reading the code.*
 
-**`CaseStudySection({ id, heading, children })`** — the one shared wrapper (M3-05 checks there is no copy-pasted
-section markup): `<section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-24">` with
-`<h2 id={`${id}-heading`} className="text-2xl font-bold mb-4">{heading}</h2>`. `scroll-mt-24` keeps an anchored
-heading below the fixed 64 px Navbar.
+All in `src/components/projects/case-study/`, all server components (no `"use client"`), no new dependencies.
+Every component takes exactly one prop, a slice of `project.caseStudy`; there are no optional or styling props.
+Copy that is not data (headings, "Chose … over … because …", "Cost:", "What broke", "The rule", "How it was
+built") is fixed template text. The template adds **no punctuation**: write every data string as the sentence or
+fragment it will be read as (see the authoring rules below the table).
 
-| Component | Props | Renders | Anchors | Empty case |
+**`CaseStudySection({ id, heading, children })`** — the one shared wrapper; every case-study block, and The Problem
+and Outcome in case-study mode, renders through it (no copy-pasted section markup):
+`<section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-24">` with
+`<h2 id={`${id}-heading`} className={sectionHeadingClass}>`. `sectionHeadingClass` (`'text-2xl font-bold mb-4'`)
+is exported from the same file and is the class of every h2 on a project page, case study or not.
+`scroll-mt-24` keeps an anchored heading below the fixed 64 px Navbar. Each section is a landmark `region` named by
+its heading.
+
+| Component | Props (exact) | Renders | Anchors | Empty case |
 |---|---|---|---|---|
-| `MethodSteps` | `{ method: CaseStudy['method'] }` | `CaseStudySection id="method" heading="The Method"`, then an `<ol>` of the five `methodSteps` (from `approach.ts`, in its order): label (mono, accent) then `method[step.id]` | `<li id="diagnose">` … `<li id="simplify">` (each `scroll-mt-24`); section `#method` | none: all five strings are required by the type |
-| `DecisionLog` | `{ decisions: Decision[] }` | `CaseStudySection id="decisions" heading="Key Decisions"`, a `<ul>`; per decision: the `id` as a chip (mono, small, bordered), `title` as `<h3>`, `Chose {chose} over {over} because {because}` — the `over {over}` clause omitted when `over` is absent (`Chose {chose} because {because}`), and `Cost: {cost}` only when `cost` is set | `#decisions` | `[]` → `null` |
-| `IterationTimeline` | `{ iterations?: Iteration[] }` | `CaseStudySection id="iterations" heading="How It Evolved"`, an `<ol>`; per row `when · label` (mono eyebrow), then `what`, then `why` (muted) | `#iterations` | `undefined` or `[]` → `null` |
-| `LessonList` | `{ lessons: Lesson[] }` | `CaseStudySection id="lessons" heading="What Broke"`, a `<ul>`; per lesson a "What broke" label + `broke`, an aria-hidden `→`, a "The rule" label + `rule` | `#lessons` | `[]` → `null` |
-| `ProjectLinks` | `{ links: ProjectLink[] }` | `CaseStudySection id="links" heading="Links"`, a `<ul>`; per link an aria-hidden glyph for `kind` (text: repo `</>`, live `●`, doc `¶`, demo `▶`) and the visible `label`. `href` starting with `/` → `next/link`, no target. Otherwise `<a target="_blank" rel="noopener noreferrer">` plus `<span className="sr-only"> (opens in new tab)</span>` (as on `/card`). Each link `min-h-[44px]` inline-flex | `#links` | `[]` → `null` |
+| `MethodSteps` | `{ method: CaseStudy['method'] }` | `CaseStudySection id="method" heading="The Method"`, an `<ol>` of the five `methodSteps` from `approach.ts`, in that order. Per step, an `<h3>` (mono, accent) with an aria-hidden `01 `…`05 ` prefix and the step's `label`, then `<p>` `method[step.id]` (muted) | `<li id="diagnose">`, `decide`, `build`, `verify`, `simplify` (each `scroll-mt-24`); section `#method` | none: the type requires all five strings |
+| `DecisionLog` | `{ decisions: Decision[] }` | `CaseStudySection id="decisions" heading="Key Decisions"`, a `<ul>` of cards (key `d.id`). Per decision: `id` as a mono chip, `title` as `<h3>`, then `<p>` "Chose {chose} over {over} because {because}" (the " over {over}" part only when `over` is set), then `<p>` "Cost: {cost}" only when `cost` is set | `#decisions` | `[]` → `null` |
+| `IterationTimeline` | `{ iterations?: Iteration[] }` | `CaseStudySection id="iterations" heading="How It Evolved"`, an `<ol>` with a left rule. Per row: "{when} · {label}" (mono, accent eyebrow), `what` (`<p>`), `why` (`<p>`, muted, smaller) | `#iterations` | `undefined` or `[]` → `null` |
+| `LessonList` | `{ lessons: Lesson[] }` | `CaseStudySection id="lessons" heading="What Broke"`, a `<ul>` of cards: "What broke" label + `broke` (muted), an aria-hidden `→` (points down on mobile, right from `sm`), "The rule" label (accent) + `rule`. Three columns from `sm`, stacked below | `#lessons` | `[]` → `null` |
+| `ProjectLinks` | `{ links: ProjectLink[] }` | `CaseStudySection id="links" heading="Links"`, a wrapping `<ul>` of 44 px-tall bordered pills: an aria-hidden glyph for `kind` (repo `</>`, live `●`, doc `¶`, demo `▶`; ● and ▶ carry U+FE0E so iOS keeps them as text), then `label`. Three href shapes: a site path (one leading `/`, matched by `/^\/(?![/\\])/`, so `//host` and `/\host` are *not* site paths) → `next/link`, same tab; `#…`, `mailto:`, `tel:` → plain `<a>`, same tab; anything else → `<a target="_blank" rel="noopener noreferrer">` plus sr-only " (opens in new tab)" | `#links` | `[]` → `null` |
 
-The `builtWith` note is not a component: `ProjectDetail` renders it as `<p>` with a mono "How it was built" label
-and the sentence (no heading), only when set.
+`ProjectDetail` itself (`src/components/projects/ProjectDetail.tsx`) owns the rest of the case-study page:
+
+- **Header role line**: `{role} · {timeframe}` (mono, muted) between the description and the tech chips.
+- **The Problem / Outcome**: `detail.problem` and `detail.outcome` in `CaseStudySection`s with ids `problem` and
+  `outcome` (classic pages keep their bare h2s; the snapshot pins them).
+- **Diagrams**: `detail.architectureDiagram` after The Problem, and each of `caseStudy.extraDiagrams` after
+  How It Evolved. A new `DiagramKey` needs an entry in `DIAGRAMS`, `CAPTIONS` and `LABELS` in
+  `src/components/projects/diagrams/index.tsx` (the `Record` types force all three).
+- **builtWith**: a `<p>` with a mono, accent "How it was built" label and the sentence, no heading, only when set.
+
+**Authoring rules for M4–M6** (`src/__tests__/lib/case-study-data.test.ts` checks the starred ones for every
+project with a `caseStudy`):
+
+- `decisions[].because` ends the sentence, so it carries the full stop: "Chose Supabase over Airtable because it
+  keeps state in SQL." `chose`, `over` and `because` read as one sentence after "Chose".
+- `decisions[].id` is unique within the project* (it is the React key and the visible chip, e.g. `D1`).
+- `iterations[].when` is a short date-ish eyebrow ("Week 1", "Mar 2026"); `label` a two- or three-word name.
+- `lessons[].broke` and `.rule` are full sentences with their own full stops.
+- `links[].href` is a site path, `https://…`, `#…` or `mailto:`*. If the project sets `githubUrl` or `demoUrl`,
+  the same URL must also be in `caseStudy.links`*: a case study does not render the header GitHub/Live links.
+- `detail.approach` and `detail.challenges` stay required but are not rendered (D16): one sentence each.
+- Copy follows `docs/notes/brand.md`; the content guard runs over the data file.
 
 ## Page order
 
@@ -86,14 +112,14 @@ In the Code → A Closer Look → back footer. No class, text or order change.
 1. Header: back link, company eyebrow, h1 title, shortDescription, a `{role} · {timeframe}` line (mono, muted),
    tech chips. No GitHub/Live links here: ProjectLinks (step 12) is the one link list on a case study.
 2. `MetricStrip` (renders nothing without metrics), then the divider.
-3. h2 **The Problem** — `detail.problem`.
+3. h2 **The Problem** — `detail.problem` (section `#problem`).
 4. `detail.architectureDiagram` (D17: after Problem, not after Approach), when set.
 5. `MethodSteps` (h2 The Method).
 6. `DecisionLog` (h2 Key Decisions).
 7. `IterationTimeline` (h2 How It Evolved), when iterations exist.
 8. `caseStudy.extraDiagrams`, each a `ProjectDiagram`, in array order (D17).
 9. `LessonList` (h2 What Broke).
-10. h2 **Outcome** — `detail.outcome`.
+10. h2 **Outcome** — `detail.outcome` (section `#outcome`).
 11. h2 **In the Code** (`detail.codeSnippets`) then h2 **A Closer Look** (`detail.media`), each when present.
 12. `ProjectLinks` (h2 Links).
 13. The `builtWith` note.
@@ -104,8 +130,8 @@ So a full case study's h2 order is: The Problem, The Method, Key Decisions, How 
 In the Code, A Closer Look, Links (the last three only when their data exists).
 
 **`getCaseStudyAnchors(project: Project): string[]`** (M3-04, `projects.ts`, barrel-exported): `[]` without a
-case study; otherwise `diagnose, decide, build, verify, simplify, method, decisions` (if any), `iterations` (if
-any), `lessons` (if any), `links` (if any). M7's link test uses it instead of re-deriving the rules; the
+case study; otherwise `problem, diagnose, decide, build, verify, simplify, method`, `decisions` (if any),
+`iterations` (if any), `lessons` (if any), `outcome`, `links` (if any). (`problem` and `outcome` added by M3-05.) M7's link test uses it instead of re-deriving the rules; the
 `ProjectDetail` test asserts every returned id exists in the rendered DOM.
 
 **Diagram accessibility (D17, M3-04):** `ProjectDiagram` wraps `<Component />` in
@@ -172,9 +198,56 @@ Run `npx tsc --noEmit` in M3-02 and see it fail on a deliberately wrong literal 
 
 ## What Michael will see
 
+No real project has a `caseStudy` yet, so M3 must leave every project page as it was. The screenshots are of
+`/projects/ghl-jobtread-integration` on the dev server, full page, taken after scrolling so every reveal had run
+(0 elements in `<main>` below opacity 1). No console or page errors, no horizontal scroll at 390.
+
 | Page | What is on screen | Anything wrong |
 |---|---|---|
-| | | |
+| `docs/screenshots/v2/M3-ghl-jobtread-integration-390.png` (286 KB) | Hamburger navbar; "← Projects" back link; "BUILDER CLARITY" eyebrow; h1 "GoHighLevel ↔ JobTread Integration"; description; six tech chips on two rows; metric strip stacked (2 days → ~6 hrs, Bidirectional, 0); divider; The Problem; The Approach; the architecture diagram (GoHighLevel and JobTread panels stacked, waterfall chips wrapped to two rows, caption); Challenges; Outcome; In the Code with one JavaScript block; "← Back to all projects"; footer | Nothing added or missing versus before M3. The code block scrolls sideways inside itself at 390 (its `overflow-x-auto`, unchanged since before M3). The round "N" at the left edge is the Next dev indicator, not on the live site |
+| `docs/screenshots/v2/M3-ghl-jobtread-integration-1280.png` (318 KB) | Same content: full navbar, metric strip in three columns, the diagram's two panels side by side with "on stage change →" between them, waterfall strip phone → email → name → create on one row | Nothing added or missing versus before M3 |
+
+"Nothing added or missing" rests on the DOM, not on eyeballing: `project-page-unchanged.test.tsx` snapshotted all
+six pages before the M3-04 refactor and passed untouched after it; the M3-05 review compared the snapshot from
+before and after a4fcd74 and found the only difference is D17's `<div role="img" aria-label>` around each diagram,
+which has no class and no visual effect. M3-05's refactor left the snapshot passing untouched again. The h2s in the
+DOM are exactly The Problem, The Approach, Challenges, Outcome, In the Code, and none of the case-study ids exist.
+No GitHub/Live links appear because this project has neither URL (as before).
+
+Visible elsewhere: `/projects` now offers Systems and Process filters that show the empty state until M4–M6 add
+projects in those categories.
 
 ## Review
 
+M3-05, 2026-10-18. Opus review of `git diff 78010ea..HEAD -- src ':!src/__tests__'` (772 lines, 11 files, written
+to `$HARNESS_SCRATCH/M3.diff`). **0 Critical, 0 Important, 7 Minor; all 7 fixed in M3-05**, test-first where they
+change behaviour.
+
+What the reviewer verified holds: the six classic pages differ from before M3 only by the D17 wrapper; the
+case-study branch follows the 13 steps; approach/challenges are not rendered; the `anchors.has(...)` gates are
+needed (an empty `ScrollReveal` would still take a `space-y-12` margin); no `&&` on numbers; "Chose … over …
+because" spacing is right; the internal-link regex rejects `//host` and `/\host`; case-study ids don't clash with
+any other id in `src/`.
+
+| # | Severity | Where | Finding | Fix |
+|---|---|---|---|---|
+| 1 | Minor | `ProjectDetail.tsx` ProseSection | In case-study mode The Problem and Outcome were bare h2s, not labelled `region`s like every other block; the h2 class was copied four times | `ProseSection` takes an optional `id` and then renders `CaseStudySection` (`#problem`, `#outcome`, added to `getCaseStudyAnchors`); classic pages pass no id (snapshot untouched). `sectionHeadingClass` exported from `CaseStudySection` and used for every h2. Tests: regions named The Problem / Outcome; anchors test updated |
+| 2 | Minor | `ProjectDetail.tsx` header | A case study drops `githubUrl`/`demoUrl` silently; an M4–M6 author could lose a link | New `src/__tests__/lib/case-study-data.test.ts`: for every project with a `caseStudy`, both URLs (when set) must be in `caseStudy.links`; it also checks href shapes and unique decision ids, with fixture-based tests that it catches each mistake |
+| 3 | Minor | `ProjectLinks.tsx` | `#anchor` and `mailto:` links got `target="_blank"` and "(opens in new tab)" | `#…`, `mailto:`, `tel:` render a plain same-tab `<a>`; three new tests |
+| 4 | Minor | `ProjectDetail.tsx` | The `ScrollReveal delay=0.1` + `ProjectDiagram` block was written three times | `DiagramReveal({ diagram, className? })`; the classic branch passes `mt-6` so its DOM is unchanged |
+| 5 | Minor | `ProjectDetail.tsx` role line | `-mt-4 mb-6` only cancels the description's `mb-8`; someone might "fix" it | Comment explains it (the classic page's spacing is pinned) |
+| 6 | Minor | `IterationTimeline.tsx` | Key `${when}-${label}` collides on two rows with the same when and label | Key `${i}-${when}`; duplicate-key test |
+| 7 | Minor | `ProjectDetail.test.tsx` | No page-level test of empty decisions/lessons/links | Test: those ids absent and the body has exactly 8 non-empty children |
+
+**Simplification pass.** One shared `CaseStudySection` (all five components plus Problem/Outcome); one heading
+class; one `DiagramReveal`; `CodeAndMedia` shared by both branches. No component has an unused prop (each takes
+one data slice). The classic and case-study branches stay separate bodies on purpose: merging them would change
+the pinned classic DOM.
+
+**`vercel-react-best-practices`.** Consulted; the applicable rules hold: no client boundary added (all server
+components; `ScrollReveal` is the only client component and receives only children), `rendering-conditional-render`
+(no `&&` on a number; `metrics && metrics.length > 0`), static lookup tables hoisted to module scope (`GLYPHS`,
+`LABELS`, `sections`), no waterfalls (no data fetching; `params` awaited once). `bundle-barrel-imports` does not
+apply: `@/lib/data` is a local barrel of server-only data modules, not a large library. Nothing else to fix.
+
+**Ready for M4–M6.**

@@ -8,8 +8,8 @@ export default function IterationTimeline({ iterations }: { iterations?: Iterati
   return (
     <CaseStudySection id="iterations" heading="How It Evolved">
       <ol className="space-y-6 border-l border-white/10 pl-5">
-        {iterations.map((it) => (
-          <li key={`${it.when}-${it.label}`}>
+        {iterations.map((it, i) => (
+          <li key={`${i}-${it.when}`}>
             <p className="font-mono text-xs tracking-wide text-[var(--color-accent)] mb-1">
               {it.when} · {it.label}
             </p>

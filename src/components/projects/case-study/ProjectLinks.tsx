@@ -7,11 +7,13 @@ const GLYPHS: Record<ProjectLink['kind'], string> = { repo: '</>', live: '●\uF
 
 // A site path: one leading slash, not a protocol-relative `//host` or `/\host`.
 const isInternal = (href: string) => /^\/(?![/\\])/.test(href);
+// A same-page anchor or an app link: a plain <a> that stays in the tab.
+const isSameTab = (href: string) => /^(#|mailto:|tel:)/i.test(href);
 
 const linkClass =
   'inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/8 bg-[var(--color-surface)] px-4 text-sm font-medium text-[var(--color-accent)] hover:border-[var(--color-accent)]/40 transition-colors';
 
-/** The one link list on a case study. Site paths stay in the tab; everything else opens a new one. */
+/** The one link list on a case study. Site paths, #anchors and mailto:/tel: stay in the tab; the rest open a new one. */
 export default function ProjectLinks({ links }: { links: ProjectLink[] }) {
   if (links.length === 0) return null;
 
@@ -31,6 +33,11 @@ export default function ProjectLinks({ links }: { links: ProjectLink[] }) {
                   {glyph}
                   {l.label}
                 </Link>
+              ) : isSameTab(l.href) ? (
+                <a href={l.href} className={linkClass}>
+                  {glyph}
+                  {l.label}
+                </a>
               ) : (
                 <a href={l.href} target="_blank" rel="noopener noreferrer" className={linkClass}>
                   {glyph}

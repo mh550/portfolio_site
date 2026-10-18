@@ -47,6 +47,18 @@ describe('ProjectLinks', () => {
     expect(a).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
+  it.each(['#lessons', 'mailto:someone@example.com', 'tel:+15550100'])(
+    'renders the same-page or app href %s as a plain same-tab <a> without new-tab text',
+    (href) => {
+      render(<ProjectLinks links={[{ label: 'Here', href, kind: 'doc' }]} />);
+      const a = screen.getByRole('link', { name: /Here/ });
+      expect(a).toHaveAttribute('href', href);
+      expect(a).not.toHaveAttribute('target');
+      expect(a).not.toHaveAttribute('rel');
+      expect(a).not.toHaveTextContent('(opens in new tab)');
+    },
+  );
+
   it('renders two links that share an href without a duplicate-key warning', () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     render(

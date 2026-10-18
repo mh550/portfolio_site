@@ -34,4 +34,12 @@ describe('IterationTimeline', () => {
     const { container } = render(<IterationTimeline iterations={[]} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('renders two rows that share when and label without a duplicate-key warning', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const row = { when: 'Week 1', label: 'v2', what: 'First change.', why: 'First reason.' };
+    render(<IterationTimeline iterations={[row, { ...row, what: 'Second change.' }]} />);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
 });

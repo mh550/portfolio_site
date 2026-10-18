@@ -9,7 +9,7 @@ describe('getCaseStudyAnchors', () => {
   });
 
   it('returns every anchor for a full case study, method steps first', () => {
-    expect(getCaseStudyAnchors(fixtureProject)).toEqual([...METHOD_IDS, 'decisions', 'iterations', 'lessons', 'links']);
+    expect(getCaseStudyAnchors(fixtureProject)).toEqual(['problem', ...METHOD_IDS, 'decisions', 'iterations', 'lessons', 'outcome', 'links']);
   });
 
   it('leaves out the sections whose data is empty', () => {
@@ -17,6 +17,6 @@ describe('getCaseStudyAnchors', () => {
       ...fixtureProject,
       caseStudy: { ...fixtureProject.caseStudy!, decisions: [], iterations: undefined, lessons: [], links: [] },
     };
-    expect(getCaseStudyAnchors(empty)).toEqual(METHOD_IDS);
+    expect(getCaseStudyAnchors(empty)).toEqual(['problem', ...METHOD_IDS, 'outcome']);
   });
 });

@@ -30,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (154 tests, 21 suites after M1)
+npm test             # Jest unit/integration tests (228 tests, 34 suites after M3)
 npm run test:watch   # watch mode
 ```
 
@@ -72,6 +72,12 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`)
 - `components/projects/ProjectCard.tsx` — project card (Server Component)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid using `ProjectCard` + `ScrollReveal` (`"use client"`)
+- `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves
+  the slug. Without `project.caseStudy` it renders the classic Problem/Approach/Challenges/Outcome page (pinned by
+  `src/__tests__/app/project-page-unchanged.test.tsx`); with it, the case-study order (D16, D17)
+- `components/projects/case-study/` — `CaseStudySection` (shared section + h2) and `MethodSteps`, `DecisionLog`,
+  `IterationTimeline`, `LessonList`, `ProjectLinks` (Server Components, `null` when empty). Data authors: the props
+  and copy rules are in `docs/plans/2026-10-18-M3-case-study-template.md` § Components
 
 ### Pages
 All pages are Server Components (no `"use client"`) except where noted. They import from `lib/data` and render `ScrollReveal` + page-specific markup.

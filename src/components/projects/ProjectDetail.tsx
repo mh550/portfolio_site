@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { getCaseStudyAnchors, type CaseStudy, type Project } from '@/lib/data';
+import { getCaseStudyAnchors, type CaseStudy, type DiagramKey, type Project } from '@/lib/data';
 import ScrollReveal from '@/components/ScrollReveal';
 import MetricStrip from '@/components/projects/MetricStrip';
 import CodeBlock from '@/components/projects/CodeBlock';
 import MediaGallery from '@/components/projects/MediaGallery';
 import ProjectDiagram from '@/components/projects/diagrams';
+import CaseStudySection, { sectionHeadingClass } from '@/components/projects/case-study/CaseStudySection';
 import MethodSteps from '@/components/projects/case-study/MethodSteps';
 import DecisionLog from '@/components/projects/case-study/DecisionLog';
 import IterationTimeline from '@/components/projects/case-study/IterationTimeline';
@@ -43,6 +44,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
         <p className="text-[var(--color-muted)] text-lg leading-relaxed mb-8">
           {project.shortDescription}
         </p>
+        {/* -mt-4 pulls the role line up under the description without touching its mb-8 (the classic page is pinned) */}
         {caseStudy && (
           <p className="-mt-4 mb-6 font-mono text-xs tracking-wide text-[var(--color-muted)]">
             {`${caseStudy.role} · ${caseStudy.timeframe}`}
@@ -113,11 +115,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
 
               {/* Architecture / process diagram follows "The Approach" */}
               {key === 'approach' && project.detail.architectureDiagram && (
-                <ScrollReveal delay={0.1}>
-                  <div className="mt-6">
-                    <ProjectDiagram diagram={project.detail.architectureDiagram} />
-                  </div>
-                </ScrollReveal>
+                <DiagramReveal diagram={project.detail.architectureDiagram} className="mt-6" />
               )}
             </div>
           ))}
@@ -148,13 +146,9 @@ function CaseStudyBody({ project, caseStudy }: { project: Project; caseStudy: Ca
 
   return (
     <div className="space-y-12">
-      <ProseSection heading="The Problem" text={project.detail.problem} delay={0.05} />
+      <ProseSection id="problem" heading="The Problem" text={project.detail.problem} delay={0.05} />
 
-      {project.detail.architectureDiagram && (
-        <ScrollReveal delay={0.1}>
-          <ProjectDiagram diagram={project.detail.architectureDiagram} />
-        </ScrollReveal>
-      )}
+      {project.detail.architectureDiagram && <DiagramReveal diagram={project.detail.architectureDiagram} />}
 
       <ScrollReveal delay={0.05}>
         <MethodSteps method={caseStudy.method} />
@@ -173,9 +167,7 @@ function CaseStudyBody({ project, caseStudy }: { project: Project; caseStudy: Ca
       )}
 
       {caseStudy.extraDiagrams?.map((diagram, i) => (
-        <ScrollReveal key={`${i}-${diagram}`} delay={0.1}>
-          <ProjectDiagram diagram={diagram} />
-        </ScrollReveal>
+        <DiagramReveal key={`${i}-${diagram}`} diagram={diagram} />
       ))}
 
       {anchors.has('lessons') && (
@@ -184,7 +176,7 @@ function CaseStudyBody({ project, caseStudy }: { project: Project; caseStudy: Ca
         </ScrollReveal>
       )}
 
-      <ProseSection heading="Outcome" text={project.detail.outcome} delay={0.05} />
+      <ProseSection id="outcome" heading="Outcome" text={project.detail.outcome} delay={0.05} />
 
       <CodeAndMedia detail={project.detail} />
 
@@ -208,13 +200,29 @@ function CaseStudyBody({ project, caseStudy }: { project: Project; caseStudy: Ca
   );
 }
 
-function ProseSection({ heading, text, delay }: { heading: string; text: string; delay: number }) {
+/** A heading and a paragraph. With an `id` (case-study mode) it is an anchorable, labelled CaseStudySection. */
+function ProseSection({ id, heading, text, delay }: { id?: string; heading: string; text: string; delay: number }) {
+  const body = <p className="text-[var(--color-muted)] text-base leading-relaxed">{text}</p>;
   return (
     <ScrollReveal delay={delay}>
-      <h2 className="text-2xl font-bold mb-4">{heading}</h2>
-      <p className="text-[var(--color-muted)] text-base leading-relaxed">{text}</p>
+      {id ? (
+        <CaseStudySection id={id} heading={heading}>
+          {body}
+        </CaseStudySection>
+      ) : (
+        <>
+          <h2 className={sectionHeadingClass}>{heading}</h2>
+          {body}
+        </>
+      )}
     </ScrollReveal>
   );
+}
+
+/** A diagram that reveals on scroll; `className` adds a wrapper div (the classic page's `mt-6`). */
+function DiagramReveal({ diagram, className }: { diagram: DiagramKey; className?: string }) {
+  const figure = <ProjectDiagram diagram={diagram} />;
+  return <ScrollReveal delay={0.1}>{className ? <div className={className}>{figure}</div> : figure}</ScrollReveal>;
 }
 
 /** "In the Code" then "A Closer Look", each only when it has content. */
@@ -224,7 +232,7 @@ function CodeAndMedia({ detail }: { detail: Project['detail'] }) {
       {/* Code excerpts */}
       {detail.codeSnippets && detail.codeSnippets.length > 0 && (
         <ScrollReveal delay={0.05}>
-          <h2 className="text-2xl font-bold mb-4">In the Code</h2>
+          <h2 className={sectionHeadingClass}>In the Code</h2>
           <div className="space-y-6">
             {detail.codeSnippets.map((snippet) => (
               <CodeBlock key={snippet.title} snippet={snippet} />
@@ -236,7 +244,7 @@ function CodeAndMedia({ detail }: { detail: Project['detail'] }) {
       {/* Screenshot / recording gallery */}
       {detail.media && detail.media.length > 0 && (
         <ScrollReveal delay={0.05}>
-          <h2 className="text-2xl font-bold mb-4">A Closer Look</h2>
+          <h2 className={sectionHeadingClass}>A Closer Look</h2>
           <MediaGallery media={detail.media} />
         </ScrollReveal>
       )}

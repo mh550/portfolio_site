@@ -184,7 +184,7 @@
         ".harness/check.sh is green and `node .harness/smoke.mjs` is green"
       ],
       "after": ["M3-04"],
-      "passes": false
+      "passes": true
     },
 
     {

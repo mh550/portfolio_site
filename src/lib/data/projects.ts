@@ -301,11 +301,13 @@ export function getCaseStudyAnchors(project: Project): string[] {
   const cs = project.caseStudy;
   if (!cs) return [];
   return [
+    'problem',
     ...methodSteps.map((step) => step.id),
     'method',
     ...(cs.decisions.length > 0 ? ['decisions'] : []),
     ...(cs.iterations && cs.iterations.length > 0 ? ['iterations'] : []),
     ...(cs.lessons.length > 0 ? ['lessons'] : []),
+    'outcome',
     ...(cs.links.length > 0 ? ['links'] : []),
   ];
 }

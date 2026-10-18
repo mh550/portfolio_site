@@ -9,6 +9,23 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:59 · M3-05 · passes
+
+- Review of `git diff 78010ea..HEAD -- src ':!src/__tests__'` ($HARNESS_SCRATCH/M3.diff, Opus): 0 Critical/Important, 7 Minor, all
+  fixed test-first. Problem/Outcome are `CaseStudySection`s (#problem, #outcome, now in `getCaseStudyAnchors`), shared
+  `sectionHeadingClass` + `DiagramReveal`, ProjectLinks keeps `#…`/`mailto:`/`tel:` in the tab, IterationTimeline index key, new
+  `src/__tests__/lib/case-study-data.test.ts` (githubUrl/demoUrl must be in caseStudy.links, href shapes, unique decision ids).
+  219 → 228 tests (34 suites). Findings table + vercel-react-best-practices notes under the plan's `## Review`.
+- Verified: the classic-page snapshot passed untouched after the refactor; I checked that the a4fcd74 snapshot minus the
+  role="img" wrapper equals the pre-a4fcd74 one byte for byte. `docs/screenshots/v2/M3-ghl-jobtread-integration-{390,1280}.png`
+  (286/318 KB, scrolled so 0 elements below opacity 1; I looked at both). check.sh green, tsc clean, smoke 28/28.
+- Next (M4–M6): author data against the plan's `## Components` (rewritten to match the shipped props, plus authoring rules:
+  `because`/lessons carry their own full stops, the template adds no punctuation). A new DiagramKey needs DIAGRAMS, CAPTIONS, LABELS.
+  CLAUDE.md Architecture now names ProjectDetail and case-study/.
+- Proposed changes: still open from M3-04: the reduced-motion hydration bug in `ScrollReveal` (body invisible for
+  reduced-motion visitors) deserves its own feature before launch.
+- Questions for Michael: none.
+
 ### 2026-10-18 23:45 · M3-04 · passes
 
 - New `src/components/projects/ProjectDetail.tsx` (server) holds the page body; `page.tsx` only resolves slug → `notFound()` or
