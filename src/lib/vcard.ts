@@ -4,7 +4,7 @@ import type { Profile } from './data/profile';
 const COUNTRY = 'USA';
 
 // RFC 6350 § 3.4 text escaping: backslash first, then comma, semicolon and line breaks
-function escape(value: string): string {
+function escapeText(value: string): string {
   return value
     .replace(/\\/g, '\\\\')
     .replace(/,/g, '\\,')
@@ -29,13 +29,13 @@ export function buildVCard(profile: Profile): string {
     [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      `N:${escape(family)};${escape(given)};;;`,
-      `FN:${escape(profile.name)}`,
-      `TITLE:${escape(profile.positioning)}`,
+      `N:${escapeText(family)};${escapeText(given)};;;`,
+      `FN:${escapeText(profile.name)}`,
+      `TITLE:${escapeText(profile.positioning)}`,
       `EMAIL;TYPE=INTERNET:${profile.email}`,
       `URL:${profile.siteUrl}`,
       `X-SOCIALPROFILE;TYPE=linkedin:${profile.linkedin}`,
-      `ADR;TYPE=WORK:;;;${escape(locality)};${escape(region)};;${COUNTRY}`,
+      `ADR;TYPE=WORK:;;;${escapeText(locality)};${escapeText(region)};;${COUNTRY}`,
       'END:VCARD',
     ].join('\r\n') + '\r\n'
   );

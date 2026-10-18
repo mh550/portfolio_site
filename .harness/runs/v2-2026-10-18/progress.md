@@ -9,6 +9,21 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 21:55 · M1-07 · passes
+
+- Opus review of `$HARNESS_SCRATCH/M1.diff` (2473db6..HEAD, 1395 lines): 0 Critical, 0 Important, 13 Minor. Fixed 8
+  test-first: arrow aria-hidden on "Full portfolio", sr-only "(opens in new tab)" on LinkedIn/GitHub, all 9 /card links
+  pinned to `focus-visible:outline-2`, "Back to card" sr-only on /card/qr, QR img width/height 420, `escape` →
+  `escapeText`, a 75-octet vCard line test, Footer.tsx + contact/page.tsx now read `profile` (grep clean). 150 → 154.
+- The rest are listed with reasons in the plan's Review section, along with the web-design-guidelines results.
+  Contrast is AA everywhere (lowest is muted text on the card surface, 5.4:1). A Chromium keyboard pass at 390
+  reached all 9 /card links, each with a 2px cyan outline. The plan ends "Ready to merge: yes"; CLAUDE.md routes now list /card,
+  /card/qr, /michael-herron.vcf.
+- Verified: smoke 28/28 PASS; check.sh green (154); 390 screenshots of /card, /card/qr, /contact unchanged visually.
+- Note: the footer/contact LinkedIn href is now the canonical `https://www.linkedin.com/in/mherron734/`. A PNG
+  byte-compare test was tried and dropped (≈ 8 s under Jest). M1 is complete; next is M3 per the brief's order.
+- Questions: none. Proposed changes: none.
+
 ### 2026-10-18 21:25 · M1-06 · passes
 
 - New `docs/screenshots/v2/M1-card-390.png` (75 KB, 390 × 844 viewport), `M1-card-1280.png` (99 KB, full page),

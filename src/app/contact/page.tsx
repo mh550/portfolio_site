@@ -1,29 +1,33 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import ScrollReveal from '@/components/ScrollReveal';
+import { profile } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Contact — Michael Herron',
   description: "Get in touch with Michael Herron — let's build something.",
 };
 
+// 'https://www.linkedin.com/in/x/' → 'linkedin.com/in/x'
+const display = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
+
 const links = [
   {
     label: 'Email',
-    value: 'mherron734@gmail.com',
-    href: 'mailto:mherron734@gmail.com',
+    value: profile.email,
+    href: `mailto:${profile.email}`,
     description: 'Best way to reach me',
   },
   {
     label: 'LinkedIn',
-    value: 'linkedin.com/in/mherron734',
-    href: 'https://linkedin.com/in/mherron734',
+    value: display(profile.linkedin),
+    href: profile.linkedin,
     description: 'Connect professionally',
   },
   {
     label: 'GitHub',
-    value: 'github.com/mh550',
-    href: 'https://github.com/mh550',
+    value: display(profile.github),
+    href: profile.github,
     description: 'See my code',
   },
 ];

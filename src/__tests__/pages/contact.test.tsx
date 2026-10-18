@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import ContactPage from '@/app/contact/page';
+import { profile } from '@/lib/data';
 
 describe('ContactPage', () => {
   it('renders the heading', () => {
@@ -10,19 +11,19 @@ describe('ContactPage', () => {
   it('renders email link', () => {
     render(<ContactPage />);
     const link = screen.getByRole('link', { name: /email.*mherron734@gmail\.com/i });
-    expect(link).toHaveAttribute('href', 'mailto:mherron734@gmail.com');
+    expect(link).toHaveAttribute('href', `mailto:${profile.email}`);
   });
 
   it('renders LinkedIn link', () => {
     render(<ContactPage />);
     const link = screen.getByRole('link', { name: /linkedin/i });
-    expect(link).toHaveAttribute('href', 'https://linkedin.com/in/mherron734');
+    expect(link).toHaveAttribute('href', profile.linkedin);
   });
 
   it('renders GitHub link', () => {
     render(<ContactPage />);
     const link = screen.getByRole('link', { name: /github/i });
-    expect(link).toHaveAttribute('href', 'https://github.com/mh550');
+    expect(link).toHaveAttribute('href', profile.github);
   });
 
   it('renders email address text', () => {

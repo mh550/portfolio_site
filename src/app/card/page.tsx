@@ -45,12 +45,14 @@ export default function CardPage() {
       <div className="mt-3 grid w-full grid-cols-3 gap-3">
         <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className={secondaryButton}>
           LinkedIn
+          <span className="sr-only"> (opens in new tab)</span>
         </a>
         <a href={`mailto:${profile.email}`} className={secondaryButton}>
           Email
         </a>
         <a href={profile.github} target="_blank" rel="noopener noreferrer" className={secondaryButton}>
           GitHub
+          <span className="sr-only"> (opens in new tab)</span>
         </a>
       </div>
 
@@ -77,7 +79,7 @@ export default function CardPage() {
 
       <div className="mt-8 flex flex-col items-center gap-2">
         <Link href="/" className={textButton}>
-          Full portfolio →
+          Full portfolio<span aria-hidden="true">&nbsp;→</span>
         </Link>
         <Link href="/card/qr" className={`${secondaryButton} text-[var(--color-muted)]`}>
           Show QR

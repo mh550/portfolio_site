@@ -119,7 +119,7 @@
         "`node .harness/smoke.mjs` (all routes) and .harness/check.sh are green"
       ],
       "after": ["M1-06"],
-      "passes": false
+      "passes": true
     },
 
     {

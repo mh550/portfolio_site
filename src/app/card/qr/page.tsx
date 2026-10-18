@@ -15,6 +15,8 @@ export default function CardQrPage() {
       {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG; next/image adds nothing here */}
       <img
         src="/card/qr.svg"
+        width={420}
+        height={420}
         alt={`QR code linking to ${new URL(profile.siteUrl).host}/card`}
         style={{ width: 'min(80vw, 420px)' }}
         className="aspect-square h-auto"
@@ -27,7 +29,7 @@ export default function CardQrPage() {
         href="/card"
         className="inline-flex min-h-[44px] items-center rounded-lg px-4 text-sm text-neutral-700 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
       >
-        <span aria-hidden="true">←&nbsp;</span>Back
+        <span aria-hidden="true">←&nbsp;</span>Back<span className="sr-only"> to card</span>
       </Link>
     </main>
   );

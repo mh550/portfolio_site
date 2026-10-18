@@ -11,6 +11,13 @@ describe('CardQrPage', () => {
     expect(img).toHaveStyle({ width: 'min(80vw, 420px)' });
   });
 
+  it('the QR image reserves its square before it loads', () => {
+    render(<CardQrPage />);
+    const img = screen.getByRole('img');
+    expect(img).toHaveAttribute('width', '420');
+    expect(img).toHaveAttribute('height', '420');
+  });
+
   it('shows the name (as h1) and positioning under it', () => {
     render(<CardQrPage />);
     const name = screen.getByRole('heading', { level: 1, name: profile.name });
@@ -22,7 +29,7 @@ describe('CardQrPage', () => {
 
   it('Back links to /card', () => {
     render(<CardQrPage />);
-    const back = screen.getByRole('link', { name: /Back/ });
+    const back = screen.getByRole('link', { name: 'Back to card' });
     expect(back).toHaveAttribute('href', '/card');
     expect(back).toHaveClass('min-h-[44px]');
   });

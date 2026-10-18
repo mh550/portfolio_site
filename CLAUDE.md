@@ -20,6 +20,9 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
+| `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
+| `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
+| `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 
 ## Commands
 
@@ -27,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (70 tests, 12 suites on 2026-10-18)
+npm test             # Jest unit/integration tests (154 tests, 21 suites after M1)
 npm run test:watch   # watch mode
 ```
 

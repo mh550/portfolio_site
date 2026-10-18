@@ -26,6 +26,12 @@ describe('buildVCard', () => {
     expect(out).not.toMatch(/(^|[^\r])\n/);
   });
 
+  it('keeps every line within 75 octets, so no folding is needed', () => {
+    buildVCard(profile)
+      .split('\r\n')
+      .forEach((line) => expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(75));
+  });
+
   it('has no phone line (D5)', () => {
     const lines = buildVCard(profile).split('\r\n');
     expect(lines.filter((line) => line.startsWith('TEL'))).toEqual([]);

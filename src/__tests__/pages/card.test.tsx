@@ -24,12 +24,28 @@ describe('CardPage', () => {
 
   it('LinkedIn, Email and GitHub hrefs come from profile', () => {
     render(<CardPage />);
-    expect(screen.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', profile.linkedin);
+    expect(screen.getByRole('link', { name: 'LinkedIn (opens in new tab)' })).toHaveAttribute(
+      'href',
+      profile.linkedin
+    );
     expect(screen.getByRole('link', { name: 'Email' })).toHaveAttribute(
       'href',
       `mailto:${profile.email}`
     );
-    expect(screen.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', profile.github);
+    expect(screen.getByRole('link', { name: 'GitHub (opens in new tab)' })).toHaveAttribute(
+      'href',
+      profile.github
+    );
+  });
+
+  it('links that open a new tab say so to screen readers', () => {
+    const { container } = render(<CardPage />);
+    const blank = Array.from(container.querySelectorAll('a[target="_blank"]'));
+    expect(blank).toHaveLength(2);
+    blank.forEach((a) => {
+      expect(a).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(a.querySelector('.sr-only')).toHaveTextContent('(opens in new tab)');
+    });
   });
 
   it('shows exactly 3 selected-work links, equal to getTopProjects(3) in order', () => {
@@ -57,15 +73,31 @@ describe('CardPage', () => {
 
   it('Full portfolio links to / and Show QR links to /card/qr', () => {
     render(<CardPage />);
-    expect(screen.getByRole('link', { name: 'Full portfolio →' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Full portfolio' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Show QR' })).toHaveAttribute('href', '/card/qr');
   });
 
+  const buttonNames = [
+    'Save contact',
+    'LinkedIn (opens in new tab)',
+    'Email',
+    'GitHub (opens in new tab)',
+    'Full portfolio',
+    'Show QR',
+  ];
+
   it('every link styled as a button has min-h-[44px]', () => {
     render(<CardPage />);
-    ['Save contact', 'LinkedIn', 'Email', 'GitHub', 'Full portfolio →', 'Show QR'].forEach((name) => {
+    buttonNames.forEach((name) => {
       expect(screen.getByRole('link', { name })).toHaveClass('min-h-[44px]');
     });
+  });
+
+  it('every link has a visible focus outline', () => {
+    const { container } = render(<CardPage />);
+    const links = Array.from(container.querySelectorAll('a'));
+    expect(links).toHaveLength(buttonNames.length + 3);
+    links.forEach((a) => expect(a).toHaveClass('focus-visible:outline-2'));
   });
 
   it('headshot image uses profile.headshot with alt text', () => {
