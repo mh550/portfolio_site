@@ -11,7 +11,7 @@ export default function TimelineLine() {
       style={{ left: '5.5px', transformOrigin: 'top' }}
       initial={{ opacity: 0, y: 40, scaleY: 0 }}
       whileInView={{ opacity: 1, y: 0, scaleY: 1 }}
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once: true, margin: '-60px 0px' }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
     />
   );

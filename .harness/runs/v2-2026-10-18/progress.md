@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:59 · M2-05 · passes
+
+- Eight full-page shots in `docs/screenshots/v2/M2-{home,about,skills,experience}-{390,1280}.png` (51–182 KB, none cropped) plus `M2-home-390-viewport.png`. The plan's What Michael will see table has all 8 rows filled.
+- Hero at 390×844 (Sonnet, Playwright :7800, default and reduced motion give the same numbers): eyebrow 159–179, h1 195–315, tagline 331–387, subline 403–475, strip 507–563, View Projects 595–639, **About Me 655–701**. No overlaps, nothing under the 65 px nav, opacity 1 throughout, no horizontal scroll, no console errors.
+- **Fixed:** the /experience timeline line never appeared below 1280 px (already broken on `main`). `TimelineLine`'s `margin: '-60px'` insets the IntersectionObserver root on the left too, and the 1 px bar sits at x ≈ 30. Now `'-60px 0px'`; measured opacity 1 and 1795 px tall at 390, 768 and 1280, with and without reduced motion. The new `TimelineLine.test.tsx` failed first ("-60px"). Tests 439 → 440, suites 44 → 45.
+- Listed but not changed (reasons are in the plan): on mobile the strip's arrow trails "Build →" at the end of row 1; FloatingLogos sit behind the hero text at 390 (still legible; for M2-06's contrast pass); the About Philosophy blockquote still says "architect automations and integrations" (the plan keeps Philosophy unchanged); a lone "it." on the Verify line at 1280.
+- Verified: `lib/check.sh` green; jest 440/440; smoke 34/34 PASS. I looked at all eight shots. Opus review: 0 Critical, 0 Important. Applied: numeric margin comparison, one `resetModules`. Left for M2-06: `ScrollReveal`'s uniform `-80px` margin (harmless for its full-width blocks, but the same trap for a narrow one).
+- Housekeeping for Michael: the shared stash stack has an entry `m205-tl-check` (b79e2bc) holding the same one-line TimelineLine change; this session wasn't permitted to drop it. `git stash drop` it when convenient. Questions: none. Proposed changes: none.
+
 ### 2026-10-18 23:55 · M2-04 · passes
 
 - `skills.ts` is now four capability groups in plan order: `process` "Process & delivery" (featured, D20, 7), `systems` "Systems & architecture" (12), `build` "Build" (24), `operate` "Operate & verify" (8). That is 51 unique strings: all 39 pre-M2 skills plus 12 new ones, each with the evidence line the plan cites. `/skills` puts Process & delivery in the glow panel ("Differentiator" kept) and stacks the other three full width. The intro and metadata now describe grouping by capability. Chips are now `ul role="list"`/`li`, each list named by its h2 (`aria-labelledby`). The stale `h-full` is gone.

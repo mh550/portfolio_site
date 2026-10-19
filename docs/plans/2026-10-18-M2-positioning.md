@@ -376,18 +376,25 @@ hostname, `TODO` or `[X]`.
 
 ## What Michael will see
 
-Filled by M2-05 from `docs/screenshots/v2/M2-<page>-<width>.png`.
+Filled by M2-05 from `docs/screenshots/v2/M2-<page>-<width>.png` (full page, `reducedMotion: reduce`, after scrolling
+the page once so every ScrollReveal has run; all eight under 400 KB as full pages, none cropped to 3000 px). The 390×844
+viewport capture of the hero is `M2-home-390-viewport.png`. Measured on `next dev` :7800 at 390×844, default and reduced
+motion identical: nav bottom 65, eyebrow 159–179, h1 195–315, tagline 331–387, subline 403–475, strip 507–563,
+View Projects 595–639, **About Me 655–701 (bottom 701 ≤ 844)**; no two of these overlap, all at opacity 1, no
+horizontal scroll, no console errors.
 
 | Page | What is on screen | Anything that looks wrong |
 |---|---|---|
-| `/` at 390 | | |
-| `/` at 1280 | | |
-| `/about` at 390 | | |
-| `/about` at 1280 | | |
-| `/skills` at 390 | | |
-| `/skills` at 1280 | | |
-| `/experience` at 390 | | |
-| `/experience` at 1280 | | |
+| `/` at 390 | Eyebrow "SYSTEMS & PROCESS ENGINEER", "Michael / Herron", tagline, subline, strip in two rows (Diagnose → Decide → Build → / Verify → Simplify), View Projects and About Me full width; **About Me bottom 701**. Below: Recent work, three cards (Agent Harness 55, Linear 2×, music library 831), "See all projects →", Footer | (1) The arrow after "Build" ends row 1 (noted in M2-02). Left: it reads as "continues on the next row" and the order is right. (2) FloatingLogos (40 % white, `aria-hidden`) sit behind the eyebrow and tagline; the text stays legible. Left for M2-06's contrast pass, since it predates M2 |
+| `/` at 1280 | Same hero centred; the strip is one row of five labels, each with its line under it; buttons side by side; three Recent work cards in one row; Footer | The Verify line wraps with a lone "it." on line 3. Left: a copy-length nit, not a layout fault |
+| `/about` at 390 | ABOUT, h1 "My Story", then the intro (subline + "I work in five steps: Diagnose, Decide, Build, Verify, Simplify. I own delivery from requirements to release.") above the story; the headshot floats right of the first story paragraph (142 px, `float: right`); Philosophy, Outside the Terminal, snowboard photo, Footer | Philosophy still says "architect automations and integrations". Left: the plan keeps Philosophy unchanged (§ About); a copy question for M7/Michael, not M2 |
+| `/about` at 1280 | Intro in one 3-line block under the h1; the float is intact (238 px headshot right of the Duke paragraph, text wraps under it) | Nothing |
+| `/skills` at 390 | Tech Stack, "Grouped by what I do…", Process & delivery in the glowing panel with "Differentiator" and 7 cyan chips, then Systems & architecture, Build, Operate & verify stacked full width; chips wrap, no bullets | Nothing |
+| `/skills` at 1280 | Same order; featured panel full width, the three groups full width below it, chips in 1–3 rows | Nothing |
+| `/experience` at 390 | History; MAXX bullets show "2× sprint throughput and ~80% less bug-filing time", de facto PM, FCP, DB migrations; Builder Clarity "3 clients", "~2 days to ~6 hours", "~8 hrs/week", "4+ sources"; High Cascade "Mentored 12–18-year-old snowboarders"; Education card with no GPA line | **Fixed here:** the timeline's vertical line never appeared below 1280 px (on `main` too): `TimelineLine`'s `margin: '-60px'` also insets the observer 60 px from the left, and the 1 px bar sits at x ≈ 30, so it never intersected. Now `'-60px 0px'`; measured visible (opacity 1, 1795 px tall) at 390, 768 and 1280, with and without reduced motion |
+| `/experience` at 1280 | Same content, timeline line from the first dot to the Snowboard Coach entry, Education with Honors and Coursework side by side, no GPA | Nothing |
+
+The round "N" badge in every shot is the `next dev` indicator; it is not in a production build.
 
 ## Review
 
