@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 verify S3
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| S3-01 | 1 | Read `@media print` in globals.css (l.54-127); grep `print:hidden` in components | white bg/black text, nav/footer hidden, pre pre-wrap + max-height none, links underlined; print:hidden on NodeGraph, FloatingLogos (+LoopingVideo, ProjectDetail) | yes |
+| S3-01 | 2 | `node .harness/print-check.mjs` on /projects/agent-harness (first case study, projects.ts l.167); `ls` the screenshot | body rgb(255,255,255), visibleNav 0, PASS; docs/screenshots/v2/S3-print-agent-harness.png 235446 B (<400 KB) | yes |
+| S3-01 | 3 | `npx jest print-styles.test.ts` | 6/6 pass; asserts block exists, nav/footer display none, pre pre-wrap/max-height none | yes |
+| S3-01 | 4 | `lib/check.sh`; `node .harness/smoke.mjs` | check green; smoke all PASS | yes |
+
 ### 2026-10-19 02:10 · S3-01 · passes
 
 - One `@media print` block at the end of `src/app/globals.css` (D40 *default*): white page and black text on every element (`*` with `!important`, then `html, body` white after it), borders #bbb, `nav`/`footer` hidden, `#content` top padding dropped, `pre` `pre-wrap` / `overflow: visible` / `max-height: none`, links underlined with external URLs printed after them, `[data-scroll-reveal]` forced to opacity 1 (framer leaves unrevealed sections at opacity 0, which printed blank). `print:hidden` on NodeGraph, FloatingLogos, the LoopingVideo button and both project back links (the bottom one's wrapper). ScrollReveal now adds `data-scroll-reveal`.
