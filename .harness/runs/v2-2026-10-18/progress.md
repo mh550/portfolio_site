@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:30 · M2-03 · passes
+
+- `experience.ts`: the 6 MAXX and 4 Builder Clarity bullets now match the plan word for word (2×, ~80%, de facto PM, Foundational Capability Patterns, git-tracked DB migrations; 3 clients, ~2 days → ~6 hours, ~8 hrs/week, **4+ sources**, Agile/Scrum in Linear). "Pioneered" and "7+" are gone, High Cascade reads "Mentored 12–18-year-old snowboarders" (D9), and `gpa` is removed from `Education` and from the page (D8). Titles, companies and periods are unchanged. The Experience metadata now reads from `profile.name`.
+- `approach.ts` exports `aboutIntro` (D32): the subline, the five steps and "I own delivery from requirements to release." `/about` renders it as one `<p>` under the h1, before the story. The About metadata drops "full-stack and integration engineer".
+- Tests 420 → 435 (44 suites), in experience, about, approach and data tests. All 14 new behaviour tests failed first ("Colorado" was a spot check and already passed). `lib/check.sh` green; smoke PASS for /about and /experience at both widths (all routes). I looked at both 390 shots: the intro sits above the headshot float, which is intact.
+- Opus review of the diff: 0 Critical, 0 Important, 2 Minor (two tests hold by construction; kept because the plan specifies them). It also found that `tsc --noEmit` now reports 2 errors from before this session, in test files: `HeroSection.test.tsx:122` and `case-study-home-media-server.test.ts:38`. `next build` doesn't flag them. Left for M2-06.
+- Note for M2-05: the about test logs a `next/image` warning (headshot `quality={100}` isn't in `images.qualities`), from before this session. Smoke ignores it.
+- Next: M2-04 (independent). Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 23:05 · M2-02 · passes
 
 - Root metadata from `profile` (title "Michael Herron — Systems & Process Engineer", description = subline, Open Graph with siteName and headshot, no title/url; twitter summary). New `MethodStrip` (`ol role="list"` named "How I work", D23/D31). The hero reads eyebrow, tagline and subline from `profile`, adds the strip, uses `min-h-svh pt-24 pb-16` instead of `h-screen`, and honours reduced motion (instant variants with the same hidden state, still FloatingLogos, NodeGraph draws one frame and redraws on resize, no rAF loop). `/` gains Recent work (`getTopProjects(3)`, `ProjectCard headingAs="h3"`, "See all projects"), and the Footer shows on `/` (D19).

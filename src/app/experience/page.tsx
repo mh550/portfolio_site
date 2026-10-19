@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { roles, education } from '@/lib/data';
+import { roles, education, profile } from '@/lib/data';
 import ScrollReveal from '@/components/ScrollReveal';
 import TimelineLine from '@/components/TimelineLine';
 
 export const metadata: Metadata = {
   title: 'Experience — Michael Herron',
-  description: 'Professional history and education — full-stack and integration engineering.',
+  description: `Work history and education of ${profile.name}.`,
 };
 
 export default function ExperiencePage() {
@@ -76,8 +76,7 @@ export default function ExperiencePage() {
             {education.period}
           </p>
           <h3 className="text-xl font-bold mb-1">{education.institution}</h3>
-          <p className="text-[var(--color-accent)] text-sm font-medium mb-1">{education.degree}</p>
-          <p className="text-[var(--color-muted)] text-sm mb-5">GPA: {education.gpa}</p>
+          <p className="text-[var(--color-accent)] text-sm font-medium mb-5">{education.degree}</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
             {/* Honors */}

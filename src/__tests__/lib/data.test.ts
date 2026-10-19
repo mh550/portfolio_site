@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   projects,
   getProjectBySlug,
@@ -141,7 +143,13 @@ describe('experience data', () => {
   it('exports education with required fields', () => {
     expect(education.degree).toBeTruthy();
     expect(education.institution).toBe('Duke University');
-    expect(education.gpa).toBeTruthy();
+    expect('gpa' in education).toBe(false);
     expect(education.coursework.length).toBeGreaterThan(0);
+  });
+
+  it('uses the committed "4+ sources" figure, never "7+" (brand.md metrics bank)', () => {
+    const source = readFileSync(join(process.cwd(), 'src/lib/data/experience.ts'), 'utf8');
+    expect(source).not.toContain('7+');
+    expect(source).toContain('4+ sources');
   });
 });

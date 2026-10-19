@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import ScrollReveal from '@/components/ScrollReveal';
+import { aboutIntro, profile } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'About — Michael Herron',
-  description: 'Duke CS grad turned full-stack and integration engineer. I build systems that are reliable and make sense to the people using them.',
+  description: `Duke CS grad, first engineer at Builder Clarity, now at MAXX Potential. ${profile.subline}`,
 };
 
 export default function AboutPage() {
@@ -15,9 +16,12 @@ export default function AboutPage() {
         <p className="font-mono text-[var(--color-accent)] text-sm tracking-[0.3em] uppercase mb-4">
           About
         </p>
-        <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-12">
+        <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-6">
           My Story
         </h1>
+        <p className="text-xl leading-relaxed text-[var(--color-foreground)] max-w-2xl mb-12">
+          {aboutIntro.join(' ')}
+        </p>
       </ScrollReveal>
 
       {/* Story — photo floated right, text wraps alongside and continues below */}

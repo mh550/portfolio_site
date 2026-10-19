@@ -1,4 +1,4 @@
-import { methodSteps, type MethodStep } from '@/lib/data';
+import { aboutIntro, methodSteps, profile, type MethodStep } from '@/lib/data';
 
 describe('methodSteps', () => {
   it('has the five steps in method order', () => {
@@ -26,6 +26,25 @@ describe('methodSteps', () => {
     for (const step of methodSteps) {
       const keys: (keyof MethodStep)[] = ['id', 'label', 'line'];
       expect(Object.keys(step).sort()).toEqual([...keys].sort());
+    }
+  });
+});
+
+describe('aboutIntro (D13, D32)', () => {
+  it('is at most three sentences', () => {
+    expect(aboutIntro.length).toBeGreaterThan(0);
+    expect(aboutIntro.length).toBeLessThanOrEqual(3);
+    expect(aboutIntro.join(' ').match(/[.!?](\s|$)/g)?.length).toBeLessThanOrEqual(3);
+  });
+
+  it('opens with the subline', () => {
+    expect(aboutIntro[0]).toBe(profile.subline);
+  });
+
+  it('names every method step', () => {
+    const text = aboutIntro.join(' ');
+    for (const step of methodSteps) {
+      expect(text).toContain(step.label);
     }
   });
 });

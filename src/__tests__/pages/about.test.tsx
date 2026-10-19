@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import AboutPage from '@/app/about/page';
+import AboutPage, { metadata } from '@/app/about/page';
+import { aboutIntro } from '@/lib/data';
 
 describe('AboutPage', () => {
   it('renders the heading', () => {
@@ -44,5 +45,23 @@ describe('AboutPage', () => {
     const blockquote = screen.getByRole('blockquote');
     expect(blockquote.textContent).not.toMatch(/^[""]/);
     expect(blockquote.textContent).not.toMatch(/["""]$/);
+  });
+
+  it('mentions Colorado in the story', () => {
+    render(<AboutPage />);
+    expect(screen.getByText(/moved to Colorado/)).toBeInTheDocument();
+  });
+
+  it('opens with the What I do intro before the story', () => {
+    render(<AboutPage />);
+    const intro = screen.getByText(aboutIntro.join(' '));
+    const story = screen.getByText(/Duke University/);
+    expect(intro.compareDocumentPosition(story) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const h1 = screen.getByRole('heading', { level: 1 });
+    expect(h1.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('describes the page without the old positioning', () => {
+    expect(String(metadata.description)).not.toMatch(/full-stack and integration engineer/i);
   });
 });

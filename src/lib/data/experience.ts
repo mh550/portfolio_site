@@ -13,8 +13,11 @@ export const roles: Role[] = [
     period: 'February 2026 – Present',
     type: 'work',
     bullets: [
-      'Diagnosed a critical QA/Engineering issue-tracking bottleneck and deployed Linear with an AI-agent workflow — doubled sprint throughput and cut bug-filing time by ~80%.',
-      'Pioneered agentic coding workflows across triage, implementation, and testing via Linear\'s MCP server, automating duplicate detection and root-cause triage.',
+      'Diagnosed a QA/Engineering issue-tracking bottleneck and moved the team to Linear with an AI-agent workflow: 2× sprint throughput and ~80% less bug-filing time.',
+      'Served as de facto project manager on a client engagement.',
+      'Updated the org\'s Foundational Capability Patterns for AI-assisted rapid prototyping: solution tiers and citizen vs. professional development pathways.',
+      'Bootstrapped git-tracked database migrations and onboarded the team to them.',
+      'Chose Linear partly for its MCP server, so the team\'s Claude Code workflow could fetch and update issues directly; bug filing and triage, including duplicate detection, became automated.',
       'Built full-stack React Native features for a paint-estimator app, establishing development paradigms and reusable modules from go-live.',
     ],
   },
@@ -26,8 +29,8 @@ export const roles: Role[] = [
     bullets: [
       'First engineer hired. Architected a multi-tenant integration platform that eliminated per-client buildouts — scaling to 3 clients and cutting onboarding from ~2 days to ~6 hours.',
       'Integrated CRM, VoIP, and internal systems via secure data pipelines (GoHighLevel ↔ JobTread, RingCentral ↔ JobTread), eliminating manual data entry and saving ~8 hrs/week per client.',
-      'Built and maintained ETL pipelines ingesting and normalizing data from 7+ sources into Postgres for a previously fragmented dataset.',
-      'Led the technical migration from Zapier to n8n and Pipedream, and self-directed AGILE/Scrum in Linear to improve stakeholder visibility.',
+      'Built and maintained ETL pipelines ingesting and normalizing data from 4+ sources into Postgres for a previously fragmented dataset.',
+      'Introduced Agile/Scrum in Linear for stakeholder visibility, and led the technical migration from Zapier to n8n and Pipedream.',
     ],
   },
   {
@@ -46,7 +49,7 @@ export const roles: Role[] = [
     period: 'Summers 2023 & 2024',
     type: 'work',
     bullets: [
-      'Mentored 12–18 snowboarders per session; designed targeted drills, prioritized safe progression.',
+      'Mentored 12–18-year-old snowboarders; designed targeted drills, prioritized safe progression.',
       'Coaching approach — clear instruction, patient feedback, tailored communication — translates directly to how I collaborate and communicate in engineering teams.',
     ],
   },
@@ -56,7 +59,6 @@ export interface Education {
   degree: string;
   institution: string;
   period: string;
-  gpa: string;
   honors: string[];
   coursework: string[];
 }
@@ -65,7 +67,6 @@ export const education: Education = {
   degree: 'B.S. Computer Science, Visual & Media Studies Minor',
   institution: 'Duke University',
   period: 'Graduated December 2024',
-  gpa: '3.3',
   honors: ['George Scholar', 'Duke True North Leadership Program'],
   coursework: [
     'Algorithm Design & Analysis',
