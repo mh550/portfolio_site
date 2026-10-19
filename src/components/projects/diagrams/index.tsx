@@ -300,6 +300,38 @@ function HarnessEvolutionDiagram() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Home media server — listening, the server, every night              */
+/* ------------------------------------------------------------------ */
+
+function MediaServerDiagram() {
+  return (
+    <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <Panel title="Listening" tone="neutral">
+        <Node>Phone <Sub>Amperfy or the web client</Sub></Node>
+        <Arrow label="HTTPS" />
+        <Node>Private network <Sub>HTTPS only; nothing open to the LAN or the internet</Sub></Node>
+      </Panel>
+
+      <Panel title="Home server · Docker Compose" tone="accent">
+        <Node>Navidrome <Sub>library, playlists, transcoding</Sub></Node>
+        <Arrow label="playlists · signed stream links" />
+        <Node>crates service <Sub>crate flags, wanted queue, approvals</Sub></Node>
+        <Arrow label="approved downloads" />
+        <Node accent>Worker <Sub>approved rows only: VPN search → verify → beets</Sub></Node>
+        <Arrow label="verified files, then a rescan" />
+        <Node>Library <Sub>removals go to a trash with an undo log</Sub></Node>
+      </Panel>
+
+      <Panel title="Every night" tone="muted">
+        <Node>Database snapshot <Sub>both databases, all or nothing, under the lock</Sub></Node>
+        <Arrow />
+        <Node>Encrypted backup <Sub>to a second disk; the heartbeat is green only when it is fresh</Sub></Node>
+      </Panel>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Public component                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -311,6 +343,7 @@ const DIAGRAMS: Record<DiagramKey, () => React.ReactElement> = {
   'calendar-sync': CalendarSyncDiagram,
   'agent-harness': AgentHarnessDiagram,
   'harness-evolution': HarnessEvolutionDiagram,
+  'media-server': MediaServerDiagram,
 };
 
 const CAPTIONS: Record<DiagramKey, string> = {
@@ -322,6 +355,8 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'agent-harness':
     'One run: fresh sessions do the judgment, the driver does the bookkeeping, and nothing reaches main unverified.',
   'harness-evolution': 'Six ways of driving agents, each changed by what broke in the one before.',
+  'media-server':
+    'Nothing is open to the internet, streams go straight from Navidrome to the phone, and only approved, verified downloads reach the library.',
 };
 
 // What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).
@@ -341,6 +376,8 @@ const LABELS: Record<DiagramKey, string> = {
   'harness-evolution': `Six stages, each changed by what broke in the one before. ${harnessIterations()
     .map((it) => `${it.when}, ${it.label}. ${it.short}.`)
     .join(' ')}`,
+  'media-server':
+    'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night both databases are snapshotted, all or nothing, and an encrypted backup goes to a second disk; the heartbeat is green only when that backup is fresh.',
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {

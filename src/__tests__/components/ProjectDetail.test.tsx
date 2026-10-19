@@ -75,6 +75,18 @@ describe('ProjectDetail with a caseStudy', () => {
     expect(precedes(architecture, container.querySelector('#method')!)).toBe(true);
   });
 
+  it('shows the media-server diagram on the home-media-server page, after The Problem and before The Method (M5-03)', () => {
+    const { container } = render(<ProjectDetail project={getProjectBySlug('home-media-server')!} />);
+    const problem = screen.getByRole('heading', { level: 2, name: 'The Problem' });
+    const figure = Array.from(container.querySelectorAll('figure')).find((f) =>
+      f.querySelector('figcaption')?.textContent?.startsWith('Nothing is open to the internet'),
+    )!;
+    expect(figure).toBeDefined();
+    expect(within(figure).getByRole('img').getAttribute('aria-label')).toMatch(/private network, over HTTPS/);
+    expect(precedes(problem, figure)).toBe(true);
+    expect(precedes(figure, container.querySelector('#method')!)).toBe(true);
+  });
+
   it('puts the extra diagrams after #iterations and before #lessons (D17)', () => {
     const { container } = render(<ProjectDetail project={fixtureProject} />);
     const extra = Array.from(container.querySelectorAll('figure')).find((f) =>

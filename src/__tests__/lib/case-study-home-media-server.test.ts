@@ -33,6 +33,11 @@ describe('home-media-server entry', () => {
     ['831', '1,405', '1,359', 'reversible'].forEach((s, i) => expect(texts[i]).toContain(s));
   });
 
+  it("sets the 'media-server' architecture diagram and no extra diagrams (M5-03)", () => {
+    expect(project.detail.architectureDiagram).toBe('media-server');
+    expect(project.detail.extraDiagrams).toBeUndefined();
+  });
+
   it('has five non-empty method steps', () => {
     const steps = Object.values(cs!.method);
     expect(steps).toHaveLength(5);

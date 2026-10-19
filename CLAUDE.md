@@ -30,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (288 tests, 39 suites after M5-02)
+npm test             # Jest unit/integration tests (307 tests, 39 suites after M5-03)
 npm run test:watch   # watch mode
 ```
 

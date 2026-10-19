@@ -252,7 +252,7 @@ The words M5-03's test asserts (Phone, HTTPS, Navidrome, crates service, worker,
 backup) are all in the node, sub and arrow text above (case-insensitive). The text has no `.ts.net`, no `100.`, no
 `/srv`, no `http://`, no number and no product name for the download source.
 
-- `aria-label` (`LABELS['media-server']`): `'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night both databases are snapshotted, all or nothing, and everything is backed up, encrypted, to a second disk.'`
+- `aria-label` (`LABELS['media-server']`): `'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night both databases are snapshotted, all or nothing, and an encrypted backup goes to a second disk; the heartbeat is green only when that backup is fresh.'`
 - caption (`CAPTIONS['media-server']`): `'Nothing is open to the internet, streams go straight from Navidrome to the phone, and only approved, verified downloads reach the library.'`
 
 ## Tests M5-02 and M5-03 write or update

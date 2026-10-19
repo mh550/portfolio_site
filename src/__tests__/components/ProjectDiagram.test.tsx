@@ -10,6 +10,7 @@ const KEYS: DiagramKey[] = [
   'calendar-sync',
   'agent-harness',
   'harness-evolution',
+  'media-server',
 ];
 
 describe('ProjectDiagram accessibility (D17)', () => {
@@ -84,5 +85,37 @@ describe('harness-evolution diagram', () => {
     const list = within(getByRole('img')).getByRole('list');
     expect(list.className).toMatch(/\bgrid-cols-1\b/);
     expect(list.className).toMatch(/\bmd:grid-cols-6\b/);
+  });
+});
+
+describe('media-server architecture diagram (M5-03)', () => {
+  it.each(['Phone', 'HTTPS', 'Navidrome', 'crates service', 'worker', 'verify', 'beets', 'library', 'snapshot', 'backup'])(
+    'names %s (acronyms in capitals, other words in any case)',
+    (word) => {
+      const { getByRole } = render(<ProjectDiagram diagram="media-server" />);
+      const text = getByRole('img').textContent!;
+      if (word === word.toUpperCase()) expect(text).toContain(word);
+      else expect(text.toLowerCase()).toContain(word.toLowerCase());
+    },
+  );
+
+  // '.ts' + '.net': split so the content guard does not flag this test (as in case-study-home-media-server.test.ts).
+  it.each(['.ts' + '.net', '100.', '/srv', 'http://'])('publishes no %s in its text, label or caption (D18)', (banned) => {
+    const { container, getByRole } = render(<ProjectDiagram diagram="media-server" />);
+    expect(container.textContent).not.toContain(banned);
+    expect(getByRole('img').getAttribute('aria-label')).not.toContain(banned);
+  });
+
+  it('never names the download source: the diagram says what the worker does, not where from', () => {
+    const { container, getByRole } = render(<ProjectDiagram diagram="media-server" />);
+    expect(container.textContent).not.toMatch(/soulseek|slskd/i);
+    expect(getByRole('img').getAttribute('aria-label')).not.toMatch(/soulseek|slskd/i);
+  });
+
+  it('stacks its three panels at 390 and top-aligns them side by side from md', () => {
+    const { getByRole } = render(<ProjectDiagram diagram="media-server" />);
+    const panels = getByRole('img').firstElementChild!;
+    expect(panels).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
+    expect(panels.children).toHaveLength(3);
   });
 });

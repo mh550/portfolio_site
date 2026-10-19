@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:05 · M5-03 · passes
+
+- `DiagramKey` gains `'media-server'`; `MediaServerDiagram` in `src/components/projects/diagrams/index.tsx` uses only Node/Sub/Arrow/Panel. It has three panels (Listening · Home server · Docker Compose · Every night), stacked at 390 and side by side, top-aligned, from md. Its entries in `DIAGRAMS`/`CAPTIONS`/`LABELS` are the plan's copy, verbatim. The home-media-server entry sets `detail.architectureDiagram: 'media-server'`.
+- Tests 288 → 307 (39 suites). ProjectDiagram: the new key joins the D17 a11y `it.each`; 10 word tests; banned `.ts.net`/`100.`/`/srv`/`http://` checked in the text, label and caption; no download-source name; 3 stacked panels. ProjectDetail: on the real entry, the diagram (found by its caption) sits after The Problem and before #method. case-study-home-media-server: the entry's diagram key.
+- Verified: `.harness/check.sh` run directly is green (lint, 307 tests, 6 snapshots, build). Smoke: 32/32 PASS at the start and after the change; `/projects/home-media-server` PASS at 1280 and 390. A Sonnet browser check (reduced motion) passed: panels stacked at 390 and in one row at 1280, scroll diff 0, no node overflow, no console errors. I looked at both diagram shots myself.
+- Opus review: no Critical or Important findings, 2 Minor, both applied. The test's figure lookup now uses the caption, because a gallery caption also says "Navidrome". The label said "everything is backed up", but the brief says only "backup to a separate disk", so it now reads "an encrypted backup goes to a second disk; the heartbeat is green only when that backup is fresh". The plan was updated to match.
+- Next session (M5-04): capture with `reducedMotion: 'reduce'`. An element screenshot at 390 puts the fixed navbar over the top of the diagram, so scroll it below the nav or take a full-page shot. At 1280 the long arrow labels wrap, left-aligned. I tried a `text-center` on `Arrow`'s label, but it changes the pinned classic-page snapshots, so I reverted it. Fixing it means updating those snapshots on purpose.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:40 · M5-02 · passes
 
 - New entry `home-media-server` in `src/lib/data/projects.ts` (order 3, after linear-ai-workflow), pasted from the M5 plan as written: 4 metrics (831 · 1,405 · 1,359 · "Trash, not delete"), 5 method texts, decisions D7/D3/D24/D27/D18/D38/39, 5 iterations, 7 lessons, 1 repo link, builtWith. The verify excerpt was taken from the DJ file's bytes (lines 60–65) with the one `/srv/incoming/` → `incoming/` swap. Three demo PNGs copied to `public/projects/home-media-server/` (59/90/108 KB, `cmp` identical). D29 is built: `ProjectMedia.width/height`; `MediaGallery` shows sized images uncropped, and an all-portrait list uses `sm:grid-cols-3`; unsized items render as before.

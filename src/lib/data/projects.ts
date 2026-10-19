@@ -10,7 +10,8 @@ export type DiagramKey =
   | 'paint-hierarchy'
   | 'calendar-sync'
   | 'agent-harness'
-  | 'harness-evolution';
+  | 'harness-evolution'
+  | 'media-server';
 
 export interface ProjectMedia {
   type: 'image' | 'video';
@@ -452,6 +453,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
           height: 1720,
         },
       ],
+      architectureDiagram: 'media-server',
     },
     caseStudy: {
       role: 'Designer and operator',
