@@ -15,6 +15,9 @@ https://michael-herron.vercel.app/card/qr. Both go live when you merge this bran
    the QR icon in the search bar and show "My code". A screenshot of `/card/qr` in Photos also works, but the
    person scanning still needs signal to open the card.
 
+To add a one-line greeting above "Selected work" (say "Met me at a conference? Say hi."), type it between the quotes
+of `conferenceNote: ''` in `src/lib/data/profile.ts`; leave it `''` and nothing shows (if the line has an apostrophe, use double quotes instead: `"I'm at booth 4"`).
+
 From `/card` itself, **Show QR** opens the QR page and **← Back** returns to the card, so you can hand your phone to
 someone either way.
 

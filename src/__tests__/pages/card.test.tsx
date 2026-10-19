@@ -3,6 +3,8 @@ import CardPage, { metadata } from '@/app/card/page';
 import { getTopProjects, profile, projects } from '@/lib/data';
 
 describe('CardPage', () => {
+  afterEach(() => jest.restoreAllMocks());
+
   it('renders the name as h1 and the positioning', () => {
     render(<CardPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(profile.name);
@@ -115,6 +117,24 @@ describe('CardPage', () => {
     // block (siteName, type, headshot, summary card) and fills og:title/description from its own title/description
     expect(metadata).not.toHaveProperty('openGraph');
     expect(metadata).not.toHaveProperty('twitter');
+  });
+
+  it('renders no conference note while profile.conferenceNote is empty (the default)', () => {
+    expect(profile.conferenceNote).toBe('');
+    render(<CardPage />);
+    const section = screen.getByRole('heading', { level: 2, name: 'Selected work' }).parentElement!;
+    expect(section.querySelector('p')).toBeNull();
+    expect(section.firstElementChild).toHaveTextContent('Selected work');
+  });
+
+  it('renders a filled-in conference note above the Selected work heading', () => {
+    jest.replaceProperty(profile, 'conferenceNote', 'Met me at a conference? Say hi.');
+    render(<CardPage />);
+    const note = screen.getByText('Met me at a conference? Say hi.');
+    const heading = screen.getByRole('heading', { level: 2, name: 'Selected work' });
+    expect(note.tagName).toBe('P');
+    expect(heading.parentElement!.contains(note)).toBe(true);
+    expect(note.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('renders no <nav>', () => {

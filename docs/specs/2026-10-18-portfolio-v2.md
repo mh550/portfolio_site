@@ -142,6 +142,10 @@ don't redo it.
   Sans only: → and ↔ are drawn as SVG arrows and ≈ becomes ~, because a glyph missing from that font makes next/og
   fetch one from Google Fonts (a test checks every drawn character against the font's cmap). The root `twitter.card`
   stays `summary`; `summary_large_image` on project pages is the alternative. (S1-01.)
+- **D39** *default* The `/card` conference note (`profile.conferenceNote`, Stretch 2) ships empty, so the live card is
+  unchanged until Michael types a line. When set it renders as one `<p>` inside the Selected work section, above its
+  heading, with an accent left rule (`src/components/card/ConferenceNote.tsx`); whitespace-only counts as empty.
+  (S2-01.)
 
 ## Dependencies between milestones
 

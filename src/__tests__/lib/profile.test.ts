@@ -14,6 +14,7 @@ describe('profile data', () => {
       github: 'https://github.com/mh550',
       siteUrl: 'https://michael-herron.vercel.app',
       headshot: '/photos/headshot.png',
+      conferenceNote: '',
     };
     expect(profile).toEqual(expected);
   });
@@ -32,6 +33,7 @@ describe('profile data', () => {
     ['github', 'https://github.com/mh550'],
     ['siteUrl', 'https://michael-herron.vercel.app'],
     ['headshot', '/photos/headshot.png'],
+    ['conferenceNote', ''],
   ] as const)('%s is %p', (key, value) => {
     expect(profile[key]).toBe(value);
   });

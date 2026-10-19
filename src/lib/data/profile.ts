@@ -9,6 +9,8 @@ export interface Profile {
   github: string;
   siteUrl: string;
   headshot: string;
+  // One line shown above Selected work on /card; '' renders nothing (docs/conference-kit.md)
+  conferenceNote: string;
 }
 
 // The single source of contact and positioning facts (docs/notes/brand.md). No phone number (D5).
@@ -24,4 +26,5 @@ export const profile: Profile = {
   github: 'https://github.com/mh550',
   siteUrl: 'https://michael-herron.vercel.app',
   headshot: '/photos/headshot.png',
+  conferenceNote: '',
 };

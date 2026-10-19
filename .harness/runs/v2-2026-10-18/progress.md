@@ -9,6 +9,13 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 01:34 · S2-01 · passes
+
+- `profile.conferenceNote: string` (default `''`) in `src/lib/data/profile.ts`; new `src/components/card/ConferenceNote.tsx` takes the note as a prop and renders one `<p>` (trimmed, accent left rule) or nothing; `/card` renders it inside the Selected work section above the h2 (section now `aria-labelledby` its h2). D39 *default* records this. `docs/conference-kit.md` has the line telling Michael where to type it.
+- Tests 625 → 631 (55 → 56 suites): component test (renders 'Met me at a conference? Say hi.' as a `<p>`; nothing for '' or spaces), card.test.tsx (no note by default; with `jest.replaceProperty` the note renders inside the section, before the heading), profile.test.ts. Removing the `<ConferenceNote>` line from the page turns the card test red.
+- Verified: `lib/check.sh` green; smoke 38/38 PASS; 390 px screenshot with the note filled in is `docs/screenshots/v2/S2-card-note-390.png` (scrollWidth 390); with it empty, no `<p>` in the section. Opus review: 0 Critical, 1 Important (restore leak, now `afterEach`), Minor fixes applied.
+- Next session: S3-01 (print stylesheet) is the last stretch feature. Questions for Michael: none needed (D39 is reversible). Proposed changes: none.
+
 ### 2026-10-19 14:00 · verify S1
 
 | Feature | Step | What you ran or read | What you saw | Holds |

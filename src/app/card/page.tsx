@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getTopProjects, profile } from '@/lib/data';
 import { focusRing } from '@/components/focusRing';
+import ConferenceNote from '@/components/card/ConferenceNote';
 
 const title = `${profile.name} — ${profile.positioning}`;
 
@@ -54,8 +55,12 @@ export default function CardPage() {
         </a>
       </div>
 
-      <section className="mt-10 w-full text-left">
-        <h2 className="font-mono text-sm uppercase tracking-wider text-[var(--color-muted)]">
+      <section aria-labelledby="selected-work" className="mt-10 w-full text-left">
+        <ConferenceNote note={profile.conferenceNote} />
+        <h2
+          id="selected-work"
+          className="font-mono text-sm uppercase tracking-wider text-[var(--color-muted)]"
+        >
           Selected work
         </h2>
         <ul className="mt-3 flex flex-col gap-3">
