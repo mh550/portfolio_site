@@ -18,6 +18,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
+| `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
 | `/approach` | How I work: `MethodStrip showLines` + six `principles` whose examples link via `resolvedExamples` (`approach.ts`) |
@@ -33,7 +34,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (611 tests, 54 suites after M8-02)
+npm test             # Jest unit/integration tests (625 tests, 55 suites after S1-01)
 npm run test:watch   # watch mode
 ```
 

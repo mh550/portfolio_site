@@ -578,7 +578,7 @@
         ".harness/check.sh is green (the build renders the images)"
       ],
       "after": ["M3-05"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "S2-01", "milestone": "S2", "kind": "build", "model": "opus",

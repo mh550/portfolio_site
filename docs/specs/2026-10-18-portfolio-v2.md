@@ -136,6 +136,12 @@ don't redo it.
   case-study copy (curly quotes touch many tests and copy strings that trace to docs/notes), `text-balance` on the
   long h1s (they wrap acceptably at 390), and a sitemap test that walks `src/app` for new pages (the fixed route list
   is checked against the files on disk). Details in `docs/plans/2026-10-18-M8-polish.md`. (M8-02.)
+- **D38** *default* The project Open Graph image (`src/app/projects/[slug]/opengraph-image.tsx`) shows the company,
+  title, first metric (value + label) and "Michael Herron · Systems & Process Engineer". A project without metrics
+  (mirrored-google-calendars, cherished) shows its `shortDescription` instead. It uses next/og's bundled Latin Noto
+  Sans only: → and ↔ are drawn as SVG arrows and ≈ becomes ~, because a glyph missing from that font makes next/og
+  fetch one from Google Fonts (a test checks every drawn character against the font's cmap). The root `twitter.card`
+  stays `summary`; `summary_large_image` on project pages is the alternative. (S1-01.)
 
 ## Dependencies between milestones
 

@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 13:30 · S1-01 · passes
+
+- New `src/app/projects/[slug]/opengraph-image.tsx` (next/og, 1200×630 PNG, `generateStaticParams` over `projects`): on #0a0a0f it shows the company, the title, the first metric (value in accent, label) and "Michael Herron · Systems & Process Engineer". There is no font fetch. next/og's bundled Latin Noto Sans has no → or ↔, and a missing glyph makes it fetch from Google Fonts, so arrows are drawn as SVG and ≈ becomes ~. Projects without metrics (cherished, mirrored-google-calendars) show their shortDescription. D38 records this. Unknown slugs return 404.
+- New `src/__tests__/app/opengraph-image.test.ts` (14 tests): exports, size, every slug, title/metric/name/background for all 9 projects, no fetch/fonts, a 404 digest, and every drawn character checked against the font's own cmap (a mutation that removes the arrow swap turns it red). Tests 611 → 625 (54 → 55 suites). CLAUDE.md routes and count are updated.
+- Verified: curl :7800/projects/agent-harness/opengraph-image → `200 image/png`, saved as `docs/screenshots/v2/S1-og-agent-harness.png` (50 KB). I also looked at ghl (↔ and → arrows), paint-estimator and cherished. The page's `og:image` meta points at the route, 1200×630. `lib/check.sh` is green, and the build prerenders all 9 images (`.next-check/server/app/projects/*/opengraph-image.body`). Smoke 38/38 PASS.
+- Opus review: 0 Critical, 4 Minor. Fixed: the 404 test now checks the digest, arrows in metric labels are centred, and the `size` prop is renamed. Kept: one shared `alt` for every project; a per-project alt needs `generateImageMetadata`, which changes the URL.
+- Question for Michael (no answer needed): should project pages switch `twitter.card` to `summary_large_image` so X/Slack show the new image large (D38)? Proposed changes: none.
+
 ### 2026-10-19 13:00 · verify M9
 
 | Feature | Step | What you ran or read | What you saw | Holds |
