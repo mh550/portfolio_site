@@ -119,8 +119,8 @@ describe('CardPage', () => {
     expect(metadata).not.toHaveProperty('twitter');
   });
 
-  it('renders no conference note while profile.conferenceNote is empty (the default)', () => {
-    expect(profile.conferenceNote).toBe('');
+  it('renders no conference note when profile.conferenceNote is empty', () => {
+    jest.replaceProperty(profile, 'conferenceNote', '');
     render(<CardPage />);
     const section = screen.getByRole('heading', { level: 2, name: 'Selected work' }).parentElement!;
     expect(section.querySelector('p')).toBeNull();
