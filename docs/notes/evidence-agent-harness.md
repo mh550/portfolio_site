@@ -64,7 +64,7 @@ throwaway repo (~2 min).
 - **D-H10 → D-H16, D-H21** Live systems get a staged protocol (dry run → 5 → 50 → all, snapshots, a lock) and live
   writes never overlap the nightly backup.
 
-## Numbers (ledger/runs.jsonl, the first v3 night, Oct 17)
+## Numbers (ledger/runs.jsonl, Oct 17: two runs started overnight on v2 and finished on v3 that day)
 
 - 2 projects, 71 features attempted, **55 passing, 52 verified and merged through 12 PRs**.
 - **+374 tests** (1,242 → 1,616). **$139.34 total, ≈ $2.53 per passing feature.** 13.9 h wall, 127 sessions.
@@ -100,3 +100,9 @@ throwaway repo (~2 min).
   by the harness it describes"; link the repo's pull requests filtered by `harness`).
 - Screenshots to capture later (asset checklist): `harness attach` in tmux; a phone INBOX.md edit; an ntfy
   notification.
+
+## Corrections
+
+- 2026-10-18 (M4-01): the Numbers heading said "the first v3 night". `journal/runs/2026-10-17-evaluation.md` calls it
+  "the first harness v2 night"; v3 was built that afternoon and the runs' continuations ran on it. The 13.9 h is the
+  run time of two overlapping runs, not elapsed time.

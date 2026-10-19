@@ -9,6 +9,21 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:09 · M4-01 · passes
+
+- New `docs/plans/2026-10-18-M4-agent-harness.md`: final copy field by field (entry, 4 metrics, 5 method texts, D-H1/2/4/5/11/17,
+  6 iterations (D27 resolved: row 1b folded into row 1, matching the six diagram stages), 5 lessons, 2 links, builtWith),
+  Traceability table (every number → brief line or agent-harness file, ledger sums rechecked), code excerpt
+  `lib/driver.sh` 170–182 (13 lines, diffed byte-for-byte against the source), both diagrams' nodes/labels/captions, brand check,
+  and the tests M4-02/M4-03 must write or update (data.test 6→7, top-3 becomes agent-harness/linear/ghl, case-study-types, ProjectsGrid Systems empty state).
+- Opus fact-check of the copy: 2 Important fixed (Oct 17 was "the first harness v2 night" finishing on v3, not "the first v3 night";
+  lesson 5 had presented "block only on declared dependencies" as built, `lib/features.mjs` shows it is still proposed) + 3 Minor.
+  Corrected the brief's Numbers heading (`docs/notes/evidence-agent-harness.md`, note under `## Corrections`; line numbers unchanged).
+- Tests 228 → 228 (plan only); check.sh green; smoke all PASS.
+- Next (M4-02): paste the copy as written; copy the excerpt from the file, not the plan. The verbatim test will break whenever
+  driver.sh changes: re-copy, don't loosen it.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 · verify M3
 
 | Feature | Step | What you ran or read | What you saw | Holds |
