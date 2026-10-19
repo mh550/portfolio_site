@@ -539,7 +539,7 @@
         "`node .harness/smoke.mjs` (every route) and .harness/check.sh are green"
       ],
       "after": ["M2-06", "M7-05"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M8-02", "milestone": "M8", "kind": "review", "model": "opus",

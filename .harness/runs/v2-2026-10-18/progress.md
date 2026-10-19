@@ -9,6 +9,13 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 09:30 · M8-01 · passes
+
+- Navbar: Approach sits between Projects and Experience, in the desktop list and the mobile menu (`src/components/Navbar.tsx`). `/projects` now sorts cards by `order` (`ProjectsGrid.tsx`). The filters already included Systems and Process, and case studies without a thumbnail already showed their first metric; both are now pinned by tests. New `src/app/sitemap.ts` (the 8 static routes plus 9 projects, built from `profile.siteUrl`, without `/evidence` and `/card/qr`) and `src/app/robots.ts` (disallows both, points to `/sitemap.xml`). The CLAUDE.md routes, components and test count are updated. Tests went from 552 to 562 (51 → 52 suites; new `src/__tests__/app/sitemap-robots.test.ts`). I wrote the tests first and watched them fail: 3 Navbar, 1 order, 1 missing module.
+- Verified: on :7800, `curl sitemap.xml | grep -c '<loc>'` = 17 (needs ≥ 16), and robots.txt has `Disallow: /evidence` and `Disallow: /card/qr`. The build prerenders both as static files. Smoke 38/38 PASS. `lib/check.sh` is green. A Sonnet browser check found the seven links on one row at 768, 1024 and 1280 (rightmost edge at 744 of 768, 0 overflow), the mobile menu in the same order, Approach → /approach with aria-current, cards in order 1–9, and 0 console errors. I looked at the 768 nav and 390 menu screenshots.
+- Next session (M8-02): the M8 diff is this commit (`git diff 9c3ac7e..HEAD`). At 768 the desktop nav has 24 px to spare, so adding another nav link would need a smaller gap.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-19 verify M7
 
 | Feature | Step | What you ran or read | What you saw | Holds |

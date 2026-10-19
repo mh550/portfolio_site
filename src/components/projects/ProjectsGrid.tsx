@@ -15,11 +15,13 @@ const FILTERS: { label: string; value: ProjectCategory | 'all' }[] = [
   { label: 'Process', value: 'process' },
 ];
 
+// Display order across the site (D12), lowest first
+const sorted = [...projects].sort((a, b) => a.order - b.order);
+
 export default function ProjectsGrid() {
   const [active, setActive] = useState<ProjectCategory | 'all'>('all');
 
-  const filtered =
-    active === 'all' ? projects : projects.filter((p) => p.categories.includes(active));
+  const filtered = active === 'all' ? sorted : sorted.filter((p) => p.categories.includes(active));
 
   return (
     <div>

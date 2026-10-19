@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Navbar from '@/components/Navbar';
 
@@ -15,7 +15,7 @@ describe('Navbar', () => {
 
   it('renders all nav links', () => {
     render(<Navbar />);
-    const links = ['Home', 'About', 'Skills', 'Projects', 'Experience', 'Contact'];
+    const links = ['Home', 'About', 'Skills', 'Projects', 'Approach', 'Experience', 'Contact'];
     for (const label of links) {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     }
@@ -28,6 +28,7 @@ describe('Navbar', () => {
       About: '/about',
       Skills: '/skills',
       Projects: '/projects',
+      Approach: '/approach',
       Experience: '/experience',
       Contact: '/contact',
     };
@@ -37,6 +38,20 @@ describe('Navbar', () => {
       const found = linkEls.some((el) => el.getAttribute('href') === href);
       expect(found).toBe(true);
     }
+  });
+
+  it('lists the seven links in order in the desktop list and the mobile menu (M8)', async () => {
+    const user = userEvent.setup();
+    render(<Navbar />);
+    await user.click(screen.getByRole('button', { name: /open menu/i }));
+    const order = ['Home', 'About', 'Skills', 'Projects', 'Approach', 'Experience', 'Contact'];
+    const lists = screen.getAllByRole('list');
+    expect(lists).toHaveLength(2);
+    for (const list of lists) {
+      expect(within(list).getAllByRole('link').map((a) => a.textContent)).toEqual(order);
+      expect(within(list).getByRole('link', { name: 'Approach' })).toHaveAttribute('href', '/approach');
+    }
+    expect(screen.queryByRole('link', { name: /evidence|card/i })).not.toBeInTheDocument();
   });
 
   it('does not link to /evidence (noindex, off the nav)', () => {

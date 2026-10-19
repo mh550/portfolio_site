@@ -25,6 +25,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
+| `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
 
 ## Commands
 
@@ -32,7 +33,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (552 tests, 51 suites after M7-05)
+npm test             # Jest unit/integration tests (562 tests, 52 suites after M8-01)
 npm run test:watch   # watch mode
 ```
 
@@ -67,7 +68,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `index.ts` — barrel export
 
 ### Components
-- `components/Navbar.tsx` — fixed top nav with active link highlighting, mobile hamburger (`"use client"`)
+- `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Approach, Experience, Contact) with active link highlighting, mobile hamburger (`"use client"`)
 - `components/Footer.tsx` — social links
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper; skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
@@ -77,7 +78,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
-- `components/projects/ProjectsGrid.tsx` — client filter + grid using `ProjectCard` + `ScrollReveal` (`"use client"`)
+- `components/projects/ProjectsGrid.tsx` — client filter + grid (sorted by `order`) using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves
   the slug. Without `project.caseStudy` it renders the classic Problem/Approach/Challenges/Outcome page (pinned by
   `src/__tests__/app/project-page-unchanged.test.tsx`); with it, the case-study order (D16, D17)

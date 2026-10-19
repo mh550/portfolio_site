@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProjectsGrid from '@/components/projects/ProjectsGrid';
 import { projects } from '@/lib/data';
@@ -88,6 +88,26 @@ describe('ProjectsGrid', () => {
     await user.click(screen.getByRole('button', { name: 'All' }));
     for (const p of projects) {
       expect(screen.getByText(p.title)).toBeInTheDocument();
+    }
+  });
+
+  it('renders the cards sorted by order, lowest first (M8)', () => {
+    render(<ProjectsGrid />);
+    const rendered = screen.getAllByRole('article').map((a) => within(a).getByRole('heading').textContent);
+    const expected = [...projects].sort((a, b) => a.order - b.order).map((p) => p.title);
+    expect(rendered).toEqual(expected);
+  });
+
+  it('shows the first metric value in the preview band of each case study without a thumbnail', () => {
+    render(<ProjectsGrid />);
+    const caseStudies = projects.filter((p) => p.caseStudy && !p.thumbnail);
+    expect(caseStudies.length).toBeGreaterThan(0);
+    for (const p of caseStudies) {
+      const card = screen.getAllByRole('article').find((a) => within(a).queryByRole('heading', { name: p.title }));
+      expect(card).toBeDefined();
+      const metric = p.metrics?.[0];
+      expect(metric).toBeDefined();
+      expect(within(card!).getAllByText(metric!.value).length).toBeGreaterThan(0);
     }
   });
 });
