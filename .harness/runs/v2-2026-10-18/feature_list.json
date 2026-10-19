@@ -565,7 +565,7 @@
         "All four files pass the content guard; `git diff --stat HEAD~1` touches only docs/, CLAUDE.md, README.md and .harness/runs/; .harness/check.sh is green"
       ],
       "after": ["M1-07"],
-      "passes": false
+      "passes": true
     },
 
     {

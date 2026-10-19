@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 12:00 · M9-01 · passes
+
+- Wrote `docs/review-guide.md` (merge order M1 first, M1 ships M0 and the harness setup; per-milestone changes and what to check at 390 px), extended `docs/asset-checklist.md` (HitList kept; added agent-harness, Amperfy, MAXX projects, shared media-entry instructions), updated `CLAUDE.md` (spec/plans pointers, profile/approach/competencies modules, content guard) and replaced the `README.md` boilerplate.
+- CLAUDE.md's routes table, 611-test count and "prerenders, not a static export" were already correct; checked against `src/app` and `npx jest --silent` (611, 54 suites; unchanged, docs only).
+- Verified: README has 0 hits for create-next-app/Getting Started; `.harness/check.sh` green (lint, jest, build), smoke passed at the start.
+- Question for Michael: may the MAXX projects get any screenshots at all? The checklist says to ask MAXX first.
+- Proposed changes: none.
+
 ### 2026-10-19 verify M8
 
 | Feature | Step | What you ran or read | What you saw | Holds |

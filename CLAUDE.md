@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Michael Herron's personal portfolio site — a bold, expressive multi-page site built with Next.js (App Router), TypeScript, Tailwind CSS, and Framer Motion. Deployed on Vercel.
 
-**Spec:** `portfolio_site_spec.md` — read this before implementing any new section or feature.
-**Plan:** `IMPLEMENTATION_PLAN.md` — milestone-based implementation plan.
+**Spec:** `docs/specs/2026-10-18-portfolio-v2.md` — read this before implementing any new section or feature.
+**Plans:** `docs/plans/` — one file per milestone (`<date>-<milestone>-<topic>.md`). Hand-off: `docs/review-guide.md`, `docs/asset-checklist.md`.
 
 ## Routes
 
@@ -65,6 +65,8 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `projects.ts` — `Project[]` with slug, title, categories, techStack, detail sections; `getProjectBySlug()`, `getProjectsByCategory()`
 - `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
 - `experience.ts` — `Role[]` + `Education` object
+- `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
+- `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
 
 ### Components
@@ -88,6 +90,9 @@ Single source of truth for all page content — no content is hardcoded in compo
 
 ### Pages
 All pages are Server Components (no `"use client"`) except where noted. They import from `lib/data` and render `ScrollReveal` + page-specific markup.
+
+### Content guard
+`src/__tests__/lib/content-guard.test.ts` walks `src/` and `public/` and fails on tailnet hostnames, CGNAT IPs, ntfy URLs, US phone numbers, private repo links, TODO/placeholder text and secret-looking assignments. Fix the content, never the patterns.
 
 ### Testing
 - `src/__tests__/` — Jest + React Testing Library
