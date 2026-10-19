@@ -111,6 +111,14 @@ don't redo it.
   removal is a reversible move" instead of D18's "Nothing deleted": the D32 purge deleted 35 (restorable) playlists,
   `fetch` deletes its own failed downloads, and 18 trashed copies were overwritten on Oct 15 before the trash stopped
   overwriting, so "Nothing deleted" would overclaim. (M5-01 fact-check.)
+- **D31** *default* Below 768 px the hero's method strip shows the five labels with arrows; each step's line is
+  visible from 768 px up and read by screen readers at every width (`sr-only md:not-sr-only`). With the lines shown
+  at 390 px, both hero buttons would fall below a 390×844 fold. `/approach` (M7) shows the lines at every width.
+  (M2-01.)
+- **D32** *default* The About intro (D13) lives in `src/lib/data/approach.ts` as `aboutIntro: string[]` (subline +
+  the five method labels + "I own delivery from requirements to release."), not in `profile.ts`:
+  `scripts/make-qr.mjs` imports `profile.ts` under Node's type stripping (D21), which can't resolve an extensionless
+  import of `./approach`. (M2-01. Not the media server's own "D32 purge" in D30.)
 
 ## Dependencies between milestones
 

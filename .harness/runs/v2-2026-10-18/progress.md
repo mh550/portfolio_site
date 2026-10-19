@@ -9,6 +9,16 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:55 · M2-01 · passes
+
+- New `docs/plans/2026-10-18-M2-positioning.md` (plan only, no code). Sections: Files, Metadata (root `metadata` from `profile`; Open Graph carries siteName + headshot but no title/url, so project pages unfurl with their own titles), Hero (eyebrow/tagline/subline from `profile`, `MethodStrip` created by M2-02 per D23, `h-screen` → `min-h-svh`, reduced motion for the fade-ups, FloatingLogos and NodeGraph), Recent work (`getTopProjects(3)`, `ProjectCard headingAs="h3"`, "See all projects", Footer on `/` per D19), Experience (MAXX and Builder Clarity bullets word for word with brand.md lines, `7+` → `4+`, GPA removal, D9 bullet, a traceability table), About (3-sentence intro), Skills (4 groups, 51 strings; a table shows all 39 current skills survive; Process & delivery featured), Tests (per-feature table), an empty 8-row What Michael will see table, an empty Review.
+- New defaults in the spec: **D31** (below 768 px the hero strip shows only the labels; the lines appear from md up and screen readers get them at every width, so both buttons stay above a 390×844 fold), **D32** (`aboutIntro` lives in `approach.ts`, because make-qr imports profile.ts under Node type stripping).
+- Measured today's hero (Sonnet, Playwright on :7800): at 390×844 the hero is `h-screen` and About Me ends at 619 px; it ends at 545 at 375×667 and at 533 at 1280×800. The planned layout should put About Me near 720 at 390×844, and M2-02 measures the real value.
+- An Opus review of the plan found 7 Important and 10 Minor issues, checked and applied. The root Open Graph block would have retitled every project page. The planned reduced-motion test (resetModules + require) would crash on NodeGraph's hooks. NodeGraph would have stayed blank under reduced motion. The card title is not a link (assert "Deep dive"). MAXX "Pioneered … testing" overclaimed (project_descriptions.md 13–25), so it is rewritten. The 12–18 age range comes from D9, not brand.md, and the plan now says so.
+- Not added: the skill "Monitoring", because the media-server heartbeat is built but not installed. The site will show "AGILE/Scrum" as a chip next to "Agile/Scrum in Linear" in a bullet; M2-04's hard-coded list forces that.
+- Verified: `lib/check.sh` green (392 tests, unchanged); smoke 34/34 PASS at session start; the commit touches only `docs/` and `.harness/runs/`.
+- Next: M2-02, M2-03 and M2-04 are independent. Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 verify M6
 
 | Feature | Step | What you ran or read | What you saw | Holds |
