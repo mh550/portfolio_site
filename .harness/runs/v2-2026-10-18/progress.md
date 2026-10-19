@@ -9,6 +9,35 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M6
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M6-01 | 1 | Read plan (502 lines) § entry/metrics/caseStudy; compared with data dump | Plan has all fields, 3 metrics, 6 iterations, lessons, repo link, builtWith; data matches | yes |
+| M6-01 | 2 | Read plan `## Traceability` (l.331) | Table maps numbers/dates/ids to brief lines or HL files | yes |
+| M6-01 | 3 | Read plan `## Diagrams` (l.192-300) | Nodes for hit-list and form-simplification incl. 5-step scale, aria-label and caption | yes |
+| M6-01 | 4 | grep plan 'none will be faked' (l.152); `git show --stat aaa1f93`; docs/asset-checklist.md HitList section | States no screenshots; checklist entries present; commit touches only docs/ and .harness/runs/ | yes |
+| M6-01 | 5 | lib/check.sh | green | yes |
+| M6-02 | 1 | jest dump of getProjectBySlug('hit-list') | company, categories, order 4, featured, githubUrl exact; metrics 374 / 20+ → 7 / SDK 54 → 57 | yes |
+| M6-02 | 2 | Same dump + data shape | method object with 5 strings (type), ids D1 D2 D3 D12 D21 D22, 6 iterations, last has 'specified' + 'not yet built', 5 lessons incl. 7679.1 mi, flexGrow, crypto.getRandomValues, 1 link exact href, builtWith | yes |
+| M6-02 | 3 | Dump + `ls public/projects`; case-study-hit-list.test.ts l.86 | media undefined, no demoUrl, no public/projects/hit-list; test asserts it | yes |
+| M6-02 | 4 | case-study-hit-list.test.ts l.100-110; `npx jest case-study-hit-list data.test` | Digit-run and decision-id vs brief asserted; data count 9; 141 tests pass | yes |
+| M6-02 | 5 | Read docs/asset-checklist.md HitList section | Lists List, Map, Quick Add, detail shots or 15 s recording | yes |
+| M6-02 | 6 | lib/check.sh | green | yes |
+| M6-03 | 1 | ProjectDiagram.test.tsx KEYS includes both; jest run | DiagramKey, LABELS/CAPTIONS render; tests pass | yes |
+| M6-03 | 2 | ProjectDiagram.test.tsx l.142-250; browser text at /projects/hit-list | Words, role=img, labels asserted; scale 'None · Little · Some · Enough · Too much' in order; 7 fields | yes |
+| M6-03 | 3 | Data dump + browser computed grid columns | architectureDiagram hit-list, extraDiagrams [form-simplification]; 390: 1 column (300px), 1280: 2 (327px each) | yes |
+| M6-03 | 4 | `node .harness/smoke.mjs` | PASS /projects/hit-list at 1280 and 390 (all routes pass) | yes |
+| M6-03 | 5 | lib/check.sh | green | yes |
+| M6-04 | 1 | `ls -la`, `file` on docs/screenshots/v2/M6-* | 393 KB and 336 KB (<400 KB), full pages 1280x7165, 390x11516 | yes |
+| M6-04 | 2 | Read plan 'What Michael will see' (l.317) | Lists metrics, diagram, method, decisions, iterations, form before/after, lessons, single link, no gallery | yes |
+| M6-04 | 3 | Playwright at 390 and 1280 | scrollWidth−innerWidth=0 both; scale text intact; plan table states 0 | yes |
+| M6-04 | 4 | Read table 'Anything wrong' column | Fixes or reasons listed | yes |
+| M6-04 | 5 | lib/check.sh | green | yes |
+| M6-05 | 1 | Read plan ## Review (l.401-502) | Findings with severity, 28-row fact table, 'specified, not yet built' sentence present | yes |
+| M6-05 | 2 | Read Review; ProjectDiagram M6-05 tests; progress entry | Fixes with tests; web-design-guidelines run recorded | yes |
+| M6-05 | 3 | tail of plan; smoke; lib/check.sh | Ends 'Ready to merge: yes'; smoke and check green | yes |
+
 ### 2026-10-18 23:55 · M6-05 · passes
 
 - Review of M6 from `$HARNESS_SCRATCH/M6.diff` (`aaa1f93~1..6de6479`, 1,189 lines): Opus on the code, Opus on facts and voice against the brief and the HitList files, Sonnet on the guidelines in a browser. Each finding was checked against the cited lines before acting. The plan's `## Review` has a 28-row fact table, a privacy pass and 16 findings (4 Important, 12 Minor), and ends "Ready to merge: yes".
