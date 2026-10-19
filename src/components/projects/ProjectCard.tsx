@@ -4,6 +4,8 @@ import type { Project } from '@/lib/data';
 
 interface ProjectCardProps {
   project: Project;
+  /** h3 under a section heading (home's Recent work); h2 on /projects */
+  headingAs?: 'h2' | 'h3';
 }
 
 /** Top preview band: thumbnail image when available, else a gradient that
@@ -44,7 +46,7 @@ function PreviewBand({ project }: { project: Project }) {
   );
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, headingAs: Heading = 'h2' }: ProjectCardProps) {
   return (
     <article className="flex flex-col h-full p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-[var(--color-accent)]/30 transition-colors group">
       {/* Preview */}
@@ -55,9 +57,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <p className="font-mono text-xs text-[var(--color-muted)] tracking-widest uppercase mb-2">
           {project.company}
         </p>
-        <h2 className="text-xl font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-accent)] transition-colors leading-snug">
+        <Heading className="text-xl font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-accent)] transition-colors leading-snug">
           {project.title}
-        </h2>
+        </Heading>
       </div>
 
       {/* Description */}

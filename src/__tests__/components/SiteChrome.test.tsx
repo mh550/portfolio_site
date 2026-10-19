@@ -30,11 +30,11 @@ describe('SiteChrome', () => {
     expect(container.querySelector('.pt-16')).toBeNull();
   });
 
-  it('/: nav and offset, no footer', () => {
+  it('/: nav, offset and footer (D19)', () => {
     const { container, getByText } = renderAt('/');
     expect(container.querySelector('nav')).not.toBeNull();
     expect(container.querySelector('.pt-16')).toContainElement(getByText('child'));
-    expect(container.querySelector('footer')).toBeNull();
+    expect(container.querySelector('footer')).not.toBeNull();
   });
 
   it('/about: nav, offset and footer', () => {

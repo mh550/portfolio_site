@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   siTypescript,
   siReact,
@@ -110,15 +110,17 @@ const logos: LogoEntry[] = [
 ];
 
 export default function FloatingLogos() {
+  const reduced = useReducedMotion();
+
   return (
     <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
       {logos.map((logo) => (
-        // Outer div: continuous y float only
+        // Outer div: continuous y float only (none with reduced motion)
         <motion.div
           key={logo.id}
           className="absolute pointer-events-auto cursor-default"
           style={logo.style}
-          animate={{ y: [0, -logo.floatY, 0] }}
+          animate={reduced ? undefined : { y: [0, -logo.floatY, 0] }}
           transition={{
             duration: logo.floatDuration,
             repeat: Infinity,

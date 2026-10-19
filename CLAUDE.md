@@ -30,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (392 tests, 40 suites after M6-05)
+npm test             # Jest unit/integration tests (420 tests, 44 suites after M2-02)
 npm run test:watch   # watch mode
 ```
 
@@ -69,8 +69,9 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/Footer.tsx` — social links
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper; skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
-- `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`)
-- `components/projects/ProjectCard.tsx` — project card (Server Component)
+- `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos and NodeGraph honour reduced motion
+- `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero now, `/approach` in M7
+- `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves
   the slug. Without `project.caseStudy` it renders the classic Problem/Approach/Challenges/Outcome page (pinned by

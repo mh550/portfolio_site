@@ -16,8 +16,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     <>
       <Navbar />
       <div className="pt-16">{children}</div>
-      {/* The hero fills the viewport on / (until M2's Recent work, D19) */}
-      {pathname !== '/' && <Footer />}
+      <Footer />
     </>
   );
 }

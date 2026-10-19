@@ -48,4 +48,15 @@ describe('ProjectCard', () => {
     render(<ProjectCard project={ghl} />);
     expect(screen.queryByRole('link', { name: /github/i })).not.toBeInTheDocument();
   });
+
+  it('renders the title as an h2 by default', () => {
+    render(<ProjectCard project={ghl} />);
+    expect(screen.getByRole('heading', { level: 2, name: ghl.title })).toBeInTheDocument();
+  });
+
+  it('renders the title as an h3 with headingAs="h3"', () => {
+    render(<ProjectCard project={ghl} headingAs="h3" />);
+    expect(screen.getByRole('heading', { level: 3, name: ghl.title })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+  });
 });

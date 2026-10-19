@@ -131,6 +131,20 @@ px margin. The tighter mobile margins above take back about 36 px. That is ≈ 5
 roughly 127 → 717: everything clears the 65 px nav and **About Me should end near 720 ≤ 844**. M2-02 measures the
 real number and writes it in this section; M2-05 copies it into the table.
 
+**Measured after M2-02** (Sonnet, Playwright on :7800, `next dev`, after 2.5 s; page-absolute top–bottom in px):
+
+| Viewport | eyebrow | h1 | tagline | subline | strip | View Projects | About Me | hero height |
+|---|---|---|---|---|---|---|---|---|
+| 390×844 | 159–179 | 195–315 | 331–387 | 403–475 | 507–563 | 595–639 | **655–701** | 844 |
+| 375×667 | 96–116 | 132–252 | 268–352 | 368–440 | 472–528 | 560–604 | **620–666** | 746 (grows, page scrolls) |
+| 1280×800 | 174–194 | 218–314 | 338–370 | 386–442 | 474–556 | 596–642 (same row) | 596–642 | 800 |
+
+About Me ends at **701 ≤ 844** at 390×844 (the estimate was ~720), and at 666 ≤ 667 at 375×667. No overlaps,
+`scrollWidth − innerWidth` 0 at all three, nav bottom 65. Under `reducedMotion: 'reduce'` the boxes are identical and
+eyebrow and About Me have opacity 1 at 100 ms. The step lines are a 1×1 `sr-only` box at 390 and 375 and visible at
+1280. Below 768 the labels wrap Diagnose → Decide → Build → / Verify → Simplify, so an arrow trails "Build" at the
+line end (cosmetic; for M2-05 to judge). Shots: `$HARNESS_SCRATCH/M2-02-hero-390.png`, `M2-02-hero-1280.png`.
+
 **Height:** `h-screen` becomes **`min-h-svh`** with `pt-24 pb-16` (keep `-mt-16`, `flex items-center
 justify-center`, `overflow-hidden`). At 390×844 the hero still fills exactly one screen. On a short phone (375×667,
 602 px under the nav) the content (~590 px plus padding) no longer fits; with `h-screen overflow-hidden` it would be

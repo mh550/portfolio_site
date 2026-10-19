@@ -17,9 +17,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   // Resolves relative Open Graph image paths (D24)
   metadataBase: new URL(profile.siteUrl),
-  title: 'Michael Herron — Full-Stack & Integration Engineer',
-  description:
-    'Portfolio of Michael Herron — full-stack developer and automation/integration engineer. I build systems that connect things.',
+  title: `${profile.name} — ${profile.positioning}`,
+  description: profile.subline,
+  // No title, description or url here: Next fills og:/twitter: title and description from each page's own
+  openGraph: {
+    type: 'website',
+    siteName: profile.name,
+    images: [{ url: profile.headshot, alt: `${profile.name} headshot` }],
+  },
+  twitter: { card: 'summary', images: [profile.headshot] },
 };
 
 export default function RootLayout({

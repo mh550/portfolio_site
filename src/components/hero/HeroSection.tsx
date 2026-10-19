@@ -1,7 +1,9 @@
 'use client';
 
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import Link from 'next/link';
+import MethodStrip from '@/components/MethodStrip';
+import { profile } from '@/lib/data';
 import NodeGraph from './NodeGraph';
 import FloatingLogos from './FloatingLogos';
 
@@ -14,9 +16,19 @@ const fadeUp: Variants = {
   }),
 };
 
+// Reduced motion: same elements and initial state (the server can't know the preference, see ScrollReveal), shown at
+// once. The transition must live in the variant: a variant's transition wins over the `transition` prop.
+const instant: Variants = {
+  hidden: { opacity: 0, y: 32 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0 } },
+};
+
 export default function HeroSection() {
+  const variants = useReducedMotion() ? instant : fadeUp;
+
   return (
-    <section className="relative -mt-16 h-screen flex items-center justify-center overflow-hidden">
+    // min-h-svh, not h-screen: on short phones the content is taller than the screen, so the hero grows
+    <section className="relative -mt-16 min-h-svh pt-24 pb-16 flex items-center justify-center overflow-hidden">
       {/* Animated node graph background */}
       <NodeGraph />
 
@@ -39,18 +51,18 @@ export default function HeroSection() {
           custom={0}
           initial="hidden"
           animate="visible"
-          variants={fadeUp}
-          className="font-mono text-[var(--color-accent)] text-sm tracking-[0.3em] uppercase mb-6"
+          variants={variants}
+          className="font-mono text-[var(--color-accent)] text-sm tracking-[0.3em] uppercase mb-4 sm:mb-6"
         >
-          Full-Stack & Integration Engineer
+          {profile.positioning}
         </motion.p>
 
         <motion.h1
           custom={0.15}
           initial="hidden"
           animate="visible"
-          variants={fadeUp}
-          className="text-6xl sm:text-7xl md:text-8xl font-bold leading-none tracking-tight mb-6"
+          variants={variants}
+          className="text-6xl sm:text-7xl md:text-8xl font-bold leading-none tracking-tight mb-4 sm:mb-6"
         >
           Michael{' '}
           <span className="text-[var(--color-accent)]">Herron</span>
@@ -60,17 +72,31 @@ export default function HeroSection() {
           custom={0.3}
           initial="hidden"
           animate="visible"
-          variants={fadeUp}
-          className="text-xl sm:text-2xl text-[var(--color-muted)] font-light tracking-wide mb-10"
+          variants={variants}
+          className="text-xl sm:text-2xl text-[var(--color-muted)] font-light tracking-wide mb-4"
         >
-          I build simple, elegant systems that fit the humans who run them.
+          {profile.tagline}
         </motion.p>
 
-        <motion.div
-          custom={0.45}
+        <motion.p
+          custom={0.4}
           initial="hidden"
           animate="visible"
-          variants={fadeUp}
+          variants={variants}
+          className="text-base sm:text-lg text-[var(--color-foreground)]/80 max-w-2xl mx-auto mb-8"
+        >
+          {profile.subline}
+        </motion.p>
+
+        <motion.div custom={0.5} initial="hidden" animate="visible" variants={variants}>
+          <MethodStrip className="mb-8 sm:mb-10" />
+        </motion.div>
+
+        <motion.div
+          custom={0.6}
+          initial="hidden"
+          animate="visible"
+          variants={variants}
           className="flex flex-col sm:flex-row gap-4 justify-center pointer-events-auto"
         >
           <Link

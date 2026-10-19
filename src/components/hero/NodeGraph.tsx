@@ -22,6 +22,8 @@ export default function NodeGraph() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    // Reduced motion: draw still frames, no loop (jsdom has no matchMedia)
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
     let animId: number;
     let nodes: Node[] = [];
@@ -88,11 +90,14 @@ export default function NodeGraph() {
 
     resize();
     init();
-    loop();
+    if (reduced) draw();
+    else loop();
 
     const ro = new ResizeObserver(() => {
       resize();
       init();
+      // Setting canvas.width clears it; the loop redraws on its next frame, a still graph needs it now
+      if (reduced) draw();
     });
     ro.observe(canvas);
 

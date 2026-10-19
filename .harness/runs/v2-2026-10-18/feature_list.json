@@ -411,7 +411,7 @@
         "`node .harness/smoke.mjs http://localhost:$HARNESS_PORT /` prints PASS at both widths; .harness/check.sh is green"
       ],
       "after": ["M2-01"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M2-03", "milestone": "M2", "kind": "build", "model": "opus",

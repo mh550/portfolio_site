@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:05 · M2-02 · passes
+
+- Root metadata from `profile` (title "Michael Herron — Systems & Process Engineer", description = subline, Open Graph with siteName and headshot, no title/url; twitter summary). New `MethodStrip` (`ol role="list"` named "How I work", D23/D31). The hero reads eyebrow, tagline and subline from `profile`, adds the strip, uses `min-h-svh pt-24 pb-16` instead of `h-screen`, and honours reduced motion (instant variants with the same hidden state, still FloatingLogos, NodeGraph draws one frame and redraws on resize, no rAF loop). `/` gains Recent work (`getTopProjects(3)`, `ProjectCard headingAs="h3"`, "See all projects"), and the Footer shows on `/` (D19).
+- Tests 392 → 420, suites 40 → 44 (new: layout-metadata, MethodStrip, NodeGraph, home). Every new behaviour test failed first. `.harness/check.sh` run directly exits 0; `lib/check.sh` green; smoke 34/34 PASS, `/` PASS at 1280 and 390.
+- Measured (Sonnet, Playwright :7800): About Me ends at **701 ≤ 844** at 390×844 and at 666 at 375×667, where the hero grows to 746. No overlaps, scroll diff 0, reduced-motion opacity 1 at 100 ms. The table is in the plan under "390 px layout and the fold". I looked at the 390 shot.
+- Opus review of the diff: 0 Critical, 0 Important, 5 Minor. Fixed: `role="list"` on the strip, and a test that the reduced-motion hidden state equals the fade-up one (hydration). Left for M2-06: (1) `/card`'s own openGraph replaces the root block, so the card unfurl lacks og:site_name/type; (2) the root `twitter.images` would mask a future per-page og:image (drop `images`, let Next derive it); (3) FloatingLogos `whileHover` still scales 1.5× under reduced motion. Also for M2-05: below 768 the labels wrap after "Build →", so one arrow trails at the line end.
+- Note: `npx tsc --noEmit` reports one error from before this session, in `case-study-home-media-server.test.ts:38` (`extraDiagrams` on a narrowed type). `next build` doesn't flag it.
+- Next: M2-03 and M2-04 are independent. Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:55 · M2-01 · passes
 
 - New `docs/plans/2026-10-18-M2-positioning.md` (plan only, no code). Sections: Files, Metadata (root `metadata` from `profile`; Open Graph carries siteName + headshot but no title/url, so project pages unfurl with their own titles), Hero (eyebrow/tagline/subline from `profile`, `MethodStrip` created by M2-02 per D23, `h-screen` → `min-h-svh`, reduced motion for the fade-ups, FloatingLogos and NodeGraph), Recent work (`getTopProjects(3)`, `ProjectCard headingAs="h3"`, "See all projects", Footer on `/` per D19), Experience (MAXX and Builder Clarity bullets word for word with brand.md lines, `7+` → `4+`, GPA removal, D9 bullet, a traceability table), About (3-sentence intro), Skills (4 groups, 51 strings; a table shows all 39 current skills survive; Process & delivery featured), Tests (per-feature table), an empty 8-row What Michael will see table, an empty Review.
