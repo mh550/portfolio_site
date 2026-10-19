@@ -39,6 +39,11 @@ describe('Navbar', () => {
     }
   });
 
+  it('does not link to /evidence (noindex, off the nav)', () => {
+    render(<Navbar />);
+    for (const a of screen.getAllByRole('link')) expect(a.getAttribute('href')).not.toMatch(/^\/evidence/);
+  });
+
   it('shows hamburger button on mobile', () => {
     render(<Navbar />);
     expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();

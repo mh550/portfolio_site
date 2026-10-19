@@ -21,6 +21,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/experience` | Work history & education |
 | `/contact` | Contact |
 | `/approach` | How I work: `MethodStrip showLines` + six `principles` whose examples link via `resolvedExamples` (`approach.ts`) |
+| `/evidence` | Noindex, off the Navbar: six `competencies` × 2–4 linked items via `resolvedItems` (`competencies.ts`, D7; rubric stub `docs/notes/maxx-level-4.md`) |
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
@@ -31,7 +32,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (485 tests, 48 suites after M7-02)
+npm test             # Jest unit/integration tests (507 tests, 50 suites after M7-03)
 npm run test:watch   # watch mode
 ```
 

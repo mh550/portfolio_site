@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 00:55 · M7-03 · passes
+
+- `/evidence` is live on the branch (noindex, not in the Navbar). New `src/lib/data/competencies.ts`: `competencies` (6 × 3/4/4/4/3/3 = 21 items, with a MAXX Potential item in all 6), `evidenceIntro` and `resolvedItems` (mirrors `resolvedExamples`). The copy is the plan's word for word (65/65 strings, checked by script). New `src/app/evidence/page.tsx`: repo links open in a new tab with sr-only "(opens in a new tab)". New `docs/notes/maxx-level-4.md` (rubric stub; remapping = editing `competencies.ts` only). `/evidence` added to `smoke-routes.txt` and the CLAUDE.md routes table. Tests 485 → 507 (48 → 50 suites): `competencies-links.test.ts`, `evidence.test.tsx`, and a Navbar no-`/evidence` test.
+- Verified: `.harness/check.sh` exits 0 (`evidence.html` prerendered); `lib/check.sh` green; `tsc --noEmit` 0; smoke 38/38 PASS. A Sonnet browser check on :7800 passed all 8 points at 390 and 1280: noindex meta, 6 h2s in order, 21 links (12 distinct), all 20 internal links return 200, all 9 hashes found by `getElementById`, scrollWidth 390, focus outline, 0 console errors. I looked at the 390 shot.
+- Opus review: 0 Critical, 0 Important, 7 Minor. Fixed: an empty `ul` when every item drops out (test first), a wrong import-cycle comment, a test helper that shadowed `escape`, and the ↗ arrow rendering as an emoji (now U+FE0E). Left as is: no template-literal href type (the test catches typos), and the context label is not in the link's accessible name (it matches the plan's structure).
+- For M7-05: the design item "…3 clients, onboarding from ~2 days to ~6 hours" links `/projects/ghl-jobtread-integration`. That page has the onboarding figure but not "3 clients" (brand.md line 47 and /experience have it). Rule on it there: add the figure to the ghl page or accept it as is. "One spreadsheet per person" was already accepted in M7-01.
+- Next session (M7-04): the full-page screenshots in `$HARNESS_SCRATCH/browser-M7-03/` show the fixed Navbar mid-page because they were taken after scrolling. Take the M7 screenshots after scrolling back to the top, or crop them. Don't run `npx prettier`: the repo has no config, and its defaults rewrite to double quotes.
+- Question for Michael: none new (D35 from M7-01 still stands). Proposed changes: none.
+
 ### 2026-10-19 00:30 · M7-02 · passes
 
 - `/approach` is live on the branch. `approach.ts` gains `principles` (6 × 3 examples, copy pasted from the M7 plan, 24/24 strings verbatim by script), `approachIntro`, `approachClosing`, `resolvedExamples` (drops a missing slug, drops an anchor the project doesn't render) and `exampleHref`. New `src/app/approach/page.tsx` (static; link names `<project title>: <section>`; closing link → `/projects/agent-harness`, else `/projects`). `MethodStrip` gains `showLines`: lines visible at every width, steps stacked left-aligned below md with the arrows hidden there; the hero is unchanged. `/approach` is in `smoke-routes.txt`; CLAUDE.md routes updated. Tests 456 → 485 (46 → 48 suites).
