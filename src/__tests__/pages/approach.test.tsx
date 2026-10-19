@@ -1,6 +1,14 @@
 import { render, screen, within } from '@testing-library/react';
 import ApproachPage, { metadata } from '@/app/approach/page';
-import { approachIntro, getCaseStudyAnchors, getProjectBySlug, methodSteps, principles, projects } from '@/lib/data';
+import {
+  approachIntro,
+  getCaseStudyAnchors,
+  getProjectBySlug,
+  methodSteps,
+  principles,
+  resolvedExamples,
+} from '@/lib/data';
+import { withoutProject } from '../helpers/projects';
 
 function projectLinks() {
   return screen
@@ -8,20 +16,15 @@ function projectLinks() {
     .filter((a) => a.getAttribute('href')?.startsWith('/projects'));
 }
 
-function withoutProject(slug: string, fn: () => void) {
-  const i = projects.findIndex((p) => p.slug === slug);
-  if (i < 0) throw new Error(`no project ${slug}`);
-  const [removed] = projects.splice(i, 1);
-  try {
-    fn();
-  } finally {
-    projects.splice(i, 0, removed);
-  }
-}
-
 describe('ApproachPage', () => {
   it('has the title', () => {
     expect(metadata.title).toBe('Approach — Michael Herron');
+  });
+
+  it('names the method strip differently from the h1', () => {
+    render(<ApproachPage />);
+    expect(screen.getByRole('list', { name: 'The five steps' })).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'How I work' })).toBeNull();
   });
 
   it('renders the h1 and the two-sentence intro', () => {
@@ -33,7 +36,7 @@ describe('ApproachPage', () => {
 
   it('shows the five method labels and their lines, visible at every width', () => {
     render(<ApproachPage />);
-    const strip = screen.getByRole('list', { name: 'How I work' });
+    const strip = screen.getByRole('list', { name: 'The five steps' });
     for (const step of methodSteps) {
       expect(within(strip).getByText(step.label)).toBeInTheDocument();
       const line = within(strip).getByText(step.line);
@@ -58,7 +61,8 @@ describe('ApproachPage', () => {
   it('links every example to a project that exists, and every hash to an anchor that project renders', () => {
     render(<ApproachPage />);
     const links = projectLinks().filter((a) => a.getAttribute('href') !== '/projects');
-    expect(links.length).toBeGreaterThanOrEqual(17);
+    const linked = principles.flatMap((p) => resolvedExamples(p)).filter((e) => e.projectSlug);
+    expect(links).toHaveLength(linked.length + 1); // + the closing harness link
     for (const a of links) {
       const [path, hash] = a.getAttribute('href')!.split('#');
       const slug = path.replace('/projects/', '');
@@ -70,14 +74,13 @@ describe('ApproachPage', () => {
 
   it('names each example link after its project and section', () => {
     render(<ApproachPage />);
-    expect(screen.getAllByRole('link', { name: `${getProjectBySlug('hit-list')!.title}: What Broke` })[0]).toHaveAttribute(
-      'href',
-      '/projects/hit-list#lessons',
-    );
-    expect(screen.getAllByRole('link', { name: `${getProjectBySlug('agent-harness')!.title}: Diagnose` })[0]).toHaveAttribute(
+    // The short name: the project title up to its first colon ("Agent Harness", not the full subtitle).
+    expect(screen.getAllByRole('link', { name: 'HitList: What Broke' })[0]).toHaveAttribute('href', '/projects/hit-list#lessons');
+    expect(screen.getAllByRole('link', { name: 'Agent Harness: Diagnose' })[0]).toHaveAttribute(
       'href',
       '/projects/agent-harness#diagnose',
     );
+    for (const a of projectLinks()) expect((a.textContent!.match(/:/g) ?? []).length).toBeLessThanOrEqual(1);
     expect(
       screen.getAllByRole('link', { name: `${getProjectBySlug('linear-ai-workflow')!.title}: Project page` })[0],
     ).toHaveAttribute('href', '/projects/linear-ai-workflow');
@@ -135,6 +138,9 @@ describe('ApproachPage', () => {
   });
 
   it('without hit-list, renders no hit-list link and keeps every principle', () => {
+    const { unmount } = render(<ApproachPage />);
+    expect(projectLinks().some((a) => a.getAttribute('href')?.startsWith('/projects/hit-list'))).toBe(true);
+    unmount();
     withoutProject('hit-list', () => {
       render(<ApproachPage />);
       for (const a of projectLinks()) expect(a.getAttribute('href')).not.toMatch(/hit-list/);

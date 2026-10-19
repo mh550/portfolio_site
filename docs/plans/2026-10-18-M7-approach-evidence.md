@@ -65,7 +65,7 @@ Summary: `I write each decision down: what I chose, what I passed on, and why. T
 
 | Slug | Anchor | Text | Source |
 |---|---|---|---|
-| `agent-harness` | `decisions` | `The harness keeps a decision ledger, D-H1 to D-H24. The first entry: a fresh session per feature, because subagents only delay the context limit and fresh sessions force state onto disk.` | AH 5, 49–50; page decision "A fresh session per feature" |
+| `agent-harness` | `decisions` | `The harness keeps a numbered decision ledger. The first entry, D-H1: a fresh session per feature, because subagents only delay the context limit and fresh sessions force state onto disk.` | AH 5, 49–50; page decision "A fresh session per feature" |
 | `home-media-server` | `decisions` | `The crate flag first lived as a #crate tag in playlist comments. I moved it into the crates app's own database and wrote down why: the app owns the flag.` | MS 42–43; page decision "The app owns the crate flag" |
 | `hit-list` | `decisions` | `When the agent put batch import on the Profile tab, I rejected it as bad UX and moved it to the Spots tab. The ledger records it as D12.` | HL 35–36; page decision "Import lives on the Spots tab" |
 
@@ -97,7 +97,7 @@ Summary: `The first version carries guesses. After I have used it, I cut what no
 |---|---|---|---|
 | `home-media-server` | `simplify` | `I built four download-quality tiers, used them, then replaced them with one rule: lossless or 256 kbps and up.` | MS 38–39; page `method.simplify` |
 | `hit-list` | `simplify` | `After using HitList on my phone, I wrote a spec that cuts a 20+ field form in five sections to seven fields. It is specified, not yet built.` | HL 37–42; page `method.simplify` |
-| none (D14, D34) | none | `I spec'd an invite and gig-broadcast app over five rounds of questions, then chose not to build it: an iOS Shortcut does the job with zero code, and the spec records when building it would become worth it.` | spec D14 (private: no link) |
+| none (D14, D34) | none | `I spec'd an invite and gig-broadcast app over five rounds of questions, then chose not to build it. An iOS Shortcut does the job with zero code, and the spec records when building it would become worth it.` | spec D14 (private: no link) |
 
 ### 6. `automate-bookkeeping` · Automate the bookkeeping, keep judgment human
 
@@ -107,7 +107,7 @@ Summary: `Scripts and agents take the repetitive, checkable work. The calls that
 |---|---|---|---|
 | `agent-harness` | `decisions` | `In the harness a deterministic bash driver does all the git bookkeeping, because a script does that and a prompt might not. On this site every PR still waits for me to merge it.` | AH 56; spec D2; page decision "The driver does the git bookkeeping" |
 | `linear-ai-workflow` | none | `At MAXX Potential, moving QA tracking to Linear and an AI-agent workflow cut bug-filing time by about 80%.` | brand 43–44 |
-| `home-media-server` | `decisions` | `Nothing downloaded on its own at first. The first real download was mine to approve, by hand.` | MS 35; page decision "The first real download is mine" |
+| `home-media-server` | `decisions` | `Nothing downloads on its own: the first real download is mine to approve, by hand. As of Oct 17 the download path had not run live.` | MS 35; page decision "The first real download is mine" |
 
 Every principle has 3 examples; 17 link and 1 (D14) does not.
 
@@ -186,9 +186,9 @@ brand.md's `**` bold markers.
 | Context | Text | Href | Source phrase · line |
 |---|---|---|---|
 | MAXX Potential | `Updated MAXX Potential's Foundational Capability Patterns for AI-assisted rapid prototyping: solution tiers, citizen vs. professional pathways` | `/experience` | `Foundational Capability Patterns for AI-assisted rapid prototyping` · brand 44–45 |
-| Builder Clarity | `Replaced per-client builds with one multi-tenant integration platform: 3 clients, onboarding from ~2 days to ~6 hours` | `/projects/ghl-jobtread-integration` | `multi-tenant integration platform` · brand 47 |
-| Personal | `Kept a decision ledger for my agent harness, D-H1 to D-H24` | `/projects/agent-harness#decisions` | `D-H1…D-H24` · AH 5 |
-| Personal | `Split ownership in my music server: Navidrome owns the songs and playlists; the crates app owns only the crate flags, the wanted queue and approvals` | `/projects/home-media-server#decisions` | `the app owns the flag` · MS 43 |
+| Builder Clarity | `Replaced per-client builds with one multi-tenant integration platform: onboarding from ~2 days to ~6 hours` | `/projects/ghl-jobtread-integration` | `multi-tenant integration platform` · brand 47 |
+| Personal | `Kept a numbered decision ledger for my agent harness: what I chose, over what, and why` | `/projects/agent-harness#decisions` | `D-H1…D-H24` · AH 5 |
+| Personal | `Split ownership in my music server: Navidrome owns the songs and playlists; the crates app owns only the crate flags, the wanted queue and approvals` | `/projects/home-media-server#decide` | `the app owns the flag` · MS 43 |
 
 ### 3. `deliver` · Deliver working, verified software
 
@@ -214,7 +214,7 @@ brand.md's `**` bold markers.
 |---|---|---|---|
 | MAXX Potential | `Onboarded the team to git-tracked database migrations` | `/experience` | `onboarded the team` · brand 46 |
 | Personal | `Mentored 12–18-year-old snowboarders at High Cascade: targeted drills, safe progression, patient feedback` | `/experience` | `Mentored 12–18-year-old snowboarders` · spec D9 (D35: labelled Personal) |
-| Personal | `Wrote the runbooks and specs my agents work from, so a fresh session picks up the work from disk` | `/projects/agent-harness#iterations` | `fresh sessions force state onto disk` · AH 49–50 |
+| Personal | `Designed the runbooks and specs my agents work from, so a fresh session picks up the work from disk` | `/projects/agent-harness#iterations` | `fresh sessions force state onto disk` · AH 49–50 |
 
 ### 6. `ai` · Use AI with guardrails
 
@@ -222,7 +222,7 @@ brand.md's `**` bold markers.
 |---|---|---|---|
 | MAXX Potential | `Moved QA tracking to Linear plus an AI-agent workflow: ~80% less bug-filing time` | `/projects/linear-ai-workflow` | `~80% less bug-filing time` · brand 43–44 |
 | Personal | `Designed my agent harness to merge only a tree that is byte-for-byte the one that was verified` | `/projects/agent-harness#decisions` | `byte-for-byte a tree that was verified` · AH 57–58 |
-| Personal | `Had v3 of my agent harness independently reviewed before its first run: 2 critical and 8 important bugs found` | `/projects/agent-harness#lessons` | `found 2 critical + 8 important bugs` · AH 87 |
+| Personal | `An independent review of v3 of my agent harness, before its first run, found 2 critical and 8 important bugs` | `/projects/agent-harness#lessons` | `found 2 critical + 8 important bugs` · AH 87 |
 
 Every competency has a MAXX Potential item (6 of 6; the step needs ≥ 4): the bank (brand 43–46) supports one each.
 No MAXX claim outside brand 43–46 is used. Item counts: 3, 4, 4, 4, 3, 3.
@@ -234,7 +234,7 @@ No MAXX claim outside brand 43–46 is used. Item counts: 3, 4, 4, 4, 3, 3.
 - `metadata`: title `'Evidence of practice — Michael Herron'`, `robots: { index: false }`. Not in `Navbar.tsx`, and
   M8's sitemap excludes it (spec M8).
 - h1: `Evidence of practice — Michael Herron`.
-- Reading note (one sentence, `evidenceIntro.reading` in `competencies.ts`): `Each competency lists two to four pieces of my work, each labelled with where I did it and linked to where you can check it.`
+- Reading note (one sentence, `evidenceIntro.reading` in `competencies.ts`): `Each competency lists two to four pieces of my work, each labelled with where I did it and linked to the case study, role or repo it comes from.`
 - D7 note (`evidenceIntro.mapping`): `For now these map to general competencies; once I have the MAXX Potential level-4 rubric, this page will follow it instead.`
 - Six `section`s with an h2 each and a `ul` of resolved items: the context as a small label, then the item text as
   the link. External repo links open in a new tab with `rel="noopener noreferrer"`; internal ones use `next/link`.
@@ -301,3 +301,123 @@ home-media-server#decisions, agent-harness#lessons, hit-list#lessons, agent-harn
 hit-list#simplify) and the 8 on `/evidence` (adding agent-harness#iterations) passed the same check: 19 of 19.
 
 ## Review
+
+M7-05, 2026-10-19. The diff is `b5fbd93..55f7fd4` without `.harness/runs` and the screenshots (1735 lines). It was
+written to `$HARNESS_SCRATCH/M7.diff` and reviewed from there by two Opus reviewers: one for code, one fact-checking
+all 39 claims. The `web-design-guidelines` pass was run by hand. Tests went from 508 to 552 (50 → 51 suites).
+
+### Findings
+
+| # | Severity | Where | Finding | Done |
+|---|---|---|---|---|
+| F1 | Important | `competencies.ts` design-2 | "3 clients" isn't on `/projects/ghl-jobtread-integration` (only `/experience` and brand 47 have it) | Took "3 clients" out of the item; the onboarding figure is on the page (metric, outcome). New test `claims-on-linked-page.test.ts`: every number in an example or item also appears in the data of the page its link opens (37 links, repo links excluded) |
+| F2 | Important | `approach.ts` 2a, `competencies.ts` design-3 | "D-H1 to D-H24" is sourced (AH 5), but `#decisions` shows 6 entries and never says 24 | Reworded: "a numbered decision ledger. The first entry, D-H1: …" and "Kept a numbered decision ledger …: what I chose, over what, and why" (the DecisionLog's chose/over/because). Caught by the same test |
+| F3 | Important | `approach.ts` 6c | "The first real download was mine to approve" reads as done; the linked page (D7 cost, outcome) says the path had not run live as of Oct 17 | "Nothing downloads on its own: the first real download is mine to approve, by hand. As of Oct 17 the download path had not run live." Test first |
+| F4 | Important | `competencies.ts` teach-3 | "Wrote the runbooks and specs my agents work from" overclaims: a planning session wrote HitList's overnight spec (HL 47), and brand.md (Voice) says he *designed* the specs | "Designed the runbooks and specs …". Test first: no item says "wrote the specs/runbooks" |
+| F5 | Important | `competencies.ts` design-4 | The Navidrome/crates ownership split is told in the Decide step (`projects.ts` home-media-server `method.decide`); `#decisions` only has D7, D18, D27 | Linked to `#decide`. Test first |
+| F6 | Important | `competencies.ts` `evidenceIntro.reading` | "linked to where you can check it" overpromises: 7 of 21 items link to `/experience`, which restates the claim | "… linked to the case study, role or repo it comes from." Test first |
+| F7 | Important (accepted) | `approach.ts` 1a, `competencies.ts` diagnose-1, lead-3 | The MAXX "bottleneck / one spreadsheet per person" detail and the Builder Clarity "for stakeholder visibility" are not on brand.md's bank lines; they come from `docs/notes/apprentice-profile.md` and are already published on `linear-ai-workflow` and `/experience` | Kept, as M7-01 did: no number involved, and the linked page states it. Whether brand.md should grow these phrases is Michael's call, low stakes |
+| F8 | Minor | `approach/page.tsx` | Link names repeated the full title: "Agent Harness: overnight software delivery with verification gates: Diagnose" | Named from the title up to its first colon ("Agent Harness: Diagnose", "HitList: What Broke"). Test first |
+| F9 | Minor | `approach/page.tsx` | `SECTION_NAMES` was a hand copy of three case-study h2s, typed `Partial` | One `caseStudySectionHeadings` in `case-study/sectionHeadings.ts`, read by `DecisionLog`, `IterationTimeline`, `LessonList` and `/approach` |
+| F10 | Minor | `approach.ts`, `competencies.ts` | `resolvedExamples` and `resolvedItems` repeated the same project/anchor check | One `resolveProjectLink(slug, anchor?)` in `projects.ts`, used by both |
+| F11 | Minor | `approach`, `evidence`, `card` pages | Three copies of the focus-outline class string | One `focusRing` in `src/components/focusRing.ts` |
+| F12 | Minor | `MethodStrip.tsx` | On `/approach` the list's name "How I work" repeated the h1 | New `label` prop (default "How I work"); `/approach` passes "The five steps". Test first |
+| F13 | Minor | `approach.test.tsx` | The link count was `>= 17` | Exact: resolved linked examples + 1 |
+| F14 | Minor | `evidence.test.tsx` | The no-break space was a literal U+00A0 in a regex | ` ` |
+| F15 | Minor | both page tests | The "without hit-list" tests could pass vacuously | Each first asserts a hit-list link exists |
+| F16 | Minor | four test files | `withoutProject` / `withoutCaseStudy` were copied four times | One `src/__tests__/helpers/projects.ts` |
+| F17 | Minor | `approach.ts` 5c | 37-word sentence (brand: short sentences) | Split at "chose not to build it." |
+| F18 | Minor | `competencies.ts` ai-3 | "Had v3 … independently reviewed" is passive | "An independent review of v3 …, before its first run, found 2 critical and 8 important bugs" (AH 87's wording) |
+| F19 | Minor (left) | `approach`/`evidence` pages | The eyebrow, h1 and closing-link labels are in the components, not `lib/data` | Left: every page on the site writes its h1 and eyebrow in `page.tsx` (about, skills, projects, experience, contact). Moving all of them is one site-wide change, not an M7 change |
+| F20 | Minor (left) | `competencies.ts` lead-4 | The repo root is a weaker proof than the `pulls?q=is:pr+harness` filter (AH 99–100) | Left: the M7-03 step only allows the four repo roots as https hrefs; changing that is a feature-list change (Proposed changes) |
+
+0 Critical. 6 Important fixed and 1 accepted. 11 Minor fixed and 2 left with a reason.
+
+### Fact-check
+
+Sources: brand = `docs/notes/brand.md`, AH/MS/HL = the evidence briefs, P = the linked project's data in
+`projects.ts`, E = `experience.ts`, with line numbers as of M7-05. ✓ = ok as shipped; ✎ = fixed above.
+
+| Ref | Claim | Source | Linked page states it | |
+|---|---|---|---|---|
+| 1a | QA bottleneck, one sheet per person, no status history; 2× sprint throughput | brand 43 (2×); detail F7 | `linear-ai-workflow` problem, metrics | ✓ (F7) |
+| 1b | three walls; every repo silent 00:12–07:19 | AH 14–15, 23 | `#diagnose` | ✓ |
+| 1c | 92 titles wrong while counts matched; 28 second copies | MS 64, 75 | `#diagnose` | ✓ |
+| 2a | numbered ledger; D-H1 a fresh session per feature | AH 5, 49–50 | `#decisions` D-H1 | ✎ F2 |
+| 2b | `#crate` tag moved into the crates app's DB; the app owns the flag | MS 42–43 | `#decisions` D27 | ✓ |
+| 2c | import moved from Profile to Spots; D12 | HL 35–36 | `#decisions` D12 | ✓ |
+| 3a | made-up limit message; 45 sessions counted as failed attempts in 6 min; real fixture | AH 79–82, correction 111–112 | `#lessons` | ✓ |
+| 3b | guessed fake hid 3 critical bugs; fakes from captured responses | MS 73–74 | `#lessons` | ✓ |
+| 3c | test DB enforced foreign keys, the phone's did not | HL 62–64 | `#lessons` | ✓ |
+| 4a | 859 = 859 = 859 while 92 titles wrong | MS 75 | `#lessons` | ✓ |
+| 4b | "7679.1 mi" without GPS; a screen table caught it | HL 70–71, correction 92–94 | `#lessons` | ✓ |
+| 4c | independent verify, one row per step; only the verified tree merges | AH 37–40, 57–58 | `#verify` | ✓ |
+| 5a | four tiers → lossless or 256 kbps and up | MS 38 | `#simplify` | ✓ |
+| 5b | 20+ fields in five sections → seven; specified, not built | HL 37–42 | `#simplify` | ✓ |
+| 5c | invite/gig app spec'd, not built; iOS Shortcut | spec D14, D34 (no link) | — | ✎ F17 |
+| 6a | bash driver does the git bookkeeping; every PR waits for Michael | AH 32, 56; spec D2 | `#decisions` D-H5 | ✓ |
+| 6b | ~80% less bug-filing time | brand 43–44 | `linear-ai-workflow` | ✓ |
+| 6c | nothing downloads on its own; not run live as of Oct 17 | MS 35 | `#decisions` D7 cost | ✎ F3 |
+| diagnose-1 | QA bottleneck, moved to Linear | brand 43; detail F7 | `linear-ai-workflow`, E MAXX 1 | ✓ (F7) |
+| diagnose-2 | three walls | AH 14–15 | `#diagnose` | ✓ |
+| diagnose-3 | 92 titles wrong while counts matched | MS 75 | `#diagnose` | ✓ |
+| design-1 | Foundational Capability Patterns; tiers, pathways | brand 44–45 | `/experience` | ✓ |
+| design-2 | multi-tenant platform; ~2 days → ~6 hours | brand 47 | `ghl-jobtread-integration` metric, outcome | ✎ F1 |
+| design-3 | numbered decision ledger: chose, over, why | AH 5 | `#decisions` | ✎ F2 |
+| design-4 | Navidrome owns songs/playlists; crates app the flags, queue, approvals | MS 20–23, 43 | `#decide` | ✎ F5 |
+| deliver-1 | git-tracked DB migrations | brand 46 | `/experience` | ✓ |
+| deliver-2 | ETL from 4+ sources into Postgres | brand 42, 48 | `/experience` | ✓ |
+| deliver-3 | 52 features, 12 PRs, two runs, independent verify | AH 67, 69 | metrics, `#verify` | ✓ |
+| deliver-4 | 374 passing tests, crash on the iPhone | HL 59–61 | `#lessons` | ✓ |
+| lead-1 | de facto PM on a client engagement | brand 44 | `/experience` | ✓ |
+| lead-2 | Linear + AI workflow: 2× sprint throughput | brand 43 | `linear-ai-workflow` | ✓ |
+| lead-3 | Agile/Scrum in Linear for stakeholder visibility | brand 48; qualifier F7 | `/experience` | ✓ (F7) |
+| lead-4 | this site's update as specs, milestones, PRs he merges | AH 40, 99–100 | repo root | ✓ (F20) |
+| teach-1 | onboarded the team to migrations | brand 46 | `/experience` | ✓ |
+| teach-2 | mentored 12–18-year-old snowboarders (Personal) | spec D9, D35 | `/experience` | ✓ |
+| teach-3 | designed the runbooks and specs agents work from | AH 23, 49–50; brand Voice | `#iterations` | ✎ F4 |
+| ai-1 | ~80% less bug-filing time | brand 43–44 | `linear-ai-workflow` | ✓ |
+| ai-2 | merges only a byte-for-byte verified tree | AH 39–40, 57–58 | `#decisions` D-H17 | ✓ |
+| ai-3 | review of v3 before first run: 2 critical, 8 important | AH 87–88 | `#lessons` | ✎ F18 |
+
+Page copy: `approachIntro` holds ("Most": 15 of 18 examples carry an anchor), `approachClosing` links
+`/projects/agent-harness`, the six summaries are sourced (MS 76, AH 56, spec D14), and `evidenceIntro.mapping`
+matches D7. Never-publish list: no hits in either file (tailnet hosts, `100.x`, ntfy, `.env`, `/srv`, tokens,
+AcoustID, Gatus, Spotify, `journal/raw`, phone patterns, private repos). No buzzwords.
+
+### Simplification
+
+- `MethodStrip` is the only method strip: the hero and `/approach` both render it (`showLines` and the new `label`
+  are its only variations).
+- No principle or competency copy is duplicated: the pages render `approach.ts` / `competencies.ts`, and the tests
+  read the same exports (the two `/chose not to build/` matches pick out the D14 example; they don't restate it).
+- One link resolver (F10), one set of section headings (F9), one focus ring (F11), one set of test helpers (F16).
+
+### Web interface guidelines (`/approach`, `/evidence`)
+
+| Rule | Result |
+|---|---|
+| Heading order | One h1, then six h2s on each page; sections are `aria-labelledby` their h2. Pass |
+| Link text | Example links read "<project>: <section>" (F8), evidence links are the full claim, and the closing link says where it goes. External link: "(opens in a new tab)" sr-only, `rel="noopener noreferrer"`, ↗ `aria-hidden`. Pass |
+| Focus states | `focus-visible` 2 px accent outline on every link (`focusRing`), with tests on both pages. Pass |
+| Hover states | Evidence links change colour on hover. The `/approach` links had none at rest → fixed with `hover:decoration-2` |
+| Reduced motion | Only `ScrollReveal`, which renders static under `prefers-reduced-motion`; `MethodStrip` has no motion. Pass |
+| Lists | `ul`/`li` for examples and items; the method strip is an `ol` with `role="list"` and its own name (F12); no empty list when everything filters out (tested). Pass |
+| Typography | The no-break space before ↗ (M7-04). Straight quotes and apostrophes, as on every other page of the site (0 curly quotes in `lib/data`): left, since curly quotes would be a site-wide change |
+| Copy | Sentence-case headings follow the spec's titles, not the guideline's Title Case: left, on purpose |
+| Overflow, 390 | 0 px (M7-04, re-checked in M7-05) |
+
+### Verified after the fixes
+
+- A Sonnet browser check on :7800 (`$HARNESS_SCRATCH/browser-M7-05/check.mjs`, 390 and 1280, reduced motion) passed
+  7 of 7 points. It found 0 console or page errors and 0 px overflow. `/approach` has one h1, six h2s, the strip
+  `ol` named "The five steps", and 17 example links that each match `^[^:]+: [^:]+$` plus the closing link.
+  `/evidence` has noindex, six h2s, 21 item links, the new reading note, and the ownership item on `#decide`. All 19
+  hashed links (11 + 8) return 200 and their element exists. The first example link gets a 2 px solid
+  `rgb(0, 212, 255)` focus outline. I looked at both 390 px shots.
+- The four `docs/screenshots/v2/M7-*.png` were re-captured with the M7-04 script after the copy fixes: approach-390
+  179 KB (390 × 5661), approach-1280 204 KB, evidence-390 113 KB (390 × 3707), evidence-1280 132 KB. In the same pass
+  hscroll was 0, nothing was clipped, and there were 0 errors. The sizes in the table above are M7-04's.
+- `.harness/check.sh` and `node .harness/smoke.mjs` are green (see the M7-05 progress entry).
+
+Ready to merge: yes

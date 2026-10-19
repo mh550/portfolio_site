@@ -1,6 +1,6 @@
 import { profile } from './profile';
 // Import cycle (projects.ts imports methodSteps): use these only inside functions, never at module load.
-import { getCaseStudyAnchors, getProjectBySlug } from './projects';
+import { resolveProjectLink } from './projects';
 
 export type MethodStepId = 'diagnose' | 'decide' | 'build' | 'verify' | 'simplify';
 
@@ -93,7 +93,7 @@ export const principles: Principle[] = [
       {
         projectSlug: 'agent-harness',
         anchor: 'decisions',
-        text: 'The harness keeps a decision ledger, D-H1 to D-H24. The first entry: a fresh session per feature, because subagents only delay the context limit and fresh sessions force state onto disk.',
+        text: 'The harness keeps a numbered decision ledger. The first entry, D-H1: a fresh session per feature, because subagents only delay the context limit and fresh sessions force state onto disk.',
       },
       {
         projectSlug: 'home-media-server',
@@ -171,7 +171,7 @@ export const principles: Principle[] = [
       },
       {
         // D14: a private spec, so no link (D34)
-        text: "I spec'd an invite and gig-broadcast app over five rounds of questions, then chose not to build it: an iOS Shortcut does the job with zero code, and the spec records when building it would become worth it.",
+        text: "I spec'd an invite and gig-broadcast app over five rounds of questions, then chose not to build it. An iOS Shortcut does the job with zero code, and the spec records when building it would become worth it.",
       },
     ],
   },
@@ -193,7 +193,7 @@ export const principles: Principle[] = [
       {
         projectSlug: 'home-media-server',
         anchor: 'decisions',
-        text: 'Nothing downloaded on its own at first. The first real download was mine to approve, by hand.',
+        text: 'Nothing downloads on its own: the first real download is mine to approve, by hand. As of Oct 17 the download path had not run live.',
       },
     ],
   },
@@ -206,12 +206,9 @@ export const approachClosing = 'This site update was built that way, one verifie
 export function resolvedExamples(principle: Principle): PrincipleExample[] {
   return principle.examples.flatMap((example) => {
     if (!example.projectSlug) return [example];
-    const project = getProjectBySlug(example.projectSlug);
-    if (!project) return [];
-    if (example.anchor && !getCaseStudyAnchors(project).includes(example.anchor)) {
-      return [{ projectSlug: example.projectSlug, text: example.text }];
-    }
-    return [example];
+    const link = resolveProjectLink(example.projectSlug, example.anchor);
+    if (!link) return [];
+    return [link.anchor === example.anchor ? example : { projectSlug: example.projectSlug, text: example.text }];
   });
 }
 

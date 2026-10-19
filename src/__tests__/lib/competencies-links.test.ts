@@ -5,10 +5,10 @@ import {
   competencies,
   getCaseStudyAnchors,
   getProjectBySlug,
-  projects,
   resolvedItems,
   type Competency,
 } from '@/lib/data';
+import { withoutProject, withoutCaseStudy } from '../helpers/projects';
 
 const ROOT = path.resolve(__dirname, '../../..');
 const collapse = (s: string) => s.replace(/\s+/g, ' ');
@@ -29,30 +29,6 @@ const REPOS = ['agent-harness', 'hit-list', 'dj-crate-streaming', 'portfolio_sit
 
 const allItems = competencies.flatMap((c) => c.items);
 const allResolved = competencies.flatMap((c) => resolvedItems(c));
-
-/** Runs `fn` with `slug` taken out of `projects`, then puts it back where it was. */
-function withoutProject<T>(slug: string, fn: () => T): T {
-  const i = projects.findIndex((p) => p.slug === slug);
-  if (i < 0) throw new Error(`no project ${slug}`);
-  const [removed] = projects.splice(i, 1);
-  try {
-    return fn();
-  } finally {
-    projects.splice(i, 0, removed);
-  }
-}
-
-/** Runs `fn` with `slug`'s caseStudy removed, then restores it. */
-function withoutCaseStudy<T>(slug: string, fn: () => T): T {
-  const project = getProjectBySlug(slug)!;
-  const saved = project.caseStudy;
-  project.caseStudy = undefined;
-  try {
-    return fn();
-  } finally {
-    project.caseStudy = saved;
-  }
-}
 
 /** Why `href` is not allowed, or null when it is. */
 function hrefProblem(href: string): string | null {

@@ -1,17 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import EvidencePage, { metadata } from '@/app/evidence/page';
-import { competencies, evidenceIntro, projects } from '@/lib/data';
-
-function withoutProject(slug: string, fn: () => void) {
-  const i = projects.findIndex((p) => p.slug === slug);
-  if (i < 0) throw new Error(`no project ${slug}`);
-  const [removed] = projects.splice(i, 1);
-  try {
-    fn();
-  } finally {
-    projects.splice(i, 0, removed);
-  }
-}
+import { competencies, evidenceIntro } from '@/lib/data';
+import { withoutProject } from '../helpers/projects';
 
 describe('EvidencePage', () => {
   it('has the title and is noindex', () => {
@@ -68,11 +58,14 @@ describe('EvidencePage', () => {
     const external = screen.getAllByRole('link').filter((a) => a.getAttribute('href')?.startsWith('https://'));
     for (const a of external) {
       const arrow = a.querySelector('[aria-hidden="true"]');
-      expect(arrow?.textContent).toMatch(/^ ↗/);
+      expect(arrow?.textContent).toMatch(/^\u00A0↗/);
     }
   });
 
   it('drops the items of a missing project and still renders six sections', () => {
+    const { unmount } = render(<EvidencePage />);
+    expect(screen.getAllByRole('link').some((a) => a.getAttribute('href')?.startsWith('/projects/hit-list'))).toBe(true);
+    unmount();
     withoutProject('hit-list', () => {
       render(<EvidencePage />);
       expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(6);

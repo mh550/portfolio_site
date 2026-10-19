@@ -3,40 +3,16 @@ import {
   getCaseStudyAnchors,
   getProjectBySlug,
   principles,
-  projects,
   resolvedExamples,
   type Principle,
 } from '@/lib/data';
+import { withoutProject, withoutCaseStudy } from '../helpers/projects';
 
 const ANCHORS = ['diagnose', 'decide', 'build', 'verify', 'simplify', 'decisions', 'iterations', 'lessons'];
 const SLUGS = ['agent-harness', 'home-media-server', 'hit-list', 'linear-ai-workflow', 'ghl-jobtread-integration'];
 
 const allExamples = principles.flatMap((p) => p.examples);
 const allResolved = principles.flatMap((p) => resolvedExamples(p));
-
-/** Runs `fn` with `slug` taken out of `projects`, then puts it back where it was. */
-function withoutProject<T>(slug: string, fn: () => T): T {
-  const i = projects.findIndex((p) => p.slug === slug);
-  if (i < 0) throw new Error(`no project ${slug}`);
-  const [removed] = projects.splice(i, 1);
-  try {
-    return fn();
-  } finally {
-    projects.splice(i, 0, removed);
-  }
-}
-
-/** Runs `fn` with `slug`'s caseStudy removed, then restores it. */
-function withoutCaseStudy<T>(slug: string, fn: () => T): T {
-  const project = getProjectBySlug(slug)!;
-  const saved = project.caseStudy;
-  project.caseStudy = undefined;
-  try {
-    return fn();
-  } finally {
-    project.caseStudy = saved;
-  }
-}
 
 describe('principles', () => {
   it('has the six principles in order', () => {

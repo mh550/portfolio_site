@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 00:45 · M7-05 · passes
+
+- Reviewed the M7 diff (`$HARNESS_SCRATCH/M7.diff`, 1735 lines) with two Opus reviewers, one for code and one for facts (39 claims traced). Result: 0 Critical, 7 Important (6 fixed, 1 accepted), 13 Minor (11 fixed, 2 left with a reason). The plan's Review section has the finding table, a fact-check row per example and item, a simplification note, the web-guidelines table, and ends "Ready to merge: yes". Tests 508 → 552 (50 → 51 suites).
+- Copy fixes, each test first. New `claims-on-linked-page.test.ts`: every number in an example or item also appears on the page its link opens. That test caught "3 clients" (not on the ghl page, now removed) and "D-H1 to D-H24" (the page shows 6 entries; now "a numbered decision ledger"). Other fixes: the first download no longer reads as done, "Wrote the runbooks/specs" → "Designed", the ownership item → `#decide`, the reading note says "linked to the case study, role or repo it comes from", one long sentence split, ai-3 now active voice.
+- Code: one `resolveProjectLink` in `projects.ts` (used by `resolvedExamples` and `resolvedItems`), shared `caseStudySectionHeadings`, shared `focusRing` (card, approach, evidence), `MethodStrip` gains a `label` prop (on `/approach` the strip is "The five steps", not a second "How I work"), short link names ("Agent Harness: Diagnose"), a hover state on the `/approach` links, and shared test helpers in `src/__tests__/helpers/projects.ts`.
+- Verified: `.harness/check.sh` exits 0 (552 jest, build); smoke 38/38 PASS. A Sonnet browser check passed 7 of 7 at 390 and 1280: 0 errors, 0 overflow, 19/19 hashed links land, focus outline OK. I looked at both 390 shots. The `docs/screenshots/v2/M7-*.png` were re-captured after the copy changes.
+- Question for Michael (low stakes; no answer needed to proceed): the MAXX "one spreadsheet per person / bottleneck" and Builder Clarity "for stakeholder visibility" details come from `apprentice-profile.md`, not brand.md's bank. They are kept because the linked pages already publish them. Add them to brand.md, or trim them?
+- Proposed change: let `/evidence` link the harness PR list (`github.com/mh550/portfolio_site/pulls?q=is:pr+harness`, AH 99–100) instead of the bare repo root. M7-03's step allows only the four repo roots.
+
 ### 2026-10-19 01:15 · M7-04 · passes
 
 - Four screenshots in `docs/screenshots/v2/`: `M7-approach-390.png` (191 KB, 390 × 5815), `M7-approach-1280.png` (213 KB), `M7-evidence-390.png` (111 KB), `M7-evidence-1280.png` (131 KB). All are full pages, so none needed the top-3000 crop. They were taken after scrolling back to the top, so the Navbar sits at the top. The M7 plan's "What Michael will see" table now has four rows and an anchor-landing table.

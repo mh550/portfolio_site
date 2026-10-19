@@ -1,12 +1,13 @@
 import type { Decision } from '@/lib/data';
 import CaseStudySection from './CaseStudySection';
+import { caseStudySectionHeadings } from './sectionHeadings';
 
 /** The recorded choices: what was chosen, over what, why, and what it cost. */
 export default function DecisionLog({ decisions }: { decisions: Decision[] }) {
   if (decisions.length === 0) return null;
 
   return (
-    <CaseStudySection id="decisions" heading="Key Decisions">
+    <CaseStudySection id="decisions" heading={caseStudySectionHeadings.decisions}>
       <ul className="space-y-4">
         {decisions.map((d) => (
           <li key={d.id} className="rounded-xl border border-white/8 bg-[var(--color-surface)] p-5">

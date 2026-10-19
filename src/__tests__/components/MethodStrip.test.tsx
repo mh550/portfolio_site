@@ -61,6 +61,11 @@ describe('MethodStrip', () => {
     for (const a of arrows) expect(a).toHaveClass('hidden', 'md:inline');
   });
 
+  it('takes a label, so a page whose h1 is "How I work" can name it differently', () => {
+    render(<MethodStrip showLines label="The five steps" />);
+    expect(screen.getByRole('list', { name: 'The five steps' })).toBeInTheDocument();
+  });
+
   it('appends className', () => {
     render(<MethodStrip className="mb-8" />);
     expect(screen.getByRole('list', { name: 'How I work' })).toHaveClass('mb-8');

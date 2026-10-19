@@ -1,5 +1,6 @@
 import type { Lesson } from '@/lib/data';
 import CaseStudySection from './CaseStudySection';
+import { caseStudySectionHeadings } from './sectionHeadings';
 
 const label = 'block font-mono text-xs uppercase tracking-wide mb-1';
 
@@ -8,7 +9,7 @@ export default function LessonList({ lessons }: { lessons: Lesson[] }) {
   if (lessons.length === 0) return null;
 
   return (
-    <CaseStudySection id="lessons" heading="What Broke">
+    <CaseStudySection id="lessons" heading={caseStudySectionHeadings.lessons}>
       <ul className="space-y-4">
         {lessons.map((l, i) => (
           <li

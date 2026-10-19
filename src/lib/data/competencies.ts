@@ -1,5 +1,5 @@
 // projects.ts is in an import cycle with approach.ts: call these only inside functions, never at module load.
-import { getCaseStudyAnchors, getProjectBySlug } from './projects';
+import { resolveProjectLink } from './projects';
 
 export type EvidenceContext = 'MAXX Potential' | 'Builder Clarity' | 'Personal';
 
@@ -23,7 +23,7 @@ export interface Competency {
 // Remapping to the MAXX level-4 rubric means editing this file only (docs/notes/maxx-level-4.md).
 export const evidenceIntro = {
   reading:
-    'Each competency lists two to four pieces of my work, each labelled with where I did it and linked to where you can check it.',
+    'Each competency lists two to four pieces of my work, each labelled with where I did it and linked to the case study, role or repo it comes from.',
   mapping:
     'For now these map to general competencies; once I have the MAXX Potential level-4 rubric, this page will follow it instead.',
 };
@@ -65,20 +65,20 @@ export const competencies: Competency[] = [
       },
       {
         context: 'Builder Clarity',
-        text: 'Replaced per-client builds with one multi-tenant integration platform: 3 clients, onboarding from ~2 days to ~6 hours',
+        text: 'Replaced per-client builds with one multi-tenant integration platform: onboarding from ~2 days to ~6 hours',
         href: '/projects/ghl-jobtread-integration',
         source: 'multi-tenant integration platform',
       },
       {
         context: 'Personal',
-        text: 'Kept a decision ledger for my agent harness, D-H1 to D-H24',
+        text: 'Kept a numbered decision ledger for my agent harness: what I chose, over what, and why',
         href: '/projects/agent-harness#decisions',
         source: 'D-H1…D-H24',
       },
       {
         context: 'Personal',
         text: 'Split ownership in my music server: Navidrome owns the songs and playlists; the crates app owns only the crate flags, the wanted queue and approvals',
-        href: '/projects/home-media-server#decisions',
+        href: '/projects/home-media-server#decide',
         source: 'the app owns the flag',
       },
     ],
@@ -162,7 +162,7 @@ export const competencies: Competency[] = [
       },
       {
         context: 'Personal',
-        text: 'Wrote the runbooks and specs my agents work from, so a fresh session picks up the work from disk',
+        text: 'Designed the runbooks and specs my agents work from, so a fresh session picks up the work from disk',
         href: '/projects/agent-harness#iterations',
         source: 'fresh sessions force state onto disk',
       },
@@ -186,7 +186,7 @@ export const competencies: Competency[] = [
       },
       {
         context: 'Personal',
-        text: 'Had v3 of my agent harness independently reviewed before its first run: 2 critical and 8 important bugs found',
+        text: 'An independent review of v3 of my agent harness, before its first run, found 2 critical and 8 important bugs',
         href: '/projects/agent-harness#lessons',
         source: 'found 2 critical + 8 important bugs',
       },
@@ -200,9 +200,8 @@ export function resolvedItems(competency: Competency): EvidenceItem[] {
   return competency.items.flatMap((item) => {
     const m = item.href.match(/^\/projects\/([^#]+)(?:#(.+))?$/);
     if (!m) return [item];
-    const project = getProjectBySlug(m[1]);
-    if (!project) return [];
-    if (m[2] && !getCaseStudyAnchors(project).includes(m[2])) return [{ ...item, href: `/projects/${m[1]}` }];
-    return [item];
+    const link = resolveProjectLink(m[1], m[2]);
+    if (!link) return [];
+    return [link.anchor === m[2] ? item : { ...item, href: `/projects/${m[1]}` }];
   });
 }

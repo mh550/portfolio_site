@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { focusRing } from '@/components/focusRing';
 import ScrollReveal from '@/components/ScrollReveal';
 import { competencies, evidenceIntro, resolvedItems, type EvidenceItem } from '@/lib/data';
 
@@ -12,8 +13,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]';
-const LINK = `leading-relaxed text-[var(--color-foreground)] underline decoration-[var(--color-accent)]/50 underline-offset-4 hover:text-[var(--color-accent)] ${FOCUS}`;
+const LINK = `leading-relaxed text-[var(--color-foreground)] underline decoration-[var(--color-accent)]/50 underline-offset-4 hover:text-[var(--color-accent)] ${focusRing}`;
 
 function ItemLink({ item }: { item: EvidenceItem }) {
   if (item.href.startsWith('https://')) {

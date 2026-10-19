@@ -32,7 +32,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (508 tests, 50 suites after M7-04)
+npm test             # Jest unit/integration tests (552 tests, 51 suites after M7-05)
 npm run test:watch   # watch mode
 ```
 
@@ -73,6 +73,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos (hidden below `xl`, D33) and NodeGraph honour reduced motion
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
+- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

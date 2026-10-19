@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTopProjects, profile } from '@/lib/data';
+import { focusRing } from '@/components/focusRing';
 
 const title = `${profile.name} — ${profile.positioning}`;
 
@@ -11,9 +12,7 @@ export const metadata: Metadata = {
   description: profile.subline,
 };
 
-const focus =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]';
-const button = `min-h-[44px] inline-flex items-center justify-center rounded-lg px-4 font-medium transition-colors ${focus}`;
+const button = `min-h-[44px] inline-flex items-center justify-center rounded-lg px-4 font-medium transition-colors ${focusRing}`;
 const primaryButton = `${button} w-full bg-[var(--color-accent)] text-[var(--color-background)] py-3 hover:bg-[var(--color-accent)]/85`;
 const secondaryButton = `${button} border border-white/15 text-sm hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]`;
 const textButton = `${button} text-[var(--color-muted)] hover:text-[var(--color-accent)]`;
@@ -64,7 +63,7 @@ export default function CardPage() {
             <li key={project.slug}>
               <Link
                 href={`/projects/${project.slug}`}
-                className={`block rounded-lg border border-white/10 bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-accent)] ${focus}`}
+                className={`block rounded-lg border border-white/10 bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-accent)] ${focusRing}`}
               >
                 <span className="block font-semibold">{project.title}</span>
                 <span className="mt-1 block text-sm text-[var(--color-muted)]">

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import MethodStrip from '@/components/MethodStrip';
 import ScrollReveal from '@/components/ScrollReveal';
+import { focusRing } from '@/components/focusRing';
+import { caseStudySectionHeadings } from '@/components/projects/case-study/sectionHeadings';
 import {
   approachClosing,
   approachIntro,
@@ -11,7 +13,6 @@ import {
   principles,
   profile,
   resolvedExamples,
-  type CaseStudyAnchor,
   type PrincipleExample,
 } from '@/lib/data';
 
@@ -20,20 +21,17 @@ export const metadata: Metadata = {
   description: profile.subline,
 };
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]';
+const LINK = `text-[var(--color-accent)] underline underline-offset-4 hover:decoration-2 ${focusRing}`;
 
-// Where a link lands, named as the case study heads it (method labels; CaseStudySection headings).
-const SECTION_NAMES: Partial<Record<CaseStudyAnchor, string>> = {
-  decisions: 'Key Decisions',
-  iterations: 'How It Evolved',
-  lessons: 'What Broke',
-};
-
+/** "<project>: <where it lands>", the project named up to the first colon of its title ("Agent Harness") and the
+ *  section as the case study heads it (method label or section h2). */
 function linkName({ projectSlug, anchor }: PrincipleExample): string {
+  const project = getProjectBySlug(projectSlug!)!.title.split(':')[0];
   const section = !anchor
     ? 'Project page'
-    : (methodSteps.find((s) => s.id === anchor)?.label ?? SECTION_NAMES[anchor]);
-  return `${getProjectBySlug(projectSlug!)!.title}: ${section}`;
+    : (methodSteps.find((s) => s.id === anchor)?.label ??
+      caseStudySectionHeadings[anchor as keyof typeof caseStudySectionHeadings]);
+  return `${project}: ${section}`;
 }
 
 export default function ApproachPage() {
@@ -54,7 +52,7 @@ export default function ApproachPage() {
       </ScrollReveal>
 
       <ScrollReveal>
-        <MethodStrip showLines className="mb-16" />
+        <MethodStrip showLines label="The five steps" className="mb-16" />
       </ScrollReveal>
 
       <div className="space-y-14">
@@ -77,7 +75,7 @@ export default function ApproachPage() {
                           {href && (
                             <Link
                               href={href}
-                              className={`mt-1 inline-block text-sm text-[var(--color-accent)] underline underline-offset-4 ${FOCUS}`}
+                              className={`mt-1 inline-block text-sm ${LINK}`}
                             >
                               {linkName(example)}
                             </Link>
@@ -97,11 +95,11 @@ export default function ApproachPage() {
         <p className="mt-16 text-lg leading-relaxed">
           {approachClosing}{' '}
           {hasHarness ? (
-            <Link href="/projects/agent-harness" className={`text-[var(--color-accent)] underline underline-offset-4 ${FOCUS}`}>
+            <Link href="/projects/agent-harness" className={LINK}>
               Read the agent harness case study
             </Link>
           ) : (
-            <Link href="/projects" className={`text-[var(--color-accent)] underline underline-offset-4 ${FOCUS}`}>
+            <Link href="/projects" className={LINK}>
               See the projects
             </Link>
           )}
