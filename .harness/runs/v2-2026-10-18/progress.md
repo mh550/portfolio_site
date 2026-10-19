@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:20 · M6-04 · passes
+
+- New `docs/screenshots/v2/M6-hit-list-390.png` (334 KB, 390 × 11425) and `M6-hit-list-1280.png` (382 KB, 1280 × 7165), both full pages as palette PNGs (script `$HARNESS_SCRATCH/m6-shots.mjs`). The plan's "What Michael will see" table in `docs/plans/2026-10-18-M6-hit-list.md` describes both, row by row.
+- Fixed (M6-03 flagged it): at 1280 the Before panel stretched to the After panel's height, leaving an empty box. The form grid in `diagrams/index.tsx` now has `md:items-start`, like the other diagrams. New test in `ProjectDiagram.test.tsx`; it failed first. Tests 376 → 377 (40 suites).
+- Verified from the DOM at both widths: scrollWidth − innerWidth = 0; no console errors; the metric values `374` / `20+ → 7` / `SDK 54 → 57` each sit on one line (1 column at 390, one row of 3 at 1280, so SDK 54 → 57 fits a third-width card); 6/6 decisions read "Chose … over … because"; the timeline ends with the Oct 16 "Simplification spec" (specified, not yet built); 7 After fields; the scale steps are 45 px (390) and 50 px (1280) wide, with scrollWidth = clientWidth and no ellipsis, and "Too much" wraps to two lines; 0 `img` in `<main>`; one link, to the repo root. I looked at all 8 + 4 slices and the re-shot form crop.
+- `lib/check.sh` green; `npx jest` 377/377; smoke exit 0, including `/projects/hit-list` PASS at 1280 and 390.
+- Left as is, with reasons in the table: the DecisionLog chip/title wrap (shared layout) and the wrapping letter-spaced panel titles.
+- Next (M6-05): review the M6 diff. Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:50 · M6-03 · passes
 
 - `src/components/projects/diagrams/index.tsx` gains `HitListDiagram` (3 panels: On the phone · Expo Go / Needs a signal / Capture now, details later) and `FormSimplificationDiagram` (Before · 20+ fields in five sections / After · 7 fields, specified Oct 16, an `<ol>` of 7 with the speed scale None · Little · Some · Enough · Too much as plain divs, Enough selected), plus `CAPTIONS`/`LABELS` copied from the M6 plan. `DiagramKey` gains both keys; the hit-list entry sets `detail.architectureDiagram: 'hit-list'` and `caseStudy.extraDiagrams: ['form-simplification']`.

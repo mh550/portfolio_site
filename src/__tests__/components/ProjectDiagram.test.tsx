@@ -213,6 +213,11 @@ describe('form-simplification diagram (M6-03)', () => {
     expect(grid.children).toHaveLength(2);
   });
 
+  it('top-aligns the panels side by side, so Before is not stretched to the taller After (M6-04)', () => {
+    const { grid } = panels();
+    expect(grid).toHaveClass('md:items-start');
+  });
+
   it('says in its label and caption that the simplification is specified, not yet built', () => {
     const { container, getByRole } = render(<ProjectDiagram diagram="form-simplification" />);
     const label = getByRole('img').getAttribute('aria-label')!;

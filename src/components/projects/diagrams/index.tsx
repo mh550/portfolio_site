@@ -420,8 +420,9 @@ function FormSimplificationDiagram() {
     { label: 'Natural speed' },
     { label: 'Notes', sub: 'one free-text field' },
   ];
+  // items-start: stretched to the taller After panel, Before left an empty box under Status at 1280 (M6-04).
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
       <Panel title="Before · 20+ fields in five sections" tone="muted">
         {before.map((section) => (
           <Node key={section.label} className="opacity-80">
