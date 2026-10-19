@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:55 · M2-04 · passes
+
+- `skills.ts` is now four capability groups in plan order: `process` "Process & delivery" (featured, D20, 7), `systems` "Systems & architecture" (12), `build` "Build" (24), `operate` "Operate & verify" (8). That is 51 unique strings: all 39 pre-M2 skills plus 12 new ones, each with the evidence line the plan cites. `/skills` puts Process & delivery in the glow panel ("Differentiator" kept) and stacks the other three full width. The intro and metadata now describe grouping by capability. Chips are now `ul role="list"`/`li`, each list named by its h2 (`aria-labelledby`). The stale `h-full` is gone.
+- Tests 435 → 439 (44 suites), in `data.test.ts` (ids and names in order, only `process` featured, ≥ 4 each, the hard-coded 39 plus all 12 new strings, no duplicates) and `skills.test.tsx` (four h2s, featured panel via `closest('div.glow-accent')`, TypeScript/Docker/Linear inside their own group's list, each list's items equal the data, intro and metadata). Every behaviour test failed first. The ≥ 4 / 39-kept / no-duplicate guards already held before the change.
+- Verified: `lib/check.sh` green; smoke 34/34 PASS. A Playwright check at 390 and 1280: four h2s in order at opacity 1, only Process & delivery in `.glow-accent`, the lower cards one column (x 24 w 342 at 390; x 152 w 976 at 1280), scrollWidth = clientWidth, no console errors. I looked at the 390 shots: chips wrap cleanly with no list bullets. Note for M2-05: the smoke full-page shot leaves the lower groups blank because ScrollReveal only animates them on scroll. Scroll first; `/tmp/harness/portfolio_site/v2-2026-10-18/skills-check.mjs` does.
+- Opus review: 0 Critical, 0 Important, 6 Minor. Applied: all 12 new strings asserted, the group-membership spot-checks, ul/li, `h-full` removed. Left: querying the panel by its CSS class (the plan specifies it) and the metadata literal test.
+- CLAUDE.md: skills.ts line and test count updated. Next: M2-05 (all its prerequisites now pass). Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 23:30 · M2-03 · passes
 
 - `experience.ts`: the 6 MAXX and 4 Builder Clarity bullets now match the plan word for word (2×, ~80%, de facto PM, Foundational Capability Patterns, git-tracked DB migrations; 3 clients, ~2 days → ~6 hours, ~8 hrs/week, **4+ sources**, Agile/Scrum in Linear). "Pioneered" and "7+" are gone, High Cascade reads "Mentored 12–18-year-old snowboarders" (D9), and `gpa` is removed from `Education` and from the page (D8). Titles, companies and periods are unchanged. The Experience metadata now reads from `profile.name`.

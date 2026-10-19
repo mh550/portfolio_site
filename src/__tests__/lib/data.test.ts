@@ -104,24 +104,57 @@ describe('getTopProjects', () => {
 });
 
 describe('skills data', () => {
-  it('exports 6 skill categories', () => {
-    expect(skillCategories).toHaveLength(6);
+  // The 39 skill strings listed before M2 (hard-coded so a regroup can never drop one).
+  const PRE_M2_SKILLS = [
+    'Pipedream', 'n8n', 'Zapier', 'Multi-tenant architecture', 'RESTful APIs', 'OAuth 2.0', 'Webhooks',
+    'TypeScript', 'JavaScript', 'Python', 'PowerShell', 'Java', 'C/C++', 'Ruby', 'R',
+    'React', 'React Native', 'Next.js', 'Tailwind CSS', 'Framer Motion',
+    'Node.js', 'Flask', 'Ruby on Rails', 'PostgreSQL', 'Supabase Edge Functions', 'ETL pipelines', 'MongoDB',
+    'Supabase', 'Vercel', 'Git', 'Linear', 'Linux CLI', 'WSL', 'Claude Code',
+    'AGILE/Scrum', 'Agentic AI', 'User-driven design', 'AI-assisted development', 'Test-driven development',
+  ];
+  // Added in M2 (sources: docs/plans/2026-10-18-M2-positioning.md § Skills).
+  const NEW_SKILLS = [
+    'Requirements', 'Specs and decision ledgers', 'Project management', 'Team onboarding',
+    'Self-hosted infrastructure', 'Docker', 'Agent orchestration', 'Expo', 'SQLite',
+    'GitHub Actions', 'restic', 'Private networking',
+  ];
+  const allSkills = () => skillCategories.flatMap((c) => c.skills);
+
+  it('exports the four capability groups in order', () => {
+    expect(skillCategories.map((c) => c.id)).toEqual(['process', 'systems', 'build', 'operate']);
+    expect(skillCategories.map((c) => c.name)).toEqual([
+      'Process & delivery',
+      'Systems & architecture',
+      'Build',
+      'Operate & verify',
+    ]);
   });
 
-  it('Integration & Automation is marked as featured', () => {
-    const integration = skillCategories.find((c) => c.id === 'integration');
-    expect(integration?.featured).toBe(true);
+  it('Process & delivery is the only featured group (D20)', () => {
+    const featured = skillCategories.filter((c) => c.featured);
+    expect(featured.map((c) => c.id)).toEqual(['process']);
   });
 
-  it('each category has at least 3 skills', () => {
+  it('each category has at least 4 skills', () => {
     for (const cat of skillCategories) {
-      expect(cat.skills.length).toBeGreaterThanOrEqual(3);
+      expect(cat.skills.length).toBeGreaterThanOrEqual(4);
     }
   });
 
-  it('only one category is featured', () => {
-    const featured = skillCategories.filter((c) => c.featured);
-    expect(featured).toHaveLength(1);
+  it('keeps all 39 pre-M2 skills', () => {
+    expect(PRE_M2_SKILLS).toHaveLength(39);
+    const missing = PRE_M2_SKILLS.filter((s) => !allSkills().includes(s));
+    expect(missing).toEqual([]);
+  });
+
+  it('adds the new evidence-backed skills', () => {
+    const missing = NEW_SKILLS.filter((s) => !allSkills().includes(s));
+    expect(missing).toEqual([]);
+  });
+
+  it('lists no skill twice', () => {
+    expect(new Set(allSkills()).size).toBe(allSkills().length);
   });
 });
 

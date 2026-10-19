@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import SkillsPage from '@/app/skills/page';
+import { render, screen, within } from '@testing-library/react';
+import { skillCategories } from '@/lib/data';
+import SkillsPage, { metadata } from '@/app/skills/page';
 
 describe('SkillsPage', () => {
   it('renders the heading', () => {
@@ -7,30 +8,50 @@ describe('SkillsPage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Tech Stack');
   });
 
-  it('renders Integration & Automation as featured', () => {
+  it('renders the four capability groups as headings', () => {
     render(<SkillsPage />);
-    expect(screen.getByText('Integration & Automation')).toBeInTheDocument();
-    expect(screen.getByText('Differentiator')).toBeInTheDocument();
-  });
-
-  it('renders all skill categories', () => {
-    render(<SkillsPage />);
-    const categories = ['Languages', 'Frontend', 'Backend', 'Tools & Platforms', 'Practices'];
-    for (const cat of categories) {
-      expect(screen.getByRole('heading', { name: cat })).toBeInTheDocument();
+    for (const name of ['Process & delivery', 'Systems & architecture', 'Build', 'Operate & verify']) {
+      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
     }
   });
 
-  it('renders integration skills', () => {
+  it('renders Process & delivery in the featured panel', () => {
     render(<SkillsPage />);
-    expect(screen.getByText('Pipedream')).toBeInTheDocument();
-    expect(screen.getByText('n8n')).toBeInTheDocument();
-    expect(screen.getByText('OAuth 2.0')).toBeInTheDocument();
+    const panel = screen.getByRole('heading', { name: 'Process & delivery' }).closest('div.glow-accent');
+    expect(panel).not.toBeNull();
+    expect(panel).toContainElement(screen.getByText('Differentiator'));
+    expect(panel).toContainElement(screen.getByText('Linear'));
+    expect(document.querySelectorAll('div.glow-accent')).toHaveLength(1);
   });
 
-  it('renders language skills', () => {
+  it('renders the other groups outside the featured panel', () => {
     render(<SkillsPage />);
-    expect(screen.getByText('Python')).toBeInTheDocument();
-    expect(screen.getByText('TypeScript')).toBeInTheDocument();
+    for (const name of ['Systems & architecture', 'Build', 'Operate & verify']) {
+      expect(screen.getByRole('heading', { name }).closest('div.glow-accent')).toBeNull();
+    }
+  });
+
+  it('spot-checks skills in their groups', () => {
+    render(<SkillsPage />);
+    const groupOf = (name: string) => screen.getByRole('list', { name });
+    expect(within(groupOf('Build')).getByText('TypeScript')).toBeInTheDocument();
+    expect(within(groupOf('Systems & architecture')).getByText('Docker')).toBeInTheDocument();
+    expect(within(groupOf('Process & delivery')).getByText('Linear')).toBeInTheDocument();
+  });
+
+  it('renders each group as a list named by its heading, one item per skill', () => {
+    render(<SkillsPage />);
+    for (const cat of skillCategories) {
+      const items = within(screen.getByRole('list', { name: cat.name })).getAllByRole('listitem');
+      expect(items.map((li) => li.textContent)).toEqual(cat.skills);
+    }
+  });
+
+  it('describes the page by capability', () => {
+    expect(metadata.description).toBe(
+      'Skills grouped by capability: process and delivery, systems and architecture, building, and operating and verifying.',
+    );
+    render(<SkillsPage />);
+    expect(screen.getByText('Grouped by what I do, with the tools I use for each.')).toBeInTheDocument();
   });
 });

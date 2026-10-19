@@ -4,7 +4,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export const metadata: Metadata = {
   title: 'Skills — Michael Herron',
-  description: 'Technical skills across integration & automation, full-stack development, and more.',
+  description: 'Skills grouped by capability: process and delivery, systems and architecture, building, and operating and verifying.',
 };
 
 export default function SkillsPage() {
@@ -21,11 +21,11 @@ export default function SkillsPage() {
           Tech Stack
         </h1>
         <p className="text-[var(--color-muted)] text-lg mb-16 max-w-xl">
-          Tools and technologies I use to build reliable systems.
+          Grouped by what I do, with the tools I use for each.
         </p>
       </ScrollReveal>
 
-      {/* Featured: Integration & Automation */}
+      {/* Featured: Process & delivery (D20) */}
       {featured && (
         <ScrollReveal delay={0.05}>
           <div className="relative mb-12 p-8 rounded-xl border border-[var(--color-accent)]/40 bg-[var(--color-surface-alt)] glow-accent overflow-hidden">
@@ -38,7 +38,7 @@ export default function SkillsPage() {
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-2 h-8 rounded-full bg-[var(--color-accent)]" />
-                <h2 className="text-2xl font-bold text-[var(--color-accent)]">
+                <h2 id={`skills-${featured.id}`} className="text-2xl font-bold text-[var(--color-accent)]">
                   {featured.name}
                 </h2>
                 <span className="ml-auto font-mono text-xs text-[var(--color-accent)]/60 tracking-widest uppercase">
@@ -46,39 +46,39 @@ export default function SkillsPage() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <ul role="list" aria-labelledby={`skills-${featured.id}`} className="flex flex-wrap gap-3">
                 {featured.skills.map((skill) => (
-                  <span
+                  <li
                     key={skill}
                     className="px-4 py-2 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 text-[var(--color-accent)] text-sm font-medium"
                   >
                     {skill}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
         </ScrollReveal>
       )}
 
-      {/* Other categories grid */}
-      <div className="grid sm:grid-cols-2 gap-6">
+      {/* Other groups, stacked full width */}
+      <div className="grid gap-6">
         {rest.map((cat, i) => (
           <ScrollReveal key={cat.id} delay={0.05 + i * 0.05}>
-            <div className="p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-white/15 transition-colors h-full">
-              <h2 className="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+            <div className="p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-white/15 transition-colors">
+              <h2 id={`skills-${cat.id}`} className="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
                 {cat.name}
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <ul role="list" aria-labelledby={`skills-${cat.id}`} className="flex flex-wrap gap-2">
                 {cat.skills.map((skill) => (
-                  <span
+                  <li
                     key={skill}
                     className="px-3 py-1.5 rounded-full bg-white/5 border border-white/8 text-[var(--color-muted)] text-sm hover:text-[var(--color-foreground)] hover:border-white/15 transition-colors"
                   >
                     {skill}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </ScrollReveal>
         ))}

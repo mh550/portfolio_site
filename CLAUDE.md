@@ -30,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (435 tests, 44 suites after M2-03)
+npm test             # Jest unit/integration tests (439 tests, 44 suites after M2-04)
 npm run test:watch   # watch mode
 ```
 
@@ -60,7 +60,7 @@ The dev server must be running first (`npm run dev`). The `.playwright/cli.confi
 ### Data Layer (`src/lib/data/`)
 Single source of truth for all page content — no content is hardcoded in components:
 - `projects.ts` — `Project[]` with slug, title, categories, techStack, detail sections; `getProjectBySlug()`, `getProjectsByCategory()`
-- `skills.ts` — `SkillCategory[]`; one category has `featured: true` (Integration & Automation)
+- `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
 - `experience.ts` — `Role[]` + `Education` object
 - `index.ts` — barrel export
 
