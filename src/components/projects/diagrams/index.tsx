@@ -1,4 +1,4 @@
-import type { DiagramKey } from '@/lib/data';
+import { getProjectBySlug, type DiagramKey } from '@/lib/data';
 
 /* ------------------------------------------------------------------ */
 /* Shared primitives                                                   */
@@ -231,6 +231,77 @@ function CalendarSyncDiagram() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Agent harness — one run, and what surrounds it                      */
+/* ------------------------------------------------------------------ */
+
+function AgentHarnessDiagram() {
+  return (
+    <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
+      <Panel title="One run" tone="accent">
+        <Node>harness CLI <Sub>start · status · queue</Sub></Node>
+        <Arrow />
+        <Node>Driver <Sub>deterministic bash, in tmux</Sub></Node>
+        <Arrow />
+        <Node>Initializer session <Sub>spec → feature_list.json</Sub></Node>
+        <Arrow />
+        <Node accent>Coding session per feature <Sub>fresh context, Opus or Sonnet</Sub></Node>
+        <Arrow />
+        <Node>Suite gate <Sub>red suite un-passes the feature</Sub></Node>
+        <Arrow label="milestone done" />
+        <Node>Verify session per milestone <Sub>one evidence row per step</Sub></Node>
+        <Arrow />
+        <Node>Tag + PR <Sub>run/&lt;run&gt;/&lt;milestone&gt;</Sub></Node>
+        <Arrow label="tree == verified" />
+        <Node accent>main <Sub>only the verified tree merges</Sub></Node>
+      </Panel>
+
+      <Panel title="Around it" tone="muted">
+        <Node>INBOX.md <Sub>pause · stop · answers, from my phone</Sub></Node>
+        <Node>Push notifications <Sub>verified, needs me, merged</Sub></Node>
+        <Node>Usage-limit marker <Sub>one for the machine; every run waits on it</Sub></Node>
+        <Node>Queue + ledger <Sub>runs go one at a time; a retro per run</Sub></Node>
+      </Panel>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Harness evolution — six stages, each changed by what broke before   */
+/* ------------------------------------------------------------------ */
+
+/** Diagram-only "why it changed" lines (≤ 8 words), one per agent-harness iteration, in order. */
+export const HARNESS_EVOLUTION_WHY: readonly string[] = [
+  'Needed me at the keyboard',
+  'Hit usage and context limits',
+  'Blocked by the permission classifier',
+  'One guard trip stopped the night',
+  'Merges still needed a human',
+  'Current: it built this update',
+];
+
+function HarnessEvolutionDiagram() {
+  const iterations = getProjectBySlug('agent-harness')!.caseStudy!.iterations!;
+  return (
+    <ol className="grid grid-cols-1 gap-3 md:grid-cols-6">
+      {iterations.map((it, i) => (
+        <li key={`${it.when}-${it.label}`} className="flex flex-col gap-3">
+          <Node accent={i === iterations.length - 1} className="flex-1 md:px-1.5">
+            <span className="block font-mono text-[10px] text-[var(--color-muted)]">{it.when}</span>
+            <span className="my-1 block font-bold md:text-[13px]">{it.label}</span>
+            <Sub>{HARNESS_EVOLUTION_WHY[i]}</Sub>
+          </Node>
+          {i < iterations.length - 1 && (
+            <div className="md:hidden">
+              <Arrow />
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Public component                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -240,6 +311,8 @@ const DIAGRAMS: Record<DiagramKey, () => React.ReactElement> = {
   'paint-hierarchy': PaintHierarchyDiagram,
   ringcentral: RingCentralDiagram,
   'calendar-sync': CalendarSyncDiagram,
+  'agent-harness': AgentHarnessDiagram,
+  'harness-evolution': HarnessEvolutionDiagram,
 };
 
 const CAPTIONS: Record<DiagramKey, string> = {
@@ -248,6 +321,9 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'paint-hierarchy': 'How a paint job decomposes into priced line items.',
   ringcentral: 'Every call and text matched by phone number into a single per-customer thread.',
   'calendar-sync': 'Idempotent, event-driven mirroring from a source calendar to an availability calendar.',
+  'agent-harness':
+    'One run: fresh sessions do the judgment, the driver does the bookkeeping, and nothing reaches main unverified.',
+  'harness-evolution': 'Six ways of driving agents, each changed by what broke in the one before.',
 };
 
 // What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).
@@ -262,6 +338,10 @@ const LABELS: Record<DiagramKey, string> = {
     'A RingCentral call or text is matched by phone number to one or more JobTread contacts and logged to each, building one thread with a summary, transcript and action items.',
   'calendar-sync':
     'Events on a source Google Calendar pass through an idempotent, event-driven sync engine to a mirror calendar that blocks the same time as unavailable.',
+  'agent-harness':
+    'The harness CLI starts a deterministic driver. The driver runs an initializer session that turns the spec into a feature list, then one fresh coding session per feature. Every feature passes a suite gate; every finished milestone gets an independent verify session; a verified milestone is tagged and opened as a PR into main, and merges only if the merged tree is the verified tree. Around the run: an INBOX file for steering from a phone, push notifications, one usage-limit marker for the whole machine, and a queue with a ledger.',
+  'harness-evolution':
+    'Six stages, September to October 17, 2026: long interactive sessions, which needed me at the keyboard; a runbook and an overnight loop, which hit usage and context limits; an orchestrator with subagents, blocked by the permission classifier; harness v1, where one guard trip stopped the night; harness v2, where merges still needed a human; and harness v3, the current version, which built this site update.',
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {

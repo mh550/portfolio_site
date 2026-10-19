@@ -9,6 +9,22 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:25 · M4-03 · passes
+
+- `src/components/projects/diagrams/index.tsx`: `AgentHarnessDiagram` (panels "One run" and "Around it", stacked at 390, side by side from `md`) and
+  `HarnessEvolutionDiagram` (`ol grid grid-cols-1 md:grid-cols-6`, reads `when`/`label` from the entry's iterations, plus the exported
+  `HARNESS_EVOLUTION_WHY` (six lines of 8 words or fewer); ↓ arrows below `md` only). Nodes, captions and aria-labels are copied word for word from the M4-01 plan § Diagrams.
+  `DiagramKey` gains both keys. The entry sets `architectureDiagram: 'agent-harness'` and `extraDiagrams: ['harness-evolution']`.
+- Tests 242 → 257 (36 suites): ProjectDiagram.test iterates all 7 keys (one role=img, a non-empty aria-label, a figcaption outside it, every label distinct), checks the 9
+  architecture words (CLI/PR/INBOX case-sensitive) and the six stages in order with their when and why lines, the why array's length = iterations' length, and the grid classes;
+  case-study-agent-harness checks the two diagram fields.
+- Verified: check.sh green; full smoke has 0 non-PASS lines; `smoke … /projects/agent-harness` PASS at 1280 and 390. Sonnet in a browser: at 390 both diagrams stack, scrollWidth − innerWidth = 0;
+  at 1280 the six cards sit in one row at y = 4780, each 102 px wide. Fixed the one overflow it found: "Orchestrator" was 91 px in an 88 px card; now `md:px-1.5` and a 13 px label from `md`, and an in-browser probe finds no overflow.
+  Opus review: 0 Critical/Important; both Minor fixed (a non-null data read instead of a silent empty diagram, and the why array is now readonly). I looked at evo-390, evo-1280 and arch-390 in $HARNESS_SCRATCH.
+- Note on step 2: `role="img"` + aria-label sit on the figure's inner div, not the `<figure>` itself, so the figcaption stays visible outside the image (D17, set in M3). This meets the step's intent; the step's wording says "on its figure".
+- Next (M4-04): screenshots. The architecture diagram is tall at 390 (about 1,400 px across both panels). At 1280 the evolution cards wrap to 2–3 lines; this is legible.
+- Questions for Michael: none. Proposed changes: reword M4-03 step 2 to "inside its figure" (D17).
+
 ### 2026-10-18 20:20 · M4-02 · passes
 
 - `src/lib/data/projects.ts`: the agent-harness entry, first in the array (order 1, featured), copy pasted from the M4-01 plan

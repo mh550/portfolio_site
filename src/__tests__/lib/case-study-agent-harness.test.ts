@@ -107,3 +107,11 @@ describe('agent-harness traceability', () => {
     for (const banned of ['.ts' + '.net', 'ntfy', 'journal/raw']) expect(text).not.toContain(banned);
   });
 });
+
+describe('agent-harness diagrams (M4-03)', () => {
+  it('uses the architecture diagram and the evolution diagram', () => {
+    const project = getProjectBySlug('agent-harness')!;
+    expect(project.detail.architectureDiagram).toBe('agent-harness');
+    expect(project.caseStudy!.extraDiagrams).toEqual(['harness-evolution']);
+  });
+});

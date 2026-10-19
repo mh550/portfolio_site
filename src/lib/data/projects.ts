@@ -8,7 +8,9 @@ export type DiagramKey =
   | 'ringcentral'
   | 'linear-flow'
   | 'paint-hierarchy'
-  | 'calendar-sync';
+  | 'calendar-sync'
+  | 'agent-harness'
+  | 'harness-evolution';
 
 export interface ProjectMedia {
   type: 'image' | 'video';
@@ -151,6 +153,7 @@ merge_one() {
   [[ $tree == "$(git rev-parse "$c^{tree}")" ]] || return 3`,
         },
       ],
+      architectureDiagram: 'agent-harness',
     },
     caseStudy: {
       role: 'Designer and operator',
@@ -289,6 +292,7 @@ merge_one() {
           kind: 'repo',
         },
       ],
+      extraDiagrams: ['harness-evolution'],
       builtWith:
         'I designed the process, the specs, the decision log and the verification gates, and I ran and reviewed every night. Claude Code agents wrote much of the harness code under that direction.',
     },
