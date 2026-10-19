@@ -33,4 +33,26 @@ describe('TimelineLine', () => {
     expect(parseFloat(left)).toBe(0);
     expect(seen[0].whileInView).toEqual({ opacity: 1, y: 0, scaleY: 1 });
   });
+
+  // Same element and initial state as the animated bar (the server can't know the preference), shown at once
+  it('shows the bar at once with reduced motion', async () => {
+    const seen: Props[] = [];
+    jest.resetModules();
+    jest.doMock('framer-motion', () => ({
+      ...jest.requireActual<object>('@/__mocks__/framer-motion'),
+      useReducedMotion: () => true,
+      motion: {
+        div: ({ children, ...props }: Props) => {
+          seen.push(props);
+          return <div>{children}</div>;
+        },
+      },
+    }));
+    const { default: TimelineLine } = await import('@/components/TimelineLine');
+    render(<TimelineLine />);
+    expect(seen[0].initial).toEqual({ opacity: 0, y: 40, scaleY: 0 });
+    expect(seen[0].animate).toEqual({ opacity: 1, y: 0, scaleY: 1 });
+    expect(seen[0].whileInView).toBeUndefined();
+    expect((seen[0].transition as { duration: number }).duration).toBe(0);
+  });
 });

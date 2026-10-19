@@ -39,7 +39,7 @@ export default function ScrollReveal({
       className={className}
       initial={initial}
       whileInView={shown}
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, margin: '-80px 0px' }}
       transition={{ duration: 0.6, ease: 'easeOut', delay }}
     >
       {children}

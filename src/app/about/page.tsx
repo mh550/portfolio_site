@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import LoopingVideo from '@/components/LoopingVideo';
 import ScrollReveal from '@/components/ScrollReveal';
 import { aboutIntro, profile } from '@/lib/data';
 
@@ -128,7 +129,7 @@ export default function AboutPage() {
               I fell in love with snowboarding when I was 16, even though I sucked at it for a while.
             </p>
             <p>
-              It&apos;s taught me to let myself fail. To follow my curiousity, trust my gut, 
+              It&apos;s taught me to let myself fail. To follow my curiosity, trust my gut, 
               and put the process over the outcome. To keep working at my weak points 
               until they become my strengths. The people who handle failure with grace are the ones who
               learn the fastest.
@@ -138,15 +139,11 @@ export default function AboutPage() {
           {/* Video — right side */}
           <div className="w-full md:w-[14.3rem] lg:w-[16.5rem] shrink-0">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-[var(--color-surface-alt)]">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
+              <LoopingVideo
+                src="/videos/snowboarding-2.mp4"
+                label="Michael Herron snowboarding"
                 className="absolute inset-0 w-full h-full object-cover"
-              >
-                <source src="/videos/snowboarding-2.mp4" type="video/mp4" />
-              </video>
+              />
             </div>
           </div>
 

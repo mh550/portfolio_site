@@ -27,8 +27,8 @@ describe('root metadata', () => {
     expect(og).not.toHaveProperty('url');
   });
 
-  it('twitter card is summary with the headshot', () => {
-    expect(JSON.stringify(metadata.twitter)).toContain('summary');
-    expect(JSON.stringify(metadata.twitter)).toContain('/photos/headshot.png');
+  // twitter:image comes from og:image; root twitter images would mask a page's own og:image
+  it('twitter card is summary with no images of its own', () => {
+    expect(metadata.twitter).toEqual({ card: 'summary' });
   });
 });

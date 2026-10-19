@@ -41,7 +41,7 @@ export default function SkillsPage() {
                 <h2 id={`skills-${featured.id}`} className="text-2xl font-bold text-[var(--color-accent)]">
                   {featured.name}
                 </h2>
-                <span className="ml-auto font-mono text-xs text-[var(--color-accent)]/60 tracking-widest uppercase">
+                <span className="ml-auto font-mono text-xs text-[var(--color-accent)]/80 tracking-widest uppercase">
                   Differentiator
                 </span>
               </div>

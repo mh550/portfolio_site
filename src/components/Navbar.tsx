@@ -34,6 +34,7 @@ export default function Navbar() {
             <li key={href}>
               <Link
                 href={href}
+                aria-current={pathname === href ? 'page' : undefined}
                 className={`text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${
                   pathname === href
                     ? 'text-[var(--color-accent)]'
@@ -79,6 +80,7 @@ export default function Navbar() {
               <li key={href}>
                 <Link
                   href={href}
+                  aria-current={pathname === href ? 'page' : undefined}
                   onClick={() => setMenuOpen(false)}
                   className={`block text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${
                     pathname === href

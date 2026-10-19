@@ -56,7 +56,8 @@ describe('HeroSection', () => {
     render(<HeroSection />);
     expect(screen.getByText('Systems & Process Engineer')).toBeInTheDocument();
     expect(profile.positioning).toBe('Systems & Process Engineer');
-    expect(screen.queryByText(/Full-Stack & Integration Engineer/)).toBeNull();
+    // The pre-M2 eyebrow is gone
+    expect(screen.queryByText(/Integration Engineer/)).toBeNull();
   });
 
   it('renders the tagline', () => {
@@ -119,7 +120,7 @@ describe('HeroSection', () => {
     for (const d of durations) expect(d).toBe(0);
     // Same hidden state as the fade-up, so the server HTML (which can't know the preference) hydrates without a mismatch
     for (const r of mockRecorded.filter((x) => x.variants)) {
-      expect((r.variants as { hidden: unknown }).hidden).toEqual({ opacity: 0, y: 32 });
+      expect((r.variants as unknown as { hidden: unknown }).hidden).toEqual({ opacity: 0, y: 32 });
     }
   });
 });

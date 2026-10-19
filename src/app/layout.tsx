@@ -25,7 +25,8 @@ export const metadata: Metadata = {
     siteName: profile.name,
     images: [{ url: profile.headshot, alt: `${profile.name} headshot` }],
   },
-  twitter: { card: 'summary', images: [profile.headshot] },
+  // No images: Next copies og:image to twitter:image, so a page's own og:image reaches twitter too
+  twitter: { card: 'summary' },
 };
 
 export default function RootLayout({
@@ -34,7 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // data-scroll-behavior: Next turns smooth scrolling off during route changes only when this is set
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SiteChrome>{children}</SiteChrome>
       </body>

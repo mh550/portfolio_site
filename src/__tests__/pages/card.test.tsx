@@ -111,9 +111,10 @@ describe('CardPage', () => {
   it('metadata title and description', () => {
     expect(metadata.title).toBe('Michael Herron — Systems & Process Engineer');
     expect(metadata.description).toBe(profile.subline);
-    expect(metadata.openGraph?.images).toContain(profile.headshot);
-    expect(metadata.twitter?.images).toContain(profile.headshot);
-    expect(metadata.twitter).toHaveProperty('card', 'summary');
+    // No openGraph/twitter of its own: Next replaces (not merges) these per segment, so the card inherits the root
+    // block (siteName, type, headshot, summary card) and fills og:title/description from its own title/description
+    expect(metadata).not.toHaveProperty('openGraph');
+    expect(metadata).not.toHaveProperty('twitter');
   });
 
   it('renders no <nav>', () => {

@@ -35,7 +35,7 @@ describe('home-media-server entry', () => {
 
   it("sets the 'media-server' architecture diagram and no extra diagrams (M5-03)", () => {
     expect(project.detail.architectureDiagram).toBe('media-server');
-    expect(project.detail.extraDiagrams).toBeUndefined();
+    expect((project.detail as { extraDiagrams?: unknown }).extraDiagrams).toBeUndefined();
   });
 
   it('has five non-empty method steps', () => {

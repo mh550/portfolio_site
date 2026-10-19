@@ -5,11 +5,10 @@ import { getTopProjects, profile } from '@/lib/data';
 
 const title = `${profile.name} — ${profile.positioning}`;
 
+// Open Graph and twitter come from the root layout (siteName, headshot); Next fills og:title/description from these
 export const metadata: Metadata = {
   title,
   description: profile.subline,
-  openGraph: { title, description: profile.subline, images: [profile.headshot] },
-  twitter: { card: 'summary', images: [profile.headshot] },
 };
 
 const focus =

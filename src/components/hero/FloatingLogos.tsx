@@ -28,6 +28,9 @@ interface LogoEntry {
   floatY: number;
 }
 
+// Hover state; the 1.5× growth is left out with reduced motion
+const hoverColour = { color: '#00d4ff', filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.65))' };
+
 // 25% larger at lg+ viewports (40px → 50px)
 const ICON_SPAN = 'w-10 h-10 lg:w-[50px] lg:h-[50px]';
 
@@ -109,11 +112,12 @@ const logos: LogoEntry[] = [
   },
 ];
 
+// Hidden below xl (1280 px), where they sat behind the hero text (D33)
 export default function FloatingLogos() {
   const reduced = useReducedMotion();
 
   return (
-    <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div aria-hidden="true" className="absolute inset-0 hidden xl:block pointer-events-none overflow-hidden">
       {logos.map((logo) => (
         // Outer div: continuous y float only (none with reduced motion)
         <motion.div
@@ -135,11 +139,7 @@ export default function FloatingLogos() {
               scale: 1,
               filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.1))',
             }}
-            whileHover={{
-              color: '#00d4ff',
-              scale: 1.5,
-              filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.65))',
-            }}
+            whileHover={reduced ? hoverColour : { ...hoverColour, scale: 1.5 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             {logo.svgPath ? (

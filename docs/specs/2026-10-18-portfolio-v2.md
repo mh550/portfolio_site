@@ -119,6 +119,10 @@ don't redo it.
   the five method labels + "I own delivery from requirements to release."), not in `profile.ts`:
   `scripts/make-qr.mjs` imports `profile.ts` under Node's type stripping (D21), which can't resolve an extensionless
   import of `./approach`. (M2-01. Not the media server's own "D32 purge" in D30.)
+- **D33** *default* The hero's FloatingLogos show from 1280 px (`xl`) up and are hidden below it. Measured at 390,
+  768 and 1024 px, they sat behind the eyebrow, h1, tagline, strip labels and step lines; the 40 %-white glyphs drop
+  the muted tagline to about 1.5:1 where they cross. The logos are decorative (`aria-hidden`). Repositioning them per
+  breakpoint is the alternative if Michael wants them on tablets. (M2-06.)
 
 ## Dependencies between milestones
 

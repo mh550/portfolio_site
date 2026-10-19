@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:49 · M2-06 · passes
+
+- Reviewed the M2 diff (`$HARNESS_SCRATCH/M2.diff`, 5b9e3ff..592c783) with Opus (code + fact-check), Opus (`web-design-guidelines` over /, /about, /skills, /experience) and Sonnet (browser on :7800). Findings: 0 Critical, 8 Important (all fixed), 15 Minor (6 fixed). The plan's Review has the 23-row table, a 15-row fact-check of `experience.ts` against brand.md, and ends with "Ready to merge: yes". The title grep and the `Full-Stack & Integration Engineer` grep both print nothing.
+- Fixed test-first: `/card` inherits the root Open Graph block (og:site_name/type now in its unfurl); root twitter has no images; FloatingLogos don't scale on hover under reduced motion and are **hidden below 1280 px (D33 default)**; TimelineLine honours reduced motion; ScrollReveal margin `-80px 0px`; Navbar `aria-current`; "Skip to content" link + `#content` target in SiteChrome; new `LoopingVideo` on /about (44 px pause/play, no autoPlay attr, plays after hydration unless reduced, a blocked play shows "Play video"). Also: smooth scroll guarded + `data-scroll-behavior`, "Differentiator" 60 → 80 % (4.25:1 → passes), "curiousity" typo, the two `tsc --noEmit` errors (now exits 0).
+- Tests 440 → 456 (45 → 46 suites). `lib/check.sh` green, and `.harness/check.sh` run directly exits 0. Smoke 34/34 PASS. Browser at 390: 0 logos visible at 390 and 768; under `reduce` every hero element is at opacity 1 at 100 ms and there are 0 rAF calls in 2 s (240 by default). The first Tab focuses the skip link and Enter focuses `#content`. The video plays by default and stays paused under `reduce`. I looked at the 390 hero and /about shots. An Opus review of my own diff found 1 Important (a blocked autoplay left the button saying "Pause"), fixed.
+- Left for M8 (all from before M2): touch targets under 44 px (hamburger, menu, Footer links), the "Deep dive →" link names repeat, ProjectCard hover scale under reduced motion, an Experience "Work" heading, the headshot's `quality={100}` warning.
+- Question for Michael: D33 hides the floating logos on phones and tablets (they sat behind the hero text). Keep that, or reposition them per breakpoint? Also: the MAXX bullets tell the Linear story twice (bullets 1 and 5). Merge them?
+- Proposed change: add `npx tsc --noEmit` to `.harness/check.sh`. Jest strips types and `next build` skips test files, so type errors in tests passed the gate twice in M2.
+
 ### 2026-10-18 23:59 · M2-05 · passes
 
 - Eight full-page shots in `docs/screenshots/v2/M2-{home,about,skills,experience}-{390,1280}.png` (51–182 KB, none cropped) plus `M2-home-390-viewport.png`. The plan's What Michael will see table has all 8 rows filled.

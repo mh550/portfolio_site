@@ -12,6 +12,27 @@ describe('ScrollReveal — normal motion', () => {
     render(<ScrollReveal className="my-class"><p>Content</p></ScrollReveal>);
     expect(screen.getByText('Content').parentElement).toHaveClass('my-class');
   });
+
+  // A uniform negative margin also insets the observer's left and right edges, so content within 80 px of a side
+  // (a narrow card or badge) would never count as in view and stay at opacity 0 (the TimelineLine bug, M2-05)
+  it('reveals with a vertical-only viewport margin', async () => {
+    const seen: Record<string, unknown>[] = [];
+    jest.resetModules();
+    jest.doMock('framer-motion', () => ({
+      ...jest.requireActual<object>('@/__mocks__/framer-motion'),
+      motion: {
+        div: ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => {
+          seen.push(props);
+          return <div>{children}</div>;
+        },
+      },
+    }));
+    const { default: SR } = await import('@/components/ScrollReveal');
+    render(<SR><p>Margin</p></SR>);
+    expect(seen[0].viewport).toEqual({ once: true, margin: '-80px 0px' });
+    jest.dontMock('framer-motion');
+    jest.resetModules();
+  });
 });
 
 // Override mock to simulate prefers-reduced-motion

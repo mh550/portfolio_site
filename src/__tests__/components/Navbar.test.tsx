@@ -55,4 +55,16 @@ describe('Navbar', () => {
     await user.click(screen.getByRole('button', { name: /close menu/i }));
     expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument();
   });
+
+  // The active link was marked by colour only
+  it('marks the current page with aria-current in the desktop and mobile menus', async () => {
+    const user = userEvent.setup();
+    render(<Navbar />);
+    await user.click(screen.getByRole('button', { name: /open menu/i }));
+    const home = screen.getAllByRole('link', { name: 'Home' });
+    expect(home).toHaveLength(2);
+    for (const el of home) expect(el).toHaveAttribute('aria-current', 'page');
+    for (const el of screen.getAllByRole('link', { name: 'About' })) expect(el).not.toHaveAttribute('aria-current');
+  });
 });
+

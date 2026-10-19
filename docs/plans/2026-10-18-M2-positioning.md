@@ -398,4 +398,88 @@ The round "N" badge in every shot is the `next dev` indicator; it is not in a pr
 
 ## Review
 
-Filled by M2-06.
+M2-06. The M2 diff (`git diff 5b9e3ff..592c783`, docs and screenshots excluded, 1,920 lines) went to
+`$HARNESS_SCRATCH/M2.diff` and was reviewed from there: one Opus code review (correctness, fact-check,
+simplification, the items earlier sessions left), one Opus pass of the `web-design-guidelines` skill over /, /about,
+/skills and /experience, and one Sonnet browser check on :7800. Result: 0 Critical, 8 Important (all fixed), 15 Minor (6 fixed).
+
+### Findings
+
+| # | Severity | Finding | Outcome |
+|---|---|---|---|
+| 1 | Important | `/card` set its own `openGraph`/`twitter`, which replace the root block (Next does not merge them per segment), so the card unfurl had no `og:site_name` or `og:type` | **Fixed** test-first: card metadata has no `openGraph`/`twitter`; `curl /card` now shows og:title, og:description, og:site_name, og:type, og:image and twitter:image (headshot) |
+| 2 | Important | FloatingLogos `whileHover` scaled logos 1.5× under reduced motion | **Fixed** test-first: with reduced motion the hover only recolours. Browser: transform stays `none` on hover under `reduce` |
+| 3 | Important | `TimelineLine` ran its fade, rise and grow animation under reduced motion | **Fixed** test-first: same element and initial state, `animate` with `duration: 0` (the ScrollReveal pattern) |
+| 4 | Important | The Navbar marked the current page by colour only | **Fixed** test-first: `aria-current="page"` on the desktop and mobile links |
+| 5 | Important | "Differentiator" on /skills: accent at 60 % on surface-alt is 4.25:1 (12 px) | **Fixed**: 80 %. Not testable in jsdom |
+| 6 | Important | FloatingLogos sat behind hero text at 390 (TypeScript, React, n8n, Zapier, Supabase and Vercel over the eyebrow, h1, tagline and strip labels), and still did at 768 and 1024 | **Fixed** test-first: hidden below `xl` (**D33** *default*). Measured: 0 visible logos at 390 and 768; at 1280 only the Claude mark touches the last word of the Diagnose line |
+| 7 | Important | `about/page.tsx` snowboard `<video autoPlay loop>` has no pause control, ignores reduced motion and has no name | **Fixed** test-first: new `LoopingVideo` (client) with a 44 px pause/play button (WCAG 2.2.2) and `aria-label` "Michael Herron snowboarding". No `autoPlay` attribute: it calls `play()` after hydration unless motion is reduced, and the label follows the element's play/pause events, so a blocked play (Low Power Mode) offers Play. Browser at 390: default plays ("Pause video") and the button pauses it; `reduce` stays paused ("Play video") until clicked |
+| 8 | Important | No skip link | **Fixed** test-first: "Skip to content" is the first link in `SiteChrome` (not on `/card`), visible on focus above the nav, and moves focus to the content wrapper (`#content`, `tabIndex -1`). Browser at 390: the first Tab focuses it at (16, 12), Enter focuses `#content` |
+| 9 | Minor | Root `twitter.images` would mask a page's own og:image | **Fixed** test-first: `twitter: { card: 'summary' }`; Next copies og:image to twitter:image |
+| 10 | Minor | ScrollReveal's uniform `-80px` margin also insets the observer's sides (the TimelineLine trap) | **Fixed** test-first: `'-80px 0px'` |
+| 11 | Minor | `tsc --noEmit` errors in `HeroSection.test.tsx:122` and `case-study-home-media-server.test.ts:38`; `.harness/check.sh` runs no `tsc`, so test-file type errors pass the gate | **Fixed** both casts (`tsc --noEmit` exits 0). Adding `tsc` to check.sh is proposed in the progress entry, not done here |
+| 12 | Minor | `scroll-behavior: smooth` unguarded | **Fixed**: inside `@media (prefers-reduced-motion: no-preference)` |
+| 13 | Minor | Typo "curiousity" on /about | **Fixed** |
+| 14 | Minor | `HeroSection.test.tsx` held the old eyebrow literal, so `grep -rn 'Full-Stack & Integration Engineer' src` matched | **Fixed**: the negative assertion is `/Integration Engineer/`; the grep prints nothing |
+| 15 | Minor | Four tests hold by construction (`aboutIntro[0]` is the subline, the steps sentence is built from `methodSteps`, root description, the 39-skill constant's own length) | Left: the plan specifies them; harmless |
+| 16 | Minor | Two MAXX bullets tell the Linear story (bullets 1 and 5) | Left: the bullets are word for word from § Experience; a copy question for Michael |
+| 17 | Minor | "12–18-year-old" rests on D9 ("his experience bank"), not on a `docs/notes/` line | Left: D9 is a settled decision; adding the line to brand.md is Michael's |
+| 18 | Minor | Strip lines (12 px muted) drop to about 4.4:1 where a NodeGraph line passes behind them | Left: brief and local; 5.71:1 on the plain background |
+| 19 | Minor | "Deep dive →" repeats with the same name on three home cards; the arrow is read aloud | Left for M8 (ProjectCard predates M2) |
+| 20 | Minor | ProjectCard hover scale and skills chip hover styles have no reduced-motion or click meaning | Left for M8 |
+| 21 | Minor | Experience: roles and Education are sibling h2s with no "Work" parent; Honors and Coursework are styled `<p>`s | Left: no level is skipped; structural copy change for M8 |
+| 22 | Minor | Touch targets under 44 px (hamburger, mobile menu, Footer links); logo link named "MH"; no `aria-controls`; no `color-scheme: dark` | Left for M8 (all predate M2) |
+| 23 | Minor | NodeGraph reads `prefers-reduced-motion` once (no `change` listener) | Left: a mid-session toggle is rare; the next load honours it |
+
+### Titles and positioning strings
+
+- `git diff 5b9e3ff..HEAD -- src/lib/data/experience.ts | grep '^[-+].*title:'` prints nothing: 'Full-Stack Software
+  Engineer', 'Founding Full-Stack Software Engineer', 'AI Workflow Engineer' and 'Snowboard Coach' are byte-identical
+  to before M2.
+- `grep -rn 'Full-Stack & Integration Engineer' src` prints nothing. 'Systems & Process Engineer' appears in `src`
+  only in `profile.ts:17` (plus tests); "I own delivery from requirements to release." only in `approach.ts`.
+
+### Fact-check: every number in `src/lib/data/experience.ts`
+
+| Claim (bullet) | Source | Holds |
+|---|---|---|
+| 2× sprint throughput (MAXX 1) | brand.md:43 | Yes |
+| ~80% less bug-filing time (MAXX 1) | brand.md:43–44 | Yes |
+| De facto project manager on a client engagement (MAXX 2) | brand.md:44 | Yes |
+| Foundational Capability Patterns (MAXX 3) | brand.md:44–45 | Yes |
+| Git-tracked DB migrations, team onboarded (MAXX 4) | brand.md:46 | Yes |
+| Linear for its MCP server; filing and triage automated (MAXX 5) | project_descriptions.md:13–25 | Yes (no number) |
+| 3 clients (Builder Clarity 1) | brand.md:47 | Yes |
+| ~2 days → ~6 hours onboarding (Builder Clarity 1) | brand.md:47 | Yes |
+| ~8 hrs/week saved per client (Builder Clarity 2) | brand.md:48 | Yes |
+| 4+ sources (Builder Clarity 3; "7+" gone) | brand.md:42, 48 | Yes |
+| Agile/Scrum in Linear (Builder Clarity 4) | brand.md:48 | Yes |
+| 12–18-year-old (High Cascade) | spec D9 | Yes against D9; no `docs/notes/` line (finding 17) |
+| February 2026 – Present; March – November 2025 | apprentice-profile.md:8, 14 | Yes |
+| Dec 2024 graduation | apprentice-profile.md:31 | Yes |
+| Tahoma "February 2025"; "Summers 2023 & 2024" | none in docs/notes | Unchanged since before M2; not an M2 claim |
+
+`aboutIntro` has no number beyond "five steps" (brand.md:23). The new home and skills copy has no numbers.
+
+### Web interface guidelines (/, /about, /skills, /experience)
+
+- **Reduced motion:** the hero (instant variants, same hidden state), NodeGraph (one frame, 0 rAF calls in 2 s under
+  `reduce` vs 240 by default), FloatingLogos (no float, no hover scale), ScrollReveal and now TimelineLine and smooth
+  scrolling all honour it. Under `reduce` at 390×844 every hero element is at opacity 1 at 100 ms.
+- **Heading order:** `/` h1 › h2 Recent work › 3 h3; `/about` h1 › 2 h2; `/skills` h1 › 4 h2; `/experience` h1 › 5 h2
+  › h3. One h1 each, no skipped level.
+- **Method strip contrast** (against #0a0a0f, same at 390 and 1280): labels #00d4ff 11.16:1; arrows and lines #8888a0
+  5.71:1. Eyebrow 11.16:1, h1 16.21:1, tagline 5.71:1, subline (foreground at 80 %) 10.46:1.
+- No horizontal scroll and no console errors at 390 on the four pages.
+
+### Follow-up review of the M2-06 fixes
+
+An Opus review of this session's own diff (`$HARNESS_SCRATCH/M2-06.diff`): 0 Critical, 1 Important, 5 Minor. The
+Important one: with `autoPlay` in the markup and the state starting at "playing", a blocked autoplay left the button
+saying "Pause video" on a still frame. Fixed as finding 7 describes, test-first (a rejected `play()` keeps "Play
+video"). Applied: `data-scroll-behavior="smooth"` on `<html>`, so Next turns smooth scrolling off for route changes.
+Left: the 9 logo float animations still run in JS below `xl` while hidden (a matchMedia gate would add hydration
+work); the skip target is the whole content wrapper, not `<main>` (every page owns its own `<main>`); the card
+metadata test checks absence, and the built `card.html` was checked by hand for og:site_name, og:type and og:image.
+
+Ready to merge: yes

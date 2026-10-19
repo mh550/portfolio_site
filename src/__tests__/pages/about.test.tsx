@@ -64,4 +64,12 @@ describe('AboutPage', () => {
   it('describes the page without the old positioning', () => {
     expect(String(metadata.description)).not.toMatch(/full-stack and integration engineer/i);
   });
+
+  // jsdom can't play media, so the button offers Play here; LoopingVideo.test.tsx covers the states
+  it('the snowboarding clip is named and has a play/pause button', () => {
+    const { container } = render(<AboutPage />);
+    expect(container.querySelector('video')).toHaveAttribute('aria-label', 'Michael Herron snowboarding');
+    expect(screen.getByRole('button', { name: /^(Play|Pause) video$/ })).toBeInTheDocument();
+  });
 });
+
