@@ -411,7 +411,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
       challenges:
         'A guessed fake, a tool that rewrote every tag and a trash folder that overwrote itself each broke something before they became rules.',
       outcome:
-        'Since Oct 13 the library has run on a desktop at home: 831 songs, about 22 GB, streamed to my phone over a private network and, since Oct 14, backed up every night, encrypted, to a second disk. The cleanup retagged 376 files, moved 359 out of "Compilations" and trashed 28 duplicates, and all 1,405 playlist entries came through intact. A check of the whole library found 22 of 831 files that fail the crate check, 17 of them upscaled from ~128 kbps sources: that is the upgrade list. MusicBrainz ids for 485 files are ready to apply, and 16 went in as a reversible trial. As of Oct 17 the download path had run only in tests; the first real download is mine to start.',
+        'Since Oct 13 the library has run on a desktop at home: 831 songs, about 22 GB, streamed to my phone over a private network and backed up every night, encrypted, to a second disk. The cleanup retagged 376 files, moved 359 out of "Compilations" and trashed 28 duplicates, and all 1,405 playlist entries came through intact. A check of the whole library found 22 of 831 files that fail the crate check, 17 of them upscaled from ~128 kbps sources: that is the upgrade list. MusicBrainz ids for 485 files are ready to apply, and 16 went in as a reversible trial. As of Oct 17 the download path had run only in tests; the first real download is mine to start.',
       codeSnippets: [
         {
           title: 'verify · a "FLAC" upscaled from a lossy source is rejected (the docs\' example)',
@@ -494,7 +494,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
           title: 'One download quality',
           chose:
             'one rule, lossless or lossy at 256 kbps or more, with streaming quality left to Navidrome and the phone app,',
-          over: 'the four quality tiers I had built and used',
+          over: 'the four quality tiers I had built and tested',
           because:
             'a downloaded file is kept for years and every stream is transcoded from it, so that one file\'s quality is the only one that matters.',
           cost: 'The tier work became four tier names with the same rule in a config file.',
@@ -534,7 +534,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         {
           when: 'Oct 13',
           label: 'Live, night one',
-          what: 'The stack went live: 917 original files became 859 tracks in 35 genre playlists, with backups confirmed. Tests went from 37 to 80.',
+          what: 'The stack went live: 917 original files became 859 tracks in 35 genre playlists, with the nightly backup job already running. Tests went from 37 to 80.',
           why: 'Every count matched, but my phone still showed 92 wrong titles.',
         },
         {
@@ -588,7 +588,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         {
           broke:
             'Backups of the app\'s SQLite database were inconsistent: the main file was 4 KB and the data sat in the -wal file beside it.',
-          rule: 'Databases are copied only with sqlite3 .backup, under the lock, before every nightly backup.',
+          rule: 'Databases are copied only with sqlite3 .backup. The new nightly job also takes the lock first; it is built and waits for my one-time install.',
         },
       ],
       links: [{ label: 'dj-crate-streaming on GitHub', href: 'https://github.com/mh550/dj-crate-streaming', kind: 'repo' }],

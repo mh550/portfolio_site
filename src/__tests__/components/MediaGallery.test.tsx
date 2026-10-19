@@ -48,4 +48,12 @@ describe('MediaGallery', () => {
     const { container } = render(<MediaGallery media={[portrait(1), unsized]} />);
     expect(container.firstElementChild).toHaveClass('sm:grid-cols-2');
   });
+
+  // M5-05: only images are shown uncropped, so a sized video must not turn on the narrow three-column grid.
+  it('keeps two columns and the 4:3 box for a sized portrait video', () => {
+    const video: ProjectMedia = { type: 'video', src: '/clip.mp4', alt: 'clip', width: 840, height: 1720 };
+    const { container } = render(<MediaGallery media={[portrait(1), video]} />);
+    expect(container.firstElementChild).toHaveClass('sm:grid-cols-2');
+    expect(container.querySelector('video')!.parentElement).toHaveClass('aspect-[4/3]');
+  });
 });

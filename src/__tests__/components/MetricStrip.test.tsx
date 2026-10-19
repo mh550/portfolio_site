@@ -45,4 +45,11 @@ describe('MetricStrip columns', () => {
     const dl = render(<MetricStrip metrics={short} />).container.querySelector('dl');
     expect(dl).toHaveClass('sm:grid-cols-2', 'md:grid-cols-4');
   });
+
+  it('switches at the boundary: a 7-character value keeps one row, an 8-character one goes 2×2', () => {
+    const strip = (last: string) =>
+      render(<MetricStrip metrics={[...metrics(3), { value: last, label: 'last' }]} />).container.querySelector('dl');
+    expect(strip('1234567')).toHaveClass('md:grid-cols-4');
+    expect(strip('12345678')).not.toHaveClass('md:grid-cols-4');
+  });
 });

@@ -65,7 +65,7 @@ of the code since that fix. The digit-run test has nothing to check on it; the M
 - `problem`: `'I wanted to stop depending on Spotify and stream my own music library from a box at home to my phone. I also wanted to flip any playlist into a DJ crate, where every track gets a DJ-quality file that is found, verified and filed automatically. And all of it had to be safe to run unattended on the one server that holds my only organised library.'`
 - `approach` (not rendered, one sentence): `'Navidrome owns the library, a small crates service owns the crate flags and the queue, and a worker container verifies and files each approved download.'`
 - `challenges` (not rendered, one sentence): `'A guessed fake, a tool that rewrote every tag and a trash folder that overwrote itself each broke something before they became rules.'`
-- `outcome`: `'Since Oct 13 the library has run on a desktop at home: 831 songs, about 22 GB, streamed to my phone over a private network and, since Oct 14, backed up every night, encrypted, to a second disk. The cleanup retagged 376 files, moved 359 out of "Compilations" and trashed 28 duplicates, and all 1,405 playlist entries came through intact. A check of the whole library found 22 of 831 files that fail the crate check, 17 of them upscaled from ~128 kbps sources: that is the upgrade list. MusicBrainz ids for 485 files are ready to apply, and 16 went in as a reversible trial. As of Oct 17 the download path had run only in tests; the first real download is mine to start.'`
+- `outcome`: `'Since Oct 13 the library has run on a desktop at home: 831 songs, about 22 GB, streamed to my phone over a private network and backed up every night, encrypted, to a second disk. The cleanup retagged 376 files, moved 359 out of "Compilations" and trashed 28 duplicates, and all 1,405 playlist entries came through intact. A check of the whole library found 22 of 831 files that fail the crate check, 17 of them upscaled from ~128 kbps sources: that is the upgrade list. MusicBrainz ids for 485 files are ready to apply, and 16 went in as a reversible trial. As of Oct 17 the download path had run only in tests; the first real download is mine to start.'`
 - `media`, `codeSnippets`: see below.
 
 ### caseStudy
@@ -93,7 +93,7 @@ No other string (metrics, outcome, decisions, iterations, lessons, captions, alt
 |---|---|---|---|---|---|
 | `D7` | `The first real download is mine` | `no automatic downloads until I had approved one by hand and said go,` | `letting the queue download on its own from day one` | `the chain from download to library had only run in tests, so its first real run should be one file I watch.` | `As of Oct 17 the download path had not run live: copy replacement and play-now wait on that first approval.` |
 | `D3` | `Duplicates go to the trash, not away` | `moving each second copy to a dated trash folder with a logged reverse move, and repointing its playlists,` | `deleting duplicates` | `a wrong call should be one move from undone, and these 28 were copies that decoded to identical audio.` | `Code never empties the trash; it grows until I empty it by hand, and a status command reports its size and age.` |
-| `D24` | `One download quality` | `one rule, lossless or lossy at 256 kbps or more, with streaming quality left to Navidrome and the phone app,` | `the four quality tiers I had built and used` | `a downloaded file is kept for years and every stream is transcoded from it, so that one file's quality is the only one that matters.` | `The tier work became four tier names with the same rule in a config file.` |
+| `D24` | `One download quality` | `one rule, lossless or lossy at 256 kbps or more, with streaming quality left to Navidrome and the phone app,` | `the four quality tiers I had built and tested` | `a downloaded file is kept for years and every stream is transcoded from it, so that one file's quality is the only one that matters.` | `The tier work became four tier names with the same rule in a config file.` |
 | `D27` | `The app owns the crate flag` | `keeping which playlists are crates in the crates app's own database` | `a #crate tag written into each playlist's comment` | `playlist names and comments stay clean in every app that shows them, and one place holds the answer.` | — (not set) |
 | `D18` | `Downloads run in their own container` | `a separate worker container that has no open port and handles only approved downloads,` | `running downloads from a script on the host` | `the web-facing service keeps a read-only view of the library, and credentials stay inside the containers.` | — |
 | `D38/39` | `A green backup means a fresh backup` | `all-or-nothing database snapshots, and a nightly backup that fails when a snapshot fails,` | `refreshing each snapshot on its own and logging a warning` | `the monitoring heartbeat should be green only when the backup really holds fresh copies of both databases.` | `A broken snapshot turns the whole night red, even though the music itself was backed up.` |
@@ -112,7 +112,7 @@ diagram):
 | when | label | what | why |
 |---|---|---|---|
 | `Sep 17–18` | `Offline prototype` | `A candidate scorer, the crate layer, a fake Navidrome and a web client, all tested offline: 37 tests.` | `I wanted the design proven against fakes before it touched the real library.` |
-| `Oct 13` | `Live, night one` | `The stack went live: 917 original files became 859 tracks in 35 genre playlists, with backups confirmed. Tests went from 37 to 80.` | `Every count matched, but my phone still showed 92 wrong titles.` |
+| `Oct 13` | `Live, night one` | `The stack went live: 917 original files became 859 tracks in 35 genre playlists, with the nightly backup job already running. Tests went from 37 to 80.` | `Every count matched, but my phone still showed 92 wrong titles.` |
 | `Oct 13–15` | `Library hygiene` | `Playlist import from Spotify, tag cleanup, dedupe, quality tiers and download validation; tests reached 249.` | `Downloads needed a place that could write to the library while the web-facing service stayed read-only.` |
 | `Oct 15–16` | `Worker + identity` | `A worker container that files downloads with beets, a model of songs, versions and copies, copy replacement and play-now; about 1,100 tests by the end.` | `After using it, the tiers and the version rules were more machinery than the job needed.` |
 | `Oct 17` | `The simplification` | `One download quality, the exact track, the app owns the crate flag. An overnight run of my agent harness then built duplicate-cleanup tooling, health checks and lock-protected backups: 1,359 tests.` | `The current version. The first real download waits for my go.` |
@@ -128,7 +128,7 @@ broke; keep the order):
 | `On Oct 15 the dedupe moved copies into trash paths where an earlier repair had kept damaged copies, and 18 of them were overwritten.` | `The trash never overwrites: a name that is already there gets a numbered suffix.` |
 | `Verification would have thrown away good files: embedded webp cover art makes ffmpeg print "[error]" lines about audio that is fine.` | `For FLAC, flac -t decides. A few ffmpeg complaints are a warning; only 10 or more, audio that won't decode, or digital silence fail.` |
 | `beets matched a 412 s 12-inch mix to a 403 s 90s mix.` | `The id backfill doesn't use beets' matching: it proposes ids, I review them, and every apply can be reverted.` |
-| `Backups of the app's SQLite database were inconsistent: the main file was 4 KB and the data sat in the -wal file beside it.` | `Databases are copied only with sqlite3 .backup, under the lock, before every nightly backup.` |
+| `Backups of the app's SQLite database were inconsistent: the main file was 4 KB and the data sat in the -wal file beside it.` | `Databases are copied only with sqlite3 .backup. The new nightly job also takes the lock first; it is built and waits for my one-time install.` |
 
 M5-02's test needs a lesson whose `broke` contains `859 = 859 = 859` (lesson 2) and one containing `guessed fake`
 (lesson 1, case-insensitive: it starts "A guessed fake").
@@ -243,8 +243,8 @@ two-headed form and one is not worth adding.)
 
 | # | Node | Sub |
 |---|---|---|
-| 1 | `Database snapshot` | `both databases, all or nothing, under the lock` |
-| 2 | `Encrypted backup` | `to a second disk; the heartbeat is green only when it is fresh` |
+| 1 | `Database snapshot` | `both databases, all or nothing, under the lock (install pending)` |
+| 2 | `Encrypted backup` | `to a second disk, every night` |
 
 Arrow 1 → 2 unlabelled.
 
@@ -252,7 +252,7 @@ The words M5-03's test asserts (Phone, HTTPS, Navidrome, crates service, worker,
 backup) are all in the node, sub and arrow text above (case-insensitive). The text has no `.ts.net`, no `100.`, no
 `/srv`, no `http://`, no number and no product name for the download source.
 
-- `aria-label` (`LABELS['media-server']`): `'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night both databases are snapshotted, all or nothing, and an encrypted backup goes to a second disk; the heartbeat is green only when that backup is fresh.'`
+- `aria-label` (`LABELS['media-server']`): `'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night an encrypted backup goes to a second disk. A newer job, built and waiting for my install, snapshots both databases all or nothing under the lock and sends a heartbeat only when the backup is fresh.'`
 - caption (`CAPTIONS['media-server']`): `'Nothing is open to the internet, streams go straight from Navidrome to the phone, and only approved, verified downloads reach the library.'`
 
 ## Tests M5-02 and M5-03 write or update
@@ -299,7 +299,7 @@ numbers as of M5-01); "DJ" = `/home/mh550/projects/dj-crate-streaming/` at origi
 | all offline against fakes built from captured live responses | metric label, verify | Brief line 69; DJ `docs/hard-won-facts.md` line 19 ("Fakes must mirror captured live responses") |
 | Trash, not delete; code never deletes a library file; every removal a reversible move | metric | Brief line 30; DJ `docs/architecture.md` line 300 ("no code deletes a library file; trash never overwrites"); spec D18 refined by D30 |
 | Sep 17–18, scorer prototype, crate layer, fake Navidrome, web client, 37 tests | iteration 1, build | Brief line 52 |
-| Oct 13 live; 917 → 859 tracks, 35 genre playlists, backups confirmed, 37 → 80 | iteration 2, build, outcome | Brief lines 53–54; DJ next-session-design line 14 (859 files), line 19 (35 playlists) |
+| Oct 13 live; 917 → 859 tracks, 35 genre playlists, nightly backup job running, 37 → 80 | iteration 2, build, outcome | Brief lines 53–54 (its "backups confirmed" is corrected, see the brief's `## Corrections`); DJ `docs/backup-plan.md` lines 22–23 (that night's snapshot predates the music); DJ next-session-design line 14 (859 files), line 19 (35 playlists) |
 | 92 titles wrong on the phone; 859 = 859 = 859 | diagnose, iteration 2 why, lesson 2 | Brief line 75; DJ next-session-design lines 25–29 ("92 titles … That is the inconsistency Michael saw") |
 | 28 second copies / 28 duplicates trashed | diagnose, outcome | Brief line 64; DJ next-session-design lines 17–18 ("28 of the 859 are redundant copies of the same audio") |
 | Oct 13–15: import, tag cleanup, dedupe, tiers, validation, 249 tests | iteration 3 | Brief line 55 |
@@ -311,7 +311,7 @@ numbers as of M5-01); "DJ" = `/home/mh550/projects/dj-crate-streaming/` at origi
 | about 75 minutes, 6 at a time | verify | Brief lines 66–67; DJ `docs/hard-won-facts.md` line 45 |
 | the checks in one decode (cutoff, bits used, truncation, silence, clipping, flac -t, fingerprint) | verify | Brief lines 25–26; DJ `docs/download-validation.md` lines 36–46 |
 | ids for 485 files ready, 16 applied as a reversible trial | outcome | Brief line 68; DJ `docs/next-todos.md` lines 13–16 ("The 485 default-class rows are not applied yet", 16 `search` rows applied with revert logs) |
-| since Oct 14, backed up every night, encrypted, to a second disk | outcome, diagram | Brief line 31; DJ `docs/backup-plan.md` lines 9–14 (restic timer, repo on a separate 1 TB HDD), lines 20–23 (the Oct 13 run predates the library; the Oct 14 03:30 run is the first real library backup) |
+| backed up every night, encrypted, to a second disk ("since Oct 14" dropped in M5-05: no doc confirms that run) | outcome, diagram | Brief line 31; DJ `docs/backup-plan.md` lines 9–14 (restic timer, repo on a separate 1 TB HDD), lines 20–23 (the Oct 13 run predates the library; the Oct 14 03:30 run is the first real library backup) |
 | private network, HTTPS, nothing open to the LAN or internet | outcome, diagram | Brief lines 18–19 |
 | stream is a redirect to Navidrome; audio never passes through the crates service | decide, diagram caption | Brief line 23; DJ `README.md` line 179 ("Streaming never touches our process") |
 | As of Oct 17 the download path had run only against fakes | outcome, D7 cost, iteration 5 | DJ `docs/architecture.md` line 446 ("The download path has never run live. 0 approvals ever"), lines 435–436 (copy replacement and play-now need a real download); the doc is from origin/main of Oct 17 |
@@ -330,7 +330,7 @@ numbers as of M5-01); "DJ" = `/home/mh550/projects/dj-crate-streaming/` at origi
 | Oct 15, 18 files overwritten in the trash; numbered suffix | lesson 4 | Brief line 78; DJ `tests/test_dedupe_copies.py` line 142 ("Live 2026-10-15: M2's repair had kept damaged copies at the same trash paths; 18 were overwritten"); DJ `docs/architecture.md` line 300 ("`(2)` suffix") |
 | webp covers print "[error]"; flac -t decides; 10 or more fail | lesson 5 | Brief line 79; DJ `docs/download-validation.md` line 39; DJ `docs/hard-won-facts.md` line 38 |
 | 412 s 12-inch matched to a 403 s 90s mix; backfill bypasses beets; propose / apply / revert | lesson 6 | Brief lines 28–29 and 80; DJ `README.md` line 109 |
-| WAL: 4 KB main file, data in `-wal`; `sqlite3 .backup` under the lock | lesson 7 | Brief lines 82–83; DJ `docs/hard-won-facts.md` lines 47–49 |
+| WAL: 4 KB main file, data in `-wal`; `sqlite3 .backup`; the locked nightly job built, install pending | lesson 7, diagram | Brief lines 82–83; DJ `docs/hard-won-facts.md` lines 47–51; DJ `docs/backup-plan.md` lines 59–61 (the pre-H2 job stays installed until Michael's install) |
 | tech stack | techStack | Brief lines 18–31 (Docker Compose, Navidrome, stdlib Python, vanilla JS, SQLite, ffmpeg, beets, restic) |
 | verify excerpt | codeSnippets | DJ `docs/download-validation.md` lines 60–65, one path replaced (D18) |
 | screenshots: demo data, Sep prototype | media | Brief lines 87–89; DJ commit `0fdf5de` (2026-09-18, "Crate layer: … fake server … web client"); the images' own header "fake-navidrome 0.0.0-fake" |
@@ -360,4 +360,96 @@ Checked against `docs/notes/brand.md` by reading every string above.
 
 ## Review
 
-(M5-05 writes this section.)
+Before that: M5-01 had the copy fact-checked by an Opus reviewer (3 Important, 13 Minor, 4 line citations, all
+applied there).
+
+### M5-05 (2026-10-18)
+
+The diff is `git diff 1c1d89e~1 039ebde` (M5-01 through M5-04, without screenshots, `public/` binaries and run files),
+written to `$HARNESS_SCRATCH/M5.diff` (1,241 lines, 16 files, including `MetricStrip.tsx`'s 2 × 2 rule from M5-04).
+It was reviewed by three agents: Opus on the code, Opus on facts and voice against the brief and the DJ docs (B = the
+brief, DJ = `dj-crate-streaming` at `origin/main` `8d99309`), and Sonnet on the Web Interface Guidelines in a browser.
+Before acting on a finding, I checked it against the source (the backup finding against DJ `docs/backup-plan.md`
+lines 20–61 and `docs/hard-won-facts.md` 46–51; three ✓ rows spot-checked: 75 min, 22 of 831, 412 s vs 403 s).
+
+**Fact check** (entry vs. brief and DJ docs)
+
+| Claim (as on page) | Where | Source | ✓ |
+|---|---|---|---|
+| 831 songs, identical copies removed | metric 1, outcome | B line 62; DJ `docs/library-import-report.md` 49–50 | ✓ |
+| 1,405 playlist entries kept intact | metric 2, outcome | B lines 64–65 (brief only) | ✓ |
+| 1,359 tests, all offline against fakes | metric 3, verify, iteration Oct 17 | B lines 58, 69; DJ `docs/hard-won-facts.md` 17 | ✓ |
+| Trash, not delete; every removal a reversible move | metric 4 | DJ `docs/architecture.md` 300; spec D30 | ✓ |
+| about 22 GB | diagnose, outcome | B line 62; DJ `docs/backup-plan.md` 24 | ✓ |
+| 376 retagged, 359 out of "Compilations", 28 trashed | outcome | B line 64; DJ tag-cleanup-report 15, dedupe-report 5 | ✓ |
+| 22 of 831 fail, 17 from ~128 kbps sources | outcome | DJ `docs/download-validation.md` 79–80 | ✓ |
+| 485 ids ready, 16 as a reversible trial | outcome | DJ `docs/next-todos.md` 12–15 | ✓ |
+| **since Oct 14**, backed up every night, encrypted, to a second disk | outcome | DJ `docs/backup-plan.md` 22–26 is an expectation ("Check tomorrow") | ✗ → "since Oct 14" dropped |
+| download path only in tests as of Oct 17 | outcome, D7 cost | DJ `docs/architecture.md` 444–446 | ✓ |
+| about 75 minutes, 6 at a time | verify | DJ `docs/hard-won-facts.md` 45 | ✓ |
+| 92 wrong titles; 859 = 859 = 859 | diagnose, iteration Oct 13, lesson 2 | B line 75; DJ next-session-design 25–29 | ✓ |
+| 28 second copies of the same audio | diagnose, D3 | DJ next-session-design 17–18 | ✓ |
+| Sep 17–18; 37 tests | iteration 1 | B line 52 | ✓ |
+| Oct 13; 917 → 859, 35 playlists, 37 → 80, **backups confirmed** | iteration 2 | B line 53; DJ `docs/backup-plan.md` 22–23 (that snapshot predates the music) | ✗ → "with the nightly backup job already running" |
+| Oct 13–15; 249 tests | iteration 3 | B line 55 | ✓ |
+| Oct 15–16; about 1,100 tests | iteration 4 | B line 56; DJ README 39 | ✓ |
+| Oct 17; harness built cleanup tooling, health checks, lock-protected backups | iteration 5 | B line 57; DJ `docs/next-todos.md` 20 ("Built … not run live") | ✓ ("built") |
+| Sep – Oct 2026 | timeframe | B lines 52, 57 | ✓ |
+| D7 | decision | B; DJ next-session-design 61; `docs/architecture.md` 446 | ✓ |
+| D3 | decision | B; DJ next-session-design 57, 247–251; `docs/hard-won-facts.md` 36 | ✓ |
+| D24 over "the four quality tiers I had built **and used**" | decision | DJ `docs/architecture.md` 446 (0 approvals: no tier ever chose a download) | ✗ → "built and tested" |
+| D27 | decision | B; DJ amperfy-pivot 22 | ✓ |
+| D18 | decision | B; DJ next-session-design 72; `docs/hard-won-facts.md` 7–9 | ✓ |
+| D38/39 | decision | B lines 47–48; DJ amperfy-pivot 33–34 | ✓ as a decision (its install: see lesson 7) |
+| 35 playlists deleted, 10 kept, restorable | simplify | B line 46; DJ amperfy-pivot 27; next-todos 10–11 | ✓ |
+| 3 critical bugs behind a guessed fake | lesson 1 | B line 73 | ✓ |
+| beets rewrote every tag; genres repaired from originals | lesson 3 | B line 77; DJ `docs/hard-won-facts.md` 29–31 | ✓ |
+| Oct 15, 18 overwritten; numbered suffix | lesson 4 | B line 78; DJ `docs/architecture.md` 300 | ✓ |
+| webp "[error]"; flac -t decides; 10 or more fail | lesson 5 | DJ `docs/download-validation.md` 39; `docs/hard-won-facts.md` 38 | ✓ |
+| 412 s vs 403 s; propose, review, revert | lesson 6 | DJ README 108–110 | ✓ |
+| 4 KB main file, data in `-wal` | lesson 7 broke | DJ `docs/hard-won-facts.md` 48 | ✓ |
+| copied with `sqlite3 .backup` **under the lock, before every nightly backup** | lesson 7 rule, diagram, aria-label | DJ `docs/backup-plan.md` 59–61: the pre-H2 job ("no lock and no warning") stays installed until Michael's install | ✗ → finding 1 |
+| verify excerpt | In the Code | DJ `docs/download-validation.md` 60–65, path replaced (D18) | ✓ byte for byte (the test re-diffs it) |
+
+**Privacy pass.** `grep -rn 'ts.net\|100\.\|/srv\|ntfy\|m6-' src/lib/data/projects.ts src/components/projects/diagrams public/projects/home-media-server`
+returns nothing (exit 1). `public/projects/home-media-server/` holds only `01-playlists.png`, `02-crate-toggled.png` and
+`03-wanted.png`. "Soulseek" appears once in `src/lib/data/projects.ts` and `diagrams/` (line 467, "a peer-to-peer
+network, Soulseek"), and not in the diagram. No VPN provider is named. "mh550" appears only in the public repo URL.
+
+**Findings**
+
+| # | Severity | Finding | Resolution |
+|---|---|---|---|
+| 1 | Important | The page presented the lock-protected nightly job as live. Lesson 7's rule said "under the lock, before every nightly backup". The diagram said "under the lock" and "the heartbeat is green only when it is fresh", and the aria-label said the same. The job is built, but the pre-H2 job stays installed until Michael runs the install. The brief overclaims the same thing. | Fixed test-first (both tests failed first). Lesson 7: "… The new nightly job also takes the lock first; it is built and waits for my one-time install." Diagram: "(install pending)" and "to a second disk, every night". The aria-label now says the newer job is "built and waiting for my install". Correction added to the brief. Tests in `case-study-home-media-server.test.ts` and `ProjectDiagram.test.tsx`. |
+| 2 | Minor | Outcome said "since Oct 14", and no doc confirms that run. | Dropped. Banned by the overclaim test. |
+| 3 | Minor | Iteration Oct 13 said "with backups confirmed", but that night's snapshot predates the music. | "with the nightly backup job already running". Banned by the test. |
+| 4 | Minor | D24's `over` said "built and used", but no tier ever chose a real download. | "built and tested". Banned by the test. "After using it" in simplify and Oct 15–16 stays: it refers to the live library and web client. |
+| 5 | Minor | Present tense in verify/build ("Every download is checked …") for a path that hasn't run live. | No change: it states the design, and the outcome and D7's cost say plainly that the path has run only in tests. |
+| 6 | Minor | `MediaGallery`'s `isPortrait` ignored `type`: a sized portrait video turned on `sm:grid-cols-3` but still rendered in a 4:3 cover box. | Fixed test-first (the test failed first): `isSized` requires `type === 'image'`. |
+| 7 | Minor | `MediaGallery` repeated the wrapper classes in two branches. `sizes="33vw"` asked for about 2× the pixels of a roughly 230 px card in the `max-w-3xl` column. | One wrapper, with `relative aspect-[4/3]` only when unsized (class string unchanged, snapshots untouched). Sized images: `240px` (three up) or `384px` (two up). |
+| 8 | Minor | `MetricStrip`'s 7-character rule is a proxy for rendered width, and the 7/8 boundary was untested. | Boundary test added (7 keeps one row, 8 goes 2 × 2). The rule stays: the two 4-metric pages need it, and a data-level layout flag is more API than either needs. |
+| 9 | Minor | Test hygiene: `data.test` named "7 projects" while it asserts 8, and its `getTopProjects` ternary had a branch that can't run. `case-study-home-media-server.test` indexed `match(...)![1]` unguarded and shadowed Jest's `it` in a loop. | Fixed: the test is renamed, takes a fixed expected array, guards the match with `expect(match).not.toBeNull()`, and its loop variable is `iter`. |
+| 10 | Minor | The media-server aria-label is hand-written and could drift from the nodes. | Test: the label names each of 13 components (phone, private network, HTTPS, Navidrome, crates service, worker, VPN, verifies, beets, library, trash, snapshot, backup). |
+| 11 | Minor | Web guidelines: no `focus-visible` style on the page's links. The two back links are 20 px tall at 390, so their touch targets are under 44 px. The `<pre>` scroller has no explicit `tabIndex`. | Recorded, as in M4-05 finding 12, for a site-wide accessibility pass. All three predate M5 and are shared with the classic pages, and `CodeBlock`/`ProjectDetail` changes alter the pinned `project-page-unchanged` snapshot. The reviewer's "`tabIndex=-1`" was the DOM default for a non-focusable element, not source. Chromium and Firefox make scrollers keyboard-focusable by default. |
+| 12 | Minor | Lazy gallery images have no placeholder, so a fast scroll shows empty boxes. Width and height are set, so there is no layout shift. | No change. |
+| 13 | Minor | The `web-design-guidelines` skill (rules fetched fresh from vercel-labs `command.md`), run over `MediaGallery.tsx`, `diagrams/index.tsx` and `ProjectDetail.tsx`. `MediaGallery` ✓: explicit width and height, lazy below the fold, alt on every image, captions in `figcaption`. `diagrams` ✓: `role="img"` with a label, arrows `aria-hidden`. `ProjectDetail`: no `focus-visible` (finding 11), and no skip link (layout-level, site-wide). Copy: straight quotes instead of curly ones (0 curly quotes in all of `src/lib/data`, so this is a site convention); a sized autoplay video would have no pause control (M4-05 finding 12; this page has no video). | Recorded for the site-wide accessibility and typography pass; nothing on this page alone. |
+
+**Voice** (brand.md): first person throughout, and "Michael" never appears in the copy. Events are in the past tense,
+and rules are in the present. No buzzwords (searched: leverage, seamless, robust, cutting-edge, synergy, empower).
+There are six chose/over/because decisions, four of them with a cost, and seven lessons. builtWith credits Claude Code
+agents and the overnight harness run.
+
+**Web Interface Guidelines** on /projects/home-media-server, at 1280 and 390 with reduced motion:
+- Headings: one h1, then 9 h2 and 11 h3, with no skipped level.
+- Gallery: 3 images, each a `<figure>` with its own descriptive alt and a `<figcaption>` that says "Demo data". They
+  load uncropped (natural ratio 0.4887, rendered 0.4885).
+- Diagram: 1 `role="img"` with a non-empty label.
+- Links: 3 links in `main`, all with descriptive names. The external one carries an sr-only "(opens in new tab)".
+- Code block: the `<pre>` scrolls inside itself (1193 > 340 px at 390).
+- Page: scrollWidth − innerWidth = 0 at both widths, 0 console errors, and 0 elements at opacity 0.
+- After the fixes, I looked at the diagram at 390 myself: the panels are stacked, "(install pending)" wraps inside
+  its node, and the scroll difference is 0.
+
+**After.** `.harness/check.sh` is green (lint, 326 tests in 39 suites, 6 snapshots, build). Smoke: 32/32 PASS.
+
+Ready to merge: yes

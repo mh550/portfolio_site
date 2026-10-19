@@ -50,7 +50,7 @@ describe('home-media-server entry', () => {
 
   it('has 5 iterations, each dated Sep or Oct', () => {
     expect(cs!.iterations).toHaveLength(5);
-    for (const it of cs!.iterations!) expect(it.when).toMatch(/^(Sep|Oct)/);
+    for (const iter of cs!.iterations!) expect(iter.when).toMatch(/^(Sep|Oct)/);
   });
 
   it("has 6–8 lessons, including '859 = 859 = 859' and the guessed fake", () => {
@@ -126,7 +126,9 @@ describe('home-media-server verify excerpt', () => {
 
   itWithSource("is the docs' 'Reading the result' block with only the path shortened (D18)", () => {
     const doc = fs.readFileSync(path.join(DJ, 'docs/download-validation.md'), 'utf8');
-    const block = doc.match(/```\n(BAD [\s\S]*?)\n```/)![1];
+    const match = doc.match(/```\n(BAD [\s\S]*?)\n```/);
+    expect(match).not.toBeNull(); // the docs' fenced BAD block is gone: re-copy the excerpt
+    const block = match![1];
     expect(snippets[0].code).toBe(block.replace('/srv/incoming/', 'incoming/'));
   });
 });
@@ -153,6 +155,15 @@ describe('home-media-server traceability and privacy', () => {
     const text = JSON.stringify(project);
     // '.ts' + '.net' so this file doesn't trip content-guard.test.ts's own scan of src/
     for (const banned of ['.ts' + '.net', '100.', 'ntfy', '/srv', 'm6-']) expect(text).not.toContain(banned);
+  });
+
+  // M5-05 review: the locked nightly job (DJ backup-plan.md §4, H2) is built but waits for Michael's install, no DJ
+  // doc confirms the Oct 14 run, and no tier ever chose a real download.
+  it('claims no more of the backups and tiers than has run live', () => {
+    const text = JSON.stringify(project);
+    for (const overclaim of ['since Oct 14', 'backups confirmed', 'built and used']) expect(text).not.toContain(overclaim);
+    const wal = cs!.lessons.find((l) => l.broke.includes('-wal'))!;
+    expect(wal.rule).toMatch(/built and waits for my one-time install/);
   });
 
   it("names the download source once, as 'a peer-to-peer network, Soulseek' (brand.md)", () => {

@@ -320,7 +320,7 @@
         "The plan's Review section ends with 'Ready to merge: yes'; `node .harness/smoke.mjs` and .harness/check.sh are green"
       ],
       "after": ["M5-04"],
-      "passes": false
+      "passes": true
     },
 
     {

@@ -9,7 +9,7 @@ import {
 } from '@/lib/data';
 
 describe('projects data', () => {
-  it('exports an array with 7 projects', () => {
+  it('exports an array with 8 projects', () => {
     expect(projects).toHaveLength(8);
   });
 
@@ -75,10 +75,7 @@ describe('projects data', () => {
 
 describe('getTopProjects', () => {
   it('returns the first n featured projects by order', () => {
-    const expected = getProjectBySlug('agent-harness')
-      ? ['agent-harness', 'linear-ai-workflow', 'home-media-server']
-      : ['linear-ai-workflow', 'home-media-server', 'ghl-jobtread-integration'];
-    expect(getTopProjects(3).map((p) => p.slug)).toEqual(expected);
+    expect(getTopProjects(3).map((p) => p.slug)).toEqual(['agent-harness', 'linear-ai-workflow', 'home-media-server']);
   });
 
   it('returns every featured project, sorted by order, when n exceeds the count', () => {

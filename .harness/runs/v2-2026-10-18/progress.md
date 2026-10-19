@@ -9,6 +9,16 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:59 · M5-05 · passes
+
+- Review of M5 from `$HARNESS_SCRATCH/M5.diff` (`1c1d89e~1..039ebde`, 1,241 lines): Opus on the code, Opus on facts and voice against the brief and the DJ docs, Sonnet on the guidelines in a browser. The plan's `## Review` has a 34-row fact table, a privacy pass and 13 findings (1 Important, 12 Minor), and ends "Ready to merge: yes".
+- Important, fixed test-first: lesson 7, the diagram and its aria-label presented the lock-protected nightly backup and its heartbeat as live. DJ `docs/backup-plan.md` lines 59–61 say the pre-H2 job, with no lock, stays installed until Michael runs the install. The page now says "built and waits for my install" / "(install pending)", and the brief has a `## Corrections` entry.
+- Minor, fixed: dropped "since Oct 14" (no doc confirms that run), "backups confirmed" became "nightly backup job already running", and D24 "built and used" became "built and tested". In `MediaGallery`, a sized video no longer turns on the 3-column grid, the two wrappers are merged into one, and `sizes` dropped to 240/384 px. Test hygiene: the 7/8 boundary in `MetricStrip`, a "7 projects" test name, a dead ternary, an unguarded `match()!`, a shadowed `it`, and a test that the aria-label names all 13 components.
+- Tests 309 → 326 (39 suites). Every new behaviour test failed first. `project-page-unchanged` passes, and all 6 snapshots are untouched.
+- Verified: `.harness/check.sh` is green (lint, 326 tests, build), and `lib/check.sh` is green. Smoke: 32/32 PASS. The privacy grep returns nothing (exit 1), and "Soulseek" appears once. I looked at the diagram at 390 myself (scroll difference 0). I ran the `web-design-guidelines` skill with the rules fetched fresh.
+- Recorded for a site-wide accessibility pass (each changes the pinned snapshot or the layout): `focus-visible` on links, 44 px touch targets for the back links, a skip link, an explicit `tabIndex` on the `<pre>` scroller, and curly quotes.
+- Questions for Michael: none. Proposed changes: a site-wide accessibility and typography feature (the items above, plus M4-05 findings 11–12).
+
 ### 2026-10-18 23:35 · M5-04 · passes
 
 - Screenshots: `docs/screenshots/v2/M5-home-media-server-390.png` (390 KB, 390 × 13561) and `-1280.png` (294 KB, 1280 × 7615). Both are full pages, captured with `reducedMotion: 'reduce'` as palette PNGs via sharp; the 1280 one uses 128 colours to stay under 400 KB. No top-3000 crop was needed. The plan has a new "What Michael will see" table, one row per shot (script: `$HARNESS_SCRATCH/m5-shots.mjs`).

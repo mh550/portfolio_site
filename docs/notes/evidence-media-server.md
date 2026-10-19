@@ -96,3 +96,9 @@ automatically. And it had to be safe to run unattended on a live server holding 
 - 2026-10-18 (M5-01): "46 playlists → 10 after the purge" under Numbers was wrong. D32 deleted 35 and kept 10
   (DJ `docs/specs/2026-10-17-amperfy-pivot.md` D32, `docs/next-todos.md` lines 10–11), so there were 45 before it.
   The line above now reads 45.
+- 2026-10-18 (M5-05): "consistent SQLite snapshots taken under a lock, a heartbeat" (What it is), "backups confirmed"
+  (Oct 13) and "snapshots under the lock before every nightly run" (What broke) overstate what runs. The lock-protected
+  nightly job and its heartbeat are built but not installed: until Michael runs `deploy/install-backup.sh`, the job is
+  the pre-H2 one, "from a checkout with `|| true`, no lock and no warning" (DJ `docs/backup-plan.md` §4, lines 59–61;
+  `docs/hard-won-facts.md` lines 48–51). The Oct 13 snapshot predates the music (`backup-plan.md` lines 22–23), and
+  no doc confirms the Oct 14 run. The lines above are left as written; the page says "built and waits for my install".

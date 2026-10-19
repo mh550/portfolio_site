@@ -99,6 +99,15 @@ describe('media-server architecture diagram (M5-03)', () => {
     },
   );
 
+  // The label is hand-written: every component the diagram draws must also be in what screen readers hear.
+  it.each(['phone', 'private network', 'HTTPS', 'Navidrome', 'crates service', 'worker', 'VPN', 'verifies', 'beets', 'library', 'trash', 'snapshot', 'backup'])(
+    'its aria-label names %s',
+    (word) => {
+      const { getByRole } = render(<ProjectDiagram diagram="media-server" />);
+      expect(getByRole('img').getAttribute('aria-label')!.toLowerCase()).toContain(word.toLowerCase());
+    },
+  );
+
   // '.ts' + '.net': split so the content guard does not flag this test (as in case-study-home-media-server.test.ts).
   it.each(['.ts' + '.net', '100.', '/srv', 'http://'])('publishes no %s in its text, label or caption (D18)', (banned) => {
     const { container, getByRole } = render(<ProjectDiagram diagram="media-server" />);
@@ -110,6 +119,14 @@ describe('media-server architecture diagram (M5-03)', () => {
     const { container, getByRole } = render(<ProjectDiagram diagram="media-server" />);
     expect(container.textContent).not.toMatch(/soulseek|slskd/i);
     expect(getByRole('img').getAttribute('aria-label')).not.toMatch(/soulseek|slskd/i);
+  });
+
+  // M5-05 review: the lock-protected nightly job and its heartbeat are built, not yet installed (DJ backup-plan.md §4).
+  it('marks the locked snapshot and the heartbeat as waiting for install', () => {
+    const { container, getByRole } = render(<ProjectDiagram diagram="media-server" />);
+    expect(container.textContent).toContain('install pending');
+    expect(container.textContent).not.toMatch(/heartbeat is green/);
+    expect(getByRole('img').getAttribute('aria-label')).toMatch(/built and waiting for my install/);
   });
 
   it('stacks its three panels at 390 and top-aligns them side by side from md', () => {

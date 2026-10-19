@@ -323,9 +323,9 @@ function MediaServerDiagram() {
       </Panel>
 
       <Panel title="Every night" tone="muted">
-        <Node>Database snapshot <Sub>both databases, all or nothing, under the lock</Sub></Node>
+        <Node>Database snapshot <Sub>both databases, all or nothing, under the lock (install pending)</Sub></Node>
         <Arrow />
-        <Node>Encrypted backup <Sub>to a second disk; the heartbeat is green only when it is fresh</Sub></Node>
+        <Node>Encrypted backup <Sub>to a second disk, every night</Sub></Node>
       </Panel>
     </div>
   );
@@ -377,7 +377,7 @@ const LABELS: Record<DiagramKey, string> = {
     .map((it) => `${it.when}, ${it.label}. ${it.short}.`)
     .join(' ')}`,
   'media-server':
-    'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night both databases are snapshotted, all or nothing, and an encrypted backup goes to a second disk; the heartbeat is green only when that backup is fresh.',
+    'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night an encrypted backup goes to a second disk. A newer job, built and waiting for my install, snapshots both databases all or nothing under the lock and sends a heartbeat only when the backup is fresh.',
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {
