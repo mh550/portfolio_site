@@ -20,6 +20,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
+| `/approach` | How I work: `MethodStrip showLines` + six `principles` whose examples link via `resolvedExamples` (`approach.ts`) |
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
@@ -30,7 +31,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (456 tests, 46 suites after M2-06)
+npm test             # Jest unit/integration tests (485 tests, 48 suites after M7-02)
 npm run test:watch   # watch mode
 ```
 
@@ -72,7 +73,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos (hidden below `xl`, D33) and NodeGraph honour reduced motion
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
-- `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero now, `/approach` in M7
+- `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves

@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 00:30 · M7-02 · passes
+
+- `/approach` is live on the branch. `approach.ts` gains `principles` (6 × 3 examples, copy pasted from the M7 plan, 24/24 strings verbatim by script), `approachIntro`, `approachClosing`, `resolvedExamples` (drops a missing slug, drops an anchor the project doesn't render) and `exampleHref`. New `src/app/approach/page.tsx` (static; link names `<project title>: <section>`; closing link → `/projects/agent-harness`, else `/projects`). `MethodStrip` gains `showLines`: lines visible at every width, steps stacked left-aligned below md with the arrows hidden there; the hero is unchanged. `/approach` is in `smoke-routes.txt`; CLAUDE.md routes updated. Tests 456 → 485 (46 → 48 suites).
+- Verified: `.harness/check.sh` run directly exits 0 (lint, 485 jest, build; `approach.html` prerendered); `lib/check.sh` green; `tsc --noEmit` exits 0; smoke 36/36 PASS. A Sonnet browser check on :7800 found 6 h2s, 18 example links (13 distinct hrefs), all 200, with all 11 hashes found by `getElementById`, 0 overflow at 390, every section at opacity 1 after scrolling, 4 arrows hidden at 390 and shown at 1280, the hero strip unchanged, and 0 console errors. I looked at the 390 shot.
+- Opus review: 0 Critical, 0 Important, 4 Minor, all fixed (test-first where testable). The fixes: an accent focus outline and a resting underline on the links; a page test for a principle whose examples all filter out; the `withoutProject` test helper throws on an unknown slug; and a comment on the `approach.ts` ↔ `projects.ts` import cycle, which is safe because both sides use the other only inside functions.
+- Next session (M7-03): tests remove a project by splicing the real `projects` array and restoring it in `finally`. A `jest.mock` of `@/lib/data/projects` with `requireActual` would recurse through the cycle, so don't use it. Reuse the `FOCUS` link classes from `approach/page.tsx` for `/evidence`.
+- Proposed change: none. (`/approach` gets its Navbar link in M8, per the plan.)
+
 ### 2026-10-19 00:40 · M7-01 · passes
 
 - New `docs/plans/2026-10-18-M7-approach-evidence.md`: Principles (6 × 3 examples = 18, 17 linked + the D14 "chose not to build" text, every one with its brand/brief line and the case-study string it matches), Approach page (h1 "How I work", 2-sentence intro, `MethodStrip showLines` per D31, closing link to `/projects/agent-harness` else `/projects`), Competencies (6, items 3/4/4/4/3/3, a MAXX Potential item in all 6, each with a `source` phrase), Evidence page (header, reading note, D7 note, noindex), Tests, an empty 4-row What Michael will see, an empty Review. Spec gains **D34** (D14 example has no `projectSlug`) and **D35** (High Cascade coaching labelled Personal). No src/ change; tests 456 → 456.

@@ -487,7 +487,7 @@
         ".harness/smoke-routes.txt contains `/approach`; `node .harness/smoke.mjs http://localhost:$HARNESS_PORT /approach` prints PASS at both widths; .harness/check.sh is green"
       ],
       "after": ["M7-01"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M7-03", "milestone": "M7", "kind": "build", "model": "opus",

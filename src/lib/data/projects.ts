@@ -1,3 +1,4 @@
+// Import cycle (approach.ts imports from here): use methodSteps only inside functions, never at module load.
 import { methodSteps } from './approach';
 
 export type ProjectCategory = 'integration' | 'full-stack' | 'ai' | 'education' | 'systems' | 'process';

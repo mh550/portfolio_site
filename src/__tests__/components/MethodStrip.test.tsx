@@ -38,6 +38,29 @@ describe('MethodStrip', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('hides the lines below md by default (sr-only)', () => {
+    render(<MethodStrip />);
+    for (const step of methodSteps) expect(screen.getByText(step.line)).toHaveClass('sr-only');
+  });
+
+  it('with showLines, shows the lines at every width (D31)', () => {
+    render(<MethodStrip showLines />);
+    for (const step of methodSteps) {
+      const line = screen.getByText(step.line);
+      expect(line).not.toHaveClass('sr-only');
+      expect(line.className).not.toMatch(/not-sr-only/);
+    }
+  });
+
+  it('with showLines, stacks the steps left-aligned below md and shows the arrows only from md up', () => {
+    const { container } = render(<MethodStrip showLines />);
+    expect(screen.getByRole('list', { name: 'How I work' })).toHaveClass('grid', 'md:grid-cols-5');
+    for (const item of screen.getAllByRole('listitem')) expect(item).toHaveClass('text-left', 'md:text-center');
+    const arrows = Array.from(container.querySelectorAll('span')).filter((s) => s.textContent === '→');
+    expect(arrows).toHaveLength(4);
+    for (const a of arrows) expect(a).toHaveClass('hidden', 'md:inline');
+  });
+
   it('appends className', () => {
     render(<MethodStrip className="mb-8" />);
     expect(screen.getByRole('list', { name: 'How I work' })).toHaveClass('mb-8');
