@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:10 · M5-01 · passes
+
+- New `docs/plans/2026-10-18-M5-home-media-server.md`: the full entry field by field (4 metrics, 5 method texts, decisions D7/D3/D24/D27/D18/D38/39 with chose/over/because/cost, 5 iterations, 7 lessons incl. "859 = 859 = 859" and "A guessed fake", 1 repo link, builtWith), a 42-row Traceability table, the verify excerpt, Media (3 demo shots, captions, alt text; m6-*.png never used), the `media-server` diagram's nodes/aria-label/caption, the tests M5-02/03 write, a brand check. Docs only: tests 265 → 265.
+- Verified: the excerpt is byte-identical (`cmp`) to DJ `docs/download-validation.md` lines 60–65 at origin/main `8d99309` after the one `/srv/incoming/` → `incoming/` swap; copy strings contain "Soulseek" once and none of `.ts.net`, `100.`, `/srv`, `ntfy`, `m6-`, `http://`; all 3 captions say "demo data". An Opus fact-check found 3 Important (overclaimed "Nothing deleted", 46 vs 45 playlists, "deduplicated") + 13 Minor + 4 wrong line citations: all applied. check.sh green; smoke 30/30 PASS at start.
+- New defaults in the spec: **D29** (the shots are 840 × 1720 portrait; `MediaGallery`'s 4:3 `object-cover` would show their empty middles, so `ProjectMedia` gains optional `width`/`height`, uncropped, `sm:grid-cols-3` when all are portrait; M5-02 builds it) and **D30** (metric 4 reads "Trash, not delete" / "code never deletes a library file; every removal is a reversible move", refining D18). Brief corrected: 45 playlists → 10, not 46 (`## Corrections`).
+- Next session (M5-02): the source repo's local `main` is 103 commits behind; read with `git -C … show origin/main:<path>`. As of Oct 17 the download path never ran live; the copy says so (D7 cost, outcome). Avoid "1,100." at a sentence end (the `100.` ban).
+- Questions for Michael: none. Proposed changes: M5-02 step 1 / M5-01 step 1 say metric 4 is "nothing deleted"; per D30 it is "Trash, not delete" (the M5-02 test only checks `reversible`, which still holds).
+
 ### 2026-10-18 verify M4
 
 | Feature | Step | What you ran or read | What you saw | Holds |

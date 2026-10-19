@@ -59,7 +59,7 @@ automatically. And it had to be safe to run unattended on a live server holding 
 
 ## Numbers
 
-- ~22 GB library, **831 songs after dedupe**; 46 playlists → 10 after the purge.
+- ~22 GB library, **831 songs after dedupe**; 45 playlists → 10 after the purge.
 - Spotify imports matched 57/68, 92/126 and 107 tracks across three playlists.
 - 376 files retagged, 359 re-filed out of "Compilations", 28 duplicates trashed, **1,405 playlist entries kept
   intact** through all of it.
@@ -90,3 +90,9 @@ automatically. And it had to be safe to run unattended on a live server holding 
 - A terminal excerpt of `verify` rejecting an upscaled file ("BAD: cutoff ≈ 16 kHz") as a styled code block; take
   the exact format from `docs/download-validation.md` (its example output, around line 60), never from the live server.
 - No public URL (private network only, by design). Phone (Amperfy) screenshots go on the asset checklist.
+
+## Corrections
+
+- 2026-10-18 (M5-01): "46 playlists → 10 after the purge" under Numbers was wrong. D32 deleted 35 and kept 10
+  (DJ `docs/specs/2026-10-17-amperfy-pivot.md` D32, `docs/next-todos.md` lines 10–11), so there were 45 before it.
+  The line above now reads 45.

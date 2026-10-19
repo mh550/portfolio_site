@@ -102,6 +102,15 @@ don't redo it.
 - **D28** *default* `/card` has no `ScrollReveal` or other entrance animation (it would delay the 30-second read);
   the vCard has no `PHOTO` (tiny file, simple encoding; the headshot is on the page) and is served
   `Content-Disposition: inline` so iOS shows "Add to Contacts".
+- **D29** *default* Portrait (phone) screenshots show uncropped. `ProjectMedia` gains optional `width` and `height`;
+  when both are set, `MediaGallery` renders the image at its own aspect ratio (no `fill`, no `object-cover` crop), and
+  when every item is portrait the grid is `grid-cols-1 sm:grid-cols-3`. Items without them render as today. (M5-01: the
+  three media-server demo shots are 840 × 1720; the 4:3 crop would show only their empty middles. No current project
+  sets `detail.media`, so no other page changes.)
+- **D30** *default* The fourth media-server metric reads "Trash, not delete" / "code never deletes a library file; every
+  removal is a reversible move" instead of D18's "Nothing deleted": the D32 purge deleted 35 (restorable) playlists,
+  `fetch` deletes its own failed downloads, and 18 trashed copies were overwritten on Oct 15 before the trash stopped
+  overwriting, so "Nothing deleted" would overclaim. (M5-01 fact-check.)
 
 ## Dependencies between milestones
 
