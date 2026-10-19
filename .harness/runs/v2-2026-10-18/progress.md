@@ -9,6 +9,40 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M2
+
+All 27 steps re-run; 6 features hold, 0 fail. Live checks on :7800.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M2-01 | 1 | `grep -n "^#"` on docs/plans/2026-10-18-M2-positioning.md | All sections present: Metadata, Hero (+MethodStrip, 390 px layout, Motion), Recent work, Experience (+Traceability), About, Skills, Tests, What Michael will see (now filled by M2-05), Review (filled by M2-06, as intended later) | yes |
+| M2-01 | 2 | Read plan lines 246-278 (traceability) and 455 | Traceability table maps each number to brand.md lines; "7+ → 4+" recorded (brand.md 42, 48) | yes |
+| M2-01 | 3 | `git show --stat bb498b5` | Only docs/plans, docs/specs, .harness/runs files (4 files); no src/ | yes |
+| M2-01 | 4 | `lib/check.sh` | green (6 tests, cached for this tree); same tree includes M2-01 | yes |
+| M2-02 | 1 | Read src/app/layout.tsx; `jest layout-metadata.test.ts`; curl-style browser read of head on :7800 | metadata from profile; title "Michael Herron — Systems & Process Engineer", description = subline, metadataBase, og:site_name, og:image headshot all present live; 6 tests assert title, description, image path | yes |
+| M2-02 | 2 | Browser read of / body at 390; `jest HeroSection.test.tsx` | Eyebrow SYSTEMS & PROCESS ENGINEER, name, tagline, subline, Diagnose→Decide→Build→Verify→Simplify with lines, buttons after; tests assert eyebrow, subline, five labels in order | yes |
+| M2-02 | 3 | Browser read of /; `jest home.test.tsx`, `SiteChrome.test.tsx` | h2 "Recent work", h3 Agent Harness / Linear Adoption / music library in order, "See all projects" → /projects, 1 footer on /; tests assert order, href, footer on / (D19) | yes |
+| M2-02 | 4 | Playwright 390×844 on :7800: boundingBox of "About Me"; `jest` min-h-svh test | About Me bottom = 701 ≤ 844; HeroSection test "grows with its content: min-h-svh"; measurement is in the plan | yes |
+| M2-02 | 5 | `node .harness/smoke.mjs`; `lib/check.sh` | All routes PASS at 1280 and 390 incl. /; check green | yes |
+| M2-03 | 1 | `jest experience.test.tsx` + browser read of /experience; grep "7+" experience.ts | Tests assert 2×, ~80%, de facto PM, FCP, DB migrations, 3 clients, ~2 days/~6 hours, ~8 hrs/week, 4+ sources, Agile/Scrum in Linear; page shows them; grep "7+" prints nothing | yes |
+| M2-03 | 2 | Read experience.test.tsx "keeps the job titles exactly" and "High Cascade" tests; title diff 5b9e3ff..HEAD | Tests pass; titles unchanged (diff of title: lines empty); High Cascade bullet starts "Mentored 12–18-year-old snowboarders" | yes |
+| M2-03 | 3 | grep -i gpa experience.ts + page.tsx; browser text /experience; "shows no GPA" test | No gpa field or text; live page has no "GPA"; test uses queryByText(/GPA/) null | yes |
+| M2-03 | 4 | Browser read of /about; aboutIntro in approach.ts; `jest about.test.tsx` | Intro (3 sentences: subline, five steps, delivery) above story; copy in approach.ts; Duke/Colorado asserted; about description now "Duke CS grad…" without old positioning | yes |
+| M2-03 | 5 | `lib/check.sh` | green | yes |
+| M2-04 | 1 | Browser h2 list on /skills; `jest data.test.ts` (four groups, single featured, ≥4 each) | Process & delivery, Systems & architecture, Build, Operate & verify; 3 tests pass | yes |
+| M2-04 | 2 | `jest data.test.ts` "keeps all 39 pre-M2 skills", "adds the new evidence-backed skills"; read test lines 118-120 | Both pass; Docker, restic, SQLite, Expo, Agent orchestration, Specs and decision ledgers present live | yes |
+| M2-04 | 3 | `jest skills.test.tsx` (featured panel, other groups outside, spot-check TypeScript/Docker/Linear) | Passes; data.test.ts asserts 4 categories | yes |
+| M2-04 | 4 | `lib/check.sh` | green | yes |
+| M2-05 | 1 | `ls -la docs/screenshots/v2/M2-*` | All eight present, largest 182 KB (<400 KB) | yes |
+| M2-05 | 2 | Playwright 390×844 of /; plan viewport paragraph; M2-home-390-viewport.png exists | Eyebrow, name, tagline, subline, five labels, both buttons stacked without overlap per text order; About Me bottom 701 recorded in plan | yes |
+| M2-05 | 3 | Read plan "What Michael will see" table | 8 rows (home, about, skills, experience × 2 widths) with the required observations | yes |
+| M2-05 | 4 | Read the "anything wrong" column; timeline fix commit 992ca84 | Issues fixed (timeline line) or listed with reasons | yes |
+| M2-05 | 5 | `lib/check.sh` | green | yes |
+| M2-06 | 1 | Read plan Review: findings, fact-check at 442, titles section | Findings table, 15-row fact-check, title grep stated; `git diff 5b9e3ff..HEAD -- experience.ts | grep title:` re-run by me prints nothing | yes |
+| M2-06 | 2 | `grep -rn "Full-Stack & Integration Engineer" src`; read Review findings | prints nothing; Important findings listed fixed, tests 456 passing in suite | yes |
+| M2-06 | 3 | Read plan "Web interface guidelines" section 464-474 | Section covers reduced motion, heading order, contrast of strip; fixes recorded | yes |
+| M2-06 | 4 | Tail of plan; `node .harness/smoke.mjs`; `lib/check.sh` | Ends "Ready to merge: yes"; smoke all PASS; check green | yes |
+
 ### 2026-10-18 23:49 · M2-06 · passes
 
 - Reviewed the M2 diff (`$HARNESS_SCRATCH/M2.diff`, 5b9e3ff..592c783) with Opus (code + fact-check), Opus (`web-design-guidelines` over /, /about, /skills, /experience) and Sonnet (browser on :7800). Findings: 0 Critical, 8 Important (all fixed), 15 Minor (6 fixed). The plan's Review has the 23-row table, a 15-row fact-check of `experience.ts` against brand.md, and ends with "Ready to merge: yes". The title grep and the `Full-Stack & Integration Engineer` grep both print nothing.
