@@ -123,6 +123,12 @@ don't redo it.
   768 and 1024 px, they sat behind the eyebrow, h1, tagline, strip labels and step lines; the 40 %-white glyphs drop
   the muted tagline to about 1.5:1 where they cross. The logos are decorative (`aria-hidden`). Repositioning them per
   breakpoint is the alternative if Michael wants them on tablets. (M2-06.)
+- **D34** *default* A principle example's `projectSlug` is optional: the D14 "chose not to build" example has none,
+  renders as text without a link, and is never filtered out. Every other example names one of the five slugs in the
+  M7 plan. (M7-01.)
+- **D35** *default* On `/evidence` the High Cascade coaching item ("Mentored 12–18-year-old snowboarders", D9) is
+  labelled `Personal`: the item contexts are only MAXX Potential, Builder Clarity and Personal, and coaching is the
+  strongest "Communicate and teach" evidence outside those two employers. Dropping it is the alternative. (M7-01.)
 
 ## Dependencies between milestones
 

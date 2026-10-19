@@ -9,6 +9,13 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 00:40 · M7-01 · passes
+
+- New `docs/plans/2026-10-18-M7-approach-evidence.md`: Principles (6 × 3 examples = 18, 17 linked + the D14 "chose not to build" text, every one with its brand/brief line and the case-study string it matches), Approach page (h1 "How I work", 2-sentence intro, `MethodStrip showLines` per D31, closing link to `/projects/agent-harness` else `/projects`), Competencies (6, items 3/4/4/4/3/3, a MAXX Potential item in all 6, each with a `source` phrase), Evidence page (header, reading note, D7 note, noindex), Tests, an empty 4-row What Michael will see, an empty Review. Spec gains **D34** (D14 example has no `projectSlug`) and **D35** (High Cascade coaching labelled Personal). No src/ change; tests 456 → 456.
+- Verified: a script found all 21 competency `source` phrases in brand.md / the briefs / the spec with whitespace collapsed (one fixed: brand's `**4+**` bold breaks "sources into Postgres", now "into Postgres"). An Opus fact-check found 2 Critical, 7 Important, 3 Minor; all fixed except one: the "one spreadsheet per person" detail stays, because the linked `linear-ai-workflow` page states it. My MS/HL line numbers were off by 112/216 (I had counted them in a concatenated file); they're recomputed and spot-checked. `lib/check.sh` green; smoke 34/34 PASS at start.
+- Next session (M7-02): all five slugs are on the branch, so nothing filters out today. The "Filtered at render time" table lists what drops if one is missing. MAXX items may only claim brand.md lines 43–46. Link names may repeat across principles (2a/6a and others) but then they share the href; the test asserts that rather than unique names.
+- Question for Michael: D35 shows the snowboard coaching as a "Communicate and teach" item labelled Personal. Keep it or drop it?
+
 ### 2026-10-18 verify M2
 
 All 27 steps re-run; 6 features hold, 0 fail. Live checks on :7800.
