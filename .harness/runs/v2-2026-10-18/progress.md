@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 verify S2
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| S2-01 | 1 | read `profile.ts:13,29`, `ConferenceNote.tsx`, `card/page.tsx:59`; curl /card on :7800 | `conferenceNote: string` = `''`; component takes `note` prop, returns null if empty; page renders it in Selected work above h2; live /card has no note element | yes |
+| S2-01 | 2 | read `card.test.tsx:122-138`, `ConferenceNote.test.tsx:5-7` | default-empty test asserts no `<p>` in section; component test renders 'Met me at a conference? Say hi.' as a P; page test also checks it precedes heading | yes |
+| S2-01 | 3 | `grep conferenceNote docs/conference-kit.md` | line 19 tells where to type it in `src/lib/data/profile.ts` | yes |
+| S2-01 | 4 | `lib/check.sh`; `node .harness/smoke.mjs` | check green; smoke 0 FAIL | yes |
+
 ### 2026-10-19 01:34 · S2-01 · passes
 
 - `profile.conferenceNote: string` (default `''`) in `src/lib/data/profile.ts`; new `src/components/card/ConferenceNote.tsx` takes the note as a prop and renders one `<p>` (trimmed, accent left rule) or nothing; `/card` renders it inside the Selected work section above the h2 (section now `aria-labelledby` its h2). D39 *default* records this. `docs/conference-kit.md` has the line telling Michael where to type it.
