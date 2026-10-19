@@ -29,4 +29,20 @@ describe('MetricStrip columns', () => {
     expect(dl?.children).toHaveLength(4);
     for (const label of dl!.querySelectorAll('p')) expect(label).toHaveClass('text-balance');
   });
+
+  // M5-04: at 1280 a phrase value ("Trash, not delete") in a quarter-width card wrapped to three lines
+  // and stretched all four cards. A strip with a value too long for a quarter card stays 2×2.
+  it('keeps four metrics 2×2 when a value is a phrase too long for a quarter-width card', () => {
+    const withPhrase = [...metrics(3), { value: 'Trash, not delete', label: 'every removal is reversible' }];
+    const dl = render(<MetricStrip metrics={withPhrase} />).container.querySelector('dl');
+    expect(dl).toHaveClass('grid-cols-1', 'sm:grid-cols-2');
+    expect(dl).not.toHaveClass('md:grid-cols-4');
+    expect(dl).not.toHaveClass('sm:grid-cols-3');
+  });
+
+  it('still puts four short values (the agent-harness strip) in one row from md', () => {
+    const short = ['55', '52', '+374', '≈ $2.53'].map((value) => ({ value, label: `l ${value}` }));
+    const dl = render(<MetricStrip metrics={short} />).container.querySelector('dl');
+    expect(dl).toHaveClass('sm:grid-cols-2', 'md:grid-cols-4');
+  });
 });

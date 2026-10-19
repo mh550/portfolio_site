@@ -1,13 +1,17 @@
 import type { Metric } from '@/lib/data';
 
+const ONE_ROW_MAX_VALUE_CHARS = 7;
+
 /** Big-number impact callouts. Renders nothing when there are no metrics. */
 export default function MetricStrip({ metrics }: { metrics?: Metric[] }) {
   if (!metrics || metrics.length === 0) return null;
 
   // Four in a three-column grid would leave the fourth alone on a row: 2×2, then one row from md,
-  // where the narrower cards wrap labels to two lines (balanced, so no word sits alone).
+  // where the narrower cards wrap labels to two lines (balanced, so no word sits alone). A value
+  // longer than "≈ $2.53" wraps in a quarter-width card and stretches the row, so that strip stays 2×2.
   const fourUp = metrics.length === 4;
-  const columns = fourUp ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3';
+  const oneRow = fourUp && metrics.every((m) => m.value.length <= ONE_ROW_MAX_VALUE_CHARS);
+  const columns = fourUp ? `sm:grid-cols-2${oneRow ? ' md:grid-cols-4' : ''}` : 'sm:grid-cols-3';
 
   return (
     <dl className={`grid grid-cols-1 gap-3 ${columns}`}>

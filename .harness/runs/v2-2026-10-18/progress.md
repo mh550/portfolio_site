@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:35 · M5-04 · passes
+
+- Screenshots: `docs/screenshots/v2/M5-home-media-server-390.png` (390 KB, 390 × 13561) and `-1280.png` (294 KB, 1280 × 7615). Both are full pages, captured with `reducedMotion: 'reduce'` as palette PNGs via sharp; the 1280 one uses 128 colours to stay under 400 KB. No top-3000 crop was needed. The plan has a new "What Michael will see" table, one row per shot (script: `$HARNESS_SCRATCH/m5-shots.mjs`).
+- Fixed what I found: at 1280 the four-up `MetricStrip` wrapped "Trash, not delete" onto 3 lines and stretched every card. A four-metric strip now stays 2 × 2 when any value is longer than 7 characters ("≈ $2.53" is the longest that fits a quarter card), so agent-harness keeps its single row. Tests 307 → 309 (39 suites): 2 in `MetricStrip.test.tsx`, and I watched the 2 × 2 one fail first. `project-page-unchanged` passes untouched.
+- Verified in my DOM pass and again by an independent Sonnet browser check. At 390: scrollWidth − innerWidth = 0; `pre` 1193 > 340 with `overflow-x: auto`, showing BAD and "cutoff ≈16 kHz"; the gallery is 1 column, uncropped (2.05), and every caption says "Demo data"; metrics are 1 column. At 1280: metrics 2 × 2 with every value on one line, and the gallery is 1 row of 3. No console errors; 0 hidden elements; "Soulseek" appears once in the visible text. `.harness/check.sh` run directly is green (lint, 309 tests, 6 snapshots, build). Smoke: 32/32 PASS before and after.
+- Left as is, with the reasons in the table: (1) `DecisionLog` puts short titles beside the id chip and wraps long ones below it at 390 (the shared layout, the same on the GHL and agent-harness pages). (2) `03-wanted.png`'s own UI text says "Soulseek", which M5-01 accepted and D11 forbids editing.
+- Next (M5-05): the review diff should include `MetricStrip.tsx` (the 2 × 2 rule). The M4 screenshots are still accurate: agent-harness's strip doesn't change.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 23:05 · M5-03 · passes
 
 - `DiagramKey` gains `'media-server'`; `MediaServerDiagram` in `src/components/projects/diagrams/index.tsx` uses only Node/Sub/Arrow/Panel. It has three panels (Listening · Home server · Docker Compose · Every night), stacked at 390 and side by side, top-aligned, from md. Its entries in `DIAGRAMS`/`CAPTIONS`/`LABELS` are the plan's copy, verbatim. The home-media-server entry sets `detail.architectureDiagram: 'media-server'`.
