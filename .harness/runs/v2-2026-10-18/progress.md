@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:40 · M5-02 · passes
+
+- New entry `home-media-server` in `src/lib/data/projects.ts` (order 3, after linear-ai-workflow), pasted from the M5 plan as written: 4 metrics (831 · 1,405 · 1,359 · "Trash, not delete"), 5 method texts, decisions D7/D3/D24/D27/D18/D38/39, 5 iterations, 7 lessons, 1 repo link, builtWith. The verify excerpt was taken from the DJ file's bytes (lines 60–65) with the one `/srv/incoming/` → `incoming/` swap. Three demo PNGs copied to `public/projects/home-media-server/` (59/90/108 KB, `cmp` identical). D29 is built: `ProjectMedia.width/height`; `MediaGallery` shows sized images uncropped, and an all-portrait list uses `sm:grid-cols-3`; unsized items render as before.
+- Tests 265 → 288 (37 → 39 suites): new `case-study-home-media-server.test.ts` (fields, media under public/, no `m6*`, byte-identical media and excerpt vs the DJ checkout with `it.skip` when it is absent, `DJ_CRATE_DIR`; banned strings; Soulseek exactly once; digit runs and ids vs the brief) and `MediaGallery.test.tsx`; updated data (8 projects, top 3), case-study-types (systems), ProjectsGrid (Systems filter). `card.test.tsx` and `project-page-unchanged` pass untouched; /card now lists home-media-server third.
+- Verified: `.harness/check.sh` run directly is green (lint, 288 tests, build); smoke 32/32 PASS. Sonnet browser check with reduced motion: 0 errors, 0 opacity-0, scroll diff 0 at 390. The `<pre>` scrolls inside itself (1193 vs 340 px). 3 images loaded, ratio 2.05 (uncropped), one column at 390 and one row at 1280, every figcaption says "Demo data". I looked at the gallery shot myself.
+- Next session (M5-03): add `'media-server'` to `DiagramKey`/`LABELS`/`CAPTIONS` and set `detail.architectureDiagram` on this entry (left unset here). The smoke's full-page screenshots are blank below the fold (ScrollReveal waits for in-view): M5-04 must capture with `reducedMotion: 'reduce'`, as M4-04 did.
+- Note: the brief writes "D38 / D39", so the id test expands `D38/39` into D38 and D39 and checks each.
+- Questions for Michael: none. Proposed changes: `lib/check.sh` printed "green … 6 tests" for a suite that runs 288 (its test-count parse looks wrong; the direct run shows 288).
+
 ### 2026-10-18 22:10 · M5-01 · passes
 
 - New `docs/plans/2026-10-18-M5-home-media-server.md`: the full entry field by field (4 metrics, 5 method texts, decisions D7/D3/D24/D27/D18/D38/39 with chose/over/because/cost, 5 iterations, 7 lessons incl. "859 = 859 = 859" and "A guessed fake", 1 repo link, builtWith), a 42-row Traceability table, the verify excerpt, Media (3 demo shots, captions, alt text; m6-*.png never used), the `media-server` diagram's nodes/aria-label/caption, the tests M5-02/03 write, a brand check. Docs only: tests 265 → 265.

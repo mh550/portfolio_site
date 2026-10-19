@@ -61,8 +61,8 @@ describe('case-study types', () => {
     expect([badLink, badDecision, badIteration, badLesson, badMethod, badDiagrams, badCategory]).toHaveLength(7);
   });
 
-  it('agent-harness is the only project in systems and in process (M4)', () => {
-    expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual(['agent-harness']);
+  it('systems holds agent-harness and home-media-server (M5); agent-harness alone is in process (M4)', () => {
+    expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual(['agent-harness', 'home-media-server']);
     expect(getProjectsByCategory('process').map((p) => p.slug)).toEqual(['agent-harness']);
   });
 

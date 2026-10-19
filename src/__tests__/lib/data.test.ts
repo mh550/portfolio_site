@@ -10,7 +10,7 @@ import {
 
 describe('projects data', () => {
   it('exports an array with 7 projects', () => {
-    expect(projects).toHaveLength(7);
+    expect(projects).toHaveLength(8);
   });
 
   it('each project has required fields', () => {
@@ -53,6 +53,7 @@ describe('projects data', () => {
     expect(orders).toEqual({
       'agent-harness': 1,
       'linear-ai-workflow': 2,
+      'home-media-server': 3,
       'ghl-jobtread-integration': 5,
       'paint-estimator': 6,
       'ringcentral-jobtread-integration': 7,
@@ -74,11 +75,10 @@ describe('projects data', () => {
 
 describe('getTopProjects', () => {
   it('returns the first n featured projects by order', () => {
-    expect(getTopProjects(3).map((p) => p.slug)).toEqual([
-      'agent-harness',
-      'linear-ai-workflow',
-      'ghl-jobtread-integration',
-    ]);
+    const expected = getProjectBySlug('agent-harness')
+      ? ['agent-harness', 'linear-ai-workflow', 'home-media-server']
+      : ['linear-ai-workflow', 'home-media-server', 'ghl-jobtread-integration'];
+    expect(getTopProjects(3).map((p) => p.slug)).toEqual(expected);
   });
 
   it('returns every featured project, sorted by order, when n exceeds the count', () => {
@@ -86,6 +86,7 @@ describe('getTopProjects', () => {
     expect(slugs).toEqual([
       'agent-harness',
       'linear-ai-workflow',
+      'home-media-server',
       'ghl-jobtread-integration',
       'paint-estimator',
       'ringcentral-jobtread-integration',

@@ -17,6 +17,9 @@ export interface ProjectMedia {
   src: string;
   alt: string;
   caption?: string;
+  /** Intrinsic pixel size. With both set, the gallery shows the image uncropped at its own ratio (D29). */
+  width?: number;
+  height?: number;
 }
 
 /** A big-number impact callout, e.g. { value: '~80%', label: 'less bug-filing time' }. */
@@ -380,6 +383,215 @@ async function findOrCreateContact(ghlContact, jobtread) {
       outcome:
         'The team went from fragmented sheets to an organized, automated pipeline across filing, triage, and implementation — roughly doubling sprint throughput and cutting bug-filing time by about 80%.',
       architectureDiagram: 'linear-flow',
+    },
+  },
+  {
+    slug: 'home-media-server',
+    title: 'Self-hosted music library & DJ crate pipeline',
+    company: 'Personal · home server',
+    shortDescription:
+      'A music library I host at home and stream to my phone, with a crate pipeline that checks each file\'s real quality and never deletes from the library.',
+    categories: ['systems', 'full-stack'],
+    techStack: ['Python', 'SQLite', 'Docker Compose', 'Navidrome', 'beets', 'ffmpeg', 'JavaScript', 'restic'],
+    githubUrl: 'https://github.com/mh550/dj-crate-streaming',
+    featured: true,
+    order: 3,
+    metrics: [
+      { value: '831', label: 'songs, self-hosted, identical copies removed' },
+      { value: '1,405', label: 'playlist entries kept intact through the retag and dedupe' },
+      { value: '1,359', label: 'tests, all offline against fakes' },
+      { value: 'Trash, not delete', label: 'code never deletes a library file; every removal is a reversible move' },
+    ],
+    detail: {
+      problem:
+        'I wanted to stop depending on Spotify and stream my own music library from a box at home to my phone. I also wanted to flip any playlist into a DJ crate, where every track gets a DJ-quality file that is found, verified and filed automatically. And all of it had to be safe to run unattended on the one server that holds my only organised library.',
+      approach:
+        'Navidrome owns the library, a small crates service owns the crate flags and the queue, and a worker container verifies and files each approved download.',
+      challenges:
+        'A guessed fake, a tool that rewrote every tag and a trash folder that overwrote itself each broke something before they became rules.',
+      outcome:
+        'Since Oct 13 the library has run on a desktop at home: 831 songs, about 22 GB, streamed to my phone over a private network and, since Oct 14, backed up every night, encrypted, to a second disk. The cleanup retagged 376 files, moved 359 out of "Compilations" and trashed 28 duplicates, and all 1,405 playlist entries came through intact. A check of the whole library found 22 of 831 files that fail the crate check, 17 of them upscaled from ~128 kbps sources: that is the upgrade list. MusicBrainz ids for 485 files are ready to apply, and 16 went in as a reversible trial. As of Oct 17 the download path had run only in tests; the first real download is mine to start.',
+      codeSnippets: [
+        {
+          title: 'verify · a "FLAC" upscaled from a lossy source is rejected (the docs\' example)',
+          language: 'text',
+          code: `BAD  incoming/…/03 - Good Times.flac  (tier crate)
+     flac 44100 Hz / 16 bit / 2 ch / 501.0 s  [flac-streaminfo]
+     · cutoff ≈16 kHz
+     · band dB vs full: >11k -24.8  >13k -26.7  >15k -30.4  >16k -35.0  >17k -82.7  >18k -84.7 …
+     · decoded 501.0 s · bits used 16 · peak -9.31 dBFS · flat factor 0.0
+     ✗ cutoff ≈16 kHz (energy stops above 16 kHz) for a lossless file: lossless or 320 kbps reaches 19–20 kHz, so this likely came from ≤128 kbps`,
+        },
+      ],
+      media: [
+        {
+          type: 'image',
+          src: '/projects/home-media-server/01-playlists.png',
+          alt: 'The crates web client on a phone: three playlists, one marked as a crate with 1 of 3 tracks crate-ready.',
+          caption:
+            'Playlists, with one flagged as a crate. Demo data from the September prototype, running against a fake Navidrome.',
+          width: 840,
+          height: 1720,
+        },
+        {
+          type: 'image',
+          src: '/projects/home-media-server/02-crate-toggled.png',
+          alt: 'A playlist switched to a crate: two tracks marked ok, one marked needs source.',
+          caption:
+            'A playlist toggled into a crate: each track shows its format and whether it met the crate rule of the time. Demo data.',
+          width: 840,
+          height: 1720,
+        },
+        {
+          type: 'image',
+          src: '/projects/home-media-server/03-wanted.png',
+          alt: 'The wanted queue: two tracks whose library file does not meet the crate rule, each with the reason.',
+          caption:
+            'The wanted queue: what still needs a better file, and why. Demo data from the prototype, before the one-rule simplification.',
+          width: 840,
+          height: 1720,
+        },
+      ],
+    },
+    caseStudy: {
+      role: 'Designer and operator',
+      timeframe: 'Sep – Oct 2026',
+      method: {
+        diagnose:
+          'My music was about 22 GB of files with no good way to play it away from home. After the first night live, the counts matched while 92 titles were still wrong on my phone, 28 files were second copies of the same audio, and nothing could yet tell a real lossless file from one upscaled from a low-bitrate mp3.',
+        decide:
+          'Navidrome owns the songs and playlists. A small crates service owns only the crate flags, the wanted queue and approvals, in its own SQLite database, and a stream is a redirect to Navidrome, so audio never passes through it. Downloads run in their own worker container, and nothing downloads until I have approved the first one by hand.',
+        build:
+          'I built it offline first, against a fake Navidrome, then took it live on Oct 13. Next came playlist import from Spotify, tag cleanup, dedupe, download validation, and a worker that searches a peer-to-peer network, Soulseek, through a VPN, verifies each file and files it with beets.',
+        verify:
+          'Every download is checked by one decode for the spectral cutoff, the bits actually used, truncation, silence and clipping, plus flac -t, and by an acoustic fingerprint when it replaces a library copy. The same check ran over the whole library in about 75 minutes, 6 files at a time. The 1,359 tests run offline against fakes built from captured live responses, and each milestone ends with me looking at the phone, not the counts.',
+        simplify:
+          'After using it, I replaced four quality tiers with one rule, lossless or 256 kbps and up, and left streaming quality to Navidrome and the phone app. "Prefer the 12-inch mix" became "source the exact track", the crate flag moved out of playlist comments into the app, and I deleted 35 cluttered playlists and kept 10; every one can be restored.',
+      },
+      decisions: [
+        {
+          id: 'D7',
+          title: 'The first real download is mine',
+          chose: 'no automatic downloads until I had approved one by hand and said go,',
+          over: 'letting the queue download on its own from day one',
+          because:
+            'the chain from download to library had only run in tests, so its first real run should be one file I watch.',
+          cost: 'As of Oct 17 the download path had not run live: copy replacement and play-now wait on that first approval.',
+        },
+        {
+          id: 'D3',
+          title: 'Duplicates go to the trash, not away',
+          chose:
+            'moving each second copy to a dated trash folder with a logged reverse move, and repointing its playlists,',
+          over: 'deleting duplicates',
+          because: 'a wrong call should be one move from undone, and these 28 were copies that decoded to identical audio.',
+          cost: 'Code never empties the trash; it grows until I empty it by hand, and a status command reports its size and age.',
+        },
+        {
+          id: 'D24',
+          title: 'One download quality',
+          chose:
+            'one rule, lossless or lossy at 256 kbps or more, with streaming quality left to Navidrome and the phone app,',
+          over: 'the four quality tiers I had built and used',
+          because:
+            'a downloaded file is kept for years and every stream is transcoded from it, so that one file\'s quality is the only one that matters.',
+          cost: 'The tier work became four tier names with the same rule in a config file.',
+        },
+        {
+          id: 'D27',
+          title: 'The app owns the crate flag',
+          chose: 'keeping which playlists are crates in the crates app\'s own database',
+          over: 'a #crate tag written into each playlist\'s comment',
+          because: 'playlist names and comments stay clean in every app that shows them, and one place holds the answer.',
+        },
+        {
+          id: 'D18',
+          title: 'Downloads run in their own container',
+          chose: 'a separate worker container that has no open port and handles only approved downloads,',
+          over: 'running downloads from a script on the host',
+          because:
+            'the web-facing service keeps a read-only view of the library, and credentials stay inside the containers.',
+        },
+        {
+          id: 'D38/39',
+          title: 'A green backup means a fresh backup',
+          chose: 'all-or-nothing database snapshots, and a nightly backup that fails when a snapshot fails,',
+          over: 'refreshing each snapshot on its own and logging a warning',
+          because:
+            'the monitoring heartbeat should be green only when the backup really holds fresh copies of both databases.',
+          cost: 'A broken snapshot turns the whole night red, even though the music itself was backed up.',
+        },
+      ],
+      iterations: [
+        {
+          when: 'Sep 17–18',
+          label: 'Offline prototype',
+          what: 'A candidate scorer, the crate layer, a fake Navidrome and a web client, all tested offline: 37 tests.',
+          why: 'I wanted the design proven against fakes before it touched the real library.',
+        },
+        {
+          when: 'Oct 13',
+          label: 'Live, night one',
+          what: 'The stack went live: 917 original files became 859 tracks in 35 genre playlists, with backups confirmed. Tests went from 37 to 80.',
+          why: 'Every count matched, but my phone still showed 92 wrong titles.',
+        },
+        {
+          when: 'Oct 13–15',
+          label: 'Library hygiene',
+          what: 'Playlist import from Spotify, tag cleanup, dedupe, quality tiers and download validation; tests reached 249.',
+          why: 'Downloads needed a place that could write to the library while the web-facing service stayed read-only.',
+        },
+        {
+          when: 'Oct 15–16',
+          label: 'Worker + identity',
+          what: 'A worker container that files downloads with beets, a model of songs, versions and copies, copy replacement and play-now; about 1,100 tests by the end.',
+          why: 'After using it, the tiers and the version rules were more machinery than the job needed.',
+        },
+        {
+          when: 'Oct 17',
+          label: 'The simplification',
+          what: 'One download quality, the exact track, the app owns the crate flag. An overnight run of my agent harness then built duplicate-cleanup tooling, health checks and lock-protected backups: 1,359 tests.',
+          why: 'The current version. The first real download waits for my go.',
+        },
+      ],
+      lessons: [
+        {
+          broke:
+            'A guessed fake hid 3 critical bugs in the download client: the tests passed against a fake written from a guess at the API.',
+          rule: 'Fakes mirror the live API: they are built from captured real responses.',
+        },
+        {
+          broke: 'After the first night every count matched, 859 = 859 = 859, while 92 titles were still wrong on my phone.',
+          rule: 'Every milestone ends by looking at the screen itself, not the counts. This site\'s build ends its milestones the same way.',
+        },
+        {
+          broke:
+            'beets rewrote every tag on the live library and collapsed multi-valued genres. Review caught it, and the genres were repaired from the original files.',
+          rule: 'No tool rewrites the whole library. beets writes full tags only on a fresh download with a confident MusicBrainz match.',
+        },
+        {
+          broke:
+            'On Oct 15 the dedupe moved copies into trash paths where an earlier repair had kept damaged copies, and 18 of them were overwritten.',
+          rule: 'The trash never overwrites: a name that is already there gets a numbered suffix.',
+        },
+        {
+          broke:
+            'Verification would have thrown away good files: embedded webp cover art makes ffmpeg print "[error]" lines about audio that is fine.',
+          rule: 'For FLAC, flac -t decides. A few ffmpeg complaints are a warning; only 10 or more, audio that won\'t decode, or digital silence fail.',
+        },
+        {
+          broke: 'beets matched a 412 s 12-inch mix to a 403 s 90s mix.',
+          rule: 'The id backfill doesn\'t use beets\' matching: it proposes ids, I review them, and every apply can be reverted.',
+        },
+        {
+          broke:
+            'Backups of the app\'s SQLite database were inconsistent: the main file was 4 KB and the data sat in the -wal file beside it.',
+          rule: 'Databases are copied only with sqlite3 .backup, under the lock, before every nightly backup.',
+        },
+      ],
+      links: [{ label: 'dj-crate-streaming on GitHub', href: 'https://github.com/mh550/dj-crate-streaming', kind: 'repo' }],
+      builtWith:
+        'I designed the system, set the specs, decided or approved every entry in the decision log, and decided every change to the live library. Claude Code agents wrote much of the code under that direction; the Oct 17 work was an overnight run of my agent harness.',
     },
   },
   {
