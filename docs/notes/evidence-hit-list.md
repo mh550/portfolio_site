@@ -92,3 +92,7 @@ from the spec: mobile-first, capture fast and add details later, offline-first, 
 - 2026-10-18 (M6-01): "That check became a standing rule in every spec" ("7679.1 mi"): the "What Michael will see"
   check was already in the overnight runbook (`OVERNIGHT.md` line 62) and is what caught the bug (line 382,
   `072c08b` "found by this table"). The page says the table stayed, on this site's build too.
+- 2026-10-18 (M6-05): "Removed fields archived in a `legacy_json` column" (Key decisions, D26) is not every field:
+  `status` is not archived, and the stored `gear` setting is ignored and dropped on the next save (HL simplification
+  spec lines 108–111, 291). The page says "the old details are archived". "Four sprints" built every screen but the
+  map view (HL overnight spec lines 123, 147–148).

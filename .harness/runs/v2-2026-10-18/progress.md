@@ -9,6 +9,16 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 23:55 · M6-05 · passes
+
+- Review of M6 from `$HARNESS_SCRATCH/M6.diff` (`aaa1f93~1..6de6479`, 1,189 lines): Opus on the code, Opus on facts and voice against the brief and the HitList files, Sonnet on the guidelines in a browser. Each finding was checked against the cited lines before acting. The plan's `## Review` has a 28-row fact table, a privacy pass and 16 findings (4 Important, 12 Minor), and ends "Ready to merge: yes".
+- Important, fixed test-first: (1) `simplify` and metric 2 said "I cut … Stars became" for a spec that isn't built; they now say "I wrote a spec that cuts …" and "specified Oct 16 … not yet built". (2) "every removed field archived" is false (the Oct 16 spec, line 291: `status` is not archived) → "the old details are archived". (3) The Feb sprints did not build "every screen" (no map view) → "but the map". (4) At 375 px the selected step "Enough" ran past its 42 px cell; with `-mx-2`, `gap-0.5` and no cell padding it fits from 360 up (cells 44/47/50/55 px). It still overflows at 320, which is recorded.
+- Minor, fixed: "Michael" removed from the copy, "Every feature and fix" instead of "Every change", the geocoder cap is for backfills only, saves go DB-first in the aria-label, "saved as a draft" instead of the spec's "tags", notes credited as a default. Simplification: an explicit `scale: true` field, one `SPEED_EXAMPLE`, `Sub` takes `className` (snapshots byte-identical), a guarded `speedField()`, and `toBe('20+ → 7')`. The plan copy, a brief Corrections entry and the CLAUDE.md count are updated. Screenshots re-taken (328/384 KB).
+- Tests 377 → 392 (40 suites, 6 snapshots unchanged). Every new behaviour test failed first.
+- Verified: `.harness/check.sh` run directly exits 0 (lint, 392 tests, build); `lib/check.sh` green; smoke 34/34 PASS. The `web-design-guidelines` rules were fetched fresh and applied to the page (Sonnet) and to `diagrams/index.tsx` (me). I looked at the 390 px architecture diagram and the 375 px scale myself.
+- Next: M6 is ready for its verify session. Recorded for the site-wide accessibility pass: link focus ring is the browser default.
+- Questions for Michael: none. Proposed changes: none beyond the site-wide accessibility and typography feature already proposed in M5-05.
+
 ### 2026-10-18 23:20 · M6-04 · passes
 
 - New `docs/screenshots/v2/M6-hit-list-390.png` (334 KB, 390 × 11425) and `M6-hit-list-1280.png` (382 KB, 1280 × 7165), both full pages as palette PNGs (script `$HARNESS_SCRATCH/m6-shots.mjs`). The plan's "What Michael will see" table in `docs/plans/2026-10-18-M6-hit-list.md` describes both, row by row.

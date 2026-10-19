@@ -191,9 +191,31 @@ describe('form-simplification diagram (M6-03)', () => {
     items.forEach((li, i) => expect(li.textContent).toContain(FIELDS[i]));
   });
 
+  function speedField(after: HTMLElement) {
+    const speed = Array.from(after.querySelectorAll('li')).find((li) => li.textContent!.startsWith('Natural speed'));
+    expect(speed).toBeDefined();
+    return speed!;
+  }
+
+  it('draws the scale exactly once, in the natural-speed field (M6-05)', () => {
+    const { after } = panels();
+    const withScale = Array.from(after.querySelectorAll('li')).filter((li) => li.querySelector('[data-scale-step]'));
+    expect(withScale).toEqual([speedField(after)]);
+  });
+
+  it('gives "Enough" room at 360 px: the scale escapes the node padding, with a narrow gap and no cell padding (M6-05)', () => {
+    // Measured before the fix: at 375 the cells were 42 px and "Enough" (40 px of text) ran past its border.
+    const { after } = panels();
+    const row = speedField(after).querySelector('[data-scale-step]')!.parentElement!;
+    expect(row.parentElement).toHaveClass('-mx-2');
+    expect(row).toHaveClass('gap-0.5');
+    expect(row).not.toHaveClass('gap-1');
+    Array.from(row.children).forEach((s) => expect(s.className).not.toMatch(/\bpx-/));
+  });
+
   it('draws the five-step speed scale inside the natural-speed field, words in order, Enough selected', () => {
     const { after } = panels();
-    const speed = after.querySelectorAll('li')[5];
+    const speed = speedField(after);
     const steps = Array.from(speed.querySelectorAll('[data-scale-step]'));
     expect(steps.map((s) => s.textContent)).toEqual(SCALE);
     expect(steps.map((s) => s.getAttribute('data-selected'))).toEqual(['false', 'false', 'false', 'true', 'false']);
@@ -224,6 +246,29 @@ describe('form-simplification diagram (M6-03)', () => {
     expect(label).toContain('not yet built');
     expect(label).toContain('None, Little, Some, Enough, Too much');
     expect(container.querySelector('figcaption')!.textContent).toContain('not yet built');
+  });
+});
+
+describe('hit-list diagram matches the app as built (M6-05)', () => {
+  function rendered() {
+    const { container, getByRole } = render(<ProjectDiagram diagram="hit-list" />);
+    return { text: container.textContent!, label: getByRole('img').getAttribute('aria-label')! };
+  }
+
+  it('caps only the town-name backfill at 10 per launch', () => {
+    const { text, label } = rendered();
+    expect(text).toContain('older ones backfilled at most 10 per launch');
+    expect(label).toContain('backfilling older ones at most 10 per launch');
+  });
+
+  it('says a save writes SQLite first, then the store', () => {
+    expect(rendered().label).toContain('a save writes the offline-first SQLite database first, then the store');
+  });
+
+  it("says Quick Add saves a draft, not the Oct 16 spec's tags", () => {
+    const { text } = rendered();
+    expect(text).not.toContain('tags');
+    expect(text).toContain('saved as a draft');
   });
 });
 

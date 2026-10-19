@@ -28,8 +28,12 @@ function Node({
   );
 }
 
-function Sub({ children }: { children: React.ReactNode }) {
-  return <span className="block font-mono text-[10px] text-[var(--color-muted)]">{children}</span>;
+function Sub({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span className={['block font-mono text-[10px] text-[var(--color-muted)]', className].filter(Boolean).join(' ')}>
+      {children}
+    </span>
+  );
 }
 
 /** A small directional marker, horizontal or vertical. */
@@ -350,7 +354,7 @@ function HitListDiagram() {
 
       <Panel title="Needs a signal" tone="muted">
         <Node>Apple Maps <Sub>react-native-maps; no API key, no custom build</Sub></Node>
-        <Node>Apple&apos;s geocoder <Sub>a town name for untitled spots, at most 10 per launch</Sub></Node>
+        <Node>Apple&apos;s geocoder <Sub>a town name for untitled spots; older ones backfilled at most 10 per launch</Sub></Node>
       </Panel>
 
       <Panel title="Capture now, details later" tone="neutral">
@@ -358,7 +362,7 @@ function HitListDiagram() {
         <Arrow />
         <Node>Review <Sub>a name is optional; the location comes along</Sub></Node>
         <Arrow />
-        <Node>Details later <Sub>tags whenever I get to them</Sub></Node>
+        <Node>Details later <Sub>saved as a draft; the full form whenever I get to it</Sub></Node>
       </Panel>
     </div>
   );
@@ -369,23 +373,24 @@ function HitListDiagram() {
 /* ------------------------------------------------------------------ */
 
 const SPEED_SCALE = ['None', 'Little', 'Some', 'Enough', 'Too much'];
-const SPEED_SELECTED = 'Enough';
+const SPEED_EXAMPLE = { step: 'Enough', meaning: 'rolls in with speed for most tricks.' };
 
 /** The scale as the spec draws it: a picture inside role="img", so plain divs, no buttons or radio roles. */
 function SpeedScale() {
+  // -mx-2, gap-0.5 and no cell padding: at 375 the cells were 42 px and "Enough" ran past its border (M6-05).
   return (
-    <div className="mt-2">
-      <div className="grid grid-cols-5 gap-1">
+    <div className="-mx-2 mt-2">
+      <div className="grid grid-cols-5 gap-0.5">
         {SPEED_SCALE.map((step) => {
-          const selected = step === SPEED_SELECTED;
-          // No truncate or nowrap: at 390 "Too much" may wrap to two lines, and min-h keeps the row even.
+          const selected = step === SPEED_EXAMPLE.step;
+          // No truncate or nowrap: "Too much" may wrap to two lines, and min-h keeps the row even.
           return (
             <div
               key={step}
               data-scale-step
               data-selected={selected}
               className={[
-                'flex min-h-9 items-center justify-center rounded-md border px-0.5 text-center text-[11px] leading-tight',
+                'flex min-h-9 items-center justify-center rounded-md border text-center text-[11px] leading-tight',
                 selected
                   ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]'
                   : 'border-white/15 text-[var(--color-muted)]',
@@ -396,8 +401,8 @@ function SpeedScale() {
           );
         })}
       </div>
-      <Sub>
-        <span className="mt-1.5 block">Enough: rolls in with speed for most tricks.</span>
+      <Sub className="mt-1.5">
+        {SPEED_EXAMPLE.step}: {SPEED_EXAMPLE.meaning}
       </Sub>
     </div>
   );
@@ -411,13 +416,13 @@ function FormSimplificationDiagram() {
     { label: 'Details', sub: 'intensity, bustability, bust notes' },
     { label: 'Status', sub: 'draft or complete' },
   ];
-  const after = [
+  const after: { label: string; sub?: string; scale?: true }[] = [
     { label: 'Name', sub: 'optional' },
     { label: 'Location', sub: 'the one field a spot needs' },
     { label: 'Photos', sub: 'a grid; add or remove' },
     { label: 'Feature types', sub: 'rail, ledge, bank …, pick any' },
     { label: 'Skate stopped', sub: 'one switch' },
-    { label: 'Natural speed' },
+    { label: 'Natural speed', scale: true },
     { label: 'Notes', sub: 'one free-text field' },
   ];
   // items-start: stretched to the taller After panel, Before left an empty box under Status at 1280 (M6-04).
@@ -437,7 +442,8 @@ function FormSimplificationDiagram() {
             <li key={field.label}>
               <Node>
                 {field.label}
-                {field.sub ? <Sub>{field.sub}</Sub> : <SpeedScale />}
+                {field.sub && <Sub>{field.sub}</Sub>}
+                {field.scale && <SpeedScale />}
               </Node>
             </li>
           ))}
@@ -500,7 +506,7 @@ const LABELS: Record<DiagramKey, string> = {
   'media-server':
     'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night an encrypted backup goes to a second disk. A newer job, built and waiting for my install, snapshots both databases all or nothing under the lock and sends a heartbeat only when the backup is fresh.',
   'hit-list':
-    "On my iPhone, in Expo Go, the screens are Spots, with a list and a map, Quick Add from the camera, batch Import from the photo library, and each spot's detail and edit screens. The screens read and write zustand stores for spots, media, settings and location. The stores save to an offline-first SQLite database with versioned migrations, and photos are copied into the app's own storage, never written to the camera roll; the database keeps their relative paths. Only two things need a signal: Apple Maps, and Apple's geocoder, which gives untitled spots a town name, at most 10 per launch. Capture comes first: take or pick the photos, review, save; the details can wait.",
+    "On my iPhone, in Expo Go, the screens are Spots, with a list and a map, Quick Add from the camera, batch Import from the photo library, and each spot's detail and edit screens. The screens read zustand stores for spots, media, settings and location, and a save writes the offline-first SQLite database first, then the store. The database has versioned migrations, and photos are copied into the app's own storage, never written to the camera roll; the database keeps their relative paths. Only two things need a signal: Apple Maps, and Apple's geocoder, which gives untitled spots a town name, backfilling older ones at most 10 per launch. Capture comes first: take or pick the photos, review, save as a draft; the details can wait.",
   'form-simplification':
     'Before: a spot form of 20+ fields in five sections, Feature, In-Run, Landing, Details and Status, with star ratings, setup options for gear and a draft or complete status. After, as specified on Oct 16 and not yet built: seven fields on one short screen, name, location, photos, feature types, skate stopped, natural speed and notes, and only the location is needed. Natural speed is a five-step scale, None, Little, Some, Enough, Too much, shown here with Enough selected: rolls in with speed for most tricks.',
 };

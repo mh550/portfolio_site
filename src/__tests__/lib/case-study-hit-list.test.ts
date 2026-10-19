@@ -28,7 +28,7 @@ describe('hit-list entry', () => {
     expect(project.metrics).toHaveLength(3);
     const [first, second, third] = project.metrics!;
     expect(first.value).toContain('374');
-    expect(second.value).toContain('7');
+    expect(second.value).toBe('20+ → 7');
     expect(third.value).toContain('57');
     expect(second.label).toContain('specified');
   });
@@ -123,5 +123,37 @@ describe('hit-list traceability and privacy', () => {
       expect(cs!.decisions.find((d) => d.id === id)!.cost).toMatch(/^Specified, not yet built\./);
     }
     expect(project.detail.outcome).toContain('specified, not yet built');
+  });
+});
+
+describe('hit-list review fixes (M6-05)', () => {
+  const text = JSON.stringify(project);
+
+  it.each([
+    // The Oct 16 spec is not built: no past-tense cut.
+    ['I cut ', 'the simplification is specified, not built'],
+    ['Stars became', 'the simplification is specified, not built'],
+    ['cut after using it', 'the simplification is specified, not built'],
+    // Spec line 291: status is not archived; the gear setting is dropped, not archived.
+    ['every removed field archived', 'not every removed field is archived'],
+    ['the removed fields are archived', 'not every removed field is archived'],
+    // The SDK hops were dependency fixes with no failing test.
+    ['Every change started', 'features and fixes started as failing tests, not every change'],
+    ['Michael', 'the copy is first person'],
+  ])('does not say %j (%s)', (phrase) => {
+    expect(text).not.toContain(phrase);
+  });
+
+  it('does not say the sprints built every screen: the Oct 13 spec lists the map view as missing', () => {
+    expect(text).not.toMatch(/built every screen(?! but the map)/);
+  });
+
+  it('says the simplification is a spec in the metric label and the method', () => {
+    expect(project.metrics![1].label).toMatch(/specified Oct 16.*not yet built/);
+    expect(cs!.method.simplify).toMatch(/^After using it, I wrote a spec/);
+  });
+
+  it('credits keeping notes as a default in builtWith', () => {
+    expect(cs!.builtWith).toContain('keeping notes');
   });
 });

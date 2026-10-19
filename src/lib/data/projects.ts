@@ -611,7 +611,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     order: 4,
     metrics: [
       { value: '374', label: 'tests in 37 suites, and the phone still found a crash' },
-      { value: '20+ → 7', label: 'fields on a spot, cut after using it (specified, not yet built)' },
+      { value: '20+ → 7', label: 'fields on a spot, specified Oct 16 after using it, not yet built' },
       { value: 'SDK 54 → 57', label: 'Expo upgrade in three one-version hops, each one green' },
     ],
     detail: {
@@ -630,15 +630,15 @@ async function findOrCreateContact(ghlContact, jobtread) {
       timeframe: 'Feb – Oct 2026',
       method: {
         diagnose:
-          'In February I wrote the product spec, and four interactive sprints built every screen; then it stalled: nothing had ever run on a phone. When I picked it up again in October, the first job was getting it onto my iPhone, and Expo Go runs only the newest SDK.',
+          'In February I wrote the product spec, and four interactive sprints built every screen but the map; then it stalled: nothing had ever run on a phone. When I picked it up again in October, the first job was getting it onto my iPhone, and Expo Go runs only the newest SDK.',
         decide:
           'The overnight spec fixed the big calls: upgrade the SDK one version at a time inside a 2-hour box, Apple Maps over Mapbox, and photos copied into the app, never written to the camera roll. When the agent put batch import on the Profile tab, I moved it to the Spots tab.',
         build:
           'One overnight agent loop took it from compiling to ready for my phone: SDK 54 to 57, the first green CI, real SQLite migrations, photos in app storage, Apple Maps and named untitled spots. A second session ran as an orchestrator: Sonnet wrote the failing tests, Opus implemented and Opus reviewed. Tests went from 115 to 220 to 374.',
         verify:
-          'Every change started as a failing test, and from M3 on the database code ran against real SQLite, not mocks. Every milestone got an independent review, and every one that touched a screen ended with a "What Michael will see" table, what the screen would show row by row. Then I used it on my iPhone, which found what 374 tests could not.',
+          'Every feature and fix started as a failing test, and from M3 on the database code ran against real SQLite, not mocks. Every milestone got an independent review, and every one that touched a screen ended with a table of what the screen would show, row by row. Then I used it on my iPhone, which found what 374 tests could not.',
         simplify:
-          'After using it, I cut a 20+ field form in five sections to seven fields: name, location, photos, feature types, skate stopped, natural speed and notes. Stars became a five-step speed scale, gear and drafts went, and the removed fields are archived, not deleted. This is specified, not yet built.',
+          'After using it, I wrote a spec that cuts a 20+ field form in five sections to seven fields: name, location, photos, feature types, skate stopped, natural speed and notes. In it, stars become a five-step speed scale, gear and drafts go, and the old details are archived, not deleted. This is specified, not yet built.',
       },
       decisions: [
         {
@@ -697,7 +697,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         {
           when: 'Feb 12–14',
           label: 'Spec and sprints',
-          what: 'I wrote the product spec, and four interactive sprints built every screen.',
+          what: 'I wrote the product spec, and four interactive sprints built every screen but the map.',
           why: 'The loop never closed on a device, and the project stalled for eight months.',
         },
         {
@@ -727,7 +727,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         {
           when: 'Oct 16',
           label: 'Simplification spec',
-          what: 'After using it, my feedback became a spec: from 20+ fields to seven, a five-step speed scale instead of stars, no drafts and no gear, with every removed field archived.',
+          what: 'After using it, my feedback became a spec: from 20+ fields to seven, a five-step speed scale instead of stars, no drafts and no gear, with the old details archived, not deleted.',
           why: 'It is specified, not yet built: the next agent run builds it from that spec.',
         },
       ],
@@ -761,7 +761,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
       extraDiagrams: ['form-simplification'],
       links: [{ label: 'hit-list on GitHub', href: 'https://github.com/mh550/hit-list', kind: 'repo' }],
       builtWith:
-        'I wrote the product spec, made or answered the calls on this page (the speed-scale words and the archive are defaults I can still overrule), and tested the app on my phone. Claude Code agents wrote much of the code under that direction: one overnight loop, then a session where Sonnet wrote the failing tests, Opus implemented and Opus reviewed.',
+        'I wrote the product spec, made or answered the calls on this page (keeping notes, the speed-scale words and the archive are defaults I can still overrule), and tested the app on my phone. Claude Code agents wrote much of the code under that direction: one overnight loop, then a session where Sonnet wrote the failing tests, Opus implemented and Opus reviewed.',
     },
   },
   {
