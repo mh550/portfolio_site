@@ -9,8 +9,8 @@ import {
 } from '@/lib/data';
 
 describe('projects data', () => {
-  it('exports an array with 8 projects', () => {
-    expect(projects).toHaveLength(8);
+  it('exports an array with 9 projects', () => {
+    expect(projects).toHaveLength(9);
   });
 
   it('each project has required fields', () => {
@@ -54,6 +54,7 @@ describe('projects data', () => {
       'agent-harness': 1,
       'linear-ai-workflow': 2,
       'home-media-server': 3,
+      'hit-list': 4,
       'ghl-jobtread-integration': 5,
       'paint-estimator': 6,
       'ringcentral-jobtread-integration': 7,
@@ -84,6 +85,7 @@ describe('getTopProjects', () => {
       'agent-harness',
       'linear-ai-workflow',
       'home-media-server',
+      'hit-list',
       'ghl-jobtread-integration',
       'paint-estimator',
       'ringcentral-jobtread-integration',

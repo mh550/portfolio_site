@@ -42,6 +42,24 @@ describe('ProjectsGrid', () => {
     expect(screen.queryByText('No projects in this category yet.')).not.toBeInTheDocument();
   });
 
+  it('filtering by Process shows only the agent-harness and hit-list cards', async () => {
+    const user = userEvent.setup();
+    render(<ProjectsGrid />);
+    await user.click(screen.getByRole('button', { name: 'Process' }));
+    expect(screen.getAllByRole('article')).toHaveLength(2);
+    for (const p of projects) {
+      if (['agent-harness', 'hit-list'].includes(p.slug)) expect(screen.getByText(p.title)).toBeInTheDocument();
+      else expect(screen.queryByText(p.title)).not.toBeInTheDocument();
+    }
+  });
+
+  it('filtering by Full-Stack includes the hit-list card', async () => {
+    const user = userEvent.setup();
+    render(<ProjectsGrid />);
+    await user.click(screen.getByRole('button', { name: 'Full-Stack' }));
+    expect(screen.getByText('HitList: offline-first street-spot scouting app')).toBeInTheDocument();
+  });
+
   it('All filter is active by default', () => {
     render(<ProjectsGrid />);
     expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');

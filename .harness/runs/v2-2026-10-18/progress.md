@@ -9,6 +9,16 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:20 · M6-02 · passes
+
+- `src/lib/data/projects.ts` gains the `hit-list` entry right after home-media-server (order 4, `full-stack` + `process`, 3 metrics 374 · 20+ → 7 · SDK 54 → 57, D16 detail, caseStudy with 5 method texts, D1 D2 D3 D12 D21 D22, 6 iterations, 5 lessons, one repo-root link, builtWith). The copy is pasted from `docs/plans/2026-10-18-M6-hit-list.md` as written: a script found all 80 quoted plan strings verbatim in the data. No media, no thumbnail, no demoUrl, no `public/projects/hit-list/`.
+- New `docs/asset-checklist.md` with the HitList section: 4 phone shots or a 15 s recording, privacy rules, the destination and the `media` entry shape. New `src/__tests__/lib/case-study-hit-list.test.ts` (13 tests: header, metrics, method, ids, iterations, lessons, link, builtWith, no media, checklist, digit runs and ids found in the brief, privacy, "specified, not yet built"). `data.test.ts` now expects 9 projects with `'hit-list': 4` (getTopProjects(3) unchanged, so /card is unchanged). `case-study-types` expects process = [agent-harness, hit-list]. `ProjectsGrid` gains Process and Full-Stack filter tests.
+- Tests 326 → 342 (39 → 40 suites). Each new test failed first. `.harness/check.sh` run directly: exit 0 (lint, 342 tests, 6 snapshots, build). `lib/check.sh`: green. Smoke: 34/34 PASS, including `/projects/hit-list` at 1280 and 390.
+- At 390, a Sonnet browser check scrolled the page so the reveals fire. It found scrollWidth − innerWidth = 0, the h2s Problem → Method → Decisions → Evolved → Broke → Outcome → Links, 0 images in main, one GitHub link (the repo root), and no console errors. I looked at the decision and lesson shots myself.
+- Next (M6-03): add the `hit-list` and `form-simplification` DiagramKeys and diagrams, then set `detail.architectureDiagram` and `caseStudy.extraDiagrams` (left unset here). When real shots are added, replace the "no media" test, as the checklist says.
+- Note: Prettier already reports `projects.ts` as unformatted at HEAD. It is not part of the suite, so I didn't reformat it.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 · M6-01 · passes
 
 - New `docs/plans/2026-10-18-M6-hit-list.md`: the hit-list entry field by field (order 4, 3 metrics 374 · 20+ → 7 · SDK 54 → 57), five method texts, decisions D1 D2 D3 D12 D21 D22 (HitList's own ledger ids) as chose/over/because/cost with a grammar check, 6 iterations (Feb 12–14 → Oct 16, the last saying "specified, not yet built"), 5 lessons, one repo-root link, builtWith, D16 summaries; a 39-row Traceability table (brief lines and HL `OVERNIGHT.md`/spec/README lines); the `hit-list` and `form-simplification` node lists with the five-step scale drawn, aria-labels and captions; the asset-checklist section M6-02 creates (no media, none faked); the tests M6-02/03 write.

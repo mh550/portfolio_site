@@ -61,9 +61,9 @@ describe('case-study types', () => {
     expect([badLink, badDecision, badIteration, badLesson, badMethod, badDiagrams, badCategory]).toHaveLength(7);
   });
 
-  it('systems holds agent-harness and home-media-server (M5); agent-harness alone is in process (M4)', () => {
+  it('systems holds agent-harness and home-media-server (M5); process holds agent-harness and hit-list (M6)', () => {
     expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual(['agent-harness', 'home-media-server']);
-    expect(getProjectsByCategory('process').map((p) => p.slug)).toEqual(['agent-harness']);
+    expect(getProjectsByCategory('process').map((p) => p.slug)).toEqual(['agent-harness', 'hit-list']);
   });
 
   it('the fixture is not in projects', () => {

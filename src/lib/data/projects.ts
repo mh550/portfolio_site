@@ -597,6 +597,170 @@ async function findOrCreateContact(ghlContact, jobtread) {
     },
   },
   {
+    slug: 'hit-list',
+    title: 'HitList: offline-first street-spot scouting app',
+    company: 'Personal · iOS (Expo)',
+    shortDescription:
+      'An iPhone app for logging street snowboard and skate spots with cold hands and no signal: capture first, add the details later, everything stored on the phone.',
+    categories: ['full-stack', 'process'],
+    techStack: ['React Native', 'Expo', 'TypeScript', 'expo-router', 'zustand', 'SQLite', 'react-native-maps', 'Jest', 'GitHub Actions'],
+    githubUrl: 'https://github.com/mh550/hit-list',
+    featured: true,
+    order: 4,
+    metrics: [
+      { value: '374', label: 'tests in 37 suites, and the phone still found a crash' },
+      { value: '20+ → 7', label: 'fields on a spot, cut after using it (specified, not yet built)' },
+      { value: 'SDK 54 → 57', label: 'Expo upgrade in three one-version hops, each one green' },
+    ],
+    detail: {
+      problem:
+        'I ride street spots on a snowboard and a skateboard. A spot is one rideable feature, a rail, a ledge or a bank, at one place. I scout with cold hands, little time and often no signal, and a spot I don\'t log is easy to forget. I wanted an app on my phone that saves a spot in seconds, lets me add the details later, works offline and keeps my spots to myself.',
+      approach:
+        'An Expo app with expo-router screens, zustand stores and an offline-first SQLite database, with every photo copied into the app\'s own storage.',
+      challenges:
+        'A green test suite hid a crash, a foreign-key difference and layout bugs that only the phone, or the framework\'s source, could show.',
+      outcome:
+        'When the second session wrapped up on the evening of Oct 15, the app worked end to end in tests and bundled for iOS: Quick Add, batch import grouped by place, the list and the Apple Maps view, search and sort, all offline-first. The suite stood at 374 tests in 37 suites with CI green, expo-doctor at 21/21 and a 4.1 MB iOS bundle. Then, on my iPhone in Expo Go, importing several photos crashed. Once that was fixed I used it, and on Oct 16 my feedback became a spec for the cut to seven fields. As of Oct 18 that simplification is specified, not yet built. The app still loads in Expo Go from my desktop; a TestFlight build comes later.',
+    },
+    caseStudy: {
+      role: 'Product owner and user',
+      timeframe: 'Feb – Oct 2026',
+      method: {
+        diagnose:
+          'In February I wrote the product spec, and four interactive sprints built every screen; then it stalled: nothing had ever run on a phone. When I picked it up again in October, the first job was getting it onto my iPhone, and Expo Go runs only the newest SDK.',
+        decide:
+          'The overnight spec fixed the big calls: upgrade the SDK one version at a time inside a 2-hour box, Apple Maps over Mapbox, and photos copied into the app, never written to the camera roll. When the agent put batch import on the Profile tab, I moved it to the Spots tab.',
+        build:
+          'One overnight agent loop took it from compiling to ready for my phone: SDK 54 to 57, the first green CI, real SQLite migrations, photos in app storage, Apple Maps and named untitled spots. A second session ran as an orchestrator: Sonnet wrote the failing tests, Opus implemented and Opus reviewed. Tests went from 115 to 220 to 374.',
+        verify:
+          'Every change started as a failing test, and from M3 on the database code ran against real SQLite, not mocks. Every milestone got an independent review, and every one that touched a screen ended with a "What Michael will see" table, what the screen would show row by row. Then I used it on my iPhone, which found what 374 tests could not.',
+        simplify:
+          'After using it, I cut a 20+ field form in five sections to seven fields: name, location, photos, feature types, skate stopped, natural speed and notes. Stars became a five-step speed scale, gear and drafts went, and the removed fields are archived, not deleted. This is specified, not yet built.',
+      },
+      decisions: [
+        {
+          id: 'D1',
+          title: 'One SDK version at a time',
+          chose:
+            'upgrading Expo from SDK 54 to 57 one version per step inside a 2-hour box, falling back to the last green step,',
+          over: 'a single jump to 57',
+          because: 'Expo Go on my phone runs only the newest SDK, and a failed step should cost one hop, not the night.',
+          cost: 'Each hop broke something different, from a nested module to a router change and a dependency conflict, so each was fixed and tested on its own before any feature work.',
+        },
+        {
+          id: 'D2',
+          title: 'Apple Maps now, Mapbox later',
+          chose: 'Apple Maps through react-native-maps',
+          over: 'Mapbox',
+          because: 'Apple Maps needs no API key and no custom build, so it runs in Expo Go today.',
+          cost: 'No offline map tiles until a custom build makes Mapbox possible.',
+        },
+        {
+          id: 'D3',
+          title: 'Photos stay inside the app',
+          chose: 'copying every photo into the app\'s own storage and saving only its relative path,',
+          over: 'keeping the camera\'s cache file, which iOS can purge,',
+          because:
+            'a photo survives iOS clearing its cache, my camera roll stays untouched, and deleting a spot never takes a photo with it.',
+          cost: 'Code never deletes a photo file, so a deleted spot\'s photos stay on the phone.',
+        },
+        {
+          id: 'D12',
+          title: 'Import lives on the Spots tab',
+          chose: 'a second button on the Spots tab, beside the + for a new spot,',
+          over: 'the Profile tab, where the agent first put it,',
+          because: 'new spots start on the Spots tab, in List and Map, and an import button on Profile is bad UX.',
+          cost: 'Found late: until the phone guide was written, batch import had no way in at all.',
+        },
+        {
+          id: 'D21',
+          title: 'Natural speed in words, not stars',
+          chose: 'a labelled five-step scale (None · Little · Some · Enough · Too much)',
+          over: 'a row of five stars',
+          because: 'stars read as "how good", and five identical stars say nothing about what is being measured.',
+          cost: 'Specified, not yet built. Old star ratings move down one step to fit the 0–4 scale.',
+        },
+        {
+          id: 'D22',
+          title: 'Gear removed entirely',
+          chose: 'removing gear from the app',
+          over: 'a "gear I have" filter',
+          because:
+            'filtering by what I own was the wrong way round, a spot that takes either of two setups makes any gear list ambiguous, and what gear really meant was "needs extra speed", which the speed scale already says.',
+          cost: 'Specified, not yet built. Old setup options are archived, not deleted.',
+        },
+      ],
+      iterations: [
+        {
+          when: 'Feb 12–14',
+          label: 'Spec and sprints',
+          what: 'I wrote the product spec, and four interactive sprints built every screen.',
+          why: 'The loop never closed on a device, and the project stalled for eight months.',
+        },
+        {
+          when: 'Oct 13',
+          label: 'The revival',
+          what: 'A planning session read the repo as it stood and wrote the overnight spec: the decisions, the milestones and a 2-hour box for the SDK upgrade.',
+          why: 'I wanted it on my phone, and that meant three SDK versions first.',
+        },
+        {
+          when: 'Oct 14–15',
+          label: 'Overnight loop',
+          what: 'One agent loop worked milestones M0 to M7: SDK 57, the first green CI, real SQLite tests, photos, the map, named untitled spots and a reachable import. Tests went from 115 to 220.',
+          why: 'It ran end to end in tests and bundled for iOS; clustering, search and the edit screen were next.',
+        },
+        {
+          when: 'Oct 15',
+          label: 'Orchestrator session',
+          what: 'A second session split the work: Sonnet wrote the failing tests, Opus implemented, Opus reviewed. Clustering, sort and search, edit fixes and foreign keys landed: 374 tests in 37 suites, CI green.',
+          why: 'Every gate was green. The phone had not had its turn yet.',
+        },
+        {
+          when: 'Oct 15',
+          label: 'On the phone',
+          what: 'Importing several photos crashed on my iPhone, a failure no test could see. Ids moved to expo-crypto, and a lint rule now blocks the old import.',
+          why: 'Every test had passed; the phone found what they could not.',
+        },
+        {
+          when: 'Oct 16',
+          label: 'Simplification spec',
+          what: 'After using it, my feedback became a spec: from 20+ fields to seven, a five-step speed scale instead of stars, no drafts and no gear, with every removed field archived.',
+          why: 'It is specified, not yet built: the next agent run builds it from that spec.',
+        },
+      ],
+      lessons: [
+        {
+          broke:
+            'All 374 tests passed, and importing several photos crashed on my iPhone: the uuid package needs crypto.getRandomValues(), which Node and Jest have and the phone\'s Hermes engine does not.',
+          rule: 'The test environment is not the device. Ids now come from expo-crypto, and a lint rule blocks the uuid import.',
+        },
+        {
+          broke:
+            'The test database enforced foreign keys and the phone\'s did not: node:sqlite turns them on by default, expo-sqlite starts with them off. Review then found that a future table rebuild with them on would have deleted every photo record.',
+          rule: 'Test fakes start the way the device starts. Foreign keys are off during migrations and on afterwards.',
+        },
+        {
+          broke:
+            'A spot saved without GPS showed as "7679.1 mi" away in the list. No test failed; a table of what the screen would show, row by row, exposed it.',
+          rule: 'A spot with no location shows no distance. The table stayed: every milestone that touches a screen ends with one, on this site\'s build too.',
+        },
+        {
+          broke:
+            'A row of sort chips inherited React Native\'s default flexGrow: 1 and would have filled about half the Spots screen. Jest can\'t see layout; a reviewer caught it by reading the React Native source.',
+          rule: 'Passing tests say nothing about layout. Layout gets checked against the framework\'s source and on the phone.',
+        },
+        {
+          broke:
+            'Saving a spot in Edit silently wiped its skate-stop details, rounded untouched dimensions on every save, and stored "abc" as NaN.',
+          rule: 'A save keeps every field it did not touch. A failing test reproduces the loss before the fix.',
+        },
+      ],
+      links: [{ label: 'hit-list on GitHub', href: 'https://github.com/mh550/hit-list', kind: 'repo' }],
+      builtWith:
+        'I wrote the product spec, made or answered the calls on this page (the speed-scale words and the archive are defaults I can still overrule), and tested the app on my phone. Claude Code agents wrote much of the code under that direction: one overnight loop, then a session where Sonnet wrote the failing tests, Opus implemented and Opus reviewed.',
+    },
+  },
+  {
     slug: 'ringcentral-jobtread-integration',
     title: 'RingCentral ↔ JobTread Integration',
     company: 'Builder Clarity',
