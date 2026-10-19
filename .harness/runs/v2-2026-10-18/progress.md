@@ -9,6 +9,20 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 verify M8
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M8-01 | 1 | Read Navbar.tsx links array; Navbar.test.tsx lines 20-61 | 7 links Home..Contact in order, shared by desktop+mobile lists; test 'lists the seven links in order' checks both lists + href /approach; no Evidence/Card link test passes | yes |
+| M8-01 | 2 | ProjectsGrid.tsx sortByOrder; ProjectsGrid.test.tsx 94-115 (ran, pass) | Titles equal order-sorted list; first metric value found in each non-thumbnail case-study card | yes |
+| M8-01 | 3 | Read sitemap.ts, robots.ts, sitemap-robots.test.ts (ran, pass) | 8 routes + every project, from profile.siteUrl; no /evidence or /card/qr; robots disallows both, sitemap URL asserted | yes |
+| M8-01 | 4 | curl :7800/sitemap.xml | grep -o <loc>; curl robots.txt | 17 locs (>= 7+9 projects); robots has 'Disallow: /evidence' | yes |
+| M8-01 | 5 | node .harness/smoke.mjs; .harness/check.sh | 38 PASS, 0 other; check: lint ok · jest ok (611) · build ok | yes |
+| M8-02 | 1 | Read docs/plans/2026-10-18-M8-polish.md | Table page · finding · severity · fix/D-ref covers /card, /card/qr, /approach, /evidence, 3 case studies; D36/D37 exist in spec (could not re-run the skill itself) | yes |
+| M8-02 | 2 | Ran a11y-new-pages.test.tsx (pass); read its it() titles; plan contrast table | One-h1/no-skip heading, focus-visible, link-text, chrome focus, useReducedMotion tests present and green; contrast asserted from globals.css | yes |
+| M8-02 | 3 | ls $HARNESS_SCRATCH/M8.diff; read plan review sections | M8.diff 141 KB exists; two reviews, 5 Important fixed, leftovers in D36/D37 | yes |
+| M8-02 | 4 | smoke + check.sh output; tail of plan | 38/38 PASS both widths, check green; plan ends 'Ready to merge: yes' | yes |
+
 ### 2026-10-19 11:00 · M8-02 · passes
 
 - Ran the `web-design-guidelines` pass (fresh `command.md`, Opus reviewer) over /card, /card/qr, /approach, /evidence and the three case studies. Two Opus reviews read `$HARNESS_SCRATCH/M8.diff`, the second after my fixes. Findings and outcomes are in the new `docs/plans/2026-10-18-M8-polish.md`, which ends "Ready to merge: yes". 0 Critical. 5 Important, all fixed:
