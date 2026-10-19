@@ -87,6 +87,20 @@ describe('ProjectDetail with a caseStudy', () => {
     expect(precedes(figure, container.querySelector('#method')!)).toBe(true);
   });
 
+  it('shows the hit-list diagram after The Problem and the form simplification after #iterations (M6-03)', () => {
+    const { container } = render(<ProjectDetail project={getProjectBySlug('hit-list')!} />);
+    const problem = screen.getByRole('heading', { level: 2, name: 'The Problem' });
+    const figures = Array.from(container.querySelectorAll('figure'));
+    const architecture = figures.find((f) => f.querySelector('figcaption')?.textContent?.startsWith('Spots, photos and the database'))!;
+    const form = figures.find((f) => f.querySelector('figcaption')?.textContent?.startsWith('Specified on Oct 16'))!;
+    expect(architecture).toBeDefined();
+    expect(form).toBeDefined();
+    expect(precedes(problem, architecture)).toBe(true);
+    expect(precedes(architecture, container.querySelector('#method')!)).toBe(true);
+    expect(precedes(container.querySelector('#iterations')!, form)).toBe(true);
+    expect(precedes(form, container.querySelector('#lessons')!)).toBe(true);
+  });
+
   it('puts the extra diagrams after #iterations and before #lessons (D17)', () => {
     const { container } = render(<ProjectDetail project={fixtureProject} />);
     const extra = Array.from(container.querySelectorAll('figure')).find((f) =>

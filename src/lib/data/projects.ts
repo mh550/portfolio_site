@@ -11,7 +11,9 @@ export type DiagramKey =
   | 'calendar-sync'
   | 'agent-harness'
   | 'harness-evolution'
-  | 'media-server';
+  | 'media-server'
+  | 'hit-list'
+  | 'form-simplification';
 
 export interface ProjectMedia {
   type: 'image' | 'video';
@@ -621,6 +623,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         'A green test suite hid a crash, a foreign-key difference and layout bugs that only the phone, or the framework\'s source, could show.',
       outcome:
         'When the second session wrapped up on the evening of Oct 15, the app worked end to end in tests and bundled for iOS: Quick Add, batch import grouped by place, the list and the Apple Maps view, search and sort, all offline-first. The suite stood at 374 tests in 37 suites with CI green, expo-doctor at 21/21 and a 4.1 MB iOS bundle. Then, on my iPhone in Expo Go, importing several photos crashed. Once that was fixed I used it, and on Oct 16 my feedback became a spec for the cut to seven fields. As of Oct 18 that simplification is specified, not yet built. The app still loads in Expo Go from my desktop; a TestFlight build comes later.',
+      architectureDiagram: 'hit-list',
     },
     caseStudy: {
       role: 'Product owner and user',
@@ -755,6 +758,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
           rule: 'A save keeps every field it did not touch. A failing test reproduces the loss before the fix.',
         },
       ],
+      extraDiagrams: ['form-simplification'],
       links: [{ label: 'hit-list on GitHub', href: 'https://github.com/mh550/hit-list', kind: 'repo' }],
       builtWith:
         'I wrote the product spec, made or answered the calls on this page (the speed-scale words and the archive are defaults I can still overrule), and tested the app on my phone. Claude Code agents wrote much of the code under that direction: one overnight loop, then a session where Sonnet wrote the failing tests, Opus implemented and Opus reviewed.',

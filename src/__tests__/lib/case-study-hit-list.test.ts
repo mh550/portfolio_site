@@ -67,6 +67,11 @@ describe('hit-list entry', () => {
     expect(cs!.links).toEqual([{ label: 'hit-list on GitHub', href: REPO, kind: 'repo' }]);
   });
 
+  it('draws the architecture after The Problem and the form simplification after the iterations (M6-03)', () => {
+    expect(project.detail.architectureDiagram).toBe('hit-list');
+    expect(cs?.extraDiagrams).toEqual(['form-simplification']);
+  });
+
   it('credits Claude Code agents (D10)', () => {
     expect(cs!.builtWith).toMatch(/Claude Code agents/);
   });

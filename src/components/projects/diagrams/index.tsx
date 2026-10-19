@@ -332,6 +332,121 @@ function MediaServerDiagram() {
 }
 
 /* ------------------------------------------------------------------ */
+/* HitList — on the phone, what needs a signal, capture first          */
+/* ------------------------------------------------------------------ */
+
+function HitListDiagram() {
+  return (
+    <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <Panel title="On the phone · Expo Go" tone="accent">
+        <Node accent>Screens <Sub>Spots (List · Map) · Quick Add · Import · spot detail and edit</Sub></Node>
+        <Arrow />
+        <Node>zustand stores <Sub>spots with filters, search and sort · media · settings · location</Sub></Node>
+        <Arrow label="save" />
+        <Node>SQLite <Sub>offline-first; versioned migrations</Sub></Node>
+        <Arrow label="relative paths" />
+        <Node>Photo files <Sub>photos copied into app storage; never written to the camera roll</Sub></Node>
+      </Panel>
+
+      <Panel title="Needs a signal" tone="muted">
+        <Node>Apple Maps <Sub>react-native-maps; no API key, no custom build</Sub></Node>
+        <Node>Apple&apos;s geocoder <Sub>a town name for untitled spots, at most 10 per launch</Sub></Node>
+      </Panel>
+
+      <Panel title="Capture now, details later" tone="neutral">
+        <Node>Capture <Sub>the camera, or photos from the library grouped by place</Sub></Node>
+        <Arrow />
+        <Node>Review <Sub>a name is optional; the location comes along</Sub></Node>
+        <Arrow />
+        <Node>Details later <Sub>tags whenever I get to them</Sub></Node>
+      </Panel>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* HitList form — 20+ fields before, the seven specified on Oct 16     */
+/* ------------------------------------------------------------------ */
+
+const SPEED_SCALE = ['None', 'Little', 'Some', 'Enough', 'Too much'];
+const SPEED_SELECTED = 'Enough';
+
+/** The scale as the spec draws it: a picture inside role="img", so plain divs, no buttons or radio roles. */
+function SpeedScale() {
+  return (
+    <div className="mt-2">
+      <div className="grid grid-cols-5 gap-1">
+        {SPEED_SCALE.map((step) => {
+          const selected = step === SPEED_SELECTED;
+          // No truncate or nowrap: at 390 "Too much" may wrap to two lines, and min-h keeps the row even.
+          return (
+            <div
+              key={step}
+              data-scale-step
+              data-selected={selected}
+              className={[
+                'flex min-h-9 items-center justify-center rounded-md border px-0.5 text-center text-[11px] leading-tight',
+                selected
+                  ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]'
+                  : 'border-white/15 text-[var(--color-muted)]',
+              ].join(' ')}
+            >
+              {step}
+            </div>
+          );
+        })}
+      </div>
+      <Sub>
+        <span className="mt-1.5 block">Enough: rolls in with speed for most tricks.</span>
+      </Sub>
+    </div>
+  );
+}
+
+function FormSimplificationDiagram() {
+  const before = [
+    { label: 'Feature', sub: 'type, custom type, shape, length · height · width, material, skate stops, difficulty' },
+    { label: 'In-Run', sub: 'natural speed in 1–5 stars, setup options for gear and build' },
+    { label: 'Landing', sub: 'difficulty, surface' },
+    { label: 'Details', sub: 'intensity, bustability, bust notes' },
+    { label: 'Status', sub: 'draft or complete' },
+  ];
+  const after = [
+    { label: 'Name', sub: 'optional' },
+    { label: 'Location', sub: 'the one field a spot needs' },
+    { label: 'Photos', sub: 'a grid; add or remove' },
+    { label: 'Feature types', sub: 'rail, ledge, bank …, pick any' },
+    { label: 'Skate stopped', sub: 'one switch' },
+    { label: 'Natural speed' },
+    { label: 'Notes', sub: 'one free-text field' },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Panel title="Before · 20+ fields in five sections" tone="muted">
+        {before.map((section) => (
+          <Node key={section.label} className="opacity-80">
+            {section.label} <Sub>{section.sub}</Sub>
+          </Node>
+        ))}
+      </Panel>
+
+      <Panel title="After · 7 fields, specified Oct 16" tone="accent">
+        <ol className="space-y-2">
+          {after.map((field) => (
+            <li key={field.label}>
+              <Node>
+                {field.label}
+                {field.sub ? <Sub>{field.sub}</Sub> : <SpeedScale />}
+              </Node>
+            </li>
+          ))}
+        </ol>
+      </Panel>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Public component                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -344,6 +459,8 @@ const DIAGRAMS: Record<DiagramKey, () => React.ReactElement> = {
   'agent-harness': AgentHarnessDiagram,
   'harness-evolution': HarnessEvolutionDiagram,
   'media-server': MediaServerDiagram,
+  'hit-list': HitListDiagram,
+  'form-simplification': FormSimplificationDiagram,
 };
 
 const CAPTIONS: Record<DiagramKey, string> = {
@@ -357,6 +474,9 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'harness-evolution': 'Six ways of driving agents, each changed by what broke in the one before.',
   'media-server':
     'Nothing is open to the internet, streams go straight from Navidrome to the phone, and only approved, verified downloads reach the library.',
+  'hit-list': 'Spots, photos and the database live on the phone; only the map and the town names need a signal.',
+  'form-simplification':
+    'Specified on Oct 16 after using the app, not yet built: a spot is a place with photos, and everything else is optional.',
 };
 
 // What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).
@@ -378,6 +498,10 @@ const LABELS: Record<DiagramKey, string> = {
     .join(' ')}`,
   'media-server':
     'My phone reaches the home server only through a private network, over HTTPS. On the server, Navidrome holds the library and the playlists and streams to the phone. The crates service keeps the crate flags, the wanted queue and the approvals. A worker container takes only approved downloads: it searches through a VPN, verifies each file, files it into the library with beets and asks Navidrome to rescan. Removals go to a trash with an undo log. Every night an encrypted backup goes to a second disk. A newer job, built and waiting for my install, snapshots both databases all or nothing under the lock and sends a heartbeat only when the backup is fresh.',
+  'hit-list':
+    "On my iPhone, in Expo Go, the screens are Spots, with a list and a map, Quick Add from the camera, batch Import from the photo library, and each spot's detail and edit screens. The screens read and write zustand stores for spots, media, settings and location. The stores save to an offline-first SQLite database with versioned migrations, and photos are copied into the app's own storage, never written to the camera roll; the database keeps their relative paths. Only two things need a signal: Apple Maps, and Apple's geocoder, which gives untitled spots a town name, at most 10 per launch. Capture comes first: take or pick the photos, review, save; the details can wait.",
+  'form-simplification':
+    'Before: a spot form of 20+ fields in five sections, Feature, In-Run, Landing, Details and Status, with star ratings, setup options for gear and a draft or complete status. After, as specified on Oct 16 and not yet built: seven fields on one short screen, name, location, photos, feature types, skate stopped, natural speed and notes, and only the location is needed. Natural speed is a five-step scale, None, Little, Some, Enough, Too much, shown here with Enough selected: rolls in with speed for most tricks.',
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {

@@ -11,6 +11,8 @@ const KEYS: DiagramKey[] = [
   'agent-harness',
   'harness-evolution',
   'media-server',
+  'hit-list',
+  'form-simplification',
 ];
 
 describe('ProjectDiagram accessibility (D17)', () => {
@@ -134,5 +136,104 @@ describe('media-server architecture diagram (M5-03)', () => {
     const panels = getByRole('img').firstElementChild!;
     expect(panels).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
     expect(panels.children).toHaveLength(3);
+  });
+});
+
+describe('hit-list architecture diagram (M6-03)', () => {
+  it.each(['Spots', 'Quick Add', 'Import', 'zustand', 'SQLite', 'photos', 'Apple Maps', 'geocoder'])('names %s', (word) => {
+    const { getByRole } = render(<ProjectDiagram diagram="hit-list" />);
+    expect(getByRole('img').textContent!.toLowerCase()).toContain(word.toLowerCase());
+  });
+
+  it.each(['Spots', 'Quick Add', 'Import', 'zustand', 'SQLite', 'photos', 'Apple Maps', 'geocoder', 'camera roll'])(
+    'its aria-label names %s',
+    (word) => {
+      const { getByRole } = render(<ProjectDiagram diagram="hit-list" />);
+      expect(getByRole('img').getAttribute('aria-label')!.toLowerCase()).toContain(word.toLowerCase());
+    },
+  );
+
+  it('stacks its three panels at 390 and top-aligns them side by side from md', () => {
+    const { getByRole } = render(<ProjectDiagram diagram="hit-list" />);
+    const panels = getByRole('img').firstElementChild!;
+    expect(panels).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
+    expect(panels.children).toHaveLength(3);
+  });
+});
+
+describe('form-simplification diagram (M6-03)', () => {
+  const SECTIONS = ['Feature', 'In-Run', 'Landing', 'Details', 'Status'];
+  const FIELDS = ['Name', 'Location', 'Photos', 'Feature types', 'Skate stopped', 'Natural speed', 'Notes'];
+  const SCALE = ['None', 'Little', 'Some', 'Enough', 'Too much'];
+
+  function panels() {
+    const { getByRole } = render(<ProjectDiagram diagram="form-simplification" />);
+    const grid = getByRole('img').firstElementChild!;
+    const [before, after] = Array.from(grid.children) as HTMLElement[];
+    return { grid, before, after };
+  }
+
+  it('has a Before panel with 20+ fields and the five section names in order', () => {
+    const { before } = panels();
+    const text = before.textContent!;
+    expect(text).toContain('Before');
+    expect(text).toContain('20+ fields');
+    const at = SECTIONS.map((name) => text.indexOf(name));
+    at.forEach((i) => expect(i).toBeGreaterThan(-1));
+    expect([...at].sort((a, b) => a - b)).toEqual(at);
+  });
+
+  it('has an After panel listing exactly seven fields, in the specified order', () => {
+    const { after } = panels();
+    expect(after.textContent).toContain('After');
+    const items = after.querySelectorAll('li');
+    expect(items).toHaveLength(7);
+    items.forEach((li, i) => expect(li.textContent).toContain(FIELDS[i]));
+  });
+
+  it('draws the five-step speed scale inside the natural-speed field, words in order, Enough selected', () => {
+    const { after } = panels();
+    const speed = after.querySelectorAll('li')[5];
+    const steps = Array.from(speed.querySelectorAll('[data-scale-step]'));
+    expect(steps.map((s) => s.textContent)).toEqual(SCALE);
+    expect(steps.map((s) => s.getAttribute('data-selected'))).toEqual(['false', 'false', 'false', 'true', 'false']);
+    expect(speed.textContent).toContain('Enough: rolls in with speed for most tricks.');
+    // Readable at 390 (M6-04): a long word may wrap, never get cut off.
+    steps.forEach((s) => expect(s.className).not.toMatch(/\b(truncate|whitespace-nowrap)\b/));
+  });
+
+  it('is a picture: no buttons, radios or focus stops in the scale', () => {
+    const { after } = panels();
+    expect(after.querySelectorAll('button, input, [role="radio"], [tabindex]')).toHaveLength(0);
+  });
+
+  it('stacks the before and after panels at 390 and puts them side by side from md', () => {
+    const { grid } = panels();
+    expect(grid).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2');
+    expect(grid.children).toHaveLength(2);
+  });
+
+  it('says in its label and caption that the simplification is specified, not yet built', () => {
+    const { container, getByRole } = render(<ProjectDiagram diagram="form-simplification" />);
+    const label = getByRole('img').getAttribute('aria-label')!;
+    expect(label).toContain('not yet built');
+    expect(label).toContain('None, Little, Some, Enough, Too much');
+    expect(container.querySelector('figcaption')!.textContent).toContain('not yet built');
+  });
+});
+
+describe('hit-list diagrams publish nothing private (M6-03, D18)', () => {
+  // '.ts' + '.net': split so the content guard does not flag this test.
+  it.each([
+    ['hit-list', '.ts' + '.net'],
+    ['hit-list', '100.'],
+    ['hit-list', 'http'],
+    ['form-simplification', '.ts' + '.net'],
+    ['form-simplification', '100.'],
+    ['form-simplification', 'http'],
+  ] as [DiagramKey, string][])('%s has no %s in its text, label or caption', (key, banned) => {
+    const { container, getByRole } = render(<ProjectDiagram diagram={key} />);
+    expect(container.textContent).not.toContain(banned);
+    expect(getByRole('img').getAttribute('aria-label')).not.toContain(banned);
   });
 });

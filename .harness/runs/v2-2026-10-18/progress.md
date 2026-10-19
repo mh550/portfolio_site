@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 22:50 · M6-03 · passes
+
+- `src/components/projects/diagrams/index.tsx` gains `HitListDiagram` (3 panels: On the phone · Expo Go / Needs a signal / Capture now, details later) and `FormSimplificationDiagram` (Before · 20+ fields in five sections / After · 7 fields, specified Oct 16, an `<ol>` of 7 with the speed scale None · Little · Some · Enough · Too much as plain divs, Enough selected), plus `CAPTIONS`/`LABELS` copied from the M6 plan. `DiagramKey` gains both keys; the hit-list entry sets `detail.architectureDiagram: 'hit-list'` and `caseStudy.extraDiagrams: ['form-simplification']`.
+- Tests 342 → 376 (40 suites): ProjectDiagram.test.tsx (both keys added to the role=img and unique-label checks, the words, 7 `li`, the scale order and selection, no truncate or nowrap, no buttons or radios, grid-cols-1 md:grid-cols-2, banned strings), ProjectDetail.test.tsx (positions), case-study-hit-list.test.ts (data wiring). Each failed first (34 + 1 red).
+- Verified: `lib/check.sh` green; `npx jest` 376/376; `node .harness/smoke.mjs` 34/34 PASS, including `/projects/hit-list` at 1280 and 390. Sonnet browser check, after scrolling so the reveals fire: scrollWidth − innerWidth = 0 at 390 and 1280. At 390 the form panels are stacked (both x=45); at 1280 they sit side by side (both y=4544). The scale steps are 45 px wide at 390 and none overflows. The architecture diagram sits between The Problem and The Method, the form diagram between How It Evolved and What Broke, with no console errors. I looked at the element shots: "Too much" wraps onto two lines at both widths, which the plan allows.
+- Next (M6-04): at 1280 the Before panel stretches to the After panel's height (grid default), which leaves some empty space under Status. It's harmless, but `md:items-start` would remove it if it looks off in the full-page shot.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 22:20 · M6-02 · passes
 
 - `src/lib/data/projects.ts` gains the `hit-list` entry right after home-media-server (order 4, `full-stack` + `process`, 3 metrics 374 · 20+ → 7 · SDK 54 → 57, D16 detail, caseStudy with 5 method texts, D1 D2 D3 D12 D21 D22, 6 iterations, 5 lessons, one repo-root link, builtWith). The copy is pasted from `docs/plans/2026-10-18-M6-hit-list.md` as written: a script found all 80 quoted plan strings verbatim in the data. No media, no thumbnail, no demoUrl, no `public/projects/hit-list/`.
