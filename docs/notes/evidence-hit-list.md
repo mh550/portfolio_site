@@ -77,3 +77,18 @@ from the spec: mobile-first, capture fast and add details later, offline-first, 
 - No screenshots in the repo. Use authored diagrams (architecture; the 20+ → 7 field form before/after; the
   5-step speed scale as a small styled component) and add phone screenshots / a 15 s screen recording to
   `docs/asset-checklist.md`.
+
+## Corrections
+
+- 2026-10-18 (M6-01): "Silent data loss in Edit … caught in review" (What broke) is not how HitList's log tells it.
+  The skate-stop wipe was found while planning the skate-stops item, and a failing test reproduced it; the dimension
+  rounding and `NaN` were found while checking the other fields in that same item (`OVERNIGHT.md` line 331, the
+  checklist at lines 253–255). Review then confirmed the fix (line 329). The page says "a failing test reproduces
+  the loss before the fix" and does not credit review.
+- 2026-10-18 (M6-01): "Night of Oct 14/15" (Timeline): the loop's M0 entry is at 2026-10-14 00:03 and its wrap-up
+  at 2026-10-15 00:51, with the session idle 00:13–07:20 waiting on a "Continue" (`OVERNIGHT.md` lines 350, 513–514,
+  533). The page dates it "Oct 14–15". The device crash is in the 2026-10-15 evening review entry (line 277), so the
+  page dates it Oct 15, not "Oct 15/16"; the simplification spec is Oct 16.
+- 2026-10-18 (M6-01): "That check became a standing rule in every spec" ("7679.1 mi"): the "What Michael will see"
+  check was already in the overnight runbook (`OVERNIGHT.md` line 62) and is what caught the bug (line 382,
+  `072c08b` "found by this table"). The page says the table stayed, on this site's build too.

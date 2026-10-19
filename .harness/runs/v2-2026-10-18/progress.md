@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 · M6-01 · passes
+
+- New `docs/plans/2026-10-18-M6-hit-list.md`: the hit-list entry field by field (order 4, 3 metrics 374 · 20+ → 7 · SDK 54 → 57), five method texts, decisions D1 D2 D3 D12 D21 D22 (HitList's own ledger ids) as chose/over/because/cost with a grammar check, 6 iterations (Feb 12–14 → Oct 16, the last saying "specified, not yet built"), 5 lessons, one repo-root link, builtWith, D16 summaries; a 39-row Traceability table (brief lines and HL `OVERNIGHT.md`/spec/README lines); the `hit-list` and `form-simplification` node lists with the five-step scale drawn, aria-labels and captions; the asset-checklist section M6-02 creates (no media, none faked); the tests M6-02/03 write.
+- `docs/notes/evidence-hit-list.md` gains `## Corrections`: the Edit data loss was found while planning, not in review; the loop ran Oct 14 00:03 → Oct 15 00:51; the crash was Oct 15; the "What Michael will see" table predated the 7679.1 mi bug.
+- Verified: an Opus fact-check against the brief and the HL files (6 Important, 9 Minor, all applied and re-checked against the cited lines). Among them: "took it to my phone" overclaimed (the README says the first phone run was next), the outcome's 374/crash ordering, the verify claims narrowed (real SQLite only for DB code from M3 on; tables only on screen milestones), D21/D26 credited as defaults, D3/D12 comma grammar, and privacy in the asset checklist (towns in untitled labels). `.harness/check.sh` run directly: green (lint, 39 suites / 326 tests, 6 snapshots, build); `lib/check.sh` green. Tests 326 → 326 (plan only). Smoke 32/32 PASS at start.
+- Next (M6-02): paste the copy as written, place the entry after home-media-server, create `docs/asset-checklist.md`. `getTopProjects(3)` and `/card` don't change. M6-04 must check that "SDK 54 → 57" fits a third-width metric card at 1280.
+- Note: at the start I ran read-only `git log/status/branch` in `~/projects/hit_list` (a breach of "no git in other checkouts"; nothing changed). After that I used only cat/grep.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 verify M5
 
 All 26 steps re-run; no feature flipped.
