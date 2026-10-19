@@ -9,6 +9,41 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M4
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M4-01 | 1 | Read plan sections: entry table, metrics, caseStudy method/decisions/iterations/lessons/links/builtWith, detail | All fields present: slug, title, company, 4 metrics, 5 methods, 6 decision ids, 6 iterations, 5 lessons, 2 links, builtWith, approach/challenges one-liners | yes |
+| M4-01 | 2 | Read `## Traceability` table | ~35 rows each mapping a number/date to a brief line or AH file; none cite journal/raw | yes |
+| M4-01 | 3 | Read `## Code excerpt` | lib/driver.sh lines 170–182 (13 lines) verbatim, title stated | yes |
+| M4-01 | 4 | Read `## Diagrams` | agent-harness nodes/arrows incl. INBOX, notifications, limit marker; harness-evolution 6 stages with aria-label, caption, grid-cols-1 md:grid-cols-6 stacking | yes |
+| M4-01 | 5 | Read `## Brand check`; `git show --stat` of a6b769a (M4-01 commit) | Brand table all yes; commit touched only docs/ and .harness/ paths (5 files) | yes |
+| M4-01 | 6 | `check.sh` (agent-harness lib/check.sh) | green | yes |
+| M4-02 | 1 | `npx jest case-study-agent-harness.test.ts` 'header fields' + '4 metrics' tests, read assertions | 18/18 pass; asserts title, company, categories, order 1, featured, githubUrl, metric values contain 55/52/374/2.53 | yes |
+| M4-02 | 2 | Same test file: method, decisions ids, iterations, lessons, links, builtWith tests | Assertions match step (5 methods, exact ids, 6 iterations Sep/Oct, 5 lessons, link label+href, 'Claude Code agents' + 'I designed the process') | yes |
+| M4-02 | 3 | Same file: snippet test; `itWithSource` verbatim test | 1 snippet ≤25 lines, title lib/driver.sh; verbatim test ran (✓, not skipped) with agent-harness present; uses it.skip when absent | yes |
+| M4-02 | 4 | Same file: traceability tests | digit runs [55,52,374,2.53] and decision ids matched in brief; bans .ts.net, ntfy, journal/raw | yes |
+| M4-02 | 5 | `data.test.ts` (toHaveLength(7), getTopProjects) ; `curl localhost:7800/projects/agent-harness` | data tests pass; HTTP 200; h2s: The Problem, The Method, Key Decisions, How It Evolved, What Broke, Outcome, In the Code, Links (DecisionLog heading 'Key Decisions') | yes |
+| M4-02 | 6 | check.sh | green incl. content-guard | yes |
+| M4-03 | 1 | Read projects.ts DiagramKey and diagrams/index.tsx | DiagramKey includes both keys; components in index.tsx using Node/Panel primitives, no new files/deps | yes |
+| M4-03 | 2 | Read index.tsx:327-352 `LABELS: Record<DiagramKey,string>`, `role="img" aria-label={LABELS[diagram]}`; ProjectDiagram.test.tsx | it.each over all 7 keys asserts one role=img, non-empty aria-label, figcaption outside; passes | yes |
+| M4-03 | 3 | projects.ts entry; diagrams/index.tsx:283; evolution test | architectureDiagram 'agent-harness', extraDiagrams ['harness-evolution']; `grid grid-cols-1 md:grid-cols-6`; test checks six stages in order with when+short | yes |
+| M4-03 | 4 | ProjectDiagram.test.tsx architecture words test | it.each CLI, driver, initializer, session, suite, verify, PR, main, INBOX; pass | yes |
+| M4-03 | 5 | `node .harness/smoke.mjs` | PASS /projects/agent-harness @1280 and @390 (all routes pass) | yes |
+| M4-03 | 6 | check.sh | green | yes |
+| M4-04 | 1 | `ls -l` + PNG header dims of docs/screenshots/v2/M4-* | 4 files exist: 361 KB, 311 KB, 163 KB, 37 KB, all <400 KB; full-page sizes (390×11285 etc.) | yes |
+| M4-04 | 2 | Read plan `## What Michael will see` | One row per screenshot; 390 row states single-column metrics, stacked evolution, code scrolls inside itself (scrollWidth diff 0), 'Chose … over … because'; 390 page cross-checked: smoke reports no horizontal scroll | yes |
+| M4-04 | 3 | Viewed M4-card-390.png; curl /card | Selected work first item is 'Agent Harness: overnight software delivery with verification gates' | yes |
+| M4-04 | 4 | Read 'Anything wrong' column | Issues found were fixed (metric strip 2×2, panel top-align) or listed with reason | yes |
+| M4-04 | 5 | check.sh | green | yes |
+| M4-05 | 1 | Read plan `### M4-05` Review | Findings with severity (5 Important, 8 Minor); 38-row fact table; excerpt re-diffed identical; (M4.diff is in scratch, not re-inspected) | yes |
+| M4-05 | 2 | Read Voice section + builtWith; test 'spent'/'attempted' | builtWith credits Claude Code agents; overclaims rewritten; tests pin them (pass) | yes |
+| M4-05 | 3 | Read findings table, jest runs of the new tests (case-study-agent-harness, ProjectDiagram) | Important 1–5 fixed with tests; Iteration.short in data, not component; tests pass. ScrollReveal test not re-run individually but full check green | yes |
+| M4-05 | 4 | Read 'Web Interface Guidelines' paragraph | Heading order, link text, reduced motion checked on /projects/agent-harness; reduced-motion fixed; rest recorded | yes |
+| M4-05 | 5 | grep 'Ready to merge'; smoke; check.sh | 'Ready to merge: yes' at plan line 418; smoke all PASS; check green | yes |
+
+All 28 steps hold.
+
 ### 2026-10-18 21:20 · M4-05 · passes
 
 - Review of M4 (`$HARNESS_SCRATCH/M4.diff`, 1,075 lines). Three agents reviewed it: Opus on code, Opus on facts and voice, Sonnet on the web guidelines in a browser. I checked every finding myself. 5 Important and 8 Minor; the plan's Review section has the 38-row fact table and ends "Ready to merge: yes".
