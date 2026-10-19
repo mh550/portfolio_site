@@ -182,3 +182,12 @@ describe('ProjectDetail without a caseStudy', () => {
     for (const id of CASE_STUDY_IDS) expect(container.querySelector(`#${id}`)).toBeNull();
   });
 });
+
+// M8-02: the ← is decoration, so the links are named "Projects" and "Back to all projects"
+describe('ProjectDetail back links', () => {
+  it.each(['agent-harness', 'ghl-jobtread-integration'])('%s: the arrows are hidden from the accessible name', (slug) => {
+    render(<ProjectDetail project={getProjectBySlug(slug)!} />);
+    expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute('href', '/projects');
+    expect(screen.getByRole('link', { name: 'Back to all projects' })).toHaveAttribute('href', '/projects');
+  });
+});

@@ -11,6 +11,7 @@ import DecisionLog from '@/components/projects/case-study/DecisionLog';
 import IterationTimeline from '@/components/projects/case-study/IterationTimeline';
 import LessonList from '@/components/projects/case-study/LessonList';
 import ProjectLinks from '@/components/projects/case-study/ProjectLinks';
+import { focusRing } from '@/components/focusRing';
 
 const sections = [
   { key: 'problem', heading: 'The Problem' },
@@ -29,9 +30,9 @@ export default function ProjectDetail({ project }: { project: Project }) {
       <ScrollReveal>
         <Link
           href="/projects"
-          className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors mb-10 font-mono tracking-wide"
+          className={`inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors mb-10 font-mono tracking-wide ${focusRing}`}
         >
-          ← Projects
+          <span aria-hidden="true">←</span> Projects
         </Link>
 
         {/* Header */}
@@ -129,9 +130,9 @@ export default function ProjectDetail({ project }: { project: Project }) {
         <div className="mt-16 pt-8 border-t border-white/5">
           <Link
             href="/projects"
-            className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors font-mono tracking-wide"
+            className={`inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors font-mono tracking-wide ${focusRing}`}
           >
-            ← Back to all projects
+            <span aria-hidden="true">←</span> Back to all projects
           </Link>
         </div>
       </ScrollReveal>

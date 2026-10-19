@@ -870,12 +870,14 @@ export function getProjectsByCategory(category: ProjectCategory): Project[] {
   return projects.filter((p) => p.categories.includes(category));
 }
 
+/** A sorted copy of `list` in display order (D12), lowest `order` first. */
+export function sortByOrder(list: readonly Project[] = projects): Project[] {
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
 /** The first `n` featured projects, lowest `order` first. */
 export function getTopProjects(n: number): Project[] {
-  return projects
-    .filter((p) => p.featured)
-    .sort((a, b) => a.order - b.order)
-    .slice(0, Math.max(0, n));
+  return sortByOrder(projects.filter((p) => p.featured)).slice(0, Math.max(0, n));
 }
 
 /** Every anchor id a project's case-study page renders (the five method steps first); [] without one. M7's link test uses it. */

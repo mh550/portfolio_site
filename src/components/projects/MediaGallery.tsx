@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { ProjectMedia } from '@/lib/data';
+import LoopingVideo from '@/components/LoopingVideo';
 
 // Only images are shown uncropped at their own ratio; a video always fills a 4:3 box.
 const isSized = (item: ProjectMedia) =>
@@ -22,16 +23,7 @@ export default function MediaGallery({ media }: { media?: ProjectMedia[] }) {
             className={`${isSized(item) ? '' : 'relative aspect-[4/3] '}overflow-hidden rounded-xl border border-white/10 bg-[var(--color-surface-alt)]`}
           >
             {item.type === 'video' ? (
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 h-full w-full object-cover"
-                aria-label={item.alt}
-              >
-                <source src={item.src} type="video/mp4" />
-              </video>
+              <LoopingVideo src={item.src} label={item.alt} className="absolute inset-0 h-full w-full object-cover" />
             ) : isSized(item) ? (
               <Image
                 src={item.src}

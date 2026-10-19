@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ProjectLink } from '@/lib/data';
 import CaseStudySection from './CaseStudySection';
+import { focusRing } from '@/components/focusRing';
 
 // U+FE0E keeps ● and ▶ as text glyphs (iOS Safari otherwise draws them as colour emoji).
 const GLYPHS: Record<ProjectLink['kind'], string> = { repo: '</>', live: '●\uFE0E', doc: '¶', demo: '▶\uFE0E' };
@@ -11,7 +12,7 @@ const isInternal = (href: string) => /^\/(?![/\\])/.test(href);
 const isSameTab = (href: string) => /^(#|mailto:|tel:)/i.test(href);
 
 const linkClass =
-  'inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/8 bg-[var(--color-surface)] px-4 text-sm font-medium text-[var(--color-accent)] hover:border-[var(--color-accent)]/40 transition-colors';
+  `inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/8 bg-[var(--color-surface)] px-4 text-sm font-medium text-[var(--color-accent)] hover:border-[var(--color-accent)]/40 transition-colors ${focusRing}`;
 
 /** The one link list on a case study. Site paths, #anchors and mailto:/tel: stay in the tab; the rest open a new one. */
 export default function ProjectLinks({ links }: { links: ProjectLink[] }) {

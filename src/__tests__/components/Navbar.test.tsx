@@ -2,10 +2,14 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Navbar from '@/components/Navbar';
 
-// Mock next/navigation
+// Mock next/navigation; a test may set `mockPathname` to render another route
+let mockPathname = '/';
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/',
+  usePathname: () => mockPathname,
 }));
+afterEach(() => {
+  mockPathname = '/';
+});
 
 describe('Navbar', () => {
   it('renders the logo', () => {
@@ -88,3 +92,13 @@ describe('Navbar', () => {
   });
 });
 
+
+describe('Navbar on /approach (M8-02)', () => {
+  it('marks only Approach as the current page, in the desktop list and the mobile menu', async () => {
+    mockPathname = '/approach';
+    render(<Navbar />);
+    await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const current = screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page');
+    expect(current.map((a) => a.textContent)).toEqual(['Approach', 'Approach']);
+  });
+});

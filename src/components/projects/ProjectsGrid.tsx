@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { projects, type ProjectCategory } from '@/lib/data';
+import { motion, useReducedMotion } from 'framer-motion';
+import { projects, sortByOrder, type ProjectCategory } from '@/lib/data';
 import ProjectCard from './ProjectCard';
 import ScrollReveal from '@/components/ScrollReveal';
 
@@ -16,10 +16,11 @@ const FILTERS: { label: string; value: ProjectCategory | 'all' }[] = [
 ];
 
 // Display order across the site (D12), lowest first
-const sorted = [...projects].sort((a, b) => a.order - b.order);
+const sorted = sortByOrder(projects);
 
 export default function ProjectsGrid() {
   const [active, setActive] = useState<ProjectCategory | 'all'>('all');
+  const reduced = useReducedMotion();
 
   const filtered = active === 'all' ? sorted : sorted.filter((p) => p.categories.includes(active));
 
@@ -32,7 +33,8 @@ export default function ProjectsGrid() {
         aria-label="Filter projects by category"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        // Reduced motion: same initial state as the server render (see ScrollReveal), shown at once
+        transition={reduced ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
       >
         {FILTERS.map(({ label, value }) => (
           <button

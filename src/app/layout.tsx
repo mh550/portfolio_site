@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import SiteChrome from '@/components/SiteChrome';
@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   // No images: Next copies og:image to twitter:image, so a page's own og:image reaches twitter too
   twitter: { card: 'summary' },
 };
+
+// Native scrollbars and controls follow the dark theme; the browser bar matches --color-background
+export const viewport: Viewport = { colorScheme: 'dark', themeColor: '#0a0a0f' };
 
 export default function RootLayout({
   children,

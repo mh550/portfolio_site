@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import { profile } from '@/lib/data';
 
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   title: `QR — ${profile.name}`,
   robots: { index: false },
 };
+
+export const viewport: Viewport = { colorScheme: 'light', themeColor: '#ffffff' };
 
 // Michael holds this up on his phone; black on white scans best in a dim room. The QR files come from
 // scripts/make-qr.mjs (`npm run qr`), and qr.test.ts pins them to profile.siteUrl.

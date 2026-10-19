@@ -1,4 +1,5 @@
 import type { CodeSnippet } from '@/lib/data';
+import { focusRing } from '@/components/focusRing';
 
 /** A titled, monospace code excerpt. Intentionally dependency-free — no syntax highlighter. */
 export default function CodeBlock({ snippet }: { snippet: CodeSnippet }) {
@@ -10,8 +11,14 @@ export default function CodeBlock({ snippet }: { snippet: CodeSnippet }) {
           {snippet.language}
         </span>
       </figcaption>
-      <pre className="overflow-x-auto px-4 py-4 text-[13px] leading-relaxed">
-        <code className="font-mono text-[var(--color-foreground)]/90">{snippet.code}</code>
+      {/* Focusable so a keyboard can scroll a long line sideways */}
+      <pre
+        tabIndex={0}
+        role="region"
+        aria-label={snippet.title}
+        className={`overflow-x-auto px-4 py-4 text-[13px] leading-relaxed ${focusRing}`}
+      >
+        <code translate="no" className="font-mono text-[var(--color-foreground)]/90">{snippet.code}</code>
       </pre>
     </figure>
   );

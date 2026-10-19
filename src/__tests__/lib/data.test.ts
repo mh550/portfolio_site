@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
   projects,
+  sortByOrder,
   getProjectBySlug,
   getProjectsByCategory,
   getTopProjects,
@@ -184,5 +185,15 @@ describe('experience data', () => {
     const source = readFileSync(join(process.cwd(), 'src/lib/data/experience.ts'), 'utf8');
     expect(source).not.toContain('7+');
     expect(source).toContain('4+ sources');
+  });
+});
+
+describe('sortByOrder (M8-02)', () => {
+  it('returns a copy sorted by order and leaves the data untouched', () => {
+    const before = projects.map((p) => p.slug);
+    const sorted = sortByOrder();
+    expect(sorted.map((p) => p.order)).toEqual(projects.map((p) => p.order).sort((a, b) => a - b));
+    expect(sorted).not.toBe(projects);
+    expect(projects.map((p) => p.slug)).toEqual(before);
   });
 });

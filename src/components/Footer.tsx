@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { profile } from '@/lib/data';
+import { focusRing } from '@/components/focusRing';
 
 export default function Footer() {
   return (
@@ -14,10 +15,10 @@ export default function Footer() {
               href={profile.github}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors"
+              className={`text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors ${focusRing}`}
             >
               GitHub
+              <span className="sr-only"> (opens in new tab)</span>
             </Link>
           </li>
           <li>
@@ -25,17 +26,16 @@ export default function Footer() {
               href={profile.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors"
+              className={`text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors ${focusRing}`}
             >
               LinkedIn
+              <span className="sr-only"> (opens in new tab)</span>
             </Link>
           </li>
           <li>
             <Link
               href={`mailto:${profile.email}`}
-              aria-label="Email"
-              className="text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors"
+              className={`text-[var(--color-muted)] text-sm hover:text-[var(--color-accent)] transition-colors ${focusRing}`}
             >
               Email
             </Link>

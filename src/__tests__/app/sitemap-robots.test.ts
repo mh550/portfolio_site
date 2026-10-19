@@ -24,12 +24,16 @@ describe('sitemap', () => {
   });
 
   it('excludes /evidence and /card/qr', () => {
-    expect(urls.some((u) => u.endsWith('/evidence'))).toBe(false);
-    expect(urls.some((u) => u.endsWith('/card/qr'))).toBe(false);
+    const paths = urls.map((u) => new URL(u).pathname.replace(/\/$/, ''));
+    expect(paths.filter((p) => p.startsWith('/evidence') || p.startsWith('/card/qr'))).toEqual([]);
   });
 
-  it('every url starts with the site URL', () => {
-    for (const u of urls) expect(u.startsWith(profile.siteUrl)).toBe(true);
+  it('every url starts with the site URL, without a doubled slash', () => {
+    expect(profile.siteUrl.endsWith('/')).toBe(false);
+    for (const u of urls) {
+      expect(u.startsWith(profile.siteUrl)).toBe(true);
+      expect(new URL(u).pathname).not.toContain('//');
+    }
   });
 });
 

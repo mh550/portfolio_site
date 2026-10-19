@@ -57,3 +57,13 @@ describe('MediaGallery', () => {
     expect(container.querySelector('video')!.parentElement).toHaveClass('aspect-[4/3]');
   });
 });
+
+// M8-02: a gallery clip gets LoopingVideo's pause button and honours reduced motion, like the About clip
+describe('MediaGallery video', () => {
+  it('renders a video with a pause/play button and no autoplay attribute', () => {
+    const video: ProjectMedia = { type: 'video', src: '/clip.mp4', alt: 'clip' };
+    const { container } = render(<MediaGallery media={[video]} />);
+    expect(container.querySelector('video')).not.toHaveAttribute('autoplay');
+    expect(screen.getByRole('button', { name: /video/i })).toBeInTheDocument();
+  });
+});

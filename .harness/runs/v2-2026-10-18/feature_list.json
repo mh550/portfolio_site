@@ -551,7 +551,7 @@
         "`node .harness/smoke.mjs` prints PASS for every route at both widths and .harness/check.sh is green; the plan ends with 'Ready to merge: yes'"
       ],
       "after": ["M8-01"],
-      "passes": false
+      "passes": true
     },
 
     {

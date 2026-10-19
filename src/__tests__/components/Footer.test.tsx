@@ -29,3 +29,14 @@ describe('Footer', () => {
     expect(screen.getByText(/Michael Herron/)).toBeInTheDocument();
   });
 });
+
+describe('Footer accessibility (M8-02)', () => {
+  it('names the new-tab links from their text, with "(opens in new tab)"', () => {
+    render(<Footer />);
+    for (const name of ['GitHub', 'LinkedIn']) {
+      const link = screen.getByRole('link', { name: `${name} (opens in new tab)` });
+      expect(link).not.toHaveAttribute('aria-label');
+    }
+    expect(screen.getByRole('link', { name: 'Email' })).not.toHaveAttribute('aria-label');
+  });
+});

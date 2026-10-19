@@ -430,7 +430,7 @@ function FormSimplificationDiagram() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
       <Panel title="Before · 20+ fields in five sections" tone="muted">
         {before.map((section) => (
-          <Node key={section.label} className="opacity-80">
+          <Node key={section.label}>
             {section.label} <Sub>{section.sub}</Sub>
           </Node>
         ))}

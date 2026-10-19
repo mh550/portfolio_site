@@ -129,6 +129,13 @@ don't redo it.
 - **D35** *default* On `/evidence` the High Cascade coaching item ("Mentored 12–18-year-old snowboarders", D9) is
   labelled `Personal`: the item contexts are only MAXX Potential, Builder Clarity and Personal, and coaching is the
   strongest "Communicate and teach" evidence outside those two employers. Dropping it is the alternative. (M7-01.)
+- **D36** *default* `robots.txt` keeps `Disallow: /evidence` and `/card/qr` (M8-01's step) next to the pages'
+  `noindex`, although a disallowed page's `noindex` is never fetched, so a page linked from elsewhere can still be
+  listed as a bare URL. Relying on `noindex` alone (drop the two disallows) is the alternative. (M8-02.)
+- **D37** *default* Three Minor findings of the M8-02 pass are left as they are: the straight `"…"` quotes in the
+  case-study copy (curly quotes touch many tests and copy strings that trace to docs/notes), `text-balance` on the
+  long h1s (they wrap acceptably at 390), and a sitemap test that walks `src/app` for new pages (the fixed route list
+  is checked against the files on disk). Details in `docs/plans/2026-10-18-M8-polish.md`. (M8-02.)
 
 ## Dependencies between milestones
 

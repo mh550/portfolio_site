@@ -18,7 +18,7 @@ describe('MetricStrip columns', () => {
     const { container } = render(<MetricStrip metrics={metrics(3)} />);
     const dl = container.querySelector('dl');
     expect(dl).toHaveClass('grid-cols-1', 'sm:grid-cols-3');
-    expect(dl!.querySelector('p')).not.toHaveClass('text-balance');
+    expect(dl!.querySelector('dt')).not.toHaveClass('text-balance');
   });
 
   // M4-04: four metrics in a three-column grid left the fourth alone on a second row at 1280.
@@ -27,7 +27,7 @@ describe('MetricStrip columns', () => {
     expect(dl).toHaveClass('grid-cols-1', 'sm:grid-cols-2', 'md:grid-cols-4');
     expect(dl).not.toHaveClass('sm:grid-cols-3');
     expect(dl?.children).toHaveLength(4);
-    for (const label of dl!.querySelectorAll('p')) expect(label).toHaveClass('text-balance');
+    for (const label of dl!.querySelectorAll('dt')) expect(label).toHaveClass('text-balance');
   });
 
   // M5-04: at 1280 a phrase value ("Trash, not delete") in a quarter-width card wrapped to three lines
@@ -51,5 +51,27 @@ describe('MetricStrip columns', () => {
       render(<MetricStrip metrics={[...metrics(3), { value: last, label: 'last' }]} />).container.querySelector('dl');
     expect(strip('1234567')).toHaveClass('md:grid-cols-4');
     expect(strip('12345678')).not.toHaveClass('md:grid-cols-4');
+  });
+});
+
+// M8-02: the label was an sr-only <dt> plus a visible <p>, so screen readers read it twice (and <p> is not
+// allowed directly in a <dl> group).
+describe('MetricStrip semantics', () => {
+  it('renders each label once, as the visible <dt>, and only dt/dd in each group', () => {
+    const { container } = render(<MetricStrip metrics={metrics(3)} />);
+    for (const group of container.querySelectorAll('dl > div')) {
+      expect(Array.from(group.children).map((c) => c.tagName)).toEqual(['DT', 'DD']);
+      expect(group.querySelector('dt')).not.toHaveClass('sr-only');
+    }
+    expect(container.textContent!.match(/metric 1/g)).toHaveLength(1);
+  });
+
+  // jsdom has no layout: pin the classes that show the value above its label and keep values top-aligned in a row
+  // where one label wraps (in column-reverse, justify-end packs toward the top)
+  it('shows the value above the label, packed to the top of the card', () => {
+    const { container } = render(<MetricStrip metrics={metrics(3)} />);
+    for (const group of container.querySelectorAll('dl > div')) {
+      expect(group).toHaveClass('flex', 'flex-col-reverse', 'justify-end');
+    }
   });
 });

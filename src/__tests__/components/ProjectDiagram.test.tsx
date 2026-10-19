@@ -287,3 +287,14 @@ describe('hit-list diagrams publish nothing private (M6-03, D18)', () => {
     expect(getByRole('img').getAttribute('aria-label')).not.toContain(banned);
   });
 });
+
+// M8-02: opacity-80 on a "Before" node dropped its 10 px muted sub-label to 3.9:1 (AA needs 4.5:1).
+describe('ProjectDiagram contrast', () => {
+  it.each(KEYS)('%s never dims muted text with an opacity class', (key) => {
+    const { container } = render(<ProjectDiagram diagram={key} />);
+    const dimmed = Array.from(container.querySelectorAll('[class*="opacity-"]')).filter((el) =>
+      el.querySelector('[class*="--color-muted"]')
+    );
+    expect(dimmed).toHaveLength(0);
+  });
+});

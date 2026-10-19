@@ -32,3 +32,16 @@ describe('root metadata', () => {
     expect(metadata.twitter).toEqual({ card: 'summary' });
   });
 });
+
+// M8-02: native scrollbars and form controls follow the dark theme; the browser bar matches the background.
+describe('root viewport', () => {
+  it('declares the dark colour scheme and the background as theme colour', async () => {
+    const { viewport } = await import('@/app/layout');
+    expect(viewport).toEqual({ colorScheme: 'dark', themeColor: '#0a0a0f' });
+  });
+
+  it('/card/qr is black on white, so it declares the light scheme', async () => {
+    const { viewport } = await import('@/app/card/qr/page');
+    expect(viewport).toEqual({ colorScheme: 'light', themeColor: '#ffffff' });
+  });
+});

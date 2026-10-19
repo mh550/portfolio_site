@@ -9,6 +9,20 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 11:00 · M8-02 · passes
+
+- Ran the `web-design-guidelines` pass (fresh `command.md`, Opus reviewer) over /card, /card/qr, /approach, /evidence and the three case studies. Two Opus reviews read `$HARNESS_SCRATCH/M8.diff`, the second after my fixes. Findings and outcomes are in the new `docs/plans/2026-10-18-M8-polish.md`, which ends "Ready to merge: yes". 0 Critical. 5 Important, all fixed:
+  - root `viewport` with dark `colorScheme` and `themeColor` (light on /card/qr);
+  - hit-list diagram muted sub-labels were 3.9:1, opacity removed;
+  - `MetricStrip` read each label twice: now a visible `<dt>`, using `flex-col-reverse justify-end`;
+  - that new layout first knocked metric values out of line (`justify-end` fixes it);
+  - a reduced-motion hydration mismatch on the /projects filter bar.
+- Minor fixes: `focusRing` on Navbar, Footer, skip link, back links, ProjectLinks and the CodeBlock `<pre>`. The ← is aria-hidden. Footer drops its aria-labels and gains sr-only "(opens in new tab)". Gallery videos use `LoopingVideo`. One `sortByOrder()` replaces three sorts. The sitemap tests are stricter, and a Navbar test covers `aria-current` on /approach. Left as defaults: D36 (robots disallow next to noindex) and D37 (curly quotes, `text-balance`, sitemap route walk).
+- New `src/__tests__/pages/a11y-new-pages.test.tsx` covers the seven pages: one h1 and no skipped levels; a focus-visible class on every link and button, the chrome included; no vague link text; AA contrast read from `globals.css`; and every `<motion.*>` file calls `useReducedMotion`. Every fix had a test that failed first. Tests 562 → 611 (52 → 54 suites).
+- The `project-page-unchanged` snapshots were updated on purpose: the classic pages gain the focus ring, the hidden arrow, the new MetricStrip markup and CodeBlock attributes. A word diff shows no text change.
+- Verified: `lib/check.sh` green (lint, 611 jest, build), smoke 38/38 PASS. A Sonnet browser check of 8 pages at 390/1280 found 0 console errors and 0 overflow. 60 Tabs gave every stop a 2 px outline, starting with Skip to content. Metric values sit 21 px from the card top on every card (dd above dt), and reduced motion gives opacity 1 with 0 errors. I looked at the 390 metric strip and the hit-list "Before" panel.
+- Next session: M8 is done. Questions for Michael (no answer needed): D36, keep `Disallow` for /evidence and /card/qr, or rely on noindex alone? Proposed changes: none.
+
 ### 2026-10-19 09:30 · M8-01 · passes
 
 - Navbar: Approach sits between Projects and Experience, in the desktop list and the mobile menu (`src/components/Navbar.tsx`). `/projects` now sorts cards by `order` (`ProjectsGrid.tsx`). The filters already included Systems and Process, and case studies without a thumbnail already showed their first metric; both are now pinned by tests. New `src/app/sitemap.ts` (the 8 static routes plus 9 projects, built from `profile.siteUrl`, without `/evidence` and `/card/qr`) and `src/app/robots.ts` (disallows both, points to `/sitemap.xml`). The CLAUDE.md routes, components and test count are updated. Tests went from 552 to 562 (51 → 52 suites; new `src/__tests__/app/sitemap-robots.test.ts`). I wrote the tests first and watched them fail: 3 Navbar, 1 order, 1 missing module.

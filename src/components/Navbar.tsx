@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { focusRing } from './focusRing';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -24,7 +25,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="font-mono text-sm font-bold tracking-widest text-[var(--color-accent)] uppercase"
+          className={`font-mono text-sm font-bold tracking-widest text-[var(--color-accent)] uppercase ${focusRing}`}
         >
           MH
         </Link>
@@ -36,7 +37,7 @@ export default function Navbar() {
               <Link
                 href={href}
                 aria-current={pathname === href ? 'page' : undefined}
-                className={`text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${
+                className={`text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${focusRing} ${
                   pathname === href
                     ? 'text-[var(--color-accent)]'
                     : 'text-[var(--color-muted)]'
@@ -52,7 +53,7 @@ export default function Navbar() {
         <button
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className={`md:hidden flex flex-col gap-1.5 p-2 ${focusRing}`}
           onClick={() => setMenuOpen((o) => !o)}
         >
           <span
@@ -83,7 +84,7 @@ export default function Navbar() {
                   href={href}
                   aria-current={pathname === href ? 'page' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`block text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${
+                  className={`block text-sm font-medium tracking-wide transition-colors hover:text-[var(--color-accent)] ${focusRing} ${
                     pathname === href
                       ? 'text-[var(--color-accent)]'
                       : 'text-[var(--color-foreground)]'
