@@ -273,11 +273,31 @@ M7-03:
 
 ## What Michael will see
 
+M7-04, 2026-10-19. Full-page captures from the dev server (port 7800) with `reducedMotion: 'reduce'`, taken after
+scrolling top to bottom and back to the top (so the fixed Navbar sits at the top), saved as 256-colour palette PNGs
+with sharp. All four are **full pages** under 400 KB, so no top-3000 crop was needed. The measurements come from the
+DOM in the same pass (script: `$HARNESS_SCRATCH/m7-shots.mjs`): 0 console or page errors,
+`document.documentElement.scrollWidth − innerWidth` = **0** at 390 and at 1280 on both pages, no element in `<main>`
+below opacity 1, no clipped text. The round "N" at the left is the Next dev indicator, not on the live site.
+
 | Page · width | What is on screen | Anything wrong |
 |---|---|---|
-| `/approach` · 390 | | |
-| `/approach` · 1280 | | |
-| `/evidence` · 390 | | |
-| `/evidence` · 1280 | | |
+| `/approach` · 390 (`docs/screenshots/v2/M7-approach-390.png`, 191 KB, 390 × 5815, full page) | Hamburger navbar; eyebrow "APPROACH"; h1 "How I work"; the two intro sentences. **Method strip** stacked, left-aligned: Diagnose, Decide, Build, Verify, Simplify, each with its line visible (`showLines`), no arrows. **Six principles** as h2s in order (Diagnose before building · Make decisions explicit · Fakes mirror reality · Verify what the human will see · Simplify after use · Automate the bookkeeping, keep judgment human), each with its summary and 3 examples; links per principle 3 · 3 · 3 · 3 · 2 · 3 = 17 (Simplify's third, the D14 "chose not to build" example, is text only, as planned). Link names "<project title>: <section>" wrap onto two lines under the example. **Closing line** "This site update was built that way, one verified milestone at a time." with "Read the agent harness case study" → `/projects/agent-harness`; footer | Nothing to fix |
+| `/approach` · 1280 (`M7-approach-1280.png`, 213 KB, 1280 × 3754) | Full navbar (no Approach link yet, M8 adds it); the same content in a 768 px column; the method strip in one row of five with → between the first four and the lines under each label; six principles, 17 links, each link name on one line; closing line and link | Nothing to fix |
+| `/evidence` · 390 (`M7-evidence-390.png`, 111 KB, 390 × 3648) | Eyebrow "EVIDENCE"; h1 "Evidence of practice — Michael Herron" on three lines; the reading note; the D7 note in muted text. **Six competencies** as h2s in order, items 3 · 4 · 4 · 4 · 3 · 3 = 21, every item a link under its context label (MAXX POTENTIAL first in all six, then BUILDER CLARITY, then PERSONAL); one external link (`https://github.com/mh550/portfolio_site`) ending in ↗; footer. `meta robots` = `noindex`; 0 Navbar links to `/evidence` | **Fixed in M7-04:** the ↗ after "…that I review and merge" wrapped onto a line by itself. The arrow now follows a no-break space (U+00A0), so it stays with "merge" (new test in `evidence.test.tsx`; re-captured, it sits on the "merge" line) |
+| `/evidence` · 1280 (`M7-evidence-1280.png`, 131 KB, 1280 × 2784) | Full navbar without Evidence; h1 on two lines; the two notes; six competencies with 21 linked items, most on one or two lines; the ↗ on the portfolio_site line | Nothing to fix |
+
+**Anchor landings.** Each hashed example link from `/approach`, opened with Playwright `page.goto` (from
+`about:blank`, so every one is a full load), returned 200 and `document.getElementById(hash)` found the element:
+
+| Link (from `/approach`) | Status | Element found |
+|---|---|---|
+| `/projects/agent-harness#diagnose` | 200 | `LI#diagnose` "01 Diagnose" |
+| `/projects/hit-list#decisions` | 200 | `SECTION#decisions` "Key Decisions" |
+| `/projects/home-media-server#lessons` | 200 | `SECTION#lessons` "What Broke" |
+
+The other 8 hashed links on `/approach` (home-media-server#diagnose, agent-harness#decisions,
+home-media-server#decisions, agent-harness#lessons, hit-list#lessons, agent-harness#verify, home-media-server#simplify,
+hit-list#simplify) and the 8 on `/evidence` (adding agent-harness#iterations) passed the same check: 19 of 19.
 
 ## Review

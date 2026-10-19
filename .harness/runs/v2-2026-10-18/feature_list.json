@@ -513,7 +513,7 @@
         ".harness/check.sh is green"
       ],
       "after": ["M7-03"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "M7-05", "milestone": "M7", "kind": "review", "model": "opus",

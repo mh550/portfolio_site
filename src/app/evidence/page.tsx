@@ -21,8 +21,8 @@ function ItemLink({ item }: { item: EvidenceItem }) {
       <a href={item.href} target="_blank" rel="noopener noreferrer" className={LINK}>
         {item.text}
         <span className="sr-only"> (opens in a new tab)</span>
-        {/* U+FE0E: draw the arrow as text, not as an emoji tile. */}
-        <span aria-hidden="true"> {'↗︎'}</span>
+        {/* U+00A0 keeps the arrow on the last word's line; U+FE0E draws it as text, not as an emoji tile. */}
+        <span aria-hidden="true">{'\u00A0↗\uFE0E'}</span>
       </a>
     );
   }

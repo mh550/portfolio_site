@@ -63,6 +63,15 @@ describe('EvidencePage', () => {
     }
   });
 
+  it('keeps the ↗ on the same line as the last word (no-break space)', () => {
+    render(<EvidencePage />);
+    const external = screen.getAllByRole('link').filter((a) => a.getAttribute('href')?.startsWith('https://'));
+    for (const a of external) {
+      const arrow = a.querySelector('[aria-hidden="true"]');
+      expect(arrow?.textContent).toMatch(/^ ↗/);
+    }
+  });
+
   it('drops the items of a missing project and still renders six sections', () => {
     withoutProject('hit-list', () => {
       render(<EvidencePage />);

@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 01:15 · M7-04 · passes
+
+- Four screenshots in `docs/screenshots/v2/`: `M7-approach-390.png` (191 KB, 390 × 5815), `M7-approach-1280.png` (213 KB), `M7-evidence-390.png` (111 KB), `M7-evidence-1280.png` (131 KB). All are full pages, so none needed the top-3000 crop. They were taken after scrolling back to the top, so the Navbar sits at the top. The M7 plan's "What Michael will see" table now has four rows and an anchor-landing table.
+- Fixed one thing (test first): on `/evidence` at 390 the ↗ after "…that I review and merge" wrapped onto a line by itself. It now follows a no-break space (`src/app/evidence/page.tsx`); there is a new test in `evidence.test.tsx`. Tests 507 → 508 (50 suites).
+- Verified: `$HARNESS_SCRATCH/m7-shots.mjs` on :7800 found 0 console errors, scrollWidth − innerWidth = 0 at 390 and 1280 on both pages, nothing in `<main>` below opacity 1, and no clipped text. 19 of 19 hashed links (11 from /approach, 8 from /evidence) returned 200 via `page.goto`, and `getElementById(hash)` found each one. Approach has 6 principles with 3·3·3·3·2·3 links (the D14 example is text only); evidence has 6 competencies with 3·4·4·4·3·3 items. I looked at every screenshot. Smoke on /approach and /evidence: 4/4 PASS. `.harness/check.sh` exits 0 (508 jest), and `lib/check.sh` is green.
+- Next session (M7-05): the M7 diff now includes this arrow fix. I did not run a separate review; M7-05 is the review.
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-19 00:55 · M7-03 · passes
 
 - `/evidence` is live on the branch (noindex, not in the Navbar). New `src/lib/data/competencies.ts`: `competencies` (6 × 3/4/4/4/3/3 = 21 items, with a MAXX Potential item in all 6), `evidenceIntro` and `resolvedItems` (mirrors `resolvedExamples`). The copy is the plan's word for word (65/65 strings, checked by script). New `src/app/evidence/page.tsx`: repo links open in a new tab with sr-only "(opens in a new tab)". New `docs/notes/maxx-level-4.md` (rubric stub; remapping = editing `competencies.ts` only). `/evidence` added to `smoke-routes.txt` and the CLAUDE.md routes table. Tests 485 → 507 (48 → 50 suites): `competencies-links.test.ts`, `evidence.test.tsx`, and a Navbar no-`/evidence` test.
