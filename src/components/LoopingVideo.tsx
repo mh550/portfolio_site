@@ -48,7 +48,7 @@ export default function LoopingVideo({ src, label, className }: LoopingVideoProp
         type="button"
         onClick={toggle}
         aria-label={playing ? 'Pause video' : 'Play video'}
-        className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-sm text-white transition-colors hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        className="absolute bottom-2 right-2 flex h-11 w-11 print:hidden items-center justify-center rounded-full bg-black/60 text-sm text-white transition-colors hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
       >
         <span aria-hidden="true">{playing ? '❚❚' : '▶'}</span>
       </button>

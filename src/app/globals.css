@@ -48,3 +48,80 @@ body {
 .border-accent {
   border-color: var(--color-accent);
 }
+
+/* Print (S3-01): black on white for a case study handed to a reviewer, without the site chrome, the hero canvas or
+   clipped code. Decorative pieces opt out with Tailwind's `print:hidden`. */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* The screen theme's dark surfaces, light text and glows */
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    border-color: #bbb !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* After the rule above and more specific than `*`, so the page itself stays white */
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  /* Room the fixed Navbar needed on screen */
+  #content {
+    padding-top: 0 !important;
+  }
+
+  /* ScrollReveal starts at opacity 0 until scrolled into view; on paper everything is in view */
+  [data-scroll-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  /* A printout can't be clicked, so external links spell out where they go */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+  }
+
+  pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    max-height: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  figure,
+  img,
+  video {
+    break-inside: avoid;
+  }
+
+  /* A long code excerpt would jump to the next page and leave a blank gap */
+  figure:has(pre) {
+    break-inside: auto;
+  }
+}

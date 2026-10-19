@@ -55,6 +55,12 @@ afterEach(() => {
 });
 
 describe('NodeGraph', () => {
+  it('is hidden in print (S3-01)', () => {
+    stubMatchMedia(false);
+    const { container } = render(<NodeGraph />);
+    expect(container.querySelector('canvas')).toHaveClass('print:hidden');
+  });
+
   it('animates with requestAnimationFrame by default', () => {
     stubMatchMedia(false);
     render(<NodeGraph />);

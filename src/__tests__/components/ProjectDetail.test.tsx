@@ -190,4 +190,11 @@ describe('ProjectDetail back links', () => {
     expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute('href', '/projects');
     expect(screen.getByRole('link', { name: 'Back to all projects' })).toHaveAttribute('href', '/projects');
   });
+
+  // S3-01: on paper they go nowhere; the bottom one's wrapper goes too, or its rule and top margin print empty
+  it.each(['agent-harness', 'ghl-jobtread-integration'])('%s: both are hidden in print', (slug) => {
+    render(<ProjectDetail project={getProjectBySlug(slug)!} />);
+    expect(screen.getByRole('link', { name: 'Projects' })).toHaveClass('print:hidden');
+    expect(screen.getByRole('link', { name: 'Back to all projects' }).parentElement).toHaveClass('print:hidden', 'border-t');
+  });
 });

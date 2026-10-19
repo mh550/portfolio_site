@@ -117,7 +117,7 @@ export default function FloatingLogos() {
   const reduced = useReducedMotion();
 
   return (
-    <div aria-hidden="true" className="absolute inset-0 hidden xl:block pointer-events-none overflow-hidden">
+    <div aria-hidden="true" className="absolute inset-0 hidden xl:block print:hidden pointer-events-none overflow-hidden">
       {logos.map((logo) => (
         // Outer div: continuous y float only (none with reduced motion)
         <motion.div

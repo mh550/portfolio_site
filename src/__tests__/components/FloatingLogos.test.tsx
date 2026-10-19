@@ -48,6 +48,11 @@ describe('FloatingLogos', () => {
     expect(wrapper).toHaveClass('hidden', 'xl:block');
   });
 
+  it('is hidden in print (S3-01)', () => {
+    const { container } = render(<FloatingLogos />);
+    expect(container.firstChild).toHaveClass('print:hidden');
+  });
+
   it('floats every logo when motion is allowed', () => {
     render(<FloatingLogos />);
     expect(mockAnimate.filter(Boolean)).toHaveLength(9);

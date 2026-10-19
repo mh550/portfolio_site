@@ -13,6 +13,12 @@ describe('ScrollReveal — normal motion', () => {
     expect(screen.getByText('Content').parentElement).toHaveClass('my-class');
   });
 
+  // globals.css's print block forces [data-scroll-reveal] visible: nothing is scrolled into view on paper (S3-01)
+  it('marks its wrapper for the print stylesheet', () => {
+    render(<ScrollReveal><p>Print</p></ScrollReveal>);
+    expect(screen.getByText('Print').parentElement).toHaveAttribute('data-scroll-reveal');
+  });
+
   // A uniform negative margin also insets the observer's left and right edges, so content within 80 px of a side
   // (a narrow card or badge) would never count as in view and stay at opacity 0 (the TimelineLine bug, M2-05)
   it('reveals with a vertical-only viewport margin', async () => {
@@ -67,6 +73,7 @@ describe('ScrollReveal — reduced motion', () => {
     const { default: SR } = await import('@/components/ScrollReveal');
     render(<SR><p data-testid="child">Reduced</p></SR>);
     expect(screen.getByTestId('child').parentElement).toHaveAttribute('data-motion');
+    expect(seen[0]['data-scroll-reveal']).toBe(true);
     expect(seen[0].initial).toEqual({ opacity: 0, y: 40, x: 0 });
     expect(seen[0].animate).toEqual({ opacity: 1, y: 0, x: 0 });
     expect(seen[0].transition).toEqual({ duration: 0 });

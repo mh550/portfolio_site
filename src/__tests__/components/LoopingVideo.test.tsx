@@ -53,6 +53,13 @@ describe('LoopingVideo', () => {
     expect(container.querySelector('source')).toHaveAttribute('src', '/videos/clip.mp4');
   });
 
+  // On paper the clip is a still frame: the pause/play button would print as a stray circle (S3-01)
+  it('hides the button in print, not the video', () => {
+    const { container } = render(<LoopingVideo src="/videos/clip.mp4" label="A clip" />);
+    expect(screen.getByRole('button')).toHaveClass('print:hidden');
+    expect(container.querySelector('video')).not.toHaveClass('print:hidden');
+  });
+
   // WCAG 2.2.2: anything that moves for more than 5 s needs a way to pause it
   it('pauses and resumes from a button', async () => {
     const user = userEvent.setup();

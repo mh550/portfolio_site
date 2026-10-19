@@ -34,7 +34,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (631 tests, 56 suites after S2-01)
+npm test             # Jest unit/integration tests (643 tests, 57 suites after S3-01)
 npm run test:watch   # watch mode
 ```
 
@@ -73,7 +73,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 ### Components
 - `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Approach, Experience, Contact) with active link highlighting, mobile hamburger (`"use client"`)
 - `components/Footer.tsx` — social links
-- `components/ScrollReveal.tsx` — reusable `whileInView` wrapper; skips animation when `prefers-reduced-motion` is set
+- `components/ScrollReveal.tsx` — reusable `whileInView` wrapper (`data-scroll-reveal`, forced visible in print); skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos (hidden below `xl`, D33) and NodeGraph honour reduced motion
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
@@ -92,6 +92,10 @@ Single source of truth for all page content — no content is hardcoded in compo
 
 ### Pages
 All pages are Server Components (no `"use client"`) except where noted. They import from `lib/data` and render `ScrollReveal` + page-specific markup.
+
+### Print
+`globals.css` ends with one `@media print` block (D40): black on white, `nav`/`footer` hidden, `pre` wrapped. Hide
+anything else decorative with Tailwind's `print:hidden`; `src/__tests__/lib/print-styles.test.ts` pins the block.
 
 ### Content guard
 `src/__tests__/lib/content-guard.test.ts` walks `src/` and `public/` and fails on tailnet hostnames, CGNAT IPs, ntfy URLs, US phone numbers, private repo links, TODO/placeholder text and secret-looking assignments. Fix the content, never the patterns.
@@ -137,6 +141,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.
+- Print: `node .harness/print-check.mjs [base] [path] [out.png]` emulates print media (white body, no visible
+  nav/footer/canvas, `pre` wrapped, links underlined) and saves a full-page capture; exit 1 on a failure.
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).
 
 ## Decisions and plans

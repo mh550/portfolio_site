@@ -30,7 +30,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
       <ScrollReveal>
         <Link
           href="/projects"
-          className={`inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors mb-10 font-mono tracking-wide ${focusRing}`}
+          className={`inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors print:hidden mb-10 font-mono tracking-wide ${focusRing}`}
         >
           <span aria-hidden="true">←</span> Projects
         </Link>
@@ -127,7 +127,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
 
       {/* Back footer */}
       <ScrollReveal delay={0.1}>
-        <div className="mt-16 pt-8 border-t border-white/5">
+        <div className="mt-16 pt-8 border-t border-white/5 print:hidden">
           <Link
             href="/projects"
             className={`inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors font-mono tracking-wide ${focusRing}`}

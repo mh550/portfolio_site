@@ -28,7 +28,7 @@ export default function ScrollReveal({
   // motion the client reveals it at once instead of swapping in a plain div (which kept the server's opacity: 0).
   if (reduced) {
     return (
-      <motion.div className={className} initial={initial} animate={shown} transition={{ duration: 0 }}>
+      <motion.div data-scroll-reveal className={className} initial={initial} animate={shown} transition={{ duration: 0 }}>
         {children}
       </motion.div>
     );
@@ -36,6 +36,7 @@ export default function ScrollReveal({
 
   return (
     <motion.div
+      data-scroll-reveal
       className={className}
       initial={initial}
       whileInView={shown}

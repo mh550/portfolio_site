@@ -9,6 +9,14 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 02:10 · S3-01 · passes
+
+- One `@media print` block at the end of `src/app/globals.css` (D40 *default*): white page and black text on every element (`*` with `!important`, then `html, body` white after it), borders #bbb, `nav`/`footer` hidden, `#content` top padding dropped, `pre` `pre-wrap` / `overflow: visible` / `max-height: none`, links underlined with external URLs printed after them, `[data-scroll-reveal]` forced to opacity 1 (framer leaves unrevealed sections at opacity 0, which printed blank). `print:hidden` on NodeGraph, FloatingLogos, the LoopingVideo button and both project back links (the bottom one's wrapper). ScrollReveal now adds `data-scroll-reveal`.
+- Tests 631 → 643 (56 → 57 suites): new `src/__tests__/lib/print-styles.test.ts` (parses the print block: white/black, `nav`/`footer`, `pre`, `a`, reveal rule) plus render tests in the NodeGraph, FloatingLogos, LoopingVideo, ScrollReveal and ProjectDetail suites. Removing any one marker turns its test red. `project-page-unchanged` snapshots updated on purpose: the only diff is ` data-scroll-reveal="true"` and ` print:hidden` (checked by stripping both and diffing against the old snapshot).
+- Verified: new `node .harness/print-check.mjs` (print media, 700 px) on /projects/agent-harness → body rgb(255, 255, 255), 0 visible nav/footer/canvas, 15 reveals all opacity 1, `pre` pre-wrap and not clipped, 0 non-black text, PASS; `/` PASS too. `docs/screenshots/v2/S3-print-agent-harness.png` is that capture reduced to 16 grays: 232 KB (720 KB raw). `lib/check.sh` green; smoke 38/38 PASS. Opus review: 0 Critical; I fixed the dead `html, body` white, the text-match tests and the empty bottom rule. Not done: highlighted diagram nodes print like plain ones; mailto links don't print their address.
+- Next session must know: the Turbopack dev cache (`.next/dev`) kept serving the old globals.css even after a restart. Fix: kill the `next-server` on the port (the init's pid file only holds `npx`, so the child survives and the new server dies with EADDRINUSE), `rm -rf .next/dev`, rerun `.harness/init.sh`.
+- Questions for Michael: none (D40 is reversible). Proposed changes: in step 2, a full-page PNG of a case study is about 700 KB at any width, so "under 400 KB" needs the 16-gray reduction; say so in the step. In `.harness/init.sh`, kill the process listening on the port rather than the `npx` pid.
+
 ### 2026-10-19 verify S2
 
 | Feature | Step | What you ran or read | What you saw | Holds |

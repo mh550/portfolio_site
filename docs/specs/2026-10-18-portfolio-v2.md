@@ -146,6 +146,13 @@ don't redo it.
   unchanged until Michael types a line. When set it renders as one `<p>` inside the Selected work section, above its
   heading, with an accent left rule (`src/components/card/ConferenceNote.tsx`); whitespace-only counts as empty.
   (S2-01.)
+- **D40** *default* The print stylesheet (Stretch 3) is one `@media print` block in `src/app/globals.css` that
+  applies to every page, not only case studies: white page, black text on every element, borders #bbb, `nav` and
+  `footer` hidden, `pre` wrapped and unclipped, links underlined with external URLs spelled out after them
+  (`a[href^="http"]::after`), and ScrollReveal content (`data-scroll-reveal`) forced visible since nothing is scrolled
+  into view on paper. NodeGraph, FloatingLogos, the LoopingVideo button and the project page's back links use
+  `print:hidden`. Diagrams print as their bordered boxes (highlighted nodes look like plain ones); there is no separate light
+  palette for them. A figure with code may break across pages. (S3-01.)
 
 ## Dependencies between milestones
 
