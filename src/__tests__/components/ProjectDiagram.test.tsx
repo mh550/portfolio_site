@@ -1,5 +1,5 @@
 import { render, within } from '@testing-library/react';
-import ProjectDiagram, { HARNESS_EVOLUTION_WHY } from '@/components/projects/diagrams';
+import ProjectDiagram from '@/components/projects/diagrams';
 import { getProjectBySlug, type DiagramKey } from '@/lib/data';
 
 const KEYS: DiagramKey[] = [
@@ -57,13 +57,7 @@ describe('agent-harness architecture diagram', () => {
 describe('harness-evolution diagram', () => {
   const iterations = getProjectBySlug('agent-harness')!.caseStudy!.iterations!;
 
-  it('has one short "why it changed" line per iteration', () => {
-    expect(HARNESS_EVOLUTION_WHY).toHaveLength(iterations.length);
-    expect(HARNESS_EVOLUTION_WHY).toHaveLength(6);
-    for (const why of HARNESS_EVOLUTION_WHY) expect(why.split(/\s+/).length).toBeLessThanOrEqual(8);
-  });
-
-  it('shows the six stages in order, each with its when and why line', () => {
+  it('shows the six stages in DOM order, each with its when and its short line from the data', () => {
     const { getByRole } = render(<ProjectDiagram diagram="harness-evolution" />);
     const stages = within(getByRole('img')).getAllByRole('listitem');
     expect(stages).toHaveLength(6);
@@ -72,8 +66,17 @@ describe('harness-evolution diagram', () => {
       const text = stage.textContent!;
       expect(text.toLowerCase()).toContain(expected[i]);
       expect(text).toContain(iterations[i].when);
-      expect(text).toContain(HARNESS_EVOLUTION_WHY[i]);
+      expect(text).toContain(iterations[i].short);
     });
+  });
+
+  it('builds its aria-label from the same data, so the label and the cards cannot drift', () => {
+    const { getByRole } = render(<ProjectDiagram diagram="harness-evolution" />);
+    const label = getByRole('img').getAttribute('aria-label')!;
+    for (const it of iterations) {
+      expect(label).toContain(it.label);
+      expect(label).toContain(`${it.label}. ${it.short}.`);
+    }
   });
 
   it('stacks in one column and becomes a six-column row from md', () => {

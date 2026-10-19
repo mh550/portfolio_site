@@ -28,12 +28,26 @@ describe('ScrollReveal — reduced motion', () => {
     jest.resetModules();
   });
 
-  it('renders children without motion wrapper when reduced motion is preferred', async () => {
+  // The server can't know the preference (useReducedMotion is null there), so it renders the hidden initial state.
+  // The client must keep the same motion.div and reveal it at once; a plain div here left the server's inline
+  // opacity:0 in place (React doesn't patch attributes on hydration), hiding the page from reduced-motion users.
+  it('keeps the motion wrapper and reveals it instantly when reduced motion is preferred', async () => {
+    const seen: Record<string, unknown>[] = [];
+    jest.doMock('framer-motion', () => ({
+      ...jest.requireActual<object>('@/__mocks__/framer-motion'),
+      useReducedMotion: () => true,
+      motion: {
+        div: ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => {
+          seen.push(props);
+          return <div data-motion="">{children}</div>;
+        },
+      },
+    }));
     const { default: SR } = await import('@/components/ScrollReveal');
     render(<SR><p data-testid="child">Reduced</p></SR>);
-    const child = screen.getByTestId('child');
-    expect(child).toBeInTheDocument();
-    // When reduced, rendered as plain div, not a motion.div
-    expect(child.parentElement?.tagName).toBe('DIV');
+    expect(screen.getByTestId('child').parentElement).toHaveAttribute('data-motion');
+    expect(seen[0].initial).toEqual({ opacity: 0, y: 40, x: 0 });
+    expect(seen[0].animate).toEqual({ opacity: 1, y: 0, x: 0 });
+    expect(seen[0].transition).toEqual({ duration: 0 });
   });
 });

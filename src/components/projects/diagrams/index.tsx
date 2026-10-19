@@ -270,18 +270,15 @@ function AgentHarnessDiagram() {
 /* Harness evolution — six stages, each changed by what broke before   */
 /* ------------------------------------------------------------------ */
 
-/** Diagram-only "why it changed" lines (≤ 8 words), one per agent-harness iteration, in order. */
-export const HARNESS_EVOLUTION_WHY: readonly string[] = [
-  'Needed me at the keyboard',
-  'Hit usage and context limits',
-  'Blocked by the permission classifier',
-  'One guard trip stopped the night',
-  'Merges still needed a human',
-  'Current: it built this update',
-];
+/** The stages are the agent-harness entry's iterations; each card shows its `when`, `label` and `short` line. */
+function harnessIterations() {
+  const iterations = getProjectBySlug('agent-harness')?.caseStudy?.iterations;
+  if (!iterations?.length) throw new Error('harness-evolution diagram: the agent-harness entry has no iterations');
+  return iterations;
+}
 
 function HarnessEvolutionDiagram() {
-  const iterations = getProjectBySlug('agent-harness')!.caseStudy!.iterations!;
+  const iterations = harnessIterations();
   return (
     <ol className="grid grid-cols-1 gap-3 md:grid-cols-6">
       {iterations.map((it, i) => (
@@ -289,7 +286,7 @@ function HarnessEvolutionDiagram() {
           <Node accent={i === iterations.length - 1} className="flex-1 md:px-1.5">
             <span className="block font-mono text-[10px] text-[var(--color-muted)]">{it.when}</span>
             <span className="my-1 block font-bold md:text-[13px]">{it.label}</span>
-            <Sub>{HARNESS_EVOLUTION_WHY[i]}</Sub>
+            <Sub>{it.short}</Sub>
           </Node>
           {i < iterations.length - 1 && (
             <div className="md:hidden">
@@ -341,8 +338,9 @@ const LABELS: Record<DiagramKey, string> = {
     'Events on a source Google Calendar pass through an idempotent, event-driven sync engine to a mirror calendar that blocks the same time as unavailable.',
   'agent-harness':
     'The harness CLI starts a deterministic driver. The driver runs an initializer session that turns the spec into a feature list, then one fresh coding session per feature. Every feature passes a suite gate; every finished milestone gets an independent verify session; a verified milestone is tagged and opened as a PR into main, and merges only if the merged tree is the verified tree. Around the run: an INBOX file for steering from a phone, push notifications, one usage-limit marker for the whole machine, and a queue with a ledger.',
-  'harness-evolution':
-    'Six stages, September to October 17, 2026: long interactive sessions, which needed me at the keyboard; a runbook and an overnight loop, which hit usage and context limits; an orchestrator with subagents, blocked by the permission classifier; harness v1, where one guard trip stopped the night; harness v2, where merges still needed a human; and harness v3, the current version, which built this site update.',
+  'harness-evolution': `Six stages, each changed by what broke in the one before. ${harnessIterations()
+    .map((it) => `${it.when}, ${it.label}. ${it.short}.`)
+    .join(' ')}`,
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {

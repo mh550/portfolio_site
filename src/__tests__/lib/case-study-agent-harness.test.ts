@@ -8,7 +8,9 @@ import { getProjectBySlug, type Project } from '@/lib/data';
 
 const ROOT = path.resolve(__dirname, '../../..');
 const BRIEF = fs.readFileSync(path.join(ROOT, 'docs/notes/evidence-agent-harness.md'), 'utf8');
-const AGENT_HARNESS = '/home/mh550/projects/agent-harness';
+const AGENT_HARNESS = process.env.AGENT_HARNESS_DIR ?? '/home/mh550/projects/agent-harness';
+// Jest reports this as skipped (not passed) on a machine without the agent-harness checkout.
+const itWithSource = fs.existsSync(AGENT_HARNESS) ? it : it.skip;
 
 const project = getProjectBySlug('agent-harness') as Project;
 const cs = project?.caseStudy;
@@ -79,11 +81,7 @@ describe('agent-harness code excerpt', () => {
     expect(snippets[0].title).toMatch(/lib\/(driver\.sh|metrics\.mjs)/);
   });
 
-  it('appears verbatim in its source file', () => {
-    if (!fs.existsSync(AGENT_HARNESS)) {
-      console.log(`skipped: ${AGENT_HARNESS} is not on this machine, the excerpt was not compared`);
-      return;
-    }
+  itWithSource('appears verbatim in its source file', () => {
     const file = snippets[0].title.match(/lib\/(driver\.sh|metrics\.mjs)/)![0];
     const source = fs.readFileSync(path.join(AGENT_HARNESS, file), 'utf8');
     expect(source).toContain(snippets[0].code);
@@ -94,7 +92,8 @@ describe('agent-harness traceability', () => {
   it('every number in every metric value appears in the evidence brief', () => {
     const runs = project.metrics!.flatMap((m) => m.value.match(/\d+(?:\.\d+)?/g) ?? []);
     expect(runs).toEqual(['55', '52', '374', '2.53']);
-    for (const n of runs) expect(BRIEF).toContain(n);
+    // Bounded, so '55' isn't satisfied by '155' or '1,550'.
+    for (const n of runs) expect(BRIEF).toMatch(new RegExp(`(?<![\\d.,])${n.replace('.', '\\.')}(?![\\d])`));
   });
 
   it('every decision id appears in the evidence brief', () => {
@@ -105,6 +104,29 @@ describe('agent-harness traceability', () => {
     const text = JSON.stringify(project);
     // '.ts' + '.net' so this file doesn't trip content-guard.test.ts's own scan of src/
     for (const banned of ['.ts' + '.net', 'ntfy', 'journal/raw']) expect(text).not.toContain(banned);
+  });
+});
+
+describe('agent-harness claims the sources support (M4-05 fact check)', () => {
+  it('counts the 71 features as planned, not attempted (14 never ran: AH ledger/debrief.md)', () => {
+    expect(project.detail.outcome).toContain('71 features planned');
+    expect(JSON.stringify(project)).not.toMatch(/attempted/);
+  });
+
+  it("doesn't present the after list as the fix for blocked runs (AH lib/features.mjs deps())", () => {
+    expect(cs!.lessons[4].rule).toMatch(/by default a feature still waits on everything before it/);
+  });
+
+  it('keeps the quoted "spent" and the one-project scope of the 29–40 s verifies', () => {
+    expect(cs!.lessons[0].broke).toContain('counted as failed attempts');
+    expect(cs!.lessons[2].broke).toMatch(/^On one project/);
+  });
+
+  it('gives every iteration a diagram line of at most 8 words', () => {
+    for (const it of cs!.iterations!) {
+      expect(it.short?.trim()).toBeTruthy();
+      expect(it.short!.split(/\s+/).length).toBeLessThanOrEqual(8);
+    }
   });
 });
 

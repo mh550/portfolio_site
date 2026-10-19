@@ -30,7 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (261 tests, 37 suites after M4-04)
+npm test             # Jest unit/integration tests (265 tests, 37 suites after M4-05)
 npm run test:watch   # watch mode
 ```
 
@@ -120,6 +120,9 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Smoke: `node .harness/smoke.mjs` loads every route (static routes, `.harness/smoke-routes.txt`, every
   `/projects/<slug>`) at 1280 and 390 px; fails on HTTP ≥ 400, page/console errors, or horizontal scroll at 390.
   Screenshots go to `$HARNESS_SCRATCH`. A page added by a milestone goes into `.harness/smoke-routes.txt`.
+- `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
+  (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
+  turns this suite red until the excerpt is re-copied.
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).
 
 ## Decisions and plans

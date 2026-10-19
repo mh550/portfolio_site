@@ -51,8 +51,8 @@ at 390 and a value must not wrap mid-number.
 
 - `problem`: `'I have about 10 hours a week and several personal projects. I wanted coding agents to build overnight while I slept, and to steer them from my phone. Every approach that lived inside one session hit one of three walls: the model\'s context limit, my plan\'s usage limit, or the auto-mode permission classifier.'`
 - `approach` (not rendered, one sentence): `'A fresh agent session per feature with its state on disk, a deterministic driver for the bookkeeping, and independent verification before anything merges.'`
-- `challenges` (not rendered, one sentence): `'Usage limits, the permission classifier and thin verification each cost a night before they became rules.'`
-- `outcome`: `'On Oct 17 the harness ran two projects, starting overnight on v2 and finishing on v3 that day: 71 features attempted, 55 passing, 52 verified and merged through 12 PRs, and 374 tests added (1,242 → 1,616). It cost $139.34 in total, about $2.53 per passing feature, across 127 sessions and 13.9 hours of run time. The update to this site is a v3 run too: its pull requests are linked below.'`
+- `challenges` (not rendered, one sentence): `'Usage limits, the permission classifier and thin verification each broke something before they became rules.'`
+- `outcome`: `'On Oct 17 the harness ran two projects, starting overnight on v2 and finishing on v3 that day: 71 features planned, 55 passing, 52 verified and merged through 12 PRs, and 374 tests added (1,242 → 1,616). It cost $139.34 in total, about $2.53 per passing feature, across 127 sessions and 13.9 hours of run time. The update to this site is a v3 run too: its pull requests are linked below.'`
 - `codeSnippets`: one snippet, see **Code excerpt**.
 
 ### caseStudy
@@ -94,8 +94,8 @@ the timeline and the evolution diagram show the same six stages.
 |---|---|---|---|
 | `Sep 2026` | `Long sessions` | `Long interactive sessions, with spec, research and decisions files for each idea.` | `It worked, but it needed me at the keyboard.` |
 | `Oct 13–15` | `Runbook + loop` | `A written runbook as the agent's memory and an overnight loop; later one fresh thread per milestone, each ending with a handoff file.` | `Three loops ran on one plan and every repo went silent from 00:12 to 07:19 on usage limits. A long thread hit "context usage too high".` |
-| `Oct 15–16` | `Orchestrator + subagents` | `One session orchestrates by role: Sonnet writes failing tests, Opus implements, Opus reviews.` | `It delivered (one app gained 154 tests in about 2.5 hours), then hit a new wall: the permission classifier blocked a rebuild as a "production deploy", and blocked merges.` |
-| `Oct 16 eve` | `Harness v1` | `After Anthropic's "Effective harnesses for long-running agents": an initializer turns the spec into a feature list, then one fresh session per feature, from a ~60-line script.` | `It lived inside one project, ran in place, and one guard trip stopped the whole night.` |
+| `Oct 15–16` | `Orchestrator + subagents` | `One session orchestrated by role: Sonnet wrote failing tests, Opus implemented, Opus reviewed.` | `It delivered (one app gained 154 tests in about 2.5 hours), then hit a new wall: the permission classifier blocked a rebuild as a "production deploy", and blocked merges.` |
+| `Oct 16 eve` | `Harness v1` | `After Anthropic's "Effective harnesses for long-running agents": an initializer turned the spec into a feature list, then one fresh session ran per feature, from a ~60-line script.` | `It lived inside one project, ran in place, and one guard trip stopped the whole night.` |
 | `Oct 16 night` | `Harness v2` | `Its own repo. "Agents do judgment; the driver does bookkeeping." A worktree per run, repair and continue, an independent verify per milestone, tag + PR, steering from my phone through INBOX.md, metrics.` | `Merges still needed a human, and each run handled usage limits on its own.` |
 | `Oct 17` | `Harness v3` | `Merges verified milestones itself, waits out usage limits for the whole machine, queues runs, and writes a retro and a ledger entry per run.` | `The current version. The run that built this site update is a v3 run.` |
 
@@ -103,11 +103,11 @@ the timeline and the evolution diagram show the same six stages.
 
 | broke | rule |
 |---|---|
-| `The harness broke its own rule. I had tested the usage-limit detector against a message I made up; the real one said "You've hit your session limit", so 45 sessions were spent in 6 minutes with 5 hours of budget left.` | `Fakes mirror the live API: read the structured error first, and test against output captured from the real CLI.` |
+| `The harness broke its own rule. I had tested the usage-limit detector against a message I made up; the real one said "You've hit your session limit", so 45 sessions were counted as failed attempts in 6 minutes, with 5 hours of budget left.` | `Fakes mirror the live API: read the structured error first, and test against output captured from the real CLI.` |
 | `Two runs in parallel used up the 5-hour usage window in 2 h 49 min.` | `One usage limit for the whole machine, and runs go one at a time by default.` |
-| `Verify sessions took 29–40 s, and real defects were found later by review.` | `A verify writes one evidence row per step; with rows missing, it runs again on Opus.` |
+| `On one project, verify sessions took 29–40 s, and review found the real defects later.` | `A verify writes one evidence row per step; with rows missing, it runs again on Opus.` |
 | `An independent review of v3 before its first run found 2 critical and 8 important bugs, including a verify refused by a usage limit that counted as "holds" and would have merged code with zero evidence.` | `The harness gets reviewed before it drives a real night, like any other code.` |
-| `One feature waiting on a human stopped a whole run: 14 independent features never ran behind it.` | `Independent work has to be declared. The initializer now gives features an after list, so a blocked feature stops only what depends on it; blocking only on declared dependencies is the next proposed change.` |
+| `One feature waiting on a human stopped a whole run: 14 independent features never ran behind it.` | `Independent work has to be declared. The initializer can give a feature an after list so it doesn't wait on a blocked one, but by default a feature still waits on everything before it; blocking only on declared dependencies is the next proposed change.` |
 
 **links** (the `githubUrl` must be in here, `case-study-data.test.ts` checks it):
 
@@ -122,7 +122,7 @@ links: [
 ],
 ```
 
-**builtWith** (D10): `'I designed the process, the specs, the decision log and the verification gates, and I ran and reviewed every night. Claude Code agents wrote much of the harness code under that direction.'`
+**builtWith** (D10): `'I designed the process, the specs, the decision log and the verification gates, and I ran each night and reviewed its results. Claude Code agents wrote much of the harness code under that direction.'`
 
 ## Code excerpt
 
@@ -211,12 +211,12 @@ a `Node`: an eyebrow (`when`, mono 10 px, muted), the stage label (sm, bold), th
 (`Sub`). Between cards at 390 a down `Arrow`; from `md` no arrows (the row reads left to right; an `Arrow dir="right"`
 in a 6-column grid would need its own columns, not worth it). Stage 5 (v3) is `accent`.
 
-**No repeated data strings**: the component reads `when` and `label` from the agent-harness entry
-(`getProjectBySlug('agent-harness')!.caseStudy!.iterations`) and pairs them with a local six-item array of short
-"why" lines; a test asserts the two have the same length. The short lines are diagram copy (≤ 8 words, so a 100 px
-column at `md` stays readable), not a second copy of the timeline's `why`:
+**No repeated data strings**: the component reads `when`, `label` and `short` from the agent-harness entry's
+iterations, and builds its aria-label from the same three fields (M4-05 moved the short lines from a component array
+into `Iteration.short`). The short lines are diagram copy (≤ 8 words, so a 100 px column at `md` stays readable),
+not a second copy of the timeline's `why`:
 
-| # | when (from data) | label (from data) | short why (diagram only) |
+| # | when | label | short |
 |---|---|---|---|
 | 0 | Sep 2026 | Long sessions | `Needed me at the keyboard` |
 | 1 | Oct 13–15 | Runbook + loop | `Hit usage and context limits` |
@@ -281,7 +281,7 @@ Every number, date and decision id in the copy above. "Brief" = `docs/notes/evid
 | Oct 17, overnight on v2, finished on v3 | outcome, metric label | AH `journal/runs/2026-10-17-evaluation.md` line 1 ("the first harness v2 night", runs started 02:24 EDT); `journal/iterations/05-harness-v3.md` line 3 (v3 built Oct 17 afternoon); ledger rows carry 3 and 2 continuations. Brief line 67 said "first v3 night": corrected in M4-01 |
 | 55 passing | metric, outcome | Brief line 69; AH `ledger/runs.jsonl` passing 17 + 38 |
 | 52 verified and merged, 12 PRs | metric, outcome | Brief line 69; ledger verified 14 + 38, merges 4 + 8 |
-| 71 features attempted, two projects | outcome | Brief line 69; ledger total 33 + 38 |
+| 71 features planned, two projects | outcome | Brief line 69; ledger total 33 + 38 |
 | +374 tests, 1,242 → 1,616 | metric, outcome | Brief line 70; ledger (1,359 − 1,120) + (257 − 122) |
 | $139.34, ≈ $2.53 per passing feature | metric, outcome | Brief line 70; ledger 52.33 + 87.01, ÷ 55 = 2.533 |
 | 13.9 hours of run time, 127 sessions | outcome | Brief line 70; ledger wall_h 7.86 + 6.08 (two overlapping runs, so run time, not elapsed time), sessions 53 + 74 |
@@ -324,10 +324,95 @@ Checked against `docs/notes/brand.md` by reading every string above.
 
 ## Review
 
-*(Filled by M4-05.)*
-
 Before that: M4-01 had the copy fact-checked by an Opus reviewer against the brief and the agent-harness sources.
 2 Important (the Oct 17 numbers were framed as "the first v3 night", but the evaluation calls it the first v2 night;
 lesson 5's rule presented a proposal as built) and 3 Minor (decision grammar, D-H17's reason, a brand-check row). All
 five were applied above, and the brief's heading was corrected (see its `## Corrections`). The excerpt, every ledger
 sum and every Traceability line reference were confirmed.
+
+### M4-05 (2026-10-18)
+
+The diff is `git diff a6b769a~1 HEAD` (M4-01 through M4-04, without screenshots and run files), written to
+`$HARNESS_SCRATCH/M4.diff` (1,075 lines). It was reviewed by three agents: Opus on the code, Opus on facts and
+voice, and Sonnet on the Web Interface Guidelines in a browser. I checked each finding against the source before
+acting on it.
+
+**Fact check** (entry vs. brief; AH = `/home/mh550/projects/agent-harness/` at `a586f59`, ledger =
+AH `ledger/runs.jsonl`)
+
+| Claim (as on page) | Where | Source | ✓ |
+|---|---|---|---|
+| 55 features passing in one day | metric 1 | ledger passing 17 + 38; brief line 69 | ✓ |
+| 52 verified and merged | metric 2 | ledger 14 + 38; brief line 69 | ✓ |
+| 12 PRs | metric 2, outcome | ledger merges 4 + 8; AH `ledger/debrief.md` line 6 (#6–#13) | ✓ |
+| +374 tests (1,242 → 1,616) | metric 3, outcome | ledger (1359 − 1120) + (257 − 122); brief line 70 | ✓ |
+| ≈ $2.53 per passing feature | metric 4, outcome | 139.34 / 55 = 2.533; brief line 70 | ✓ |
+| $139.34 total | outcome | ledger 52.33 + 87.01; debrief.md line 8 | ✓ |
+| 127 sessions | outcome | ledger 53 + 74 | ✓ |
+| 13.9 hours of run time | outcome | ledger wall_h 7.86 + 6.08; brief Corrections | ✓ |
+| 71 features **attempted** | outcome | debrief.md line 15: 14 "never attempted" | ✗ → fixed: "71 features planned" |
+| Oct 17; two projects; overnight on v2, finished on v3 | outcome | AH `journal/runs/2026-10-17-evaluation.md` line 1; `journal/iterations/05-harness-v3.md` line 3 | ✓ |
+| about 10 hours a week | problem | brief line 13 | ✓ |
+| three walls (context, usage, classifier) | problem | brief lines 14–15 | ✓ |
+| three loops; silent 00:12 to 07:19 | method, iteration 1 | brief line 23; AH `journal/evidence/timeline.md` 56–59 | ✓ |
+| "context usage too high" | method, iteration 1 | brief line 24; timeline.md 60–62 | ✓ |
+| ~60-line script | method, iteration 3 | AH `journal/iterations/03-harness-v1.md` line 31 | ✓ |
+| one evidence row per step | method, lesson 3 | brief lines 37–38; 05-harness-v3.md line 25 | ✓ |
+| byte-for-byte verified tree | method, D-H17 | 05-harness-v3.md 40–41; `lib/driver.sh` 182 | ✓ |
+| D-H1 | decisions | AH `journal/decisions.md` 7–13; brief | ✓ |
+| D-H2 | decisions | decisions.md 16–20; brief line 52 | ✓ |
+| D-H4 | decisions | decisions.md 29–34 | ✓ |
+| D-H5 | decisions | decisions.md 36–41 | ✓ |
+| D-H11 | decisions | decisions.md 89–95 | ✓ |
+| D-H17 | decisions | decisions.md 134–145; spec line 19 (`MERGE_POLICY=pr`) | ✓ |
+| Sep 2026 | iteration 0 | brief line 22 | ✓ |
+| Oct 13–15 | iteration 1 | brief lines 23–24 | ✓ |
+| Oct 15–16; 154 tests in about 2.5 hours; "production deploy" | iteration 2 | brief line 25; AH `journal/iterations/02-orchestrator-and-subagents.md` 70, 78 | ✓ |
+| Oct 16 eve | iteration 3 | brief line 26 | ✓ |
+| Oct 16 night | iteration 4 | brief line 27 | ✓ |
+| Oct 17 | iteration 5 | brief line 28 | ✓ |
+| Sep – Oct 2026 | timeframe | brief lines 22, 28 | ✓ |
+| "You've hit your session limit"; 5 hours left | lesson 1 | evaluation.md 31–33 | ✓ |
+| 45 sessions **spent** in 6 minutes | lesson 1 | evaluation.md 32 has "spent" in quotes ($0 sessions) | ✗ → fixed: "counted as failed attempts" |
+| 5-hour window in 2 h 49 min | lesson 2 | evaluation.md 34 | ✓ |
+| Verify sessions took 29–40 s | lesson 3 | evaluation.md 37–38: Pathways only, dj's took 10 min | ✗ → fixed: "On one project, …" |
+| 2 critical + 8 important bugs | lesson 4 | 05-harness-v3.md 35–37 | ✓ |
+| 14 independent features never ran | lesson 5 | debrief.md lines 7, 15 | ✓ |
+| initializer **now** gives an after list, so a blocked feature stops only its dependants | lesson 5 rule | AH `lib/features.mjs` `deps()`: by default a feature waits on every earlier one | ✗ → fixed (see Important 2) |
+| "each cost a night" | detail.challenges (not rendered) | only the usage limit cost a night | ✗ → fixed: "each broke something" |
+| techStack | header | brief line 44; AH README line 10 | ✓ |
+| links (repo, PRs filtered by "harness") | links | brand.md line 62; brief lines 99–100 | ✓ |
+
+**Code excerpt re-diffed.** I wrote the snippet out of the data and compared it with
+`git -C …/agent-harness show a586f59:lib/driver.sh | sed -n 170,182p | diff - excerpt.txt`, and again with the
+working copy's lines 170–182. Both are identical, byte for byte.
+
+**Findings**
+
+| # | Severity | Finding | Resolution |
+|---|---|---|---|
+| 1 | Important | Reduced motion hid the page (site-wide; it predates M4). `ScrollReveal` rendered a plain `div` when `useReducedMotion()` was true, but the server, which can't know the preference, had rendered `motion.div` with inline `opacity:0; transform: translateY(40px)`. React doesn't patch attributes on hydration, so 15 blocks on this page (8 on /about) stayed invisible, with a hydration-mismatch console error. | Fixed test-first: `ScrollReveal.test` now requires the same `motion.div`, revealed by `animate` with `duration: 0` (it failed first). In Playwright with `reducedMotion: 'reduce'` at 390: 0 elements at opacity 0 and 0 console errors on /projects/agent-harness, /about and /. |
+| 2 | Important | Lesson 5's rule presented `after` lists as the fix. By default a feature still waits on every earlier one, which is the mechanism that blocked the 14. | Rewritten. A test pins "by default a feature still waits on everything before it". |
+| 3 | Important | The outcome said "71 features attempted", but 14 never ran. This contradicted lesson 5, and the brief had the same error. | "71 features planned". A test bans "attempted" in the entry. Correction added to the brief. |
+| 4 | Important | `HARNESS_EVOLUTION_WHY`, project copy, lived in a component, paired with the data by index, and was repeated again as prose in the aria-label. | Moved to `Iteration.short`. The diagram reads it, and its aria-label is built from `when`/`label`/`short`. The `!.!.!` chain was replaced with an explicit error. Tests: every iteration has a `short` of 8 words or fewer, and the label contains each stage. |
+| 5 | Important | The verbatim-excerpt test `return`ed (counted as a pass) when the sibling repo was absent, and `jest --silent` hid the note. | `it.skip` when the directory is absent, with the path from `AGENT_HARNESS_DIR` (default unchanged). Checked: with `AGENT_HARNESS_DIR=/nonexistent` Jest reports "1 skipped". |
+| 6 | Minor | Digit-run check `toContain('55')` also matches 155. | Bounded regex. |
+| 7 | Minor | Lessons 1 and 3 overstated the source ("spent", "Verify sessions took 29–40 s"); iterations 2 and 3 narrated in the present tense; builtWith said "I … reviewed every night" (the reviews were Opus sessions). | Rewritten, with plan copy updated to match. Tests pin lessons 1 and 3. |
+| 8 | Minor | The listitem test reads semantics that `role="img"` hides from screen readers. | Renamed to say it checks DOM order. |
+| 9 | Minor | No direction marker between evolution cards from `md`. | Recorded: the `when` eyebrow (Sep → Oct 17) carries the order, and right arrows in 102 px columns would crowd the labels (see Diagrams above). |
+| 10 | Minor | The timeline and the evolution diagram show the six stages back to back. | Recorded: the template's fixed order (D16/D17); the diagram is the 8-word summary of the timeline. |
+| 11 | Minor | `MetricStrip`: 2-metric pages keep an empty third column at `sm`; the visible label is a `<p>` inside the `dl` group next to an sr-only `dt` (the label is read twice). Both predate M4. | Recorded, not changed: both alter the pinned classic-page snapshot (`project-page-unchanged`), so they need their own feature. |
+| 12 | Minor | Links have no explicit `focus-visible` style (they rely on the browser outline); `MediaGallery` autoplay video has no pause control and ignores reduced motion (no video on this page). | Recorded for a site-wide accessibility pass. |
+| 13 | Minor | The coding-session node says "Opus or Sonnet", but D-H2 says Opus builds. | No change: brief line 35 says "Opus or Sonnet, chosen per feature". |
+
+**Voice** (brand.md): first person in problem, method, iteration 0 and lessons, and past tense for what happened
+(iterations 2–3 fixed). Nothing from the never-publish list: ntfy, `.ts.net`, 100.x addresses, Gatus, Pathways,
+hit_list, tokens, `.env` and `journal/raw` were all searched for. No buzzwords. builtWith credits "Claude Code agents
+wrote much of the harness code" and claims only design, running and review.
+
+**Web Interface Guidelines** on /projects/agent-harness (at 1280 and 390): one h1, then h2 sections with h3 under
+Method and Decisions, no skipped level. 4 links in `main`, all with descriptive names; the two external ones carry
+an sr-only "(opens in new tab)". Reduced motion was broken and is fixed (finding 1). scrollWidth − innerWidth = 0
+at 390. 0 console errors. Both diagrams are `role="img"` with non-empty labels.
+
+Ready to merge: yes

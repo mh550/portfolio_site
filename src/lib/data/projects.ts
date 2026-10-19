@@ -47,6 +47,8 @@ export interface Iteration {
   label: string;
   what: string;
   why: string;
+  /** The diagram's line for this stage (≤ 8 words); set where the project has an evolution diagram. */
+  short?: string;
 }
 
 /** Something that broke and the rule it left behind. */
@@ -131,9 +133,9 @@ export const projects: Project[] = [
       approach:
         'A fresh agent session per feature with its state on disk, a deterministic driver for the bookkeeping, and independent verification before anything merges.',
       challenges:
-        'Usage limits, the permission classifier and thin verification each cost a night before they became rules.',
+        'Usage limits, the permission classifier and thin verification each broke something before they became rules.',
       outcome:
-        'On Oct 17 the harness ran two projects, starting overnight on v2 and finishing on v3 that day: 71 features attempted, 55 passing, 52 verified and merged through 12 PRs, and 374 tests added (1,242 → 1,616). It cost $139.34 in total, about $2.53 per passing feature, across 127 sessions and 13.9 hours of run time. The update to this site is a v3 run too: its pull requests are linked below.',
+        'On Oct 17 the harness ran two projects, starting overnight on v2 and finishing on v3 that day: 71 features planned, 55 passing, 52 verified and merged through 12 PRs, and 374 tests added (1,242 → 1,616). It cost $139.34 in total, about $2.53 per passing feature, across 127 sessions and 13.9 hours of run time. The update to this site is a v3 run too: its pull requests are linked below.',
       codeSnippets: [
         {
           title: 'lib/driver.sh · the merge gate: only the verified tree lands on main',
@@ -228,42 +230,48 @@ merge_one() {
           label: 'Long sessions',
           what: 'Long interactive sessions, with spec, research and decisions files for each idea.',
           why: 'It worked, but it needed me at the keyboard.',
+          short: 'Needed me at the keyboard',
         },
         {
           when: 'Oct 13–15',
           label: 'Runbook + loop',
           what: 'A written runbook as the agent\'s memory and an overnight loop; later one fresh thread per milestone, each ending with a handoff file.',
           why: 'Three loops ran on one plan and every repo went silent from 00:12 to 07:19 on usage limits. A long thread hit "context usage too high".',
+          short: 'Hit usage and context limits',
         },
         {
           when: 'Oct 15–16',
           label: 'Orchestrator + subagents',
-          what: 'One session orchestrates by role: Sonnet writes failing tests, Opus implements, Opus reviews.',
+          what: 'One session orchestrated by role: Sonnet wrote failing tests, Opus implemented, Opus reviewed.',
           why: 'It delivered (one app gained 154 tests in about 2.5 hours), then hit a new wall: the permission classifier blocked a rebuild as a "production deploy", and blocked merges.',
+          short: 'Blocked by the permission classifier',
         },
         {
           when: 'Oct 16 eve',
           label: 'Harness v1',
-          what: 'After Anthropic\'s "Effective harnesses for long-running agents": an initializer turns the spec into a feature list, then one fresh session per feature, from a ~60-line script.',
+          what: 'After Anthropic\'s "Effective harnesses for long-running agents": an initializer turned the spec into a feature list, then one fresh session ran per feature, from a ~60-line script.',
           why: 'It lived inside one project, ran in place, and one guard trip stopped the whole night.',
+          short: 'One guard trip stopped the night',
         },
         {
           when: 'Oct 16 night',
           label: 'Harness v2',
           what: 'Its own repo. "Agents do judgment; the driver does bookkeeping." A worktree per run, repair and continue, an independent verify per milestone, tag + PR, steering from my phone through INBOX.md, metrics.',
           why: 'Merges still needed a human, and each run handled usage limits on its own.',
+          short: 'Merges still needed a human',
         },
         {
           when: 'Oct 17',
           label: 'Harness v3',
           what: 'Merges verified milestones itself, waits out usage limits for the whole machine, queues runs, and writes a retro and a ledger entry per run.',
           why: 'The current version. The run that built this site update is a v3 run.',
+          short: 'Current: it built this update',
         },
       ],
       lessons: [
         {
           broke:
-            'The harness broke its own rule. I had tested the usage-limit detector against a message I made up; the real one said "You\'ve hit your session limit", so 45 sessions were spent in 6 minutes with 5 hours of budget left.',
+            'The harness broke its own rule. I had tested the usage-limit detector against a message I made up; the real one said "You\'ve hit your session limit", so 45 sessions were counted as failed attempts in 6 minutes, with 5 hours of budget left.',
           rule: 'Fakes mirror the live API: read the structured error first, and test against output captured from the real CLI.',
         },
         {
@@ -271,7 +279,7 @@ merge_one() {
           rule: 'One usage limit for the whole machine, and runs go one at a time by default.',
         },
         {
-          broke: 'Verify sessions took 29–40 s, and real defects were found later by review.',
+          broke: 'On one project, verify sessions took 29–40 s, and review found the real defects later.',
           rule: 'A verify writes one evidence row per step; with rows missing, it runs again on Opus.',
         },
         {
@@ -281,7 +289,7 @@ merge_one() {
         },
         {
           broke: 'One feature waiting on a human stopped a whole run: 14 independent features never ran behind it.',
-          rule: 'Independent work has to be declared. The initializer now gives features an after list, so a blocked feature stops only what depends on it; blocking only on declared dependencies is the next proposed change.',
+          rule: 'Independent work has to be declared. The initializer can give a feature an after list so it doesn\'t wait on a blocked one, but by default a feature still waits on everything before it; blocking only on declared dependencies is the next proposed change.',
         },
       ],
       links: [
@@ -294,7 +302,7 @@ merge_one() {
       ],
       extraDiagrams: ['harness-evolution'],
       builtWith:
-        'I designed the process, the specs, the decision log and the verification gates, and I ran and reviewed every night. Claude Code agents wrote much of the harness code under that direction.',
+        'I designed the process, the specs, the decision log and the verification gates, and I ran each night and reviewed its results. Claude Code agents wrote much of the harness code under that direction.',
     },
   },
   {

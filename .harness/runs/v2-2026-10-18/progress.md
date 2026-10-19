@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 21:20 · M4-05 · passes
+
+- Review of M4 (`$HARNESS_SCRATCH/M4.diff`, 1,075 lines). Three agents reviewed it: Opus on code, Opus on facts and voice, Sonnet on the web guidelines in a browser. I checked every finding myself. 5 Important and 8 Minor; the plan's Review section has the 38-row fact table and ends "Ready to merge: yes".
+- Important, fixed test-first: (1) **site-wide reduced motion hid content.** `ScrollReveal` swapped to a plain div, so the server's inline `opacity:0` stayed (15 blocks on this page, 8 on /about, plus a hydration error). It is now the same `motion.div`, revealed with `duration: 0`. (2) Lesson 5 claimed `after` lists fix blocking (by default every feature still waits on all earlier ones). (3) "71 features attempted" → "planned" (14 never ran); correction added to the brief. (4) The diagram's short lines moved from a component array into `Iteration.short`, and the aria-label is built from the data. (5) The excerpt test now `it.skip`s when the repo is absent and reads its path from `AGENT_HARNESS_DIR`.
+- Minor copy fixes: "spent" → "counted as failed attempts", "On one project, verify sessions took 29–40 s", past tense in iterations 2–3, builtWith "ran each night and reviewed its results", challenges "each broke something". The plan copy was updated to match. Excerpt re-diffed against `a586f59` and the working copy: identical.
+- Tests 261 → 265 (37 suites). check.sh green; smoke 30/30 PASS. With Playwright `reducedMotion: 'reduce'` at 390: 0 elements at opacity 0 and 0 console errors on /projects/agent-harness, /about and /. Looked at the evolution diagram at 390 and 1280 (unchanged).
+- Recorded, not fixed (they change the pinned classic snapshot or are site-wide): the MetricStrip `<p>` inside the `dl` reads the label twice, and 2-metric pages leave an empty third column; no explicit `focus-visible` styles; MediaGallery autoplay video has no pause control or reduced-motion check.
+- Questions for Michael: none. Proposed changes: a small site-wide a11y feature for the three recorded items (MetricStrip `dt`, focus-visible, video pause); it would update the `project-page-unchanged` snapshot on purpose.
+
 ### 2026-10-18 20:45 · M4-04 · passes
 
 - Screenshots: `docs/screenshots/v2/M4-agent-harness-390.png` (303 KB), `-1280` (353 KB), `M4-projects-390` (159 KB), `M4-card-390` (36 KB). All are full pages saved as palette PNGs via sharp (already in node_modules through Next). No top-3000 crop was needed. The plan's "What Michael will see" table has one row per screenshot.
