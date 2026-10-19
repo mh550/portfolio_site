@@ -4,8 +4,13 @@ import type { Metric } from '@/lib/data';
 export default function MetricStrip({ metrics }: { metrics?: Metric[] }) {
   if (!metrics || metrics.length === 0) return null;
 
+  // Four in a three-column grid would leave the fourth alone on a row: 2×2, then one row from md,
+  // where the narrower cards wrap labels to two lines (balanced, so no word sits alone).
+  const fourUp = metrics.length === 4;
+  const columns = fourUp ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-3';
+
   return (
-    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <dl className={`grid grid-cols-1 gap-3 ${columns}`}>
       {metrics.map((m) => (
         <div
           key={m.label}
@@ -15,7 +20,11 @@ export default function MetricStrip({ metrics }: { metrics?: Metric[] }) {
           <dd className="text-2xl font-bold leading-tight text-[var(--color-accent)] sm:text-3xl">
             {m.value}
           </dd>
-          <p className="mt-1 text-xs leading-snug text-[var(--color-muted)]">{m.label}</p>
+          <p
+            className={`mt-1 text-xs leading-snug text-[var(--color-muted)]${fourUp ? ' text-balance' : ''}`}
+          >
+            {m.label}
+          </p>
         </div>
       ))}
     </dl>

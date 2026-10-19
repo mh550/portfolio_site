@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:45 · M4-04 · passes
+
+- Screenshots: `docs/screenshots/v2/M4-agent-harness-390.png` (303 KB), `-1280` (353 KB), `M4-projects-390` (159 KB), `M4-card-390` (36 KB). All are full pages saved as palette PNGs via sharp (already in node_modules through Next). No top-3000 crop was needed. The plan's "What Michael will see" table has one row per screenshot.
+- Fixed two things I found: (1) at 1280 the 4th metric (≈ $2.53) sat alone under a row of 3. `MetricStrip` with 4 metrics is now `sm:grid-cols-2 md:grid-cols-4` with `text-balance` labels; 3-metric pages are unchanged. (2) The "Around it" panel was stretched to "One run"'s height and was mostly empty, so the agent-harness diagram now uses `md:items-start`. Tests 257 → 261 (36 → 37 suites): new `MetricStrip.test.tsx` (3), plus 1 in `ProjectDiagram.test.tsx` (I watched it fail on the old class). `project-page-unchanged` passes untouched.
+- Verified in the DOM (my script `$HARNESS_SCRATCH/m4-shots.mjs`, then again by an independent Sonnet browser check). At 390: metrics in 1 column, each value on one line; evolution 6 rows; `pre` 1288 > 340 with overflow-x auto; page scrollWidth − innerWidth = 0; all 6 decisions read "Chose … over … because". At 1280: metrics 1 row of 4, evolution 1 row. /projects first card and /card's first Selected work item are both agent-harness. 0 console errors. Smoke 30/30 PASS; check.sh green.
+- Left as is, with the reason in the table: the "Around it" sub-label "…every run waits on it" leaves "it" alone on a line at 390. Fixing it means changing the shared `Sub` primitive, which the pinned classic pages also render.
+- Next (M4-05): review the diff from M4-01 on; this session's code diff is small (MetricStrip, one diagram class).
+- Questions for Michael: none. Proposed changes: none.
+
 ### 2026-10-18 20:25 · M4-03 · passes
 
 - `src/components/projects/diagrams/index.tsx`: `AgentHarnessDiagram` (panels "One run" and "Around it", stacked at 390, side by side from `md`) and

@@ -45,6 +45,13 @@ describe('agent-harness architecture diagram', () => {
       else expect(text.toLowerCase()).toContain(word);
     },
   );
+
+  it('stacks its panels at 390 and top-aligns them side by side from md (M4-04)', () => {
+    const { getByRole } = render(<ProjectDiagram diagram="agent-harness" />);
+    const panels = getByRole('img').firstElementChild!;
+    expect(panels).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
+    expect(panels).not.toHaveClass('md:items-stretch');
+  });
 });
 
 describe('harness-evolution diagram', () => {

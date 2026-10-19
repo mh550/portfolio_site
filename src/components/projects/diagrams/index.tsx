@@ -235,8 +235,9 @@ function CalendarSyncDiagram() {
 /* ------------------------------------------------------------------ */
 
 function AgentHarnessDiagram() {
+  // items-start: stretched to the tall "One run" column, "Around it" was mostly empty box at 1280 (M4-04).
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
+    <div className="flex flex-col gap-4 md:flex-row md:items-start">
       <Panel title="One run" tone="accent">
         <Node>harness CLI <Sub>start · status · queue</Sub></Node>
         <Arrow />
