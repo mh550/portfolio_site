@@ -9,6 +9,16 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 13:00 · verify M9
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M9-01 | 1 | Read docs/asset-checklist.md headings and media lines | Sections: HitList, agent-harness, home-media-server, MAXX (linear-ai-workflow, paint-estimator); each names public/projects/<slug>/ and a `media` entry snippet; HitList has recording/phone screens, agent-harness has attach/INBOX/notification, Amperfy present | yes |
+| M9-01 | 2 | Read docs/review-guide.md vs `ls docs/plans` (M1-M8) and src/app | Per-milestone changed/look-at at 390 px for M0-M9; merge order M1 first, states M1 also ships M0 and harness setup | yes |
+| M9-01 | 3 | Compared CLAUDE.md routes with find src/app; `npx jest --silent` | All 14 routes present incl. card, card/qr, approach, evidence, vcf, sitemap/robots; Tests: 611 passed, 54 suites matches; profile/approach/competencies listed; content guard section; spec/plans pointers; 'prerenders... not a static export' | yes |
+| M9-01 | 4 | `grep -in 'create-next-app\|getting started' README.md`; read README | 0 hits; describes site, npm run dev/test/build, data-driven rule, link to /projects/agent-harness | yes |
+| M9-01 | 5 | `git diff --stat HEAD~2 HEAD~1`; jest content guard; check.sh; smoke | Feature commit touches only docs/, CLAUDE.md, README.md, .harness/runs/; jest 611 pass (includes content-guard); check.sh green; smoke no failures | yes |
+
 ### 2026-10-19 12:00 · M9-01 · passes
 
 - Wrote `docs/review-guide.md` (merge order M1 first, M1 ships M0 and the harness setup; per-milestone changes and what to check at 390 px), extended `docs/asset-checklist.md` (HitList kept; added agent-harness, Amperfy, MAXX projects, shared media-entry instructions), updated `CLAUDE.md` (spec/plans pointers, profile/approach/competencies modules, content guard) and replaced the `README.md` boilerplate.
