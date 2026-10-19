@@ -9,6 +9,39 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 verify M5
+
+All 26 steps re-run; no feature flipped.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M5-01 | 1 | Read `docs/plans/2026-10-18-M5-home-media-server.md` (entry table, metrics, detail, caseStudy sections); grep of the caseStudy part | All fields match (slug, title, company, categories, order 3, featured, githubUrl, techStack, 4 metrics 831/1,405/1,359/Trash not delete); D7 D3 D24 D27 D18 D38/39 present; '859 = 859 = 859' and 'guessed fake' present; repo link, builtWith, outcome/problem/approach/challenges summaries (detail D16) present | yes |
+| M5-01 | 2 | Read '## Traceability' table (rows 831, 22 GB, 1,405, 1,359 …) and its source column | Each row cites a brief line, a named DJ docs file at origin/main 8d99309, or the AH ledger | yes |
+| M5-01 | 3 | Read '## Terminal excerpt'; ran `git -C dj-crate-streaming show origin/main:docs/download-validation.md` and diffed by eye against the plan block | Source lines 60–65 identical except `/srv/incoming/…` → `incoming/…`; no hostname/IP/token/username | yes |
+| M5-01 | 4 | Read '## Media' and '## Diagram' sections | Three files named with 'Demo data' captions; m6-*.png stated never used; nodes Phone→Private network (HTTPS)→Navidrome→crates service→Worker→Library, nightly snapshot + backup, aria-label and caption given | yes |
+| M5-01 | 5 | `grep -c Soulseek` on plan copy; `git show --stat 1c1d89e` | Copy names it once ('Soulseek' once in projects.ts); the commit touches docs/ (plan, spec, evidence note) and .harness/runs/ only | yes |
+| M5-01 | 6 | `/home/mh550/projects/agent-harness/lib/check.sh` | green (cached for this tree) | yes |
+| M5-02 | 1 | Temp jest dump of `getProjectBySlug('home-media-server')` (removed after) | company 'Personal · home server', categories [systems, full-stack], order 3, featured true, githubUrl correct, 4 metrics with 831, 1,405, 1,359, 'reversible' in the label | yes |
+| M5-02 | 2 | Same dump | 5 method strings, decision ids [D7,D3,D24,D27,D18,D38/39], 5 iterations, 7 lessons incl. '859 = 859 = 859' and 'guessed fake' in `broke`, one repo link, builtWith set | yes |
+| M5-02 | 3 | `cmp` of the 3 PNGs vs dj-crate-streaming/docs/screenshots; `ls -l`; dump of detail.media; ran case-study-home-media-server.test.ts | Byte-identical; 59,407 / 90,401 / 107,924 B (<120 KB); captions contain 'Demo data'; no m6* file; test passes | yes |
+| M5-02 | 4 | Dump of codeSnippets; `grep -rn 'ts.net\|100\.\|/srv\|ntfy\|m6-'` on data, diagrams, public | One snippet language 'text', title has 'verify', code has 'cutoff ≈16 kHz' and 'BAD', no '/srv'; grep returns nothing (exit 1); entry test passes | yes |
+| M5-02 | 5 | Ran jest on case-study-home-media-server, data.test.ts (8 projects, order, getTopProjects) + dump | 5 suites / 103 tests pass; 8 projects; getTopProjects(3) = agent-harness, linear-ai-workflow, home-media-server | yes |
+| M5-02 | 6 | `lib/check.sh` + full smoke | green; 32 smoke PASS lines, no FAIL | yes |
+| M5-03 | 1 | Read diagrams/index.tsx lines 346/358/379; ProjectDiagram.test.tsx passes | 'media-server' in DIAGRAMS, CAPTIONS, LABELS (DiagramKey covered by the all-keys test) | yes |
+| M5-03 | 2 | Ran ProjectDiagram.test.tsx (media-server words, role=img, aria-label, banned strings) | Passes; plan lists words Phone, HTTPS, Navidrome, crates service, Worker, verify, beets, Library, snapshot, backup; browser shows role=img with aria-label | yes |
+| M5-03 | 3 | Dump `architectureDiagram`; ProjectDetail.test.tsx line 78; h2 order in browser | 'media-server'; test asserts diagram after The Problem, before The Method; passes | yes |
+| M5-03 | 4 | `node .harness/smoke.mjs` | PASS /projects/home-media-server @1280 and @390 | yes |
+| M5-03 | 5 | `lib/check.sh` | green | yes |
+| M5-04 | 1 | `ls -l docs/screenshots/v2` | M5-home-media-server-390.png 399,139 B, -1280.png 301,133 B, both under 400 KB; plan table says full page | yes |
+| M5-04 | 2 | Read plan '## What Michael will see'; headless chromium check of page text | Table covers metric strip, diagram, method, decisions, iterations, lessons, 3 shots with demo-data captions, verify block, repo link; page has BAD, 'cutoff ≈16 kHz' and 3 'demo data' | yes |
+| M5-04 | 3 | Headless chromium at 390: scrollWidth−innerWidth; pre; image lefts | 0; pre scrollWidth 1193 > clientWidth 340, overflow-x auto; three images share left=25 (one column); table states 0 | yes |
+| M5-04 | 4 | Read table 'Anything wrong' column; ran MetricStrip.test.tsx | Fix for 2×2 strip recorded, other items listed with reasons; tests pass | yes |
+| M5-04 | 5 | `lib/check.sh` | green | yes |
+| M5-05 | 1 | Read plan '### M5-05' Review: fact table, findings table | 34-row fact table, 13 findings with severity (1 Important, 12 Minor); diff recorded as 1c1d89e~1..039ebde | yes |
+| M5-05 | 2 | Privacy grep from the step; `grep -o Soulseek projects.ts`; read Review privacy pass | grep exit 1 (no output); Soulseek once in the data | yes |
+| M5-05 | 3 | Read findings 1 and 13; ran the touched tests (MediaGallery, MetricStrip, ProjectDiagram, entry test) | Important finding fixed with test; web-design-guidelines run recorded (alt, figcaption, heading order checked; rest logged as site-wide); tests pass | yes |
+| M5-05 | 4 | `grep -n 'Ready to merge'`; smoke; check.sh | Line 455 'Ready to merge: yes'; smoke all PASS; check green | yes |
+
 ### 2026-10-18 23:59 · M5-05 · passes
 
 - Review of M5 from `$HARNESS_SCRATCH/M5.diff` (`1c1d89e~1..039ebde`, 1,241 lines): Opus on the code, Opus on facts and voice against the brief and the DJ docs, Sonnet on the guidelines in a browser. The plan's `## Review` has a 34-row fact table, a privacy pass and 13 findings (1 Important, 12 Minor), and ends "Ready to merge: yes".
