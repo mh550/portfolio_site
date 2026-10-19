@@ -9,6 +9,15 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 14:00 · verify S1
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| S1-01 | 1 | Read `src/app/projects/[slug]/opengraph-image.tsx`; grep fetch/font | exports size 1200×630, contentType image/png, generateStaticParams over projects; ImageResponse with #0a0a0f, title, first metric value+label, "Michael Herron"; no fetch (only comment mentions font) | yes |
+| S1-01 | 2 | `npx jest src/__tests__/app/opengraph-image.test.ts`; read lines 88-96 | 14/14 pass; asserts size toEqual {1200,630}, generateStaticParams returns every slug, exports exist | yes |
+| S1-01 | 3 | `curl -s -o /tmp/og.png -w ... :7800/projects/agent-harness/opengraph-image`; cmp with docs/screenshots/v2/S1-og-agent-harness.png; viewed image | `200 image/png`; byte-identical to screenshot; 1200×630 PNG, dark bg, title, "55 features passing in one day", Michael Herron | yes |
+| S1-01 | 4 | `lib/check.sh`; `node .harness/smoke.mjs` | check green (cached, same tree); smoke all PASS | yes |
+
 ### 2026-10-19 13:30 · S1-01 · passes
 
 - New `src/app/projects/[slug]/opengraph-image.tsx` (next/og, 1200×630 PNG, `generateStaticParams` over `projects`): on #0a0a0f it shows the company, the title, the first metric (value in accent, label) and "Michael Herron · Systems & Process Engineer". There is no font fetch. next/og's bundled Latin Noto Sans has no → or ↔, and a missing glyph makes it fetch from Google Fonts, so arrows are drawn as SVG and ≈ becomes ~. Projects without metrics (cherished, mirrored-google-calendars) show their shortDescription. D38 records this. Unknown slugs return 404.
