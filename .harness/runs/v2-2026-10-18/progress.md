@@ -9,6 +9,34 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-19 verify M7
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| M7-01 | 1 | grep headings of docs/plans/2026-10-18-M7-approach-evidence.md | Principles (6 × 3 examples, 17 linked + 1 D14 unlinked), Approach page, Competencies (6), Evidence page, Tests, What Michael will see (4-row table), Review all present | yes |
+| M7-01 | 2 | read plan § Filtered at render time | Table lists examples dropped per missing slug; states pages render with zero broken links | yes |
+| M7-01 | 3 | git show --stat of plan commit (HEAD~1 now is a harness-only commit) | Plan commit 4c9cf32/ca14a4a touched plan, spec decisions (docs/) and .harness/runs only | yes |
+| M7-01 | 4 | check.sh | green | yes |
+| M7-02 | 1 | read src/lib/data/approach.ts; approach-links.test.ts (91 tests in 5 M7 suites pass) | six ids/titles in order; 1–3 examples; resolvedExamples uses resolveProjectLink, drops anchor without caseStudy (tests at :55,:85) | yes |
+| M7-02 | 2 | loaded /approach 390+1280 in Playwright; read page.tsx | title 'Approach — Michael Herron', 2 intro sentences, MethodStrip 5 items, 6 h2s, closing link /projects/agent-harness | yes |
+| M7-02 | 3 | read approach-links.test.ts + approach.test.tsx:107,117 | asserts anchors, five slugs, slug/caseStudy existence, missing slug renders without link | yes |
+| M7-02 | 4 | approach.test.tsx:47,61,37 | six headings, five labels, every /projects/ href slug in projects | yes |
+| M7-02 | 5 | smoke-routes.txt; node .harness/smoke.mjs; check.sh | /approach listed; smoke PASS both widths; check green | yes |
+| M7-03 | 1 | read competencies.ts + competencies-links.test.ts:48-90 | six titles, 3/4/4/4/3/3 items, 7 MAXX items (all six sections), sources grepped in brand.md | yes |
+| M7-03 | 2 | Playwright /evidence; page.tsx | h1 correct, reading + D7 notes, six h2s, robots=noindex, no Navbar link to /evidence | yes |
+| M7-03 | 3 | competencies-links.test.ts:96-115 | hrefs checked vs allowed routes/anchors/repo roots; live hrefs are /experience, project slugs, github.com/mh550/portfolio_site | yes |
+| M7-03 | 4 | cat docs/notes/maxx-level-4.md | Says where to paste rubric; remapping = competencies.ts only | yes |
+| M7-03 | 5 | smoke-routes.txt + smoke run | /evidence listed, PASS at both widths; check green | yes |
+| M7-04 | 1 | ls -la docs/screenshots/v2/M7-* | four files, 135/115/209/183 KB, all < 400 KB | yes |
+| M7-04 | 2 | read plan table + live DOM | four rows; 17 links on approach (3·3·3·3·2·3), closing line; evidence 21 items, notes present | yes |
+| M7-04 | 3 | Playwright goto every hashed link from /approach (11) and /evidence (8) | getElementById non-null for all 19; table lists 3 | yes |
+| M7-04 | 4 | Playwright scrollWidth−innerWidth at 390 and 1280 | 0 on both pages, both widths | yes |
+| M7-04 | 5 | check.sh | green | yes |
+| M7-05 | 1 | read plan Review (Findings, Fact-check 39 rows) | findings with severity; fact-check per example and item | yes |
+| M7-05 | 2 | read commit 51a1206; claims-on-linked-page.test.ts passes | fixes with tests; MethodStrip shared by hero and /approach | yes |
+| M7-05 | 3 | read plan § Web interface guidelines | table covers heading order, link text, focus, reduced motion; focus test approach.test.tsx:133 passes | yes |
+| M7-05 | 4 | tail plan; smoke; check.sh | ends 'Ready to merge: yes'; smoke all PASS; check green | yes |
+
 ### 2026-10-19 00:45 · M7-05 · passes
 
 - Reviewed the M7 diff (`$HARNESS_SCRATCH/M7.diff`, 1735 lines) with two Opus reviewers, one for code and one for facts (39 claims traced). Result: 0 Critical, 7 Important (6 fixed, 1 accepted), 13 Minor (11 fixed, 2 left with a reason). The plan's Review section has the finding table, a fact-check row per example and item, a simplification note, the web-guidelines table, and ends "Ready to merge: yes". Tests 508 → 552 (50 → 51 suites).
