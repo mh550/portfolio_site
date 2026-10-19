@@ -30,15 +30,16 @@ describe('ProjectsGrid', () => {
     ]);
   });
 
-  it('filtering by Systems on the current data shows the empty state', async () => {
+  it('filtering by Systems shows only the agent-harness card', async () => {
     const user = userEvent.setup();
     render(<ProjectsGrid />);
     await user.click(screen.getByRole('button', { name: 'Systems' }));
     expect(screen.getByRole('button', { name: 'Systems' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('No projects in this category yet.')).toBeInTheDocument();
     for (const p of projects) {
-      expect(screen.queryByText(p.title)).not.toBeInTheDocument();
+      if (p.slug === 'agent-harness') expect(screen.getByText(p.title)).toBeInTheDocument();
+      else expect(screen.queryByText(p.title)).not.toBeInTheDocument();
     }
+    expect(screen.queryByText('No projects in this category yet.')).not.toBeInTheDocument();
   });
 
   it('All filter is active by default', () => {

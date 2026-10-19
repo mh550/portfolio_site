@@ -61,9 +61,9 @@ describe('case-study types', () => {
     expect([badLink, badDecision, badIteration, badLesson, badMethod, badDiagrams, badCategory]).toHaveLength(7);
   });
 
-  it('no current project is in systems or process yet', () => {
-    expect(getProjectsByCategory('systems')).toEqual([]);
-    expect(getProjectsByCategory('process')).toEqual([]);
+  it('agent-harness is the only project in systems and in process (M4)', () => {
+    expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual(['agent-harness']);
+    expect(getProjectsByCategory('process').map((p) => p.slug)).toEqual(['agent-harness']);
   });
 
   it('the fixture is not in projects', () => {

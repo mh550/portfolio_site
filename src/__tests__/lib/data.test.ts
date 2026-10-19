@@ -9,8 +9,8 @@ import {
 } from '@/lib/data';
 
 describe('projects data', () => {
-  it('exports an array with 6 projects', () => {
-    expect(projects).toHaveLength(6);
+  it('exports an array with 7 projects', () => {
+    expect(projects).toHaveLength(7);
   });
 
   it('each project has required fields', () => {
@@ -51,6 +51,7 @@ describe('projects data', () => {
   it('carries the D12 order on every project', () => {
     const orders = Object.fromEntries(projects.map((p) => [p.slug, p.order]));
     expect(orders).toEqual({
+      'agent-harness': 1,
       'linear-ai-workflow': 2,
       'ghl-jobtread-integration': 5,
       'paint-estimator': 6,
@@ -74,15 +75,16 @@ describe('projects data', () => {
 describe('getTopProjects', () => {
   it('returns the first n featured projects by order', () => {
     expect(getTopProjects(3).map((p) => p.slug)).toEqual([
+      'agent-harness',
       'linear-ai-workflow',
       'ghl-jobtread-integration',
-      'paint-estimator',
     ]);
   });
 
   it('returns every featured project, sorted by order, when n exceeds the count', () => {
     const slugs = getTopProjects(10).map((p) => p.slug);
     expect(slugs).toEqual([
+      'agent-harness',
       'linear-ai-workflow',
       'ghl-jobtread-integration',
       'paint-estimator',

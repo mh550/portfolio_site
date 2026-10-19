@@ -9,6 +9,22 @@ new defaults go in the spec's Decisions list as `D<n> *default*` (D15–D27 alre
 
 ---
 
+### 2026-10-18 20:20 · M4-02 · passes
+
+- `src/lib/data/projects.ts`: the agent-harness entry, first in the array (order 1, featured), copy pasted from the M4-01 plan
+  (a script confirmed all plan copy strings are in it verbatim); the excerpt is `lib/driver.sh` 170–182 read from the file at
+  agent-harness `a586f59` (as `String.raw`, no `${`/backtick/backslash in it). `detail.architectureDiagram` and `extraDiagrams` are
+  **not** set: the DiagramKeys don't exist yet, M4-03 adds both.
+- Tests 228 → 242 (34 → 36 suites): new `case-study-agent-harness.test.ts` (13: fields, 4 metrics, method, decision ids, 6 iterations,
+  5 lessons, links, builtWith, excerpt ≤ 25 lines + verbatim in the live file (ran, not skipped), digit runs 55/52/374/2.53 and ids in the
+  brief, no `.ts.net`/ntfy/journal/raw); data.test 6 → 7, top-3 = agent-harness/linear/ghl; case-study-types: systems/process =
+  [agent-harness]; ProjectsGrid Systems shows the card, empty state moved to new `ProjectsGrid.empty.test.tsx` (mocked empty list).
+- Verified: check.sh green (fresh run); `/projects/agent-harness` 200 with h2s Problem…Key Decisions…Links; smoke 30/30 PASS; Sonnet
+  at 390: all sections in order, scrollWidth − innerWidth 0, the four metric values one line each, code block scrolls inside itself.
+- Next (M4-04): the smoke full-page screenshot is blank below the metric strip (ScrollReveal never fires in a full-page capture):
+  scroll the page before capturing (the Sonnet script is in $HARNESS_SCRATCH/shot.mjs).
+- Questions for Michael: none. Proposed changes (harness): check.sh's test counter prints "6 tests" for this suite (jest --silent); real count 242.
+
 ### 2026-10-18 20:09 · M4-01 · passes
 
 - New `docs/plans/2026-10-18-M4-agent-harness.md`: final copy field by field (entry, 4 metrics, 5 method texts, D-H1/2/4/5/11/17,
