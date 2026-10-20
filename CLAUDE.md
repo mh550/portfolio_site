@@ -30,6 +30,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
 | `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
 | `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
+| `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
 ## Commands
 
@@ -37,8 +38,9 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (986 tests, 74 suites after VC3-05)
+npm test             # Jest unit/integration tests (992 tests, 75 suites after VC3-05 + B2)
 npm run test:watch   # watch mode
+npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
 
 To run a single test file:
