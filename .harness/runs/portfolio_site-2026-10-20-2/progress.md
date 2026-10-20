@@ -10,6 +10,20 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 10:25 · B1-02 · passes
+
+- **Landed:** `public/b/mh_harness/fake_game.py` (env-driven; `HARNESS_PID` first, then per call i `HARNESS_LLM
+  {"in": 1000*i, "out": 50*i, "ms": 100*i}` + `HARNESS_TOOL visit_city city-<i>`, `fake alarm: <text>` after call 1,
+  `RESULT {"words_found": W, "score": W*100}`, exit FAKE_EXIT); `run_one.py` with only `parse_telemetry` and
+  `exit_reason` (plus private `_marker_json`, `_int`); `tests/test_telemetry.py` (18 tests). Jest 643 → 643.
+- **Verified:** `python3 -m unittest discover -s tests` 18 ok in 0.13 s; `FAKE_LLM_CALLS=2 … | grep -c HARNESS_TOOL`
+  → 2; `FAKE_EXIT=3 …; echo $?` → 3; importing run_one prints nothing; ast 3.8 parse ok; no `__pycache__` in
+  `git status -uall`; `.harness/check.sh` `lint ok · jest ok · build ok`; smoke green.
+- **Next session (B1-03):** add `harness_home`, `kill_tree`, `start_detached`, `main` to `run_one.py` (no `main` or
+  `__main__` block yet) and `adapter.py`; `fake_game.py` with `FAKE_LLM_CALLS=0` sleeps FAKE_SLEEP_S in one go.
+- **Proposed change:** the plan's B1-06 ast command under `python3 -W error` prints ResourceWarnings for the
+  unclosed `open(f)` (exit still 0); use `pathlib.Path(f).read_text()` there.
+
 ### 2026-10-20 10:05 · B1-01 · passes
 
 - **Landed:** `docs/plans/2026-10-20-B1-booth-harness.md` (Files, Shared functions, results.jsonl row, Process control,
