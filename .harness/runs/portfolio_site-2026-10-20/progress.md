@@ -14,6 +14,27 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 · verify VC1
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC1-01 | 1 | read package.json; `npm view` each pkg; `npm ci` in a temp copy; ls node_modules/@livekit; grep lock for components-styles | deps pin livekit-client 2.23.0, components-react 2.9.24, server-sdk 2.19.1 = npm latest; no ^/~; npm ci clean; no styles pkg (0 hits); plan § explains why | yes |
+| VC1-01 | 2 | read spec D41 (line 156) | D41 *default* names the 3 packages, pins, reason (spec §3, Michael 10-19) | yes |
+| VC1-01 | 3 | read plan quotes + decoded token; ls protocol/dist | AccessToken.d.ts, RoomConfiguration/RoomAgentDispatch quoted; decoded payload has sub, video.room, roomConfig.agents[0].agentName, exp, nbf (no iat, noted). livekit_room_pb.d.ts absent in installed protocol (declared in dist/index.d.ts); plan states this | yes |
+| VC1-01 | 4 | read plan behaviour table + tests section | 503/400/200, room, identity, ttl 600, grants, metadata, emptyTimeout 30, runtime/dynamic, env per request, spec §5 tests and 'x'.repeat(32) guard advice all present | yes |
+| VC1-01 | 5 | check.sh + `npx jest --silent` | check green; jest 60 suites/680 tests pass | yes |
+| VC1-02 | 1 | read concierge-token-route.test.ts lines 55-90; ran it | no env → 503 toEqual {offline:true}; it.each of each var missing → 503; test passes | yes |
+| VC1-02 | 2 | read test cases lines 90-116 | it.each: not-a-uuid, v1, 37-char, missing body, non-JSON → 400 {error:'bad_request'}, no token | yes |
+| VC1-02 | 3 | read tests 118-200; ran; read route.ts | keys url+token, url=env, sub/room/roomJoin/nbf+600/agentName/metadata/emptyTimeout 30, distinct rooms, no key/secret in text; real SDK (no mocks in this file) | yes |
+| VC1-02 | 4 | read visitorId.ts and concierge-visitor-id.test.ts; route imports it | isUuidV4 accepts either case v4; tests reject v1, bad variant, wrong length, non-strings; passes | yes |
+| VC1-02 | 5 | read route.ts; curl POST on :7832 | runtime='nodejs', dynamic='force-dynamic', env read in handler; curl → HTTP 503 {"offline":true} | yes |
+| VC1-02 | 6 | check.sh; `node .harness/smoke.mjs` (twice) | check green; smoke all PASS, exit 0 | yes |
+| VC1-03 | 1 | read plan § Review (line 215) | 9-row table (file·finding·severity·outcome); Important flaky nbf fixed with frozen clock; commit e81219d adds tests | yes |
+| VC1-03 | 2 | `grep -rn LIVEKIT src/components src/app --include=*.tsx`; `grep -rl LIVEKIT_API .next-check/static`; read route.ts and sdk test | both greps empty; error bodies are literals; room/identity from validated id + randomBytes; 37/10000-char ids rejected before SDK (regex anchored, spy test) | yes |
+| VC1-03 | 3 | `npx jest content-guard.test.ts` | passes with route tests present | yes |
+| VC1-03 | 4 | read CLAUDE.md; `npx jest --silent | tail` | route row, D41 packages in Code rules; counts 680 tests/60 suites match | yes |
+| VC1-03 | 5 | check.sh | green | yes |
+
 ### 2026-10-20 00:36 · VC1-03 · passes
 
 - **Review:** Opus read `VC1.diff` (652 lines). No Critical findings. 1 Important: the token test's `exp - nbf === 600` was flaky,
