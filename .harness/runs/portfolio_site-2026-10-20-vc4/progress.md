@@ -11,6 +11,54 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 18:30 · verify VC5
+
+Steps failing for VC5-01/03/04 are one cause: D72 (room name `concierge-<addr10>` without random suffix) is a deliberate security fix but the feature steps were not updated to it. The next session should update the steps' wording or revert D72, with Michael's choice.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC5-01 | 1 | read plan § Mic timing, Route behaviour table, Origin rules, Address hash, Modules, /talk busy states, server-only, Tests, Live check, What Michael will see, Review, Decisions | all sections exist; table order and codes match, BUT row 5/7 read `concierge-<addr10>` (was `-*` / `-<12 hex>` until D72), so the step's room-name text no longer holds | no |
+| VC5-01 | 2 | read plan § Origin rules vs src/lib/concierge/origin.ts | regex `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$`, dev localhost/127.0.0.1, null → false, whole-origin compare via `new URL` | yes |
+| VC5-01 | 3 | read plan § Address hash vs limits.ts | first XFF entry/`unknown`, HMAC-SHA256 10 hex all match; Plan/step says the room name has a random suffix (`concierge-<addr10>-<12 hex>`); D72 (VC5-07) changed it to `concierge-<addr10>` with no suffix (step says `randomBytes(6)` suffix, code has none) | no |
+| VC5-01 | 4 | read plan § Modules; ls tests | origin.ts/limits.ts/rooms.ts, limits test file with `jest.mock` of rooms, token-route test mocks nothing; Modules table still lists `randomBytes` import (stale) but names hold | yes |
+| VC5-01 | 5 | read § Mic timing, § /talk busy states; data/concierge.ts | mic moved to agentArrived, toggle live-only, busy action/copy matches (lines 44-45) | yes |
+| VC5-01 | 6 | read § Live check, D63–D67 in spec | curl no Origin/evil/preview, two tabs, CONCIERGE_MAX_ROOMS, undo, agent-room-name caveat all present; D63–D67 at spec lines 126–143 | yes |
+| VC5-01 | 7 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-02 | 1 | `grep -n 'setMic(session, true)' TalkSession.tsx` | one line (272), inside agentArrived | yes |
+| VC5-02 | 2 | read TalkSession-live.test.tsx 61–113, TalkSession.test.tsx micCalls | 0 calls after connect without agent, `[[true]]` after addAgent, 0 on offline/unconfigured paths; pass in jest run | yes |
+| VC5-02 | 3 | grep tests for 'Mute microphone'; jest run | button absent while waiting, present when live (D65); talk and a11y tests pass | yes |
+| VC5-02 | 4 | read plan § Mic timing; docs/review-guide.md line 108 | plan matches code; guide says mic asked once concierge has joined | yes |
+| VC5-02 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-03 | 1 | read concierge-origin.test.ts + origin.ts; jest | origin.ts logic yields every listed true/false case (no-throw on non-URL); suite passes | yes |
+| VC5-03 | 2 | read concierge-limits.test.ts line 10,47 + limits.ts | addressOf/addressBucket/roomsVerdict/maxRooms hold; BUT roomNameFor test asserts `/^concierge-[0-9a-f]{10}$/` and no 'two calls differ' (D72), contradicting the step's `-[0-9a-f]{12}` regex | no |
+| VC5-03 | 3 | `grep -n server-only package.json`; `npm ls server-only`; `grep -L` | `"server-only": "0.0.1"` exact; npm ls 0.0.1; grep -L prints nothing; rooms.ts exists | yes |
+| VC5-03 | 4 | read TalkSession-import.test.tsx; `grep -rl livekit-client src/app` | counting jest.mock proves 0 loads unconfigured, 1 configured; grep empty | yes |
+| VC5-03 | 5 | read CLAUDE.md Code rules; plan § server-only | server-only named (D67); modules listed | yes |
+| VC5-03 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-04 | 1 | read route.ts; `grep -n console route.ts` | order 403→503→400→503→429→200 as stated, no-store on all, no console (grep empty) | yes |
+| VC5-04 | 2 | read concierge-token-route.test.ts; ran curls on :7834 | no Origin 403, evil 403, localhost 503 (dev); tests pass | yes |
+| VC5-04 | 3 | read concierge-token-route-limits.test.ts lines 19,83-91,156 | ROOM regex is `^concierge-([0-9a-f]{10})$` (no 12-hex suffix) and test title still says `-<12 hex>`; other cases (429s, 200 with MAX=4, 503, unknown bucket) pass; step's `-<12 hex>` regex does not hold (D72) | no |
+| VC5-04 | 4 | read concierge-token-route-sdk.test.ts | bad id and 403 reach no SDK or listLiveRooms call; passes | yes |
+| VC5-04 | 5 | read plan § Route behaviour + CLAUDE.md token row | matches code (room names updated per D72) | yes |
+| VC5-04 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-05 | 1 | read data/concierge.ts 44-45; sessionReducer.test.ts | both sentences present; reducer busy cases pass | yes |
+| VC5-05 | 2 | read TalkSession.test.tsx 179-232 | both reasons, unknown reason → offline, fetch count 1 after 15 s, no Room, mic 0; pass | yes |
+| VC5-05 | 3 | read projects.ts line 800; evidence note; jest | protection sentence in build copy; digit sentences covered by case-study and content-guard tests (pass) | yes |
+| VC5-05 | 4 | `grep -n 'Cost protection' docs/notes/voice-concierge-todo.md` | § at line 48 | yes |
+| VC5-05 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-06 | 1 | Read VC5-talk-busy-visitor-390.png; sizes via PIL; read plan table | 3 PNGs 56/58/75 KB, 390×844 / 1280×800; visitor line + Connect visible; plan rows exist | yes |
+| VC5-06 | 2 | reran .harness/talk-busy-check.mjs on :7834 (no dummy env; a second server on 7835 failed on the .next lock); read TalkSession.test.tsx 200 | rerun: 0 token requests because Connect skips the route without env (D46), so it can't re-prove 1/Connect; Jest: 429 → fetch called once over 15 s, getUserMedia 0, 0 errors in rerun; prior run documented in plan | yes |
+| VC5-06 | 3 | curl x3 on :7834 | 403, 403, 503 | yes |
+| VC5-06 | 4 | rerun script focus line | focus Connect, outline rgb(0, 212, 255), focusVisible true | yes |
+| VC5-06 | 5 | read plan § What Michael will see lines 394-400 | one row per screenshot and curl line, with the 3 columns | yes |
+| VC5-06 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-07 | 1 | read plan § Review; grep LIVEKIT_/server-only in src/components src/lib/data | review table with answers present; grep finds only copy text unrelated to env (no `LIVEKIT_` or server-only import) | yes |
+| VC5-07 | 2 | read docs/review-guide.md 151+, line 108 | § VC5 present with staged check, room list, undo; mic line updated | yes |
+| VC5-07 | 3 | read CLAUDE.md; jest tail | rows/lines name origin/limits/rooms, order, server-only, limits test and mock; count 1114 tests/81 suites matches | yes |
+| VC5-07 | 4 | read spec § 7 and vc4 spec Built note | D59–D72 each in spec, Built note at line 69 | yes |
+| VC5-07 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+
+
 ### 2026-10-20 17:50 · VC5-07 · passes
 
 - Opus review of `git diff e409a14^..HEAD`: no Critical. **Important, fixed (D72 *default*):** a forged-Origin shell could mint N tokens from one address before any room existed (each got a random room) → N agents. `roomNameFor` is now `concierge-<addr10>` (no random part), and `roomsVerdict` matches that exact name, so a burst of tokens shares one room and one agent dispatch (the token's roomConfig applies only to the join that creates the room). Tests first: 10 failed, then passed. Simplification: `mic`/`micBlocked` apply only when `live` (2 failed, then passed). `tsc --noEmit` went from 4 test-file errors to 0. Tests 1113 → 1114 (81 suites).
