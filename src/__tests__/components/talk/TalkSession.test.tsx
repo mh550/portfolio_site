@@ -178,7 +178,9 @@ describe('TalkSession: the token route', () => {
 
 // D66: a 429 {error:'busy'} says why Connect was refused and leaves the retry to the visitor.
 describe('TalkSession: the token route says busy (429)', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
 
   it.each([
     ['visitor', talkPage.status.busyVisitor],

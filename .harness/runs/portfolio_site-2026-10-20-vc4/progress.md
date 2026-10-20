@@ -11,6 +11,15 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 17:50 · VC5-07 · passes
+
+- Opus review of `git diff e409a14^..HEAD`: no Critical. **Important, fixed (D72 *default*):** a forged-Origin shell could mint N tokens from one address before any room existed (each got a random room) → N agents. `roomNameFor` is now `concierge-<addr10>` (no random part), and `roomsVerdict` matches that exact name, so a burst of tokens shares one room and one agent dispatch (the token's roomConfig applies only to the join that creates the room). Tests first: 10 failed, then passed. Simplification: `mic`/`micBlocked` apply only when `live` (2 failed, then passed). `tsc --noEmit` went from 4 test-file errors to 0. Tests 1113 → 1114 (81 suites).
+- Docs: plan § Review table and 7 answers, the known-limits note and D72; review guide § VC5 (what changed, the 4-stage live check, the room list, undo for each piece); CLAUDE.md token row (room per address) and count; D61/D68/D70/D71 now name what they supersede; the VC4 spec has a dated Built note with D59–D72 and the two things to confirm.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -rn 'LIVEKIT_\|server-only' src/components src/lib/data` empty; SDK 2.19.1 `AbortSignal.timeout(timeout * 1e3)` checked.
+- Not fixed: `TalkSession-review.test.tsx` › "a draft from a call that ended…" still logs "A component suspended inside an act scope". It fires during the `disconnected` emit and comes from a jsdom timer after `user.type`. It is test noise from before VC5 and doesn't fail anything.
+- Questions for Michael: **D72**: keep one room per address? Side effect: two people behind one NAT who press Connect in the same second share a room. Undo is in `limits.ts` alone. Still open: D64 (preview regex vs exact `VERCEL_URL`), D68, D70 (TTL 60 s?), D71 (another-tab wording), and the offline line's missing full stop.
+- Confirm on the live check: the agent doesn't parse room names (now `concierge-<10 hex>`), and the preview regex matches your previews.
+
 ### 2026-10-20 17:05 · VC5-06 · passes
 
 - New `.harness/talk-busy-check.mjs` (Playwright, `page.route` fulfils every token POST) and four captures in `docs/screenshots/v2/`: `VC5-talk-busy-visitor-390.png` 56 KB, `VC5-talk-busy-site-390.png` 57 KB, `VC5-talk-busy-visitor-1280.png` 73 KB, `VC5-talk-offline-503-390.png` 55 KB. Plan § What Michael will see filled (7 rows: 4 captures, 3 curl lines). No code change; tests 1113 → 1113 (81 suites).

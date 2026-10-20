@@ -147,3 +147,74 @@ Run `portfolio_site-2026-10-20-vc4`, spec `docs/specs/2026-10-20-vc4-order-widge
   `src/components/Navbar.tsx`; the widget is the one `{pathname !== talkWidget.href && <VoiceWidget />}` line in
   `src/components/SiteChrome.tsx` (then the Footer's `pb-24 xl:pb-8` can go back to `py-8`); the intro is
   `talkPage.intro[0]` in `src/lib/data/concierge.ts`. Each has tests that pin it, so expect those to go red with it.
+
+## VC5: mic timing and cost protection
+
+Same run and spec as VC4, plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (its § Review is the Opus
+review table, § Live check the full staged check). Merge after VC4. Decisions D63–D71 are in
+`docs/specs/2026-10-19-voice-concierge-page.md` § 7.
+
+- Changed: the browser asks for the microphone only once the concierge has joined, and the Mute button shows only
+  when Connected (D65). `POST /api/concierge/token` now checks, in this order: the Origin (403 `{error:'forbidden'}`
+  unless it is the site, a `portfolio-site-…-mh550s-projects` preview or, in dev, localhost; before the env check,
+  D63) → the three `LIVEKIT_*` (503) → the body (400) → LiveKit's live room list (503 if that call fails: fail
+  closed) → 429 `{error:'busy', reason:'visitor'}` if your address already has a live room, `reason:'site'` if
+  `CONCIERGE_MAX_ROOMS` (default 2) rooms are live → a token for room `concierge-<10 hex of your address's
+  HMAC>`, one room per address, so tokens a script mints from one address all land in one room with one agent
+  (D72). No database: the room list is the state. `/talk` shows one line per 429 ("You already have a
+  conversation open in another tab." / "The concierge is busy right now. Try again in a few minutes."), keeps
+  Connect, and never retries by itself (D66). `server-only` (exact `0.0.1`, D67) guards `env.ts` and `rooms.ts`
+  from the client bundle. The deep-dive gained one sentence on how it's protected (the agent's 5 sessions a day and
+  10 minutes each, the provider caps), traced in `docs/notes/evidence-voice-concierge.md`.
+- Look at (390): `/talk` is unchanged until you press Connect. Captures of the busy and offline replies (stubbed in
+  the browser, not from the route): `docs/screenshots/v2/VC5-talk-busy-visitor-390.png`, `VC5-talk-busy-site-390.png`,
+  `VC5-talk-busy-visitor-1280.png`, `VC5-talk-offline-503-390.png`.
+
+### The staged live check (Michael)
+The harness never runs this (build-only). On the PR preview, in order; stop at the first stage that doesn't match.
+`P=<preview URL from the PR's Vercel comment>`.
+
+1. **Origin, before any env is set.**
+   ```bash
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST $P/api/concierge/token -H 'content-type: application/json' \
+     -d '{"visitor_id":"123e4567-e89b-42d3-a456-426614174000"}'                                  # expect 403
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST $P/api/concierge/token -H 'content-type: application/json' \
+     -H 'Origin: https://evil.example' -d '{"visitor_id":"123e4567-e89b-42d3-a456-426614174000"}'  # expect 403
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST $P/api/concierge/token -H 'content-type: application/json' \
+     -H "Origin: $P" -d '{"visitor_id":"123e4567-e89b-42d3-a456-426614174000"}'                  # expect 503
+   ```
+   A 403 on the third means the preview host doesn't match the regex (D64): paste the host into INBOX.
+   LiveKit Cloud → Rooms: nothing new (no token was signed).
+2. **One visitor, two tabs** (the three `LIVEKIT_*` for **Preview** only, redeploy, start the worker). Tab A:
+   Connect → Connected, and only then the microphone prompt. Room list: one `concierge-<10 hex>` room
+   with two participants (you and the agent). Tab B, same browser: Connect → "You already have a conversation
+   open in another tab.", Connect still shown, no mic prompt; room list still one room. Tab A: Leave, and count
+   the seconds the room stays listed; until it goes, Tab B still gets the another-tab line (D68). If it stays for
+   minutes, tell the run (D68's alternative: count only rooms with a `visitor-` participant). Re-run stage 1:
+   403, 403, then 200 (a token nobody uses: no room appears) or 429 if a conversation is live. D72's check: while
+   Tab A is live, its room name has no second hex part, and stage 1's third curl from the same network answers
+   429 `visitor`.
+3. **The site cap** (`CONCIERGE_MAX_ROOMS` unset = 2): two conversations live from two addresses (laptop, and a
+   phone on cellular); the room list shows two `concierge-` rooms with different 10-hex parts. A third device on
+   another network → "The concierge is busy right now. Try again in a few minutes.", no mic prompt; still two
+   rooms.
+4. **Production**, only after 1–3 hold: the three `LIVEKIT_*` in Production (`CONCIERGE_MAX_ROOMS` only if not 2),
+   merge, stage 1's first two curls against `https://michael-herron.vercel.app` (403, 403), one Connect. Room list:
+   one new `concierge-` room while it lasts, gone after Leave as fast as in stage 2.
+
+Two things to confirm, not checkable in this run: the agent doesn't parse room names (in `mh550/voice-concierge`,
+`grep -rn 'room.name\|room_name' concierge/` must show nothing that splits on `-` or expects
+`concierge-<12 hex>`; rooms are now `concierge-<10 hex>`), and the preview regex matches your current previews (stage 1's third curl).
+
+**Undo**, one piece at a time:
+- The site cap too tight or too loose → set `CONCIERGE_MAX_ROOMS` in Vercel (Preview and/or Production) and
+  redeploy; delete it to go back to 2.
+- One room per address (D72) → `roomNameFor` in `src/lib/concierge/limits.ts` back to
+  `` `concierge-${bucket}-${randomBytes(6).toString('hex')}` `` and `roomsVerdict`'s match back to
+  `startsWith(`concierge-${bucket}-`)` (the VC5-07 commit's `limits.ts` hunk and its tests).
+- The route's limits → revert the VC5-04 commit: the VC1 route returns (no Origin check, no room list, room
+  `concierge-<12 hex>`); `concierge-token-route-limits.test.ts` goes with it.
+- The busy lines → revert the VC5-05 commit (a 429 then reads as offline).
+- The mic timing → revert the VC5-02 commit (mic asked on connect again, toggle while Waiting).
+- `server-only` → remove the two `import 'server-only'` lines and the dependency.
+- Everything off → remove the three `LIVEKIT_*` and redeploy (503, `/talk` offline).

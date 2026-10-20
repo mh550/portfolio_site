@@ -109,7 +109,7 @@ other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
   (below the Navbar's `z-50`), the shared `focusRing` with `focus-visible:outline-offset-4` (clear of the ring), `print:hidden`, and a decorative ring that pulses twice (4 s)
   only under `motion-safe:`. `SiteChrome` renders it after the Footer on every chrome page except `/talk` (and
   `/card*`, which has no chrome); `/evidence` keeps it. The Footer's bottom padding becomes `pb-24 xl:pb-8` so its
-  links stay clear of the widget at every width. Reversible: drop the element from `SiteChrome` and the padding from
+  links stay clear of the widget at every width. Supersedes nothing (new element). Reversible: drop the element from `SiteChrome` and the padding from
   `Footer`. Question for Michael: should `/evidence` lose it too? (VC4-01 plan; VC4-03 builds.)
 - **D62** The `/talk` intro and the deep-dive credit use the harness framing (Michael, VC4 spec § VC4.4). The intro's
   first paragraph is "A voice agent I designed on LiveKit and built with my agent harness: specs in, verified
@@ -145,17 +145,26 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
 - **D68** *default* `listLiveRooms` uses one 5 s attempt (`requestTimeout: 5`, `failover: false`), and every room
   it lists counts as live, whatever its participants (fail closed on cost). Effect: after Leave, the address reads
   busy until LiveKit closes the room. Alternative if that window is long: count only rooms with a `visitor-`
-  participant (`listParticipants` per room). Question: which do you want after stage 2 of the live check? (VC5-01 plan; VC5-03 and VC5-04 build.)
+  participant (`listParticipants` per room). Supersedes nothing (new). Question: which do you want after stage 2 of the live check? (VC5-01 plan; VC5-03 and VC5-04 build.)
 - **D69** *default* The token route's 200 cases move from `concierge-token-route.test.ts` to
   `concierge-token-route-limits.test.ts`, which mocks only `@/lib/concierge/rooms` (factory) and signs with the real
   SDK. `concierge-token-route.test.ts` stays mock-free. Refines D42 (the real SDK still signs every tested token).
   Overrides VC5-01 step 4's "only gains an allowed Origin header plus the 403 cases" (VC5-04 step 2 leaves it to
   the plan). (VC5-01 plan; VC5-04 builds.)
 - **D70** *default* The visitor's own room name, and so their `addr10`, is inside their JWT (`video.room`); the
-  address never is, and no body carries a bucket in plain text. The token TTL stays 600 s (VC1). Question: cut it
+  address never is, and no body carries a bucket in plain text. The token TTL stays 600 s (VC1). Supersedes VC1's
+  room name `concierge-<12 hex>` (`docs/plans/2026-10-20-VC1-token-route.md`). Question: cut it
   to about 60 s to narrow the mint-then-join window (§ Route behaviour, known limits)? (VC5-01 plan; VC5-04 builds.)
 - **D71** *default* The `busyVisitor` line keeps the spec's wording, "You already have a conversation open in another
   tab.", although `reason: 'visitor'` means only "this network address has a live room": under D68 that is also the
   visitor's own room for up to about 30 s after Leave, or another person behind the same NAT (two phones on the
   conference Wi-Fi). Alternative: "A conversation from your network is still open. Try again in a minute." Question:
-  keep the spec's line or switch? (VC5-05 builds; a copy change in `talkPage.status.busyVisitor` only.)
+  keep the spec's line or switch? Supersedes nothing (the spec's own wording). (VC5-05 builds; a copy change in `talkPage.status.busyVisitor` only.)
+- **D72** *default* One room per address: `roomNameFor(bucket)` is `concierge-<addr10>`, with no random part, and a
+  room is this address's when its name is exactly that. Every token minted from one address before anyone joins
+  names the same room, and the token's `roomConfig` (the agent dispatch) applies only to the join that creates it,
+  so a script that mints a burst of tokens with a forged Origin starts one room and one agent, not one per token
+  (VC5-07 review, Important). Supersedes the VC5 spec's `concierge-<addr10>-<random>` (§ VC5.2) and D70's room
+  shape (the bucket is still in the caller's own JWT). Side effect: two people behind one NAT pressing Connect in
+  the same second share a room. Reversible in `limits.ts` alone (review guide § VC5, Undo). Question: keep it?
+  (VC5-07 builds.)

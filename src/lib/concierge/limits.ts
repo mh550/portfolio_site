@@ -1,4 +1,4 @@
-import { createHmac, randomBytes } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 
 // The token route's room limits (plan docs/plans/2026-10-20-VC5-mic-limits-server-only.md § Address hash): pure, so
 // no env and no server-only; the secret comes in as an argument. The address and its bucket are never logged or
@@ -21,15 +21,17 @@ export function addressBucket(address: string, secret: string): string {
   return createHmac('sha256', secret).update(address).digest('hex').slice(0, 10);
 }
 
+// One room per address (D72): tokens minted from it before anyone joins all name this room, so joining them all
+// starts one room and dispatches one agent (the token's roomConfig applies only when the join creates the room).
 export function roomNameFor(bucket: string): string {
-  return `${ROOM_PREFIX}${bucket}-${randomBytes(6).toString('hex')}`;
+  return `${ROOM_PREFIX}${bucket}`;
 }
 
 // 'visitor' if this address already has a live room, else 'site' if `max` or more concierge rooms are live, else
 // null. Rooms of other uses of the LiveKit project (not concierge-*) don't count.
 export function roomsVerdict(rooms: { name: string }[], bucket: string, max: number): BusyVerdict | null {
   const concierge = rooms.filter((room) => room.name.startsWith(ROOM_PREFIX));
-  if (concierge.some((room) => room.name.startsWith(`${ROOM_PREFIX}${bucket}-`))) return 'visitor';
+  if (concierge.some((room) => room.name === roomNameFor(bucket))) return 'visitor';
   return concierge.length >= max ? 'site' : null;
 }
 

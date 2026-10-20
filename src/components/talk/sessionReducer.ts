@@ -100,10 +100,11 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         : [...state.lines.map((line) => (line.who === next.who && !line.final ? { ...line, final: true } : line)), next];
       return { ...state, lines };
     }
+    // The mic is asked for only once the agent has joined (D65), so only a live session takes its answer.
     case 'mic':
-      return inRoom(state.phase) ? { ...state, micOn: action.on, micBlocked: false } : state;
+      return state.phase === 'live' ? { ...state, micOn: action.on, micBlocked: false } : state;
     case 'micBlocked':
-      return inRoom(state.phase) ? { ...state, micOn: false, micBlocked: true } : state;
+      return state.phase === 'live' ? { ...state, micOn: false, micBlocked: true } : state;
     case 'audio':
       return inRoom(state.phase) && state.audioBlocked !== action.blocked ? { ...state, audioBlocked: action.blocked } : state;
     case 'forgetStart':

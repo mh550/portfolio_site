@@ -4,7 +4,7 @@
 import { RoomServiceClient } from 'livekit-server-sdk';
 import { listLiveRooms } from '@/lib/concierge/rooms';
 
-const mockListRooms = jest.fn();
+const mockListRooms = jest.fn<() => Promise<unknown>>();
 jest.mock('livekit-server-sdk', () => ({
   RoomServiceClient: jest.fn().mockImplementation(() => ({ listRooms: mockListRooms })),
 }));

@@ -7,7 +7,7 @@ import { addressBucket, addressOf, maxRooms, roomNameFor, roomsVerdict } from '@
 const SECRET = 'x'.repeat(32);
 const OTHER_SECRET = 'y'.repeat(32);
 const ADDRESS = '203.0.113.9';
-const ROOM_NAME = /^concierge-[0-9a-f]{10}-[0-9a-f]{12}$/;
+const ROOM_NAME = /^concierge-[0-9a-f]{10}$/;
 
 const headers = (init: Record<string, string> = {}) => new Headers(init);
 const rooms = (...names: string[]) => names.map((name) => ({ name }));
@@ -40,27 +40,26 @@ describe('addressBucket', () => {
 });
 
 describe('roomNameFor', () => {
-  it('is concierge-<bucket>-<12 random hex>, different on every call', () => {
+  // D72: one room per address, so every token minted from it before anyone joins lands in one room with one agent.
+  it('is concierge-<bucket>, the same on every call for one address', () => {
     const bucket = addressBucket(ADDRESS, SECRET);
-    const first = roomNameFor(bucket);
-    const second = roomNameFor(bucket);
-    expect(first).toMatch(ROOM_NAME);
-    expect(first.startsWith(`concierge-${bucket}-`)).toBe(true);
-    expect(second).toMatch(ROOM_NAME);
-    expect(second).not.toBe(first);
+    expect(roomNameFor(bucket)).toBe(`concierge-${bucket}`);
+    expect(roomNameFor(bucket)).toMatch(ROOM_NAME);
+    expect(roomNameFor(bucket)).toBe(roomNameFor(bucket));
+    expect(roomNameFor(addressBucket('198.51.100.7', SECRET))).not.toBe(roomNameFor(bucket));
   });
 });
 
 describe('roomsVerdict', () => {
   const b = addressBucket(ADDRESS, SECRET);
-  const other = (n: number) => `concierge-${addressBucket(`198.51.100.${n}`, SECRET)}-${'a'.repeat(12)}`;
+  const other = (n: number) => `concierge-${addressBucket(`198.51.100.${n}`, SECRET)}`;
 
   it('is null with no live rooms', () => {
     expect(roomsVerdict([], b, 2)).toBeNull();
   });
 
   it("is 'visitor' when this address already has a room", () => {
-    expect(roomsVerdict(rooms(`concierge-${b}-x`), b, 2)).toBe('visitor');
+    expect(roomsVerdict(rooms(`concierge-${b}`), b, 2)).toBe('visitor');
   });
 
   it("is 'site' when max or more concierge rooms of other addresses are live", () => {
@@ -73,12 +72,12 @@ describe('roomsVerdict', () => {
   });
 
   it("prefers 'visitor' over 'site'", () => {
-    expect(roomsVerdict(rooms(other(1), `concierge-${b}-x`), b, 2)).toBe('visitor');
+    expect(roomsVerdict(rooms(other(1), `concierge-${b}`), b, 2)).toBe('visitor');
   });
 
-  it("ignores rooms that are not concierge-*, and needs the '-' after the bucket", () => {
-    expect(roomsVerdict(rooms('lobby', 'test-room', `x-concierge-${b}-x`), b, 2)).toBeNull();
-    expect(roomsVerdict(rooms(`concierge-${b}x-y`), b, 2)).toBeNull();
+  it('ignores rooms that are not concierge-*, and needs the exact name concierge-<bucket>', () => {
+    expect(roomsVerdict(rooms('lobby', 'test-room', `x-concierge-${b}`), b, 2)).toBeNull();
+    expect(roomsVerdict(rooms(`concierge-${b}x`), b, 2)).toBeNull();
   });
 });
 

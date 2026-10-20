@@ -88,7 +88,7 @@ describe('booth harness bundle (public/b/h.tgz)', () => {
         return;
       }
       // Without MH_HARNESS_HOME the run output lands in the extracted copy, never in public/b/mh_harness/.
-      const env = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' };
+      const env: NodeJS.ProcessEnv = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' };
       delete env.MH_HARNESS_HOME;
       const run = spawnSync(python, ['-m', 'unittest', 'discover', '-s', 'tests'], {
         cwd: join(extracted, 'mh_harness'),

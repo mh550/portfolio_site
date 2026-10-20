@@ -56,9 +56,9 @@ Every reply goes through `reply()` and carries `Cache-Control: no-store`.
 | 2 | `conciergeEnv()` null (any `LIVEKIT_*` missing, url not `wss://`) | `503 {"offline": true}` |
 | 3 | Body not JSON, no string `visitor_id`, or not a UUID v4 (`readVisitorId`, unchanged) | `400 {"error": "bad_request"}` |
 | 4 | `listLiveRooms(env)` rejects (network, auth, the 5 s timeout, D68) | `503 {"offline": true}` (fail closed; the error is dropped) |
-| 5 | a live room named `concierge-<addr10>-*` (this address's bucket) | `429 {"error": "busy", "reason": "visitor"}` |
+| 5 | a live room named `concierge-<addr10>` (this address's bucket; was `concierge-<addr10>-*` until D72) | `429 {"error": "busy", "reason": "visitor"}` |
 | 6 | `maxRooms(process.env)` or more live `concierge-*` rooms; `CONCIERGE_MAX_ROOMS` default 2, any value that is not a whole number ≥ 1 falls back to 2 | `429 {"error": "busy", "reason": "site"}` |
-| 7 | otherwise | `200 {"url", "token"}`, room `concierge-<addr10>-<12 hex>` (`roomNameFor(bucket)`) |
+| 7 | otherwise | `200 {"url", "token"}`, room `concierge-<addr10>` (`roomNameFor(bucket)`; was `concierge-<addr10>-<12 hex>` until D72) |
 | – | `toJwt()` throws (unchanged from VC1) | `500 {"error": "token_failed"}` |
 
 Rows 5 and 6 are one call, `roomsVerdict(rooms, bucket, maxRooms(process.env))`, which returns `'visitor'`,
@@ -104,6 +104,12 @@ export async function POST(request: Request) {
   is a question for Michael (D70), not built. And a room stays in `listRooms` after Leave until LiveKit closes it
   (the agent leaves, then LiveKit's departure timeout, 20 s by default): Leave then Connect at once reads "another
   tab" for that long. See § Live check stage 2 and the question in D68.
+  **VC5-07 (D72) closes the one-address case:** the room is now `concierge-<addr10>`, the same for every token
+  from one address, so N tokens minted back to back all join one room. The token's `roomConfig` (and so the agent
+  dispatch) applies only to the join that creates the room ("RoomConfiguration to use if the participant
+  initiates the room", `@livekit/protocol`), so that is one agent, not N. What is left: N different addresses
+  minting at once still pass the site cap together (each sees fewer than the cap), and one address can still
+  start rooms one after another (one at a time, which is the per-visitor limit).
 - The 200 body's JWT carries `video.room`, so the visitor's own `addr10` is in their own token (base64url, not plain
   text). That is by design (D70): it is their bucket, not their address, and no one else sees it. "Never in a
   response" means never in plain text and never someone else's.
@@ -160,7 +166,8 @@ In `src/lib/concierge/limits.ts`, all pure:
   .digest('hex').slice(0, 10)`, ten lowercase hex characters. Keyed with `LIVEKIT_API_SECRET`, so the bucket can't be
   reversed by hashing all IPv4 addresses without the secret.
 - `roomNameFor(bucket: string): string`: `` `concierge-${bucket}-${randomBytes(6).toString('hex')}` ``
-  (`/^concierge-[0-9a-f]{10}-[0-9a-f]{12}$/`). Room names are visible to whoever holds the token (it's in the JWT),
+  (`/^concierge-[0-9a-f]{10}-[0-9a-f]{12}$/`). **Since VC5-07 (D72):** `` `concierge-${bucket}` ``
+  (`/^concierge-[0-9a-f]{10}$/`), no random part, and a room is this address's when its name is exactly that. Room names are visible to whoever holds the token (it's in the JWT),
   which is the visitor themself: they see their own bucket, never anyone's address.
 - A room is "this address's" when its name starts with `` `concierge-${bucket}-` `` (the trailing `-` matters).
 - `roomsVerdict(rooms: { name: string }[], bucket: string, max: number): 'visitor' | 'site' | null`: rooms whose
@@ -361,7 +368,7 @@ Routes table, `/api/concierge/token` row:
 > three `LIVEKIT_*` env vars; 400 on a bad body; 503 if `listRooms` fails (`rooms.ts`); 429 `{error:'busy',
 > reason:'visitor'|'site'}` when this address (HMAC bucket of `x-forwarded-for`) has a live room or
 > `CONCIERGE_MAX_ROOMS` (default 2) are live (`limits.ts`); else a 10-minute LiveKit token for room
-> `concierge-<addr10>-<12 hex>` that dispatches agent `concierge` (`route.ts`, plans
+> `concierge-<addr10>` (D72; drafted as `concierge-<addr10>-<12 hex>`) that dispatches agent `concierge` (`route.ts`, plans
 > `docs/plans/2026-10-20-VC1-token-route.md`, `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`)
 
 Architecture, `lib/concierge/` line: add "the Origin allowlist (`origin.ts`), the address bucket and room limits
@@ -399,6 +406,40 @@ changes the spec's W2 wording and the pinned test; one line in `concierge.ts`.
 
 ## Review
 
+VC5-07: an Opus reviewer read `git diff e409a14^..HEAD` (VC5-01 to VC5-06, saved as `VC5.diff` in the run's scratch
+directory) with the route, `lib/concierge/*`, `TalkSession.tsx` and `sessionReducer.ts` at HEAD, and the
+vercel-react-best-practices rules for the client side. No Critical findings.
+
+| File | Finding | Severity | Outcome |
+|---|---|---|---|
+| `src/app/api/concierge/token/route.ts`, `src/lib/concierge/limits.ts` | The rooms check and the join aren't atomic and every token got its own random room, so a shell with a forged Origin could mint N tokens from one address before any room existed and join them all: N rooms, N agents, past both caps | Important | Fixed (D72): `roomNameFor(bucket)` is `concierge-<addr10>`, so every token from one address names one room and only the join that creates it dispatches the agent. Tests first: `concierge-limits.test.ts` (same name on every call, exact-name match) and `concierge-token-route-limits.test.ts` (three calls from one address, two visitor ids → one room; another address → its own) failed 10, then passed. The cross-address race on the site cap is left (needs N addresses; bounded by the provider caps) |
+| `src/lib/concierge/origin.ts:7` | The preview regex `[a-z0-9-]+` also matches another Vercel account's project named `portfolio-site-x-mh550s-projects` | Minor | Open as D64's question (exact `VERCEL_URL`/`VERCEL_BRANCH_URL` instead). The route sends no CORS headers, so a page there can't read the token |
+| `src/components/talk/sessionReducer.ts` | `mic`/`micBlocked` still accepted in connecting and waiting, which can't happen since D65 (the mic is asked for only in `agentArrived`) | Minor | Fixed: both apply only when `live`; `sessionReducer.test.ts` now expects connecting, waiting and busy to ignore them (2 failed, then passed) |
+| `src/app/api/concierge/token/route.ts:27` | `request.json()` reads a body of any size (Vercel caps it at about 4.5 MB) | Minor | Not taken: the Origin check runs first, the platform cap bounds it, and the body is parsed once |
+| tests (`booth-bundle.test.ts:92`, `concierge-rooms.test.ts:21,39`, `TalkSession.test.tsx:181`) | `npx tsc --noEmit` reported 4 errors in test files (`next build` doesn't type-check tests) | Minor | Fixed: `NodeJS.ProcessEnv`, `jest.fn<() => Promise<unknown>>()`, a block-bodied `beforeEach`; `tsc --noEmit` exits 0 |
+
+The questions the step asks, answered:
+
+- **A token without both checks?** No. The only signing is after `isAllowedOrigin` (403 otherwise) and a null
+  `roomsVerdict` (429 otherwise); every earlier branch returns.
+- **Address, bucket or secret in a response, header, log or the client bundle?** No. No `console.*` in the route or
+  `lib/concierge/`; the bucket is only in the caller's own JWT (`video.room`, D70); `env.ts` and `rooms.ts` are
+  `server-only`, imported by the route and the `/talk` Server Component only. `grep -rn 'LIVEKIT_\|server-only'
+  src/components src/lib/data` is empty. The SDK's own `console.warn` runs only with failover on (it is off).
+- **Can a listRooms timeout hang the request?** No. `requestTimeout: 5` is seconds: livekit-server-sdk 2.19.1's
+  `TwirpRPC` turns it into `AbortSignal.timeout(5000)`, which covers the body too; `failover: false` means one
+  attempt. A timeout rejects, and the route answers 503.
+- **Is the Origin comparison exact?** Yes: `new URL(origin).origin === origin` rejects a path, a trailing slash,
+  userinfo, upper case and `:443`; `'null'` doesn't parse; the site compares whole origins; the preview is an
+  anchored regex over `https:` with no port (its breadth is D64's question); localhost only in dev.
+- **Is `busy` unreachable from live?** Yes: the reducer takes `busy` only from `connecting`, and the client returns
+  before any Room exists; a stale fetch is dropped by `session.alive`.
+- **Is the mic requested once per agent arrival?** Yes: `agentArrived` is the only call site, guarded by
+  `agentIdentity`; `Reconnected` never calls it; a second agent or a rejoin is blocked by the same guard.
+- **Simplification.** One place decides the status order (`route.ts` `POST`, top to bottom); UUID parsing is only
+  `isUuidV4` (`visitorId.ts`) and Origin parsing only `origin.ts`; the dead reducer branches are gone (above).
+  `limits.ts` no longer imports `randomBytes`.
+
 ## Decisions
 
 Recorded in `docs/specs/2026-10-19-voice-concierge-page.md` § 7, each naming what it supersedes.
@@ -430,3 +471,6 @@ Recorded in `docs/specs/2026-10-19-voice-concierge-page.md` § 7, each naming wh
 - **D70** *default* The visitor's own room name, and so their `addr10`, is inside their JWT (`video.room`); the
   address never is, and no body carries a bucket in plain text. The token TTL stays 600 s (VC1). Question: cut it
   to about 60 s to narrow the mint-then-join window (§ Route behaviour, known limits)?
+- **D72** *default* One room per address, `concierge-<addr10>` with no random part (VC5-07 review, Important):
+  tokens minted from one address in a burst all name one room, so one agent. Supersedes the VC5 spec's
+  `concierge-<addr10>-<random>`. Question: keep it?

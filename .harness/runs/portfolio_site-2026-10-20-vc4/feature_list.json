@@ -210,7 +210,7 @@
         "docs/specs/2026-10-19-voice-concierge-page.md `## 7. Decisions` holds D59–D67 (plus any added during VC5) each naming what it supersedes, and docs/specs/2026-10-20-vc4-order-widget-limits.md gains a dated 'Built' note at its end listing the defaults taken (D59–D67) and the two things Michael must confirm (the agent does not parse room names; the preview-host regex matches his current previews).",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

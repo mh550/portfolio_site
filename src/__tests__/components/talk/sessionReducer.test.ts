@@ -147,9 +147,10 @@ describe('sessionReducer', () => {
   });
 
   describe('the microphone', () => {
-    it.each(['connecting', 'waiting', 'live'] as Phase[])('follows setMicrophoneEnabled while %s', (phase) => {
-      const on = sessionReducer(at(phase), { type: 'mic', on: true });
-      expect(on).toMatchObject({ phase, micOn: true, micBlocked: false });
+    // D65: the mic is asked for only once the agent has joined, so only a live session takes its answer.
+    it('follows setMicrophoneEnabled while live', () => {
+      const on = sessionReducer(at('live'), { type: 'mic', on: true });
+      expect(on).toMatchObject({ phase: 'live', micOn: true, micBlocked: false });
       expect(sessionReducer(on, { type: 'mic', on: false }).micOn).toBe(false);
     });
 
@@ -159,11 +160,14 @@ describe('sessionReducer', () => {
       expect(sessionReducer(blocked, { type: 'mic', on: true })).toMatchObject({ micOn: true, micBlocked: false });
     });
 
-    it.each(['idle', 'ended', 'offline'] as Phase[])('a late mic answer while %s changes nothing', (phase) => {
+    it.each(['idle', 'connecting', 'waiting', 'busy', 'ended', 'offline'] as Phase[])(
+      'a mic answer while %s changes nothing',
+      (phase) => {
       const state = at(phase);
       expect(sessionReducer(state, { type: 'mic', on: true })).toBe(state);
       expect(sessionReducer(state, { type: 'micBlocked' })).toBe(state);
-    });
+      }
+    );
   });
 
   it('tracks blocked playback while in a room, and ignores it after', () => {

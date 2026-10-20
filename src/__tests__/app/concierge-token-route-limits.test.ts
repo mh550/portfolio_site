@@ -2,7 +2,7 @@
 // The token route's room limits (plan docs/plans/2026-10-20-VC5-mic-limits-server-only.md § Route behaviour) and the
 // VC1 200 cases. Mocks only the room list, with a factory (an automock would load the real module and its
 // network client, D69); the real livekit-server-sdk signs every token.
-import { createHmac } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { TokenVerifier } from 'livekit-server-sdk';
 import { POST } from '@/app/api/concierge/token/route';
 import { listLiveRooms } from '@/lib/concierge/rooms';
@@ -16,7 +16,7 @@ const SECRET_VALUE = 'x'.repeat(32);
 const VISITOR = '123e4567-e89b-42d3-a456-426614174000';
 const ADDRESS = '203.0.113.9';
 const FORWARDED = `${ADDRESS}, 10.0.0.1`;
-const ROOM = /^concierge-([0-9a-f]{10})-[0-9a-f]{12}$/;
+const ROOM = /^concierge-([0-9a-f]{10})$/;
 
 const bucketOf = (address: string) =>
   createHmac('sha256', SECRET_VALUE).update(address).digest('hex').slice(0, 10);
@@ -24,7 +24,7 @@ const BUCKET = bucketOf(ADDRESS);
 const OTHER_A = 'a'.repeat(10);
 const OTHER_B = 'b'.repeat(10);
 const OTHER_C = 'c'.repeat(10);
-const roomOf = (bucket: string) => ({ name: `concierge-${bucket}-${'0'.repeat(12)}` });
+const roomOf = (bucket: string) => ({ name: `concierge-${bucket}` });
 
 const listRooms = jest.mocked(listLiveRooms);
 let saved: Record<string, string | undefined>;
@@ -147,11 +147,17 @@ describe('POST /api/concierge/token success (200)', () => {
     await expect(new TokenVerifier(KEY_VALUE, 'y'.repeat(32)).verify(token)).rejects.toThrow();
   });
 
-  it('gives each call its own room in the same bucket', async () => {
+  // D72: tokens minted from one address before anyone joins (the room list is still empty) all name one room, so
+  // joining them all starts one room and dispatches one agent, not one per token.
+  it('gives every call from one address the same room, whatever the visitor id', async () => {
     const a = decodePayload((await (await postId(VISITOR)).json()).token);
     const b = decodePayload((await (await postId(VISITOR)).json()).token);
-    expect(a.video.room).not.toBe(b.video.room);
-    expect(a.video.room.match(ROOM)[1]).toBe(b.video.room.match(ROOM)[1]);
+    const c = decodePayload((await (await postId(randomUUID())).json()).token);
+    expect(a.video.room).toBe(`concierge-${BUCKET}`);
+    expect(b.video.room).toBe(a.video.room);
+    expect(c.video.room).toBe(a.video.room);
+    const other = decodePayload((await (await postId(VISITOR, '198.51.100.7')).json()).token);
+    expect(other.video.room).toBe(`concierge-${bucketOf('198.51.100.7')}`);
   });
 
   it('contains neither the key nor the secret in the response text', async () => {
