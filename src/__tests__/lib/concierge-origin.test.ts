@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { isAllowedOrigin } from '@/lib/concierge/origin';
+import { isAllowedOrigin, ownVercelHosts } from '@/lib/concierge/origin';
 import { profile } from '@/lib/data';
 
 const SITE = profile.siteUrl;
@@ -32,18 +32,37 @@ describe('isAllowedOrigin', () => {
     expect(isAllowedOrigin('https://michael-herron.vercel.app.', prod)).toBe(false);
   });
 
-  it('allows Vercel previews of this project and team (D64)', () => {
-    expect(
-      isAllowedOrigin('https://portfolio-site-git-harness-merg-e67481-mh550s-projects-e64e7e0b.vercel.app', prod),
-    ).toBe(true);
-    expect(isAllowedOrigin('https://portfolio-site-abc123-mh550s-projects.vercel.app', prod)).toBe(true);
+  it('allows the production custom domain, mherron.dev, where profile.siteUrl redirects', () => {
+    expect(isAllowedOrigin('https://mherron.dev', prod)).toBe(true);
+    expect(isAllowedOrigin('https://www.mherron.dev', prod)).toBe(true);
+    expect(isAllowedOrigin('http://mherron.dev', prod)).toBe(false);
+    expect(isAllowedOrigin('https://mherron.dev.evil.example', prod)).toBe(false);
+    expect(isAllowedOrigin('https://evil.mherron.dev', prod)).toBe(false);
   });
 
-  it('refuses hosts that only look like a preview', () => {
-    expect(isAllowedOrigin('https://evil-mh550s-projects-e64e7e0b.vercel.app', prod)).toBe(false);
-    expect(isAllowedOrigin('https://portfolio-site-x-mh550s-projects.vercel.app.evil.example', prod)).toBe(false);
-    expect(isAllowedOrigin('http://portfolio-site-abc123-mh550s-projects.vercel.app', prod)).toBe(false);
-    expect(isAllowedOrigin('https://portfolio-site-abc123-mh550s-projects.vercel.app:8443', prod)).toBe(false);
+  const PREVIEW = 'portfolio-site-git-harness-merg-e67481-mh550s-projects-e64e7e0b.vercel.app';
+  const withPreview = { ...prod, vercelHosts: [PREVIEW] };
+
+  it("allows exactly this deployment's own Vercel hosts (D64)", () => {
+    expect(isAllowedOrigin(`https://${PREVIEW}`, withPreview)).toBe(true);
+    expect(isAllowedOrigin(`https://${PREVIEW}`, prod)).toBe(false);
+  });
+
+  it('refuses other Vercel hosts, including look-alikes of this project and team', () => {
+    expect(isAllowedOrigin('https://portfolio-site-evil-mh550s-projects.vercel.app', withPreview)).toBe(false);
+    expect(isAllowedOrigin('https://portfolio-site-abc123-mh550s-projects.vercel.app', withPreview)).toBe(false);
+    expect(isAllowedOrigin(`https://${PREVIEW}.evil.example`, withPreview)).toBe(false);
+    expect(isAllowedOrigin(`http://${PREVIEW}`, withPreview)).toBe(false);
+    expect(isAllowedOrigin(`https://${PREVIEW}:8443`, withPreview)).toBe(false);
+  });
+
+  it('reads the own hosts from VERCEL_URL and VERCEL_BRANCH_URL, skipping unset ones', () => {
+    expect(ownVercelHosts({ VERCEL_URL: 'a.vercel.app', VERCEL_BRANCH_URL: 'b.vercel.app' })).toEqual([
+      'a.vercel.app',
+      'b.vercel.app',
+    ]);
+    expect(ownVercelHosts({ VERCEL_URL: '' })).toEqual([]);
+    expect(ownVercelHosts({})).toEqual([]);
   });
 
   it.each(['http://localhost:7834', 'http://127.0.0.1:3000'])('allows %s in development only', (origin) => {

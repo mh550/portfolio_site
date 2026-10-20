@@ -174,3 +174,8 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
   other; a burst of tokens minted with a forged Origin is a cost limit that the agent's caps and the provider caps
   bound, as a burst from many addresses already was. Question: keep the spec's form, or go back to D72 and accept
   the shared-room race? (VC5-01 re-run plans it, § D73 rework; VC5-03 and VC5-04 re-runs build.)
+- **D74** (Michael's session, 2026-10-20) The allowlist adds `https://mherron.dev` and `https://www.mherron.dev`:
+  `profile.siteUrl` 308-redirects there, so production requests carry that Origin and D64's list alone turned every
+  live visitor away. Previews are allowed by exact host, `VERCEL_URL` or `VERCEL_BRANCH_URL` (Vercel system env), not by
+  D64's regex, which matched a project anyone could name `portfolio-site-evil-mh550s-projects`. Supersedes D64's preview
+  regex (the `'unknown'` bucket stays). If a preview answers 403, check that the Vercel project exposes system env vars.

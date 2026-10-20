@@ -2,7 +2,7 @@ import { AccessToken, RoomAgentDispatch, RoomConfiguration } from 'livekit-serve
 import { profile } from '@/lib/data';
 import { conciergeEnv } from '@/lib/concierge/env';
 import { addressBucket, addressOf, maxRooms, roomNameFor, roomsVerdict } from '@/lib/concierge/limits';
-import { isAllowedOrigin } from '@/lib/concierge/origin';
+import { isAllowedOrigin, ownVercelHosts } from '@/lib/concierge/origin';
 import { listLiveRooms } from '@/lib/concierge/rooms';
 import { isUuidV4 } from '@/lib/concierge/visitorId';
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   // Origin before env (D63), so a caller from outside learns nothing about whether LiveKit is configured. NODE_ENV is
   // read per request, the tests' seam; a production build inlines it as 'production'.
   const dev = process.env.NODE_ENV !== 'production';
-  if (!isAllowedOrigin(request.headers.get('origin'), { siteUrl: profile.siteUrl, dev })) {
+  if (!isAllowedOrigin(request.headers.get('origin'), { siteUrl: profile.siteUrl, dev, vercelHosts: ownVercelHosts() })) {
     return reply({ error: 'forbidden' }, 403);
   }
 
