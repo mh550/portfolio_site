@@ -14,6 +14,13 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 03:40 · VC2-01 · passes
+
+- **Changed:** `docs/plans/2026-10-20-VC2-talk-page.md` 223 → 735 lines. VC2-05's commit (409bc23) had cut the plan from 595 to 148 lines. I restored § Layout, LiveKit calls, Jest, Contract types, Copy, Decisions, Tests per feature and Risks from 049f6a6, then corrected them to the code as built. Changes: the `import('livekit-client')` + `next/dynamic` RoomAudio calls, 5 room listeners incl. `Reconnected`, `isForgotten`, the measured fold numbers at 390, the copy now matching `concierge.ts`, `Room.setup`/`restart` in the mock, `utf8Bytes` rather than `TextEncoder`, fake timers with `fireEvent`. No code change; tests unchanged at 933/72.
+- **Verified:** I re-grepped every quoted signature in `node_modules` (livekit-client 2.23.0, components-react 2.9.24, components-core 0.12.15, still exact) and grepped the plan for each step's terms. An Opus review checked each quote and claim against the source: 2 wrong, 3 overstated, all fixed. `check.sh` green; smoke 40/40.
+- **Next session must know:** don't rewrite this plan wholesale. Append "As built" notes instead; the verifier greps it.
+- **Proposed change (VC2-01 step 5):** it names the `/talk` chrome decision D43, but VC1-03 took D43 (lower-cased ids). It is recorded as D44 and the visitor id as D45; the plan says so. Suggested wording: "D44 (/talk keeps the site chrome…)".
+
 ### 2026-10-20 verify · verify VC2
 
 | Feature | Step | What you ran or read | What you saw | Holds |

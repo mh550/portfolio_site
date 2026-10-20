@@ -65,7 +65,7 @@
         "The plan names the defaults to record in the v2 spec when built: D42 (the token test uses the real SDK with fake env and decodes the JWT; livekit-client and components-react are mocked in Jest), D43 (/talk keeps the site chrome, is indexable and in the sitemap, and stays off the Navbar), the visitor id read at Connect time rather than in a mount effect, and no @livekit/components-styles.",
         ".harness/check.sh is green (no code change is expected in this feature)."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-02",

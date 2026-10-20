@@ -120,7 +120,7 @@ Rules the reducer and TalkSession keep:
   teardown(), [])`; under StrictMode its first (simulated) run finds no Room and does nothing.
 - **The session lives in a ref** (`sessionRef.current = { room, timer, alive }`): teardown, the timer and the async
   continuations read it. The Room is also kept in state (`useState<Room | null>`) only because
-  `RoomContext.Provider` needs it during render and `react-hooks` 7 (installed, via `eslint-config-next`) forbids
+  `<RoomAudio room>` (its `RoomContext.Provider`) needs it during render and `react-hooks` 7 (installed, via `eslint-config-next`) forbids
   reading refs in render. Both are set and cleared together in `connect()` and `teardown()`; nothing else writes them.
 - **Teardown is one function**, idempotent: `alive = false`; `clearTimeout(timer)`; `room.off(...)` for each
   listener **before** `disconnect()` (so our own disconnect does not dispatch `ended`); unregister the three topics;
@@ -148,6 +148,521 @@ Rules the reducer and TalkSession keep:
   call; it sits in an always-present `aria-live` line under the button. A second Forget me while one is in flight sends nothing (`session.forgetting`). `isForgotten(reply)` in `contract.ts`: only a
   JSON object with `ok === true` counts. The Room is kept in state (`useState`) for `RoomContext.Provider`, set in
   `connect()` and cleared with the session.
+
+## Layout
+
+Width and rhythm follow the existing pages (`approach/page.tsx`: eyebrow in `font-mono` accent, `text-5xl
+sm:text-6xl` h1). `/talk` keeps the site chrome (Navbar, skip link, Footer; D44), so the page starts under the 64 px
+Navbar (`pt-16` in `SiteChrome`).
+
+**DOM order, which is the 390 px order:** header (eyebrow, h1, intro) → controls (the one Connect/Leave button, the
+mic toggle and Turn on sound when they apply, the status line; offline: the sentence + the deep-dive link) →
+transcript with the text box (`MessageBox` is the Transcript's `children`) → memory panel → latency panel → Forget me
+(live only) and its `aria-live` line → privacy note.
+
+**390 px:** one column (`grid grid-cols-1`; without `grid-cols-1` the implicit column grew to the latency table's
+width and scrolled sideways, fixed in VC2-05), `px-6` (342 px content). The transcript is a bordered log
+`max-h-80 overflow-y-auto`; the message box is full width (input grows, Send beside it). Panels are stacked bordered
+sections (`TalkPanel`, `--color-surface`). The latency panel is a 3-column table (label · this turn · median) with
+`tabular-nums`; labels wrap, numbers do not.
+
+**1280 px:** `main` is `max-w-6xl mx-auto px-6 py-20`; the header (`ScrollReveal`) stays `max-w-3xl`. Below it
+`lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-10`: left = controls + transcript (`lg:h-[28rem]`) with the message
+box; right = memory panel, latency panel, Forget me. The privacy note sits below the grid, `mt-16 max-w-3xl text-sm`,
+muted.
+
+**Above 844 px at 390** (measured by VC2-06 in Chromium at 390 × 844, no LiveKit env; § What Michael will see):
+
+| Block | Ends at (px) |
+|---|---|
+| h1 "Talk to my concierge" (two lines) | 300 |
+| the two intro paragraphs + `mb-8` | about 624 (Connect's top) |
+| Connect | 664 |
+| offline only: "The concierge is offline right now" | 700 |
+| offline only: "Read how it works" | 747 |
+| top of the transcript panel (idle) | about 690 (Connect's bottom + `space-y-6`), so its heading peeks above the fold |
+
+So at 390 the h1, the intro, Connect and, after a failed Connect, the offline sentence and its link are all above
+the fold; the transcript panel starts at the fold. `scrollWidth` is 390 in both states.
+
+## LiveKit calls (quoted from the installed types)
+
+Re-checked against `node_modules` on 2026-10-20 (VC2-01 restore): `livekit-client` 2.23.0,
+`@livekit/components-react` 2.9.24, `@livekit/components-core` 0.12.15; every quote below is still exact.
+
+`node_modules/livekit-client/dist/src/room/Room.d.ts`:
+
+```ts
+declare const Room_base: new () => TypedEmitter<RoomEventCallbacks>;
+declare class Room extends Room_base {
+    state: ConnectionState;
+    /** map of identity: [[RemoteParticipant]] */
+    remoteParticipants: Map<string, RemoteParticipant>;
+    localParticipant: LocalParticipant;
+    constructor(options?: RoomOptions);
+    registerTextStreamHandler(topic: string, callback: TextStreamHandler): void;
+    unregisterTextStreamHandler(topic: string): void;
+    connect: (url: string, token: string, opts?: RoomConnectOptions) => Promise<void>;
+    disconnect: (stopTracks?: boolean) => Promise<void>;
+    startAudio: () => Promise<void>;
+    /** Returns true if audio playback is enabled */
+    get canPlaybackAudio(): boolean;
+}
+// RoomEventCallbacks (same file):
+    reconnected: () => void;
+    disconnected: (reason?: DisconnectReason) => void;
+    participantConnected: (participant: RemoteParticipant) => void;
+    participantDisconnected: (participant: RemoteParticipant, disconnectReason?: DisconnectReason) => void;
+    audioPlaybackChanged: (playing: boolean) => void;
+```
+
+`on`/`off` come from `node_modules/typed-emitter/index.d.ts`:
+
+```ts
+  on<E extends keyof Events> (event: E, listener: Events[E]): this
+  off<E extends keyof Events>(event: E, listener: Events[E]): this
+```
+
+`node_modules/livekit-client/dist/src/room/events.d.ts` (`RoomEvent` values are the callback keys):
+`Disconnected = "disconnected"`, `ParticipantConnected = "participantConnected"`,
+`ParticipantDisconnected = "participantDisconnected"`, `Reconnected = "reconnected"` (added in VC2-07),
+`AudioPlaybackStatusChanged = "audioPlaybackChanged"`. `ConnectionState` (`Room.d.ts`) has
+`Disconnected = "disconnected"` and `Reconnecting = "reconnecting"`; the page reads `room.state` against
+`ConnectionState.Reconnecting` before treating an agent's `ParticipantDisconnected` as the end of the call.
+
+The page constructs `new Room()` with no options (audio only, nothing published but the mic) and connects with
+no `opts`.
+
+`node_modules/livekit-client/dist/src/room/data-stream/incoming/StreamReader.d.ts`:
+
+```ts
+declare abstract class BaseStreamReader<T extends BaseStreamInfo> {
+    get info(): T;
+}
+export declare class TextStreamReader extends BaseStreamReader<TextStreamInfo> {
+    /** Yields each chunk's decoded text as it arrives - a delta, not the string accumulated so far. */
+    [Symbol.asyncIterator](): { next: () => Promise<IteratorResult<string>>; return(): Promise<IteratorResult<string>>; };
+    readAll(opts?: BaseStreamReaderReadAllOpts): Promise<string>;
+}
+export type TextStreamHandler = (reader: TextStreamReader, participantInfo: {
+    identity: string;
+}) => void;
+```
+
+`node_modules/livekit-client/dist/src/room/types.d.ts`:
+
+```ts
+export interface BaseStreamInfo {
+    id: string;
+    mimeType: string;
+    topic: string;
+    timestamp: number;
+    size?: number;
+    attributes?: Record<string, string>;
+    encryptionType: Encryption_Type;
+}
+export interface SendTextOptions {
+    topic?: string;
+    destinationIdentities?: Array<string>;
+    attachments?: Array<File>;
+    onProgress?: (progress: number) => void;
+    attributes?: Record<string, string>;
+    compress?: boolean;
+}
+```
+
+`node_modules/livekit-client/dist/src/room/participant/LocalParticipant.d.ts`:
+
+```ts
+    setMicrophoneEnabled(enabled: boolean, options?: AudioCaptureOptions, publishOptions?: TrackPublishOptions): Promise<LocalTrackPublication | undefined>;
+    sendText(text: string, options?: SendTextOptions): Promise<TextStreamInfo>;
+    performRpc(params: PerformRpcParams): TypedPromise<string, RpcError>;
+```
+
+`node_modules/livekit-client/dist/src/room/rpc/utils.d.ts`:
+
+```ts
+export interface PerformRpcParams {
+    /** The `identity` of the destination participant */
+    destinationIdentity: string;
+    /** The method name to call */
+    method: string;
+    /** The method payload */
+    payload: string;
+    /** Timeout for receiving a response after the initial connection (milliseconds).
+     * If a value less than 8000ms is provided, it will be automatically clamped to 8000ms ...
+     * Default: 15000ms. */
+    responseTimeout?: number;
+}
+```
+
+`node_modules/livekit-client/dist/src/room/participant/Participant.d.ts`:
+
+```ts
+import { ..., ParticipantInfo_Kind as ParticipantKind, ... } from '@livekit/protocol';
+export { ParticipantKind };
+    identity: string;
+    get isAgent(): boolean;
+    get kind(): ParticipantKind;
+```
+
+`ParticipantKind` is `ParticipantInfo_Kind` from `@livekit/protocol` (`dist/index.d.ts`): `STANDARD = 0`, …,
+`AGENT = 4`. Both `ParticipantKind` and `RoomEvent` are exported from `livekit-client`'s `dist/src/index.d.ts`.
+The page tests `p.kind === ParticipantKind.AGENT`, as the feature says (`isAgent` also accepts an agent permission;
+not needed here).
+
+`node_modules/@livekit/components-react/dist/index.d.ts` re-exports the folders:
+
+```ts
+export * from './components';
+export * from './hooks';
+export * from './prefabs';
+export * from './context';
+```
+
+and `dist/context/index.d.ts` line 6, `dist/components/index.d.ts` line 20 name the two the page uses:
+
+```ts
+export { RoomContext, useEnsureRoom, useMaybeRoomContext, useRoomContext } from './room-context';
+export { RoomAudioRenderer, type RoomAudioRendererProps } from './RoomAudioRenderer';
+```
+
+(`dist/hooks/index.d.ts` line 38 `export { useChat } from './useChat';` and line 49
+`export * from './useTranscriptions';` are the two the page must not use; see § One handler per topic.)
+
+`node_modules/@livekit/components-react/dist/context/room-context.d.ts` and `components/RoomAudioRenderer.d.ts`:
+
+```ts
+export declare const RoomContext: React.Context<Room | undefined>;
+export interface RoomAudioRendererProps {
+    room?: Room;
+    volume?: number;
+    muted?: boolean;
+}
+export declare function RoomAudioRenderer({ room, volume, muted }: RoomAudioRendererProps): React.JSX.Element;
+```
+
+Those are the only two `@livekit/components-react` exports the page uses: no hooks. `RoomAudioRenderer` reads the
+room from context, so it sits inside `<RoomContext.Provider value={room}>`. **As built (VC2-07):** both live in
+`RoomAudio.tsx`, the only file with a static value import from `@livekit/components-react`; TalkSession loads it with
+`next/dynamic` (`ssr: false`) and imports only types from `livekit-client` (a test pins this).
+
+### The calls, as the page makes them
+
+```ts
+// Connect click (VC2-07): LiveKit loads alongside the token request, so it is not in /talk's first load
+const livekit = Promise.all([import('livekit-client'), import('./RoomAudio')]);   // a failed load → offline
+const [lk] = await livekit;
+const room = new lk.Room();                                          // no options; audio only
+room.registerTextStreamHandler('concierge.memory', onMemory);        // all three before connect()
+room.registerTextStreamHandler('concierge.metrics', onMetrics);
+room.registerTextStreamHandler('lk.transcription', onTranscription);
+room.on(RoomEvent.ParticipantConnected, onParticipantConnected)
+    .on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
+    .on(RoomEvent.Reconnected, onReconnected)                        // no agent after a full reconnect → ended
+    .on(RoomEvent.Disconnected, dropped)
+    .on(RoomEvent.AudioPlaybackStatusChanged, onPlayback);           // !canPlaybackAudio → Turn on sound
+await room.connect(url, token);
+[...room.remoteParticipants.values()].find((p) => p.kind === ParticipantKind.AGENT);  // already there → live
+await room.localParticipant.setMicrophoneEnabled(true);              // and false/true from the toggle
+if (!room.canPlaybackAudio) await room.startAudio();                 // also on Turn on sound, mic and Send clicks
+await room.localParticipant.sendText(text, { topic: 'lk.chat' });
+const reply = await room.localParticipant.performRpc({
+  destinationIdentity: agentIdentity, method: 'concierge.forget_me', payload: '', responseTimeout: 10_000,
+});                                                                  // isForgotten(reply): a JSON object, ok === true
+// teardown: off(...) ×5, unregisterTextStreamHandler(topic) ×3, disconnect()
+```
+
+`onMemory` / `onMetrics`: `reader.readAll()` then `parseMemory` / `parseMetrics`; a `null` (bad body) or a rejected
+`readAll` is dropped silently: no state change, no `console.error`. The stream handlers don't check
+`session.alive` themselves: `send()` drops every dispatch once the session is gone; the participant handlers and
+`dropped` check it directly.
+
+### One handler per topic
+
+`registerTextStreamHandler` throws on a second registration for the same topic. From
+`node_modules/livekit-client/dist/livekit-client.esm.mjs` (line 27472):
+
+```js
+throw new DataStreamError("A text stream handler for topic \"".concat(topic, "\" has already been set."), DataStreamErrorReason.HandlerAlreadyRegistered);
+```
+
+`@livekit/components-react`'s `useChat`, `useTranscriptions` and the session hooks register their own handlers for
+`lk.chat` and `lk.transcription` (`components-core`'s `setupTextStream` calls `room.registerTextStreamHandler(topic,
+…)`). So **the page never mounts `useChat`, `useTranscriptions`, `useSession`/`useSessionMessages` or any
+prefab that uses them** (e.g. `Chat`, `SessionProvider`-based UIs). It reads `lk.transcription` itself and sends
+`lk.chat` with `sendText` (sending registers nothing). It does not register `lk.chat`: replies come back on
+`lk.transcription`.
+
+### `lk.transcription`
+
+Attribute names, from `@livekit/components-core` 0.12.15 (`dist/index.mjs` line 507):
+`TranscriptionFinal = "lk.transcription_final"`, `TranscriptionSegmentId = "lk.segment_id"`,
+`TranscribedTrackId = "lk.transcribed_track_id"`.
+
+The handler iterates the reader (`for await (const delta of reader)`), accumulating that stream's text, and after
+each delta dispatches `{ key, who, text, final }`:
+
+- `key` = `attributes['lk.segment_id'] ?? info.id`. One segment can arrive as several streams sharing the segment
+  id (core's own comment: "Transcription updates for a segment arrive as separate streams sharing the same
+  lk.segment_id"); a line with that key is **replaced**, not appended.
+- `final` = `attributes['lk.transcription_final'] === 'true'` (core notes it flips `"false" → "true"` on the final
+  STT result). A non-final line renders muted with a visible "…" marker.
+  **As built (VC2-04):** the line is `final: false` while its stream is open; when the stream closes it is final
+  unless the attribute (read after the trailer merged into `info.attributes`) is exactly `"false"`, so an agent
+  stream without the attribute can't leave the log `aria-busy`. A new segment from the same speaker, and the end of
+  the call (`ended`/`offline`), also settle any open line.
+- `who` = `participantInfo.identity === room.localParticipant.identity ? 'visitor' : 'agent'`. The agent publishes
+  the visitor's transcription under the visitor's identity; this is how `components-react`'s own session messages
+  tell them apart (`room-Bfb4OWAI.mjs` ~line 5489: `case t.localParticipant.identity: type: "userTranscript"`).
+- `lk.transcribed_track_id` is **not read** (as built, VC2-04): identity decides `who`, and the track id would change
+  nothing on screen. Named here so nobody adds logic around it expecting a difference.
+
+A typed line is appended locally as `{ who: 'visitor', final: true }` when `sendText` is called; the agent does not
+echo `lk.chat` back.
+
+## Jest
+
+**Mapping** (`jest.config.ts`, added in VC2-04):
+
+```ts
+'^livekit-client$': '<rootDir>/src/__mocks__/livekit-client.ts',
+'^@livekit/components-react$': '<rootDir>/src/__mocks__/livekit-components-react.tsx',
+```
+
+The real `livekit-client` can then never load in Jest, so no test can open a connection. `livekit-server-sdk` does
+not import `livekit-client` (it uses `@livekit/protocol`), so the VC1 token-route tests keep the real SDK (D42);
+VC2-04 re-runs them after the mapper change to confirm.
+
+**`src/__mocks__/livekit-client.ts`** (type-checked by `next build`, so typed loosely but without `any` leaks):
+
+- `RoomEvent` with the five values above (real strings), `ConnectionState` (`Disconnected`, `Connecting`,
+  `Connected`, `Reconnecting`), `ParticipantKind` (`STANDARD: 0`, `AGENT: 4`), and `export type` re-exports are not needed: the
+  component's `import type` lines are erased by SWC.
+- `class Room` (exported as `Room`; also `MockRoom` for tests). A static `instances: Room[]`; the constructor pushes
+  `this` and then runs `Room.setup?.(this)`, so a test can shape the room it is about to get (an agent already
+  present, a `connect()` that rejects). Surface:
+  - `on(event, fn)` / `off(event, fn)` returning `this`, `emit(event, ...args)`, `listenerCount(event)`, over a
+    `Map<string, Set<fn>>`;
+  - `state` (`'disconnected'` → `'connected'` on connect);
+  - `remoteParticipants: Map<string, FakeParticipant>`;
+  - `localParticipant = { identity: 'visitor-test', sendText: jest.fn(async () => ({ id: 'sent-1' })), performRpc:
+    jest.fn(async () => '{"ok":true}'), setMicrophoneEnabled: jest.fn(async () => undefined) }`;
+  - `canPlaybackAudio = true`, `startAudio = jest.fn(async () => {})`;
+  - `connect = jest.fn(async (url, token) => { this.state = 'connected' })`;
+  - `disconnect = jest.fn(async () => { … })`: sets `state = 'disconnected'` and emits `disconnected`, but, like the
+    real one, a room already disconnected returns at once and emits nothing;
+  - `textHandlers: Map<string, handler>`; `registerTextStreamHandler = jest.fn((topic, cb) => …)` **throws, like the
+    real one, if the topic is already registered**; `unregisterTextStreamHandler = jest.fn(topic => delete)`.
+- Helpers (tests import them from `@/__mocks__/livekit-client`, which resolves to the same module instance):
+  - `lastRoom()`; `resetRooms()` (in `afterEach`);
+  - `pushText(room, topic, body, { identity = 'agent-1', attributes = {}, chunks = [body] } = {})`: builds a fake
+    reader (`info: { id, topic, attributes, timestamp, mimeType: 'text/plain' }`, `readAll()` resolving the joined
+    chunks, an async iterator yielding `chunks`), calls the registered handler, and returns a promise that settles
+    after the handler's reads (tests wrap it in `await act(...)`); throws if nothing is registered for the topic;
+  - `addAgent(room, identity = 'agent-1')`: puts `{ identity, kind: ParticipantKind.AGENT }` into
+    `remoteParticipants` and emits `participantConnected`; `removeParticipant(room, identity)` emits
+    `participantDisconnected`; `restart(room)` does what a full reconnect does (every remote participant
+    unwound, then `state = 'reconnecting'`, in one tick).
+- Order assertions use Jest's own `mock.invocationCallOrder`: every value in
+  `room.registerTextStreamHandler.mock.invocationCallOrder` is below `room.connect.mock.invocationCallOrder[0]`.
+
+**`src/__mocks__/livekit-components-react.tsx`**: `RoomContext = React.createContext<unknown>(undefined)` and
+`RoomAudioRenderer`, which renders `<div data-testid="room-audio-renderer" data-has-room hidden />` and records the
+room it found in its context (`audioRenderer.room`), so a test checks it sits inside the provider for that room.
+
+**Dynamic imports:** under Jest, `import('livekit-client')` and `next/dynamic`'s `import('./RoomAudio')` resolve
+through the same mapper, so the mock is what Connect loads; tests flush the import promise inside the same `act`
+as the fetch.
+
+**Timers:** the 10 s tests use `jest.useFakeTimers()`, click Connect with `fireEvent.click` and flush the fetch,
+import and connect promises inside one `act` (`connectWithFakeTimers` and `flush()` in `TalkSession.test.tsx`, 20
+`await Promise.resolve()` turns; user-event with fake timers was not used), then
+`act(() => jest.advanceTimersByTime(9_999))` (still waiting) and `(1)` (offline, `disconnect` called once). The
+cancel test calls `addAgent` at 3 000 ms, advances to 10 000, and expects `live` and no disconnect.
+`jest.useRealTimers()` in `afterEach`.
+
+**fetch:** `global.fetch = jest.fn()` per test, restored in `afterEach`: `mockResolvedValue({ ok: false, status:
+503, json: async () => ({ offline: true }) })`, `mockRejectedValue(new TypeError('Failed to fetch'))`, and the 200
+case `{ ok: true, status: 200, json: async () => ({ url: 'wss://concierge.test.invalid', token: 'test-token' }) }`.
+The test reads the request body to assert the `visitor_id` equals `localStorage.getItem('concierge.visitor_id')`
+across two Connects.
+
+**Storage:** `localStorage.clear()` in `beforeEach`; the throwing case uses
+`jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('denied') })` and expects a
+Connect that still POSTs a valid v4 id. `getOrCreateVisitorId`'s own tests pass a stub object instead.
+
+**Rules:** no test opens a connection or reads a LiveKit env var; the malformed-body test spies on `console.error`
+and asserts it was not called; `learned_at` formatting is asserted with the same `Intl.DateTimeFormat` options the
+component uses, so the machine's time zone does not matter. jsdom has no `TextEncoder`, so
+`parseMemory`/`parseMetrics` measure the 15 KiB cap with a hand-written `utf8Bytes(text)` in `contract.ts` (after a
+cheap `text.length > MAX_BODY_BYTES` check); no `TextEncoder` or `Blob` in `src`.
+
+## Contract types (VC2-02)
+
+```ts
+export const TOPIC = { memory: 'concierge.memory', metrics: 'concierge.metrics', transcription: 'lk.transcription', chat: 'lk.chat' } as const;
+export const RPC_FORGET_ME = 'concierge.forget_me';
+export const MAX_BODY_BYTES = 15 * 1024;
+
+export interface MemoryFact {
+  id: string; slot: string;                      // required, non-empty, else the body is rejected
+  value: string;                                 // required string
+  channel: string | null; source: string | null; learned_at: string | null; confidence: number | null;
+}
+export interface MemoryBody {
+  visitor: { name: string | null; visits: number };
+  facts: MemoryFact[]; summary: string | null; updated_at: string | null;
+}
+export interface MetricsBody {
+  turn: number;                                  // integer, else rejected
+  eou_ms: number | null; stt_ms: number | null; llm_ttft_ms: number | null; tts_ttfb_ms: number | null;
+  total_ms: number | null; memory_on_turn_path_ms: number | null;
+  preload_ms: number | null; extraction_ms: number | null;   // absent = null
+  prompt_tokens: number | null; cached_tokens: number | null; compacted: boolean | null;
+}
+```
+
+A numeric field that is present but not a finite number (a string, `NaN`) is read as `null`, not a rejection: §4
+says any field may be null, and one odd field should not hide a whole turn. Missing `facts`, a fact without `id`
+or `slot`, or a non-integer `turn` rejects the body (`null`), as the VC2-02 step says.
+
+**As built (VC2-07):** `TURN_PATH_FIELDS` is `total_ms`, `eou_ms`, `stt_ms`, `llm_ttft_ms`, `tts_ttfb_ms`,
+`memory_on_turn_path_ms`, and `LATENCY_FIELDS` is those six plus `extraction_ms` (the preload is shown once, the
+token counts only as `cachedShare`). `isForgotten(reply)` (VC2-05) is true only for a JSON object with `ok === true`.
+
+`summarise(turns)` returns, for each of `LATENCY_FIELDS`,
+`{ last, median }`: `last` is the newest turn's value (possibly `null`), `median` ignores nulls (odd count: the
+middle; even: the mean of the two middle values; none: `null`). The panel rounds for display. `cachedShare(turn)`
+= `Math.round(cached / prompt * 100) / 100`, `null` when either is null or `prompt_tokens` is 0.
+
+## Copy (`src/lib/data/concierge.ts`, VC2-02)
+
+First person (Michael), plain, short sentences (`docs/notes/brand.md` § Voice). No numbers but 30. This is the
+copy as built (`src/lib/data/concierge.ts`, pinned by `concierge-data.test.ts`); the first intro sentence was
+widened in VC2-02 to credit the Claude Code agents, and VC2-05/07 added `startAudio` and `forgetFailedEnded`.
+
+```ts
+export const talkPage = {
+  eyebrow: 'Voice concierge',
+  title: 'Talk to my concierge',
+  description: 'A voice agent that remembers you between visits, and shows you exactly what it remembers.',
+  intro: [
+    'This is a voice agent I designed and built on LiveKit, with Claude Code agents writing much of the code. It remembers you between visits.',
+    'This page shows what it remembers, where it learned each thing, and how long each turn took. Talk or type.',
+  ],
+  offlineMessage: 'The concierge is offline right now',      // exact, no full stop (tests match it exactly)
+  deepDiveHref: '/projects/voice-concierge',
+  deepDiveLabel: 'Read how it works',
+  labels: {
+    connect: 'Connect', leave: 'Leave', send: 'Send', forgetMe: 'Forget me', erase: 'Erase', cancel: 'Cancel',
+    micOn: 'Mute microphone', micOff: 'Unmute microphone',    // the label says what a press does; no aria-pressed
+    message: 'Message', messagePlaceholder: 'Type a message',
+    startAudio: 'Turn on sound',                              // shown when the browser blocks playback
+  },
+  status: {
+    connecting: 'Connecting…',
+    waiting: 'Waiting for the concierge to join…',
+    live: 'Connected. Say hello, or type below.',
+    ended: 'The call ended.',
+    micBlocked: 'Microphone blocked. You can still type.',
+    forgetConfirm: 'Erase everything the concierge remembers about you?',
+    forgotten: 'Forgotten',
+    forgetFailed: "Forget me didn't go through. Try again.",
+    forgetFailedEnded: "Forget me didn't go through. Connect again to retry.",   // the call is over, no button
+  },
+  headings: { transcript: 'Transcript', memory: 'What it remembers', latency: 'Latency', privacy: 'Privacy' },
+  empty: {
+    transcript: 'Nothing said yet.',
+    memory: 'Nothing remembered yet',
+    latency: 'No turns yet.',
+    newVisitor: 'a new visitor',
+  },
+  memory: {
+    talkingTo: 'Talking to', visit: 'visit', summary: 'Summary',
+    fact: { channel: 'Channel', source: 'Source', learnedAt: 'Learned', confidence: 'Confidence' },
+  },
+  speakers: { visitor: 'You', agent: 'Concierge' },
+};
+
+export const privacyNote: string[] = [
+  'It stores the facts it learns about you, a short summary of each visit, and the transcript events.',
+  'They are kept on my own server.',
+  'They are deleted 30 days after your last visit.',
+  'It knows you by a random id kept in this browser, not by a login. Another browser starts fresh.',
+  'Forget me erases everything about you on my server. Anonymous timing numbers, with no text and no id, are kept.',
+  "LiveKit's observability keeps the conversation's transcript and timing traces, but no audio, for 30 days. Forget me can't erase those.",
+];
+
+export const latencyLabels = {
+  total_ms: 'Whole turn',
+  eou_ms: 'End of turn detected',
+  stt_ms: 'Speech to text',
+  llm_ttft_ms: 'First token from the model',
+  tts_ttfb_ms: 'First audio from speech',
+  memory_on_turn_path_ms: 'Memory on the turn path',
+  cachedShare: 'Prompt tokens from cache',
+  preload_ms: 'Memory preload at connect',
+  extraction_ms: 'Background extraction',
+  compacted: 'History compacted',
+  turn: 'Turn', yes: 'Yes', no: 'No',
+  columns: { label: 'Step', last: 'This turn', median: 'Median' },
+};
+```
+
+The memory panel's line reads "Talking to {name || 'a new visitor'} · visit {visits}" (`||`, so an empty name reads as new too); each fact row shows slot,
+value, channel, source, `learned_at` (local date and time), and confidence as a percentage; a null shows as an en
+dash (`–`) everywhere, never `null` or `NaN`.
+
+## Decisions to record in the v2 spec when built
+
+All recorded: D41–D45 are in `docs/specs/2026-10-18-portfolio-v2.md` (lines 156–177).
+
+The numbers moved: VC1-03 used **D43** for lower-casing visitor ids, so the `/talk` chrome decision the feature
+calls D43 becomes **D44**. VC2-04 appends:
+
+- **D42** is already recorded (VC1-02): the token test signs with the real SDK and fake env and decodes the JWT;
+  `livekit-client` and `@livekit/components-react` are mocked in Jest. VC2-04 adds nothing, only cites it.
+- **D44** *default* `/talk` keeps the site chrome (Navbar, skip link, Footer), is indexable (no `robots` override)
+  and is in `sitemap.ts`, but stays off the Navbar: the Navbar holds the seven sections of the site, and `/talk` is a
+  demo reached from `/card` and the deep-dive (W4: "the Navbar only if the spec's Navbar rules allow it"). Reversible:
+  one entry in `Navbar.tsx`'s link list.
+- **D45** *default* The visitor id is read in the Connect click handler (`getOrCreateVisitorId(browserStorage())`;
+  reading `window.localStorage` itself throws when storage is blocked, and `browserStorage()` returns `undefined`
+  then, VC2-02), not in a mount effect, and the Room is created in that handler too: no state is set from an effect
+  (`react-hooks/set-state-in-effect`), the server and first client render match, StrictMode cannot register
+  handlers twice, and a visitor who never presses Connect gets no id stored.
+- **No `@livekit/components-styles`**: already part of **D41**; no new entry.
+
+## Tests per feature (what "done" looks like)
+
+- **VC2-02:** contract fixtures parse to the expected objects; `null` for non-JSON, > 15 KiB, missing `facts`, fact
+  without `id` or `slot`, `turn: 1.5`; medians `[120, 80, 200] → 120`, `[120, 80] → 100`, all nulls → `null`;
+  `cachedShare` rounding and the null/zero cases; visitor id persists across two calls, a malformed stored value is
+  replaced, throwing `getItem`/`setItem` and `undefined` storage still return a valid id; `newUuidV4` without
+  `crypto.randomUUID` (fallback) passes `isUuidV4`; the copy test.
+- **VC2-03:** each panel from the three fixtures and the empty memory; nulls render `–`; Transcript order and the
+  non-final marker; ForgetMeButton confirm, Erase once, Cancel, disabled while busy.
+- **VC2-04:** reducer table; offline on 503, non-OK, rejected fetch, rejected `connect`; the id sent is the stored
+  one on the second Connect; registers precede connect; unmount → 3 unregisters + 1 disconnect; StrictMode render
+  then Connect → each topic registered once; 10 s timeout and the 3 s agent cancel; memory and metrics bodies reach
+  the panels; a bad body changes nothing and `console.error` is not called; page test; sitemap 9; a11y `/talk`.
+- **VC2-05:** mic toggle true/false and the blocked message; Enter and Send call `sendText(text, { topic:
+  'lk.chat' })`, append, clear, ignore whitespace; two chunks of one segment → one line, final text; Forget me RPC
+  params exactly once, `{ok:true}` clears memory and shows "Forgotten", rejection re-enables and shows the error;
+  RoomAudioRenderer inside the provider; `startAudio` when `canPlaybackAudio` is false; Leave → idle, panels cleared.
+- **VC2-06:** three captures under 400 KB; h1 and Connect above 844 at 390; `scrollWidth` 390; Tab order and outline.
+- **VC2-07:** review tables with outcomes; StrictMode and release tests; no LiveKit in Server Components or the
+  first load; review guide and CLAUDE.md.
+
+## Risks and notes
+
+- The deep-dive link goes to `/projects/voice-concierge`, which VC3 creates. If VC2 merged without VC3 the link
+  would 404; the morning merge order is VC1 → VC2 → VC3 together.
+- `livekit-client` (and `components-react`, which imports it) is not in `/talk`'s first load: VC2-07 moved it behind
+  `import('livekit-client')` on Connect and `next/dynamic` for `RoomAudio` (§ Review).
+- The live path is only as right as the mocks. Michael's morning call (VC2-07's checklist) is the first real test of
+  the transcript attribution, the RPC and audio unlock on a phone.
 
 ## What Michael will see
 
