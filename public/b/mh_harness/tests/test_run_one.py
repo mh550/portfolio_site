@@ -272,6 +272,22 @@ class TestRunOne(HarnessHomeCase):
         self.assertEqual(proc.returncode, 130)
         self.assertEqual(self.rows(), [])
 
+    @unittest.skipIf(os.name == "nt", "POSIX process groups (D56: Windows leaves an exited game's orphans)")
+    def test_game_children_die_when_game_exits_itself(self):
+        game = [sys.executable, "-c", "import subprocess, sys; c = subprocess.Popen([sys.executable, '-c', "
+                "'import time; time.sleep(30)']); print(c.pid, flush=True); sys.exit(1)"]
+        path = self.write_config(make_config())
+        p = subprocess.run(wrapped_run_one(game) + [path], env=self.env(), stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, timeout=30)
+        child = wait_for_pid_line(os.path.join(self.home, "logs", "t-0.log"))
+        self.addCleanup(kill_quietly, child)
+        self.assertEqual(p.returncode, 1, p.stderr)
+        self.assertEqual(self.rows()[0]["exit_reason"], "error")
+        deadline = time.monotonic() + 3
+        while pid_alive(child) and time.monotonic() < deadline:
+            time.sleep(0.05)
+        self.assertFalse(pid_alive(child))
+
 
 @unittest.skipIf(os.name == "nt", "process groups are POSIX; Windows uses taskkill /T")
 class TestProcessControl(unittest.TestCase):

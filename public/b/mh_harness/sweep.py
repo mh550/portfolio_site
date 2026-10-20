@@ -12,7 +12,6 @@ import argparse
 import json
 import os
 import re
-import signal
 import subprocess
 import sys
 import time
@@ -90,6 +89,10 @@ def _config_problem(configs: Any) -> Optional[str]:
         if name.casefold() in seen:  # Windows and macOS file names ignore case
             return 'two configs are named "{}" (their logs and work dirs would collide)'.format(name)
         seen.add(name.casefold())
+        try:
+            run_one.config_fields(config)
+        except (KeyError, TypeError, ValueError) as exc:  # D53's check, before any run starts
+            return 'config "{}" needs a number in timeout_s and an int in expected_words ({!r})'.format(name, exc)
     return None
 
 
@@ -119,8 +122,10 @@ def _start(config: dict, index: int, round_name: str, home: Path) -> Run:
     config_path = workdir / "config.json"
     config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
     game_log = home / "logs" / (run_id + ".log")
-    if game_log.exists():
+    try:
         game_log.unlink()  # else the first status line could show an earlier round's log before run_one truncates it
+    except OSError:  # missing, or (Windows) held open: run_one truncates it anyway
+        pass
     out_path = workdir / "run_one.out"
     env = dict(os.environ)
     env["MH_HARNESS_HOME"] = str(home)
@@ -157,32 +162,11 @@ def _status(run: Run, alarm_after_s: float) -> str:
 
 
 def _stop_all(live: List[Run]) -> None:
-    """SIGTERM every run_one at once (each then kills its game), then kill_tree them one by one."""
-    if os.name != "nt":
-        for run in live:
-            try:
-                os.killpg(run.proc.pid, signal.SIGTERM)
-            except OSError:
-                pass
+    """SIGTERM every run_one at once (each then kills its game), SIGKILL whatever is left after 2 s."""
+    run_one.kill_trees([run.proc for run in live])
     for run in live:
-        run_one.kill_tree(run.proc)
         run.out_file.close()
     del live[:]
-
-
-_interrupted = False
-
-
-def _on_signal(signum: int, frame: object) -> None:
-    # Only a flag, as in run_one.py: the loop sees it within one tick, so no signal lands half-way through Popen.
-    global _interrupted
-    _interrupted = True
-
-
-def _catch_interrupts() -> None:
-    for sig_name in ("SIGINT", "SIGTERM", "SIGHUP"):
-        if hasattr(signal, sig_name):
-            signal.signal(getattr(signal, sig_name), _on_signal)
 
 
 def _print_report(home: Path, round_name: str) -> None:
@@ -192,13 +176,6 @@ def _print_report(home: Path, round_name: str) -> None:
         print("report failed: {!r}; run report.py --round {}".format(exc, round_name), file=sys.stderr, flush=True)
         return
     print(text, flush=True)
-
-
-def _positive_int(text: str) -> int:
-    value = int(text)
-    if value < 1:
-        raise argparse.ArgumentTypeError("must be 1 or more")
-    return value
 
 
 def _positive_float(text: str) -> float:
@@ -211,8 +188,8 @@ def _positive_float(text: str) -> float:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Run every config K times, N at a time, then print the report.")
     parser.add_argument("configs", help="JSON file holding an array of configs; its stem names the round")
-    parser.add_argument("--parallel", type=_positive_int, default=4, help="runs at once, default 4")
-    parser.add_argument("--repeat", type=_positive_int, default=1, help="runs per config, default 1")
+    parser.add_argument("--parallel", type=run_one.positive_int, default=4, help="runs at once, default 4")
+    parser.add_argument("--repeat", type=run_one.positive_int, default=1, help="runs per config, default 1")
     parser.add_argument("--interval", type=_positive_float, default=15.0,
                         help="seconds between status lines, default 15")
     parser.add_argument("--alarm-after", type=_positive_float, default=60.0,
@@ -247,12 +224,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             print("cmd: {}  cwd: {}".format(" ".join(cmd), cwd), flush=True)
         return 0
 
-    _catch_interrupts()
+    run_one.catch_interrupts()  # signals only set a flag: the loop sees it within a tick, never half-way through Popen
     live: List[Run] = []
     last_status = time.monotonic()
     try:
         while queue or live:
-            if _interrupted:
+            if run_one.interrupted():
                 raise KeyboardInterrupt
             while queue and len(live) < args.parallel:
                 config, k = queue.pop(0)
@@ -273,11 +250,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     except BaseException:
         _stop_all(live)
         raise
-    if _interrupted:  # Ctrl-C during the last tick: still an interrupted round, no report
+    if run_one.interrupted():  # Ctrl-C during the last tick: still an interrupted round, no report
         return 130
 
     _print_report(home, round_name)
-    return 130 if _interrupted else 0
+    return 130 if run_one.interrupted() else 0  # Ctrl-C while the report printed
 
 
 if __name__ == "__main__":

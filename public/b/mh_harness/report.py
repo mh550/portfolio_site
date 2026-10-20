@@ -168,17 +168,10 @@ def render(summary: Dict[str, Any], md: bool = False) -> str:
     return "\n".join(lines)
 
 
-def _positive_int(text: str) -> int:
-    value = int(text)
-    if value < 1:
-        raise argparse.ArgumentTypeError("must be 1 or more")
-    return value
-
-
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Summarise results.jsonl, one row per config.")
     parser.add_argument("--round", help="round to report (a configs file's stem), default the latest")
-    parser.add_argument("--prod-cities", type=_positive_int, default=21,
+    parser.add_argument("--prod-cities", type=run_one.positive_int, default=21,
                         help="cities in a prod run, for the projection, default 21")
     parser.add_argument("--md", action="store_true", help="print a markdown table instead of aligned text")
     args = parser.parse_args(argv)

@@ -10,6 +10,25 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 11:50 · B1-07 · passes
+
+- **Review:** Opus read `git diff d1f2a62..HEAD -- public/b docs .gitignore` (2550 lines) and found 0 Critical,
+  1 Important and 6 Minor. Plan § Review lists each finding with file:line and test name, and ends with the counts.
+- **Fixed RED→GREEN (POSIX):** run_one now always kills the game's process group, also after the game exits by
+  itself. Before, MCP or game servers it had started kept their ports into the next run. Test:
+  `test_game_children_die_when_game_exits_itself`. Also fixed: sweep checks `timeout_s`/`expected_words` up front
+  (exit 2, `test_config_fields_checked_before_any_run`); an old log it can't delete no longer stops the round
+  (`test_undeletable_old_log_does_not_stop_the_sweep`); the stale-log test had a one-tick margin and now has more.
+- **Simplified:** `run_one.kill_trees` serves both kill paths. One copy each of the signal flag, `positive_int`
+  and `config_fields`. Code 834 → 829 lines. Python tests 96 → 99, Jest 643.
+- **Verified:** unittest 99 OK. Fake round `--parallel 4` exit 0, `pick: base`. round1 refused, exit 2. ast 3.8 ok.
+  Anti-goal greps are empty and every write is under `harness_home()`. Cleanup leaves the tree clean. CLAUDE.md
+  is unchanged. `.harness/check.sh` printed `lint ok · jest ok · build ok`, and smoke exit 0.
+- **Question for Michael (D56):** is the booth laptop Windows? There, `taskkill /T` can't reach the orphans of a
+  game that has already exited. A Job object would fix that, but it is untested, so it is left.
+- **Left (Minor):** Windows parallel appends to `results.jsonl` can tear (rare, and the torn line is skipped).
+  `work/` is reused across sweeps (README: delete it to start clean).
+
 ### 2026-10-20 11:20 · B1-06 · passes
 
 - **Landed:** `public/b/mh_harness/README.md` (44 lines: one line per file, the four commands, fake-round "try it",

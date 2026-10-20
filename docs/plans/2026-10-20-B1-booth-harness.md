@@ -55,9 +55,14 @@ def exit_reason(returncode: Optional[int], timed_out: bool, words_found: int, ex
     """'timeout' if timed_out; else 'error' if returncode != 0; else 'solved' if words_found >= expected_words;
        else 'incomplete'. (timed_out wins over everything; returncode may be None only when timed_out.)"""
 
-def kill_tree(proc: subprocess.Popen, grace_s: float = 2.0) -> None:
-    """Kill proc and everything it started (see Process control); returns after proc is reaped. Safe on a
-       process that already exited."""
+def kill_trees(procs: List[subprocess.Popen], grace_s: float = 2.0) -> None:
+    """Kill each proc and everything it started (see Process control), one shared grace period; returns after
+       all are reaped. Safe on processes that already exited. kill_tree(proc, grace_s) is kill_trees([proc])."""
+
+def config_fields(config: dict) -> Tuple[str, float, int]:
+    """(name, timeout_s, expected_words), raising KeyError/TypeError/ValueError (D53; sweep checks it up front)."""
+
+# Also shared (B1-07): catch_interrupts() / interrupted() (the signal flag, D47) and positive_int (argparse type).
 
 def start_detached(argv: List[str], cwd: str, env: Dict[str, str], log_file: IO[bytes]) -> subprocess.Popen:
     """Popen(argv, cwd=cwd, env=env, stdin=DEVNULL, stdout=log_file, stderr=STDOUT) in its own session/group."""
@@ -133,7 +138,7 @@ mode, which is enough for a handful of runs. `report.load_rows` skips blank and 
 **Kill** (`kill_tree(proc, grace_s=2.0)`; run_one passes `GAME_GRACE_S = 1.0` for the game, so a game that ignores
 SIGTERM still dies before sweep's 2 s SIGKILL of run_one, B1-03 review):
 
-- POSIX: `os.killpg(proc.pid, SIGTERM)`; poll `proc.poll()` every 0.1 s for up to `grace_s`; then `os.killpg(proc.pid,
+- POSIX: `os.killpg(proc.pid, SIGTERM)` (every proc first, for `kill_trees`); poll `proc.poll()` every 0.1 s for up to `grace_s`; then `os.killpg(proc.pid,
   SIGKILL)` regardless (stragglers in the group), ignoring `ProcessLookupError`/`PermissionError` throughout; then
   `proc.wait()`.
 - Windows: if `proc.poll() is None`, `subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
@@ -145,14 +150,14 @@ exist_ok) → `argv, cwd = adapter.build_command(config, str(workdir))` → `env
 "HARNESS_WORKDIR": str(workdir.resolve()), "PYTHONUNBUFFERED": "1"}` (config env values are strings) → open
 `harness_home()/"logs"/f"{name}-{index}.log"` → `start_detached` (an `OSError` is written into the log and the run
 becomes an `error` row, D53) → wait in 0.1 s slices until it exits, the deadline passes (`timed_out = True`) or a
-signal set the flag; a `finally` `kill_tree`s the game whenever it is still unreaped → read the log (`utf-8`, `errors="replace"`) →
+signal set the flag; a `finally` always `kill_tree`s the game, so whatever it started dies even after it exits by itself (B1-07, D56) → read the log (`utf-8`, `errors="replace"`) →
 `parse_telemetry` + `adapter.parse_result` → append the row → print one summary line (`<name>-<K>: <exit_reason>
 words=<n> wall=<s>s`, flush) → exit code per D49.
 
 **Interrupts** (D47): `run_one.py` installs handlers for SIGTERM, SIGINT and SIGHUP (where it exists) that only set
 a module flag (no exception can land inside `Popen` or `kill_tree`; the sliced wait notices it within 0.1 s, also on
 Windows, where one long `wait()` would not see Ctrl-C); the loop then `kill_tree`s the game, appends **no** row and
-returns 130. A game that already exited when the signal came still gets its row. `sweep.py` catches `KeyboardInterrupt` around its loop, `kill_tree`s every live `run_one.py` (whose
+returns 130. A game that already exited when the signal came still gets its row. `sweep.py` catches `KeyboardInterrupt` around its loop, `kill_trees` every live `run_one.py` at once (whose
 SIGTERM handler then kills its game within the 2 s grace) and returns 130.
 
 **sweep.py** flow: load the configs (a JSON array of objects with distinct non-empty `name`s, else exit 2, D54) → `find_placeholders`: with `--dry-run` print a `warning:` line
@@ -326,4 +331,50 @@ Without the `rm -rf` the repeat run shows `solved:3`: rows accumulate per round 
 
 ## Review
 
-(Empty; B1-07 fills it in.)
+B1-07, Opus, over `git diff d1f2a62..HEAD -- public/b docs .gitignore` (2550 lines; all five modules, configs,
+PROMPTS.md, spec §1–§7). It found no Python 3.9+ syntax, and no write outside `harness_home()`.
+
+**Critical:** none.
+
+**Important**
+
+1. `run_one.py:245` (`finally`): the game's tree was killed only when the game was still running, so the
+   processes a game started (MCP servers, a local game server) outlived a run that exited or crashed by itself.
+   They kept their ports, so the next run failed with `address already in use`. **Fixed** (POSIX): `kill_tree`
+   always runs, and a game that has already exited costs no grace period. RED→GREEN:
+   `tests/test_run_one.py` `TestRunOne.test_game_children_die_when_game_exits_itself`. Windows half **left**:
+   `taskkill /T` cannot find the orphans of an exited parent. A Job object would, but it is untestable here
+   (**D56**).
+
+**Minor**
+
+2. `sweep.py:122`: an unguarded `game_log.unlink()` (WinError 32 while another process holds the log) stopped
+   the whole round. **Fixed**: OSError ignored. `tests/test_sweep.py`
+   `test_undeletable_old_log_does_not_stop_the_sweep`.
+3. `run_one.py:186`: on Windows, `O_APPEND` writes from parallel `run_one`s are not atomic, so rows that end at
+   the same instant can tear. **Left**: the window is milliseconds, and `load_rows` skips a torn line.
+4. `sweep.py:79`: `timeout_s`/`expected_words` were checked only inside `run_one`, so a typo (`"timeout"`)
+   dropped that config from the round silently. **Fixed**: `_config_problem` calls `run_one.config_fields`
+   before any run, exit 2. `test_config_fields_checked_before_any_run`.
+5. `run_one.py:212`: `work/<name>-<K>/` is reused across sweeps. **Left**: the fake game keeps no state there,
+   and the ADAPT command decides what lives there (README: delete `work/` to start clean).
+6. `tests/test_sweep.py` `test_stale_game_log_never_shows`: its margin was one 0.1 s tick, because the fresh run
+   also printed `tools=1`. **Fixed**: the stale log now holds 5 tool lines, and the test asserts that no
+   `tools=5` appears.
+7. No test covered children of a game that exits by itself. **Fixed** by the test for Important 1.
+
+**Simplification** (applied): `sweep._stop_all` re-implemented the SIGTERM half of `kill_tree`; both now use
+`run_one.kill_trees` (one shared grace period). Removed sweep's copy of the signal flag (`run_one.catch_interrupts`
+/ `interrupted`) and report's and sweep's copies of `_positive_int` (`run_one.positive_int`). sweep and run_one
+share `config_fields`. The docstring no longer says sweep uses `exit_reason`. Rejected: removing sweep's last
+`return 130 if … else 0`, which handles a Ctrl-C while the report prints (B1-05). `summary["round"]` and the
+per-config `"runs"` stay: they are cheap and a test reads `runs`. Python files total 834 → 829 lines. Tests:
+96 → 99.
+
+**Anti-goals checked:** `grep -rniE 'secret|answer' public/b/mh_harness/*.py` finds nothing. Every `open(`/`Path(`
+target is under `harness_home()` (`results.jsonl`, `logs/`, `work/`) or is a configs file being read. The
+`/b/` grep over `src/` and `public/` (`*.ts`, `*.tsx`, `*.md`, minus `mh_harness`) is empty. CLAUDE.md is
+unchanged since `d1f2a62`.
+
+**Counts:** 0 Critical, 1 Important (fixed on POSIX, Windows half left as D56), 6 Minor (4 fixed, 2 left).
+

@@ -259,3 +259,10 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   `cities` or LLM calls prints `<name>: n/a`, a control whose base has no wall time prints `n/a`, a round without
   pairs prints `no control_of pairs`. Alternative: the sweep's table shows only its own runs (rejected: it would
   disagree with `report.py` on the same round).
+- **D56** *default* `run_one.py` always `kill_tree`s the game's group when the game ends, even after a clean exit,
+  so MCP or game servers it started cannot hold their ports into the next run (B1-07 review). On Windows this only
+  works while the game is alive: `taskkill /T` cannot find the orphans of a game that already exited. They survive
+  until the laptop's next sweep, or until Michael ends them in Task Manager. Left because a Job object (ctypes,
+  KILL_ON_JOB_CLOSE) cannot be tested on this Linux box this close to the booth. `sweep.py` also checks D53's
+  `timeout_s`/`expected_words` before any run starts (exit 2), and ignores an old log it cannot delete.
+  Alternative: the Job object, if the booth laptop is Windows and orphans show up.

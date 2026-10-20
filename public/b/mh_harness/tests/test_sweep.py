@@ -177,6 +177,25 @@ class TestSweep(SweepCase):
                 self.assertIn("refusing to start", p.stderr)
                 self.assertEqual(self.home_entries(), ["round-t.json"])
 
+    def test_config_fields_checked_before_any_run(self):  # D53's checks, made at the start of the round
+        bad = make_config("b")
+        bad["timeout"] = bad.pop("timeout_s")
+        for config in (bad, make_config("c", expected_words="two")):
+            path = self.configs([make_config("a"), config])
+            p = self.sweep(path)
+            self.assertEqual(p.returncode, 2, p.stdout)
+            self.assertIn("refusing to start", p.stderr)
+            self.assertIn('config "{}"'.format(config["name"]), p.stderr)
+            self.assertEqual(self.rows(), [])
+
+    def test_undeletable_old_log_does_not_stop_the_sweep(self):  # Windows: WinError 32 while a process holds it
+        os.makedirs(os.path.join(self.home, "logs", "a-0.log"))  # unlink() raises OSError here too
+        path = self.configs([make_config("a"), make_config("b")])
+        p = self.sweep(path)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertNotIn("Traceback (most recent call last):\n  File \"" + SWEEP, p.stderr)
+        self.assertEqual([r["name"] for r in self.rows()], ["b"])
+
     def test_non_positive_interval_is_rejected(self):
         path = self.configs([make_config("a")])
         for flag, value in (("--interval", "0"), ("--alarm-after", "-1")):
@@ -188,12 +207,12 @@ class TestSweep(SweepCase):
     def test_stale_game_log_never_shows(self):
         os.makedirs(os.path.join(self.home, "logs"))
         with open(os.path.join(self.home, "logs", "a-0.log"), "w", encoding="utf-8") as f:
-            f.write("Traceback (most recent call last):\nHARNESS_TOOL {\"name\": \"old\", \"args\": {}}\n")
+            f.write("Traceback (most recent call last):\n" + "HARNESS_TOOL {\"name\": \"old\", \"args\": {}}\n" * 5)
         path = self.configs([make_config("a", env={"FAKE_SLEEP_S": "1", "FAKE_LLM_CALLS": "1"})])
         p = self.sweep(path, "--interval", "0.05")
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertNotIn("ALARM: Traceback", p.stdout)
-        self.assertNotIn("tools=1", p.stdout)
+        self.assertNotIn("tools=5", p.stdout)  # the fresh run makes 1 tool call, the stale log has 5
 
     @unittest.skipIf(os.name == "nt", "POSIX signals")
     def test_ctrl_c_kills_every_run_and_exits_130(self):

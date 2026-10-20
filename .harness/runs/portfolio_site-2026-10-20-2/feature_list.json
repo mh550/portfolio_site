@@ -111,7 +111,7 @@
         "CLAUDE.md's 'Content guard' and 'Code rules' sections are unchanged; the B1 plan's 'Review' section ends with the counts (n Critical, n Important, n Minor, fixed/left)",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B2-01",

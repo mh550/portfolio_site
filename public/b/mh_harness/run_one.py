@@ -2,7 +2,8 @@
 
 Usage: python3 run_one.py CONFIG.json [--index K] [--round NAME]   (CONFIG.json holds one config object)
 
-Also holds the functions sweep.py shares (harness_home, parse_telemetry, exit_reason, kill_tree, start_detached).
+Also holds what sweep.py and report.py share (harness_home, parse_telemetry, config_fields, start_detached,
+kill_trees, catch_interrupts, interrupted, positive_int).
 Importing this module runs nothing.
 """
 from __future__ import annotations
@@ -128,24 +129,45 @@ def _killpg(pgid: int, sig: int) -> None:
         pass
 
 
-def kill_tree(proc: subprocess.Popen, grace_s: float = 2.0) -> None:
-    """Kill proc and everything it started, then reap proc. Safe on a process that already exited.
+def kill_trees(procs: List[subprocess.Popen], grace_s: float = 2.0) -> None:
+    """Kill each proc and everything it started, then reap them. Safe on processes that already exited.
 
-    POSIX: SIGTERM to proc's process group, SIGKILL after grace_s. A child that calls setsid() itself leaves the
-    group and escapes. Windows: taskkill /T /F, skipped once proc has exited (its pid may already be reused).
+    POSIX: SIGTERM to every proc's process group at once, SIGKILL after one shared grace_s, so the group's leftovers
+    die even when the leader exited by itself. A child that calls setsid() itself leaves the group and escapes.
+    Windows: taskkill /T /F, skipped once a proc has exited (its pid may be reused; its orphans survive, D56).
     """
     if os.name == "nt":
-        if proc.poll() is None:
-            subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for proc in procs:
+            if proc.poll() is None:
+                subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        for proc in procs:
+            _killpg(proc.pid, signal.SIGTERM)
+        deadline = time.monotonic() + grace_s
+        while any(proc.poll() is None for proc in procs) and time.monotonic() < deadline:
+            time.sleep(0.1)
+        for proc in procs:
+            _killpg(proc.pid, signal.SIGKILL)  # stragglers in the group, even when the leader went quietly
+    for proc in procs:
         proc.wait()
-        return
-    _killpg(proc.pid, signal.SIGTERM)
-    deadline = time.monotonic() + grace_s
-    while proc.poll() is None and time.monotonic() < deadline:
-        time.sleep(0.1)
-    _killpg(proc.pid, signal.SIGKILL)  # stragglers in the group, even when the leader went quietly
-    proc.wait()
+
+
+def kill_tree(proc: subprocess.Popen, grace_s: float = 2.0) -> None:
+    kill_trees([proc], grace_s)
+
+
+def config_fields(config: dict) -> Tuple[str, float, int]:
+    """(name, timeout_s, expected_words); KeyError, TypeError or ValueError when one is missing or not a number."""
+    return str(config["name"]), float(config["timeout_s"]), int(config["expected_words"])
+
+
+def positive_int(text: str) -> int:
+    """argparse type for --parallel, --repeat and --prod-cities."""
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be 1 or more")
+    return value
 
 
 def child_env(config: dict, workdir: Path) -> Dict[str, str]:
@@ -167,10 +189,15 @@ def _on_signal(signum: int, frame: object) -> None:
     _interrupted = True
 
 
-def _catch_interrupts() -> None:
+def catch_interrupts() -> None:
+    """SIGTERM, SIGINT and SIGHUP (where they exist) only set the flag interrupted() reads."""
     for sig_name in ("SIGTERM", "SIGINT", "SIGHUP"):
         if hasattr(signal, sig_name):
             signal.signal(getattr(signal, sig_name), _on_signal)
+
+
+def interrupted() -> bool:
+    return _interrupted
 
 
 def _tail(log_text: str) -> List[str]:
@@ -197,9 +224,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(args.config, encoding="utf-8") as f:
         config = json.load(f)
     try:
-        name = str(config["name"])
-        timeout_s = float(config["timeout_s"])
-        expected_words = int(config["expected_words"])
+        name, timeout_s, expected_words = config_fields(config)
     except (KeyError, TypeError, ValueError) as exc:
         print("run_one: {}: needs name, a number in timeout_s and an int in expected_words ({!r})".format(
             args.config, exc), file=sys.stderr, flush=True)
@@ -215,7 +240,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     cmd, cwd = adapter.build_command(config, str(workdir))
     env = child_env(config, workdir)
 
-    _catch_interrupts()
+    catch_interrupts()
     proc: Optional[subprocess.Popen] = None
     timed_out = False
     interrupted = False
@@ -243,8 +268,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     except subprocess.TimeoutExpired:
                         pass
             finally:
-                if proc.returncode is None:  # timed out, interrupted or crashed: never leave the game running
-                    kill_tree(proc, grace_s=GAME_GRACE_S)
+                # Always, even after a clean exit: whatever the game started (MCP servers, a game server) goes too.
+                kill_tree(proc, grace_s=GAME_GRACE_S)
         wall_s = round(time.monotonic() - start, 2)
     if interrupted:
         return 130  # D47: no row, an interrupted run would skew the medians
