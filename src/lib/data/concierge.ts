@@ -80,3 +80,9 @@ export const latencyLabels = {
   no: 'No',
   columns: { label: 'Step', last: 'This turn', median: 'Median' },
 };
+
+// The floating link to /talk on every other chrome page (D61, VoiceWidget): the label is its accessible name.
+export const talkWidget = {
+  label: 'Talk to my voice concierge',
+  href: '/talk',
+};

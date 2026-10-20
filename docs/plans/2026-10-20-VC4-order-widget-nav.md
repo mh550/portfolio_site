@@ -77,7 +77,7 @@ export default function VoiceWidget() {
     <Link
       href={talkWidget.href}
       aria-label={talkWidget.label}
-      className={`fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-background)] shadow-lg shadow-black/40 transition-colors hover:bg-white print:hidden ${focusRing}`}
+      className={`fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-accent)] text-[var(--color-background)] shadow-lg shadow-black/40 transition-colors hover:bg-white print:hidden ${focusRing} focus-visible:outline-offset-4`}
     >
       {/* Two gentle pulses on load (4 s, under WCAG 2.2.2's 5 s), none under reduced motion */}
       <span
@@ -110,9 +110,12 @@ export default function VoiceWidget() {
   and portrait phones have no right inset.
 - **Layer**: `z-40`, below the Navbar's `z-50`, so the open mobile menu (inside the Navbar) draws over it and the
   skip link (`z-[60]`) too.
-- **Focus**: the shared `focusRing` (2 px accent outline, offset 2), which shows on the dark page around the accent
-  disc. `a11y-new-pages.test.tsx`'s "focus-visible style" test renders `SiteChrome` at `/approach`, so it checks the
-  widget too.
+- **Focus**: the shared `focusRing` (2 px accent outline) plus `focus-visible:outline-offset-4`, which wins over
+  the shared offset 2 (computed `outline-offset: 4px` in Chromium). Why (VC4-03 review): with offset 2 the outline
+  covered the same 2–4 px band as the decorative ring (accent at 60%), so focus only brightened that band; at offset
+  4 it is a second ring 4–6 px out with a dark gap, plainly visible. `VoiceWidget.test.tsx` pins the class and every
+  `focusRing` token. `a11y-new-pages.test.tsx`'s "focus-visible style" test renders `SiteChrome` at `/approach`, so
+  it checks the widget too.
 - **Motion**: the pulse is a decorative ring (`aria-hidden`, `pointer-events-none`) whose only animation classes are
   `motion-safe:animate-pulse` and `motion-safe:[animation-iteration-count:2]`: under `prefers-reduced-motion: reduce`
   it does not animate (computed `animation-name: none`). An opacity pulse, not `animate-ping`: ping scales the ring

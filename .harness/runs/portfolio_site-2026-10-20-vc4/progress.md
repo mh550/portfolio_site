@@ -11,6 +11,24 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 14:25 · VC4-03 · passes
+
+- **Widget (D61)**: new `src/components/VoiceWidget.tsx` (next/link to `/talk`, aria-label from `talkWidget` in
+  `concierge.ts`, aria-hidden SVG mic, `fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 h-14 w-14`,
+  `print:hidden`, `focusRing` + `focus-visible:outline-offset-4`, ring with `motion-safe:animate-pulse` ×2).
+  `SiteChrome` renders it after the Footer unless `pathname === '/talk'` (`/card*` never reaches it). Footer
+  `py-8` → `pt-8 pb-24 xl:pb-8`.
+- Tests: new `VoiceWidget.test.tsx` (7), SiteChrome +6 (`/`, `/about`, `/projects/agent-harness` present and after
+  the footer; `/talk`, `/card`, `/card/qr` absent), Footer +1, a11y chrome +1 (one nav, one contentinfo, no
+  region/heading). 993 → 1008 tests, 75 → 76 suites; 5 failed before the code, 0 after.
+- Review (Opus): the offset-2 focus outline sat on the ring's 2–4 px band (60% → 100% cyan only); fixed with
+  `outline-offset-4` (Chromium computes 4px; capture shows a separate outer ring). Plan § Focus and D61 updated.
+- Browser (Sonnet, 7834): 56×56 at 390/1280, right edge 374 at 390, scrollWidth 390; absent on /talk, /card,
+  /card/qr; no overlap with `footer a` on /about bottom at 390/640/768/1024/1279/1280/1440; reduced motion
+  `animation-name: none`, otherwise `pulse` ×2; last tab stop after "Email"; print `display: none`.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS.
+- Next (VC4-04): intro wording. CLAUDE.md lists VoiceWidget and the new count.
+
 ### 2026-10-20 13:50 · VC4-02 · passes
 
 - **Order (D59)** in `projects.ts`: 1 agent-harness, 2 voice-concierge, 3 ghl, 4 ringcentral, 5 home-media-server,

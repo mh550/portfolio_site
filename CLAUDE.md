@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (993 tests, 75 suites after VC4-02)
+npm test             # Jest unit/integration tests (1008 tests, 76 suites after VC4-03)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -74,15 +74,16 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
-- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`)
+- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`
 
 ### Components
 - `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Talk, Approach, Experience, Contact; Talk since VC4, D60) with active link highlighting, mobile hamburger (`"use client"`)
-- `components/Footer.tsx` — social links
+- `components/Footer.tsx` — social links; `pb-24 xl:pb-8` so the links row clears the VoiceWidget (D61)
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper (`data-scroll-reveal`, forced visible in print); skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos (hidden below `xl`, D33) and NodeGraph honour reduced motion
-- `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
+- `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer + VoiceWidget (not on `/talk`), none of them on `/card*` (`"use client"`)
+- `components/VoiceWidget.tsx` — the floating 56 px link to `/talk` (`talkWidget` in `concierge.ts`, D61): `fixed right-4`, safe-area bottom, `z-40`, `print:hidden`, a ring that pulses twice only under `motion-safe:`
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
 - `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`

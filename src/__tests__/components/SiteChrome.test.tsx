@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import SiteChrome from '@/components/SiteChrome';
 
 let mockPath = '/';
@@ -51,7 +51,7 @@ describe('SiteChrome', () => {
     expect(container.querySelector('footer')).not.toBeNull();
   });
 
-  // Keyboard users skip the seven nav links on every page (M2-06)
+  // Keyboard users skip the eight nav links on every page (M2-06)
   it('/: a skip link to the content comes first', () => {
     const { container, getByRole } = renderAt('/');
     const skip = getByRole('link', { name: 'Skip to content' });
@@ -66,5 +66,28 @@ describe('SiteChrome', () => {
     const { queryByRole } = renderAt('/card');
     expect(queryByRole('link', { name: 'Skip to content' })).toBeNull();
   });
-});
+  // VC4-03, D61: the floating link to /talk, last in the chrome, everywhere but /talk and /card*
+  const widget = () => screen.queryByRole('link', { name: 'Talk to my voice concierge' });
 
+  it.each(['/', '/about', '/projects/agent-harness'])('%s: the voice widget comes after the Footer', (path) => {
+    const { container } = renderAt(path);
+    const link = widget();
+    expect(link).not.toBeNull();
+    expect(link).toHaveAttribute('href', '/talk');
+    const footer = container.querySelector('footer')!;
+    expect(footer.compareDocumentPosition(link!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(footer).not.toContainElement(link);
+  });
+
+  it('/talk: no voice widget, Navbar and Footer kept', () => {
+    const { container } = renderAt('/talk');
+    expect(widget()).toBeNull();
+    expect(container.querySelector('nav')).not.toBeNull();
+    expect(container.querySelector('footer')).not.toBeNull();
+  });
+
+  it.each(['/card', '/card/qr'])('%s: no voice widget', (path) => {
+    renderAt(path);
+    expect(widget()).toBeNull();
+  });
+});

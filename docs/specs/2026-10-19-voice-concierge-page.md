@@ -106,7 +106,7 @@ other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
 - **D61** *default* The voice widget (VC4 spec § VC4.3; details are defaults): `src/components/VoiceWidget.tsx`, a
   `next/link` to `/talk` named "Talk to my voice concierge" (`talkWidget` in `concierge.ts`), a 56 px accent disc
   with an inline `aria-hidden` SVG microphone, `fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40`
-  (below the Navbar's `z-50`), the shared `focusRing`, `print:hidden`, and a decorative ring that pulses twice (4 s)
+  (below the Navbar's `z-50`), the shared `focusRing` with `focus-visible:outline-offset-4` (clear of the ring), `print:hidden`, and a decorative ring that pulses twice (4 s)
   only under `motion-safe:`. `SiteChrome` renders it after the Footer on every chrome page except `/talk` (and
   `/card*`, which has no chrome); `/evidence` keeps it. The Footer's bottom padding becomes `pb-24 xl:pb-8` so its
   links stay clear of the widget at every width. Reversible: drop the element from `SiteChrome` and the padding from

@@ -74,6 +74,21 @@ describe('the site chrome around those pages', () => {
       .map((el) => `<${el.tagName.toLowerCase()}> ${accessibleName(el)}`);
     expect(missing).toEqual([]);
   });
+
+  // VC4-03: the voice widget is one more link, not a landmark or a heading
+  it('adds the voice widget without a landmark or a heading', () => {
+    const { container, getByRole, queryAllByRole } = render(
+      <SiteChrome>
+        <p>page</p>
+      </SiteChrome>
+    );
+    expect(getByRole('link', { name: 'Talk to my voice concierge' })).toBeInTheDocument();
+    expect(queryAllByRole('navigation')).toHaveLength(1);
+    expect(queryAllByRole('contentinfo')).toHaveLength(1);
+    expect(queryAllByRole('region')).toHaveLength(0);
+    expect(queryAllByRole('complementary')).toHaveLength(0);
+    expect(headingLevels(container)).toEqual([]);
+  });
 });
 
 describe('dark-theme text contrast (WCAG AA, 4.5:1)', () => {

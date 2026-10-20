@@ -49,7 +49,7 @@
         "The plan's § Voice widget matches the code (classes, aria-label, the pathname rule) and the voice-concierge spec's D61 names the component and its exclusions.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC4-04",
