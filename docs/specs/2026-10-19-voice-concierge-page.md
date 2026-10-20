@@ -130,6 +130,10 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
   Jest tests: Vercel sets the header, and `next dev`/`next start` fill it from the socket). The preview allowlist is the hostname regex
   `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$` over `https:` with no port, derived from
   PR #16's preview host. Supersedes nothing (new). Question: does it match your current previews? (VC5-01 plan; VC5-03 and VC5-04 build.)
+  VC5-03 review: anyone can create a Vercel project named e.g. `portfolio-site-evil-mh550s-projects`, whose
+  `<name>.vercel.app` host matches, and a page there could spend through its visitors' browsers. Built as specified
+  (VC5-03 step 1 requires the regex). Question: replace it with exactly `https://$VERCEL_URL` and
+  `https://$VERCEL_BRANCH_URL` (each deployment trusts only its own hosts), or accept the risk?
 - **D65** *default* The mic toggle renders only in the `live` phase (was `waiting` or `live`), so nothing can ask
   for the microphone before the agent joins; `setMicrophoneEnabled(true)` moves into `agentArrived`. Supersedes
   the VC2 plan's state-table row "connecting → waiting: `setMicrophoneEnabled(true)`" and its "As built (VC2-05)"

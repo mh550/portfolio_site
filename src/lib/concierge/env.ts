@@ -1,3 +1,5 @@
+import 'server-only';
+
 // The token route's LiveKit settings (spec W1), read on the server only: the route signs with them, and /talk's page
 // passes TalkSession just whether they are there (D46). Null when any is missing or the url is not wss://.
 export interface ConciergeEnv {

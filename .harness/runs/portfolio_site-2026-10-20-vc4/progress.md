@@ -11,6 +11,15 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 15:20 · VC5-03 · passes
+
+- New `src/lib/concierge/origin.ts` (`isAllowedOrigin`), `limits.ts` (`addressOf`, `addressBucket`, `roomNameFor`, `roomsVerdict`, `maxRooms`, pure) and `rooms.ts` (`import 'server-only'`, `listLiveRooms` with `requestTimeout: 5, failover: false`, not wired yet). `env.ts` line 1 is `import 'server-only';`. `server-only@0.0.1` is an exact dependency (lockfile updated). CLAUDE.md Code rules name it (D67), and the `lib/concierge/` line names the new modules. Tests 1017 → 1052 (76 → 80 suites): `concierge-origin`, `concierge-limits`, `concierge-rooms` and `TalkSession-import.test.tsx`.
+- The import test has its own file, as the plan says (step 4 allows an equivalent). It reaches the mock through `jest.requireActual`: a static import of `@/__mocks__/livekit-client` is the same module path as the mapped `livekit-client`, so it would run the counting factory. Mutation check: moving the `configured` guard below the import makes the zero case fail (1).
+- Verified: `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -L` on env/rooms prints nothing; `grep -rl livekit-client src/app` is empty; `npm ls server-only` → 0.0.1.
+- Opus review: no Critical issues. Applied: `maxRooms` now also requires `Number.isSafeInteger` (a 20-digit value or Infinity would switch the cap off), plus tests for `'03'`, `:443` and a trailing-dot host.
+- Question for Michael (D64, important): the preview regex also matches a Vercel project someone else names `portfolio-site-evil-mh550s-projects` (its `<name>.vercel.app` host), so a page there could spend tokens through its visitors' browsers. Should the allowlist be exactly `https://$VERCEL_URL` + `https://$VERCEL_BRANCH_URL` instead? **Proposed change:** if yes, VC5-03 step 1's `portfolio-site-abc123-…` → true case goes, and VC5-04 passes those two env values into `opts`.
+- Next session (VC5-04): wire `listLiveRooms` + `roomsVerdict` into the route in the plan's order. `[::1]` is not a dev origin (browse `localhost`).
+
 ### 2026-10-20 14:55 · VC5-02 · passes
 
 - `TalkSession.tsx`: `setMic(session, true)` moved into `agentArrived` (one line, :254; both arrivals go through it, guarded by `agentIdentity`), and the mic toggle renders only when `phase === 'live'` (D65). Tests 1012 → 1017 (76 suites): five new mic tests in `TalkSession-live.test.tsx` (none after connect alone, `[[true]]` after addAgent, agent already present, one per Room across Leave/Connect, a second agent and a reconnect add nothing, no toggle while waiting) plus `micCalls()` = [] on configured=false, 503, rejected connect() and the 10 s timer in `TalkSession.test.tsx`.

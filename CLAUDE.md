@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1017 tests, 76 suites after VC5-02)
+npm test             # Jest unit/integration tests (1052 tests, 80 suites after VC5-03)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -94,7 +94,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
   Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
   phases (Jest mocks: see Testing)
-- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`
+- `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5, wired in VC5-04) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
@@ -145,6 +145,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
   decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency. `livekit-client`,
   `@livekit/components-react` and `livekit-server-sdk` are approved at exact pins (D41); keep `LIVEKIT_*` server-only.
+  `server-only` is approved at `0.0.1` exact (D67): `env.ts` and `rooms.ts` import it, so a Client Component that
+  pulls either in fails `next build` (next/jest maps it to an empty mock).
 - Content lives in `src/lib/data/*.ts` (projects, experience, skills, profile, approach, competencies); components
   render it. Reuse `ScrollReveal`, `ProjectCard`, `MetricStrip`, `MediaGallery`, `CodeBlock` and the diagrams in
   `src/components/projects/diagrams/` rather than re-implementing them.

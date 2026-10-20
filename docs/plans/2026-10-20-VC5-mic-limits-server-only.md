@@ -244,6 +244,20 @@ module export unreliable. So:
   module-registry spy"; this is it. `src/app/talk/page.tsx` imports
   nothing from `livekit-client` (`grep -rl livekit-client src/app` is empty today and stays so).
 
+**As built (VC5-03).** `server-only@0.0.1` is in `dependencies` (exact) and `package-lock.json`. The modules that
+import it are exactly `src/lib/concierge/env.ts` and `src/lib/concierge/rooms.ts` (line 1 of each); `origin.ts` and
+`limits.ts` don't. `rooms.ts` is not called by the route yet (VC5-04 wires it). In `TalkSession-import.test.tsx` the
+test reaches the mock through `jest.requireActual('@/__mocks__/livekit-client')`, never a static import: that path
+is the file `livekit-client` maps to, so Jest keys the `jest.mock` factory to it and a static import of it runs the
+factory at load (the count would start at 1). Checked by moving the `configured` guard below the import in
+`TalkSession.tsx`: the unconfigured case then fails with `mockLoads` 1. Tests 1017 → 1052 (80 suites): the four new
+files `concierge-origin`, `concierge-limits`, `concierge-rooms` and `TalkSession-import`. An Opus review found no
+Critical issue. Applied: `maxRooms` also requires `Number.isSafeInteger` (a 20-digit value, or 400 nines = Infinity,
+would switch the site cap off), and the tests pin `'03'` → 3, `:443` and a trailing-dot host → false. Not applied
+(a question in D64): `PREVIEW_HOST` also matches a project someone else names `portfolio-site-…-mh550s-projects`;
+the alternative is to allow exactly `https://$VERCEL_URL` and `https://$VERCEL_BRANCH_URL`. Not covered:
+`http://[::1]:<port>` is refused in dev (browse `localhost` instead).
+
 ## Tests
 
 Base 1012 tests / 76 suites. Each build feature adds or edits:
