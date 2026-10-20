@@ -37,7 +37,7 @@ describe('voice-concierge entry', () => {
     expect(project.metrics).toBeUndefined();
   });
 
-  it('names the LLM provider the agent repo uses: Anthropic direct, OpenRouter only as a fallback', () => {
+  it('lists Anthropic API, not OpenRouter, in the tech stack', () => {
     expect(project.techStack).toContain('Anthropic API');
     expect(project.techStack).not.toContain('OpenRouter');
   });
@@ -81,6 +81,31 @@ describe('voice-concierge entry', () => {
   it('says plainly that no latency numbers are measured and that 1.8 only maps onto 2.0', () => {
     expect(project.detail.outcome).toContain('No latency numbers are measured yet.');
     expect(project.detail.outcome).toContain('only maps onto Agents 2.0');
+  });
+});
+
+// VC3-05 fact-check: at review the agent repo's main was at C3 of C8 (store, fence, preload and worker skeleton; no
+// extraction, write gate, session timer or live run) and its README said "Being built". The page states the agent
+// as a design being built; only this site's own /talk page and token route are stated as built.
+describe('voice-concierge claims match what is built', () => {
+  it('does not say the agent was built or that a demo happened', () => {
+    const text = strings(project).join(' ');
+    expect(text).not.toMatch(/agent and this page were built/i);
+    expect(text).not.toMatch(/for a demo on/i);
+    expect(text).not.toMatch(/wrote the code for both/i);
+    expect(project.detail.outcome).toContain('The agent is still being built.');
+  });
+
+  it('states unbuilt agent behaviour as design', () => {
+    expect(project.shortDescription).toMatch(/designed to remember/);
+    expect(project.detail.approach).toMatch(/^The design:/);
+    expect(cs!.method.build).toMatch(/meant to run on my home box/);
+    expect(cs!.method.build).toMatch(/designed to end each session after 10 minutes/);
+    expect(cs!.method.build).not.toMatch(/as they change/);
+  });
+
+  it('keeps the problem to what the research found: LiveKit\'s default, not every voice agent', () => {
+    expect(project.detail.problem).toMatch(/^By default a LiveKit voice agent forgets you when the call ends/);
   });
 });
 

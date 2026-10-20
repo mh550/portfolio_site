@@ -771,7 +771,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     title: 'Voice Concierge: a voice agent that remembers returning visitors',
     company: 'Personal · open source',
     shortDescription:
-      'A LiveKit voice agent on this site that remembers you between visits, shows you what it remembers, and forgets you on request.',
+      'A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.',
     categories: ['ai', 'systems'],
     techStack: ['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code'],
     githubUrl: 'https://github.com/mh550/voice-concierge',
@@ -779,13 +779,13 @@ async function findOrCreateContact(ghlContact, jobtread) {
     order: 5,
     detail: {
       problem:
-        'Voice agents forget you when the call ends, and memory is easy to add badly. A store call awaited inside the turn is a pause the caller hears. An extractor that reads the whole transcript can store what the agent said, or the part of a reply the visitor talked over, as if the visitor had said it. I wanted a concierge for this site that remembers returning visitors, by voice or by text, and lets each of them see and erase what it keeps.',
+        'By default a LiveKit voice agent forgets you when the call ends, and memory is easy to add badly. A store call awaited inside the turn is a pause the caller hears. An extractor that reads the whole transcript can store what the agent said, or the part of a reply the visitor talked over, as if the visitor had said it. I wanted a concierge for this site that remembers returning visitors, by voice or by text, and lets each of them see and erase what it keeps.',
       approach:
-        'One thread of memory per visitor, loaded at connect, written in the background, and shown live on the page.',
+        'The design: one thread of memory per visitor, loaded at connect, written in the background, and shown live on the page.',
       challenges:
         'Keeping memory off the turn path, storing only what the visitor said and heard, and making erasure win over work still in flight.',
       outcome:
-        'The agent and this page were built in parallel overnight, Oct 19 to Oct 20, for a demo on Oct 20, by two harness runs working to one shared contract. No latency numbers are measured yet. They go on this page once I have measured real sessions, and until then it shows none. The agent is built on livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread that expires once it sits idle, as a 2.0 thread does.',
+        'This page and its /talk demo were built overnight, Oct 19 to Oct 20, while a second harness run worked on the agent to the same written contract. The agent is still being built. No latency numbers are measured yet. They go on this page once I have measured real sessions, and until then it shows none. The agent is written for livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread meant to expire once it sits idle, as a 2.0 thread does.',
       architectureDiagram: 'voice-concierge',
     },
     caseStudy: {
@@ -797,7 +797,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         decide:
           'I wrote the memory design down practice by practice before any code, nearly every one with a test or an eval behind it, and modelled it on the thread, state and journal of LiveKit Agents 2.0, so it maps across if 2.0 ships as described. The agent and this page share one written contract, so the two could be built at the same time.',
         build:
-          'The agent is a Python worker on my home box that connects out to LiveKit Cloud and keeps each visitor\'s memory in a local SQLite thread store. This site gained a token route and the /talk page, which shows the memory and the latency of each turn as they change. Each session ends after 10 minutes, and the page shows an offline state when the worker is not running.',
+          'The agent is a Python worker, meant to run on my home box, that connects out to LiveKit Cloud and keeps each visitor\'s memory in a local SQLite thread store. This site gained a token route and the /talk page, with panels for the memory and the latency of each turn. The agent is designed to end each session after 10 minutes, and the page shows an offline state when no agent joins.',
         verify:
           'The agent\'s design names an offline test for each part: the store, the merge, the write gate, heard-text-only and erasure, plus one that fails if a turn waits on extraction. This site\'s suite runs with no LiveKit settings at all, so the offline page is what every check sees. The live check, a real call against the running worker, is mine to run.',
         simplify:
@@ -871,7 +871,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         { label: 'voice-concierge on GitHub', href: 'https://github.com/mh550/voice-concierge', kind: 'repo' },
       ],
       builtWith:
-        'The spec and the design are mine: the agent, its memory and the contract between it and this page. Claude Code agents wrote the code for both, overnight, in two runs of my agent harness.',
+        'The spec and the design are mine: the agent, its memory and the contract between it and this page. Claude Code agents wrote this page\'s code overnight in one run of my agent harness, and a second run is writing the agent.',
     },
   },
   {

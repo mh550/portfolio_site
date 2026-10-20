@@ -81,6 +81,20 @@ Run `portfolio_site-2026-10-20`, spec `docs/specs/2026-10-19-voice-concierge-pag
   fold (`VC2-talk-offline-390.png`). The one console line is the browser's own 503 for the token POST.
 - Tab from the top: Skip link, MH, menu, Connect, each with the cyan outline.
 
+### VC3: the deep-dive and `/card` (`docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md`)
+- Changed: a tenth project, `/projects/voice-concierge` (order 5, after the four measured case studies, D47; top 3,
+  `/card` and home unchanged): problem, the five method lines, six decisions (one per memory practice), an honest
+  outcome and links to `/talk` and the public agent repo, plus the architecture diagram (three panels: your
+  browser and this site, LiveKit Cloud, your home box). `/card` gains a full-width "Talk to my concierge" button
+  under LinkedIn · Email · GitHub (D48); the Navbar is unchanged (D49). Fact-check, review and design pass: the
+  plan's § Fact-check, § Review and § Design pass tables.
+- Look at (390): `/projects/voice-concierge`: the diagram stacks top to bottom with down arrows, no sideways
+  scroll; the copy reads as a design being built, not a measured product. `/card`: the new button shows without
+  scrolling (it ends at 496 px of 844). Captures: `VC3-voice-concierge-390.png`, `-1280.png`, `VC3-card-390.png`.
+- Numbers: the page has none, on purpose. After real sessions, `docs/notes/voice-concierge-todo.md` says where they
+  go (the evidence brief first, then `metrics` on the entry, four at most).
+- Question open: is order 5 right (INBOX `## Answers`)?
+
 ### Morning: the live check (Michael)
 The harness never runs this (build-only policy); every check it ran saw the offline state. Start the worker first,
 per the agent repo's `MORNING.md` (`mh550/voice-concierge`).

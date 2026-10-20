@@ -12,7 +12,7 @@ import {
 } from '@/lib/data';
 
 describe('projects data', () => {
-  it('exports an array with 9 projects', () => {
+  it('exports an array with 10 projects', () => {
     expect(projects).toHaveLength(10);
   });
 

@@ -102,9 +102,10 @@ describe('ProjectsGrid', () => {
   const cardFor = (title: string) =>
     screen.getAllByRole('article').find((a) => within(a).queryByRole('heading', { name: title }));
 
-  it('shows the first metric value in the preview band of each case study with metrics and no thumbnail', () => {
+  // voice-concierge has no metric until it is measured (its own test below); any other case study without one fails.
+  it('shows the first metric value in the preview band of each case study with no thumbnail', () => {
     render(<ProjectsGrid />);
-    const caseStudies = projects.filter((p) => p.caseStudy && !p.thumbnail && p.metrics?.length);
+    const caseStudies = projects.filter((p) => p.caseStudy && !p.thumbnail && p.slug !== 'voice-concierge');
     expect(caseStudies.length).toBeGreaterThan(0);
     for (const p of caseStudies) {
       const card = cardFor(p.title);

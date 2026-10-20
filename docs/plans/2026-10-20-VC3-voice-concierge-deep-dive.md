@@ -22,7 +22,7 @@ changing the brief's § Sentences with digits first.
 | `slug` | `'voice-concierge'` (already the target of `/talk`'s "deep dive" link, `talkPage.deepDiveHref`) |
 | `title` | `'Voice Concierge: a voice agent that remembers returning visitors'` (64 characters, ASCII only: the OG image draws it with the bundled font) |
 | `company` | `'Personal · open source'` (as agent-harness; the repo is public) |
-| `shortDescription` | `'A LiveKit voice agent on this site that remembers you between visits, shows you what it remembers, and forgets you on request.'` (ASCII only) |
+| `shortDescription` | `'A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.'` (ASCII only) |
 | `categories` | `['ai', 'systems']` |
 | `techStack` | `['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code']` (brief § Providers, § Hosting; the page half is Next.js + TypeScript). VC3-02: was `'OpenRouter'`; the agent repo's `docs/decisions.md` moved every LLM call to the Anthropic API, OpenRouter only as a fallback |
 | `githubUrl` | `'https://github.com/mh550/voice-concierge'`: `gh repo view mh550/voice-concierge --json visibility` printed `{"visibility":"PUBLIC"}` at plan time (2026-10-20, VC3-01). `case-study-data.test.ts` then requires the same URL in `caseStudy.links` (it is) |
@@ -53,7 +53,7 @@ brief. They follow the order of the six practices in the voice-concierge page sp
     title: 'Voice Concierge: a voice agent that remembers returning visitors',
     company: 'Personal · open source',
     shortDescription:
-      'A LiveKit voice agent on this site that remembers you between visits, shows you what it remembers, and forgets you on request.',
+      'A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.',
     categories: ['ai', 'systems'],
     techStack: ['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code'],
     githubUrl: 'https://github.com/mh550/voice-concierge',
@@ -61,13 +61,13 @@ brief. They follow the order of the six practices in the voice-concierge page sp
     order: 5,
     detail: {
       problem:
-        'Voice agents forget you when the call ends, and memory is easy to add badly. A store call awaited inside the turn is a pause the caller hears. An extractor that reads the whole transcript can store what the agent said, or the part of a reply the visitor talked over, as if the visitor had said it. I wanted a concierge for this site that remembers returning visitors, by voice or by text, and lets each of them see and erase what it keeps.',
+        'By default a LiveKit voice agent forgets you when the call ends, and memory is easy to add badly. A store call awaited inside the turn is a pause the caller hears. An extractor that reads the whole transcript can store what the agent said, or the part of a reply the visitor talked over, as if the visitor had said it. I wanted a concierge for this site that remembers returning visitors, by voice or by text, and lets each of them see and erase what it keeps.',
       approach:
-        'One thread of memory per visitor, loaded at connect, written in the background, and shown live on the page.',
+        'The design: one thread of memory per visitor, loaded at connect, written in the background, and shown live on the page.',
       challenges:
         'Keeping memory off the turn path, storing only what the visitor said and heard, and making erasure win over work still in flight.',
       outcome:
-        'The agent and this page were built in parallel overnight, Oct 19 to Oct 20, for a demo on Oct 20, by two harness runs working to one shared contract. No latency numbers are measured yet. They go on this page once I have measured real sessions, and until then it shows none. The agent is built on livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread that expires once it sits idle, as a 2.0 thread does.',
+        'This page and its /talk demo were built overnight, Oct 19 to Oct 20, while a second harness run worked on the agent to the same written contract. The agent is still being built. No latency numbers are measured yet. They go on this page once I have measured real sessions, and until then it shows none. The agent is written for livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread meant to expire once it sits idle, as a 2.0 thread does.',
       // architectureDiagram: 'voice-concierge',  ← VC3-03
     },
     caseStudy: {
@@ -79,7 +79,7 @@ brief. They follow the order of the six practices in the voice-concierge page sp
         decide:
           'I wrote the memory design down practice by practice before any code, nearly every one with a test or an eval behind it, and modelled it on the thread, state and journal of LiveKit Agents 2.0, so it maps across if 2.0 ships as described. The agent and this page share one written contract, so the two could be built at the same time.',
         build:
-          'The agent is a Python worker on my home box that connects out to LiveKit Cloud and keeps each visitor\'s memory in a local SQLite thread store. This site gained a token route and the /talk page, which shows the memory and the latency of each turn as they change. Each session ends after 10 minutes, and the page shows an offline state when the worker is not running.',
+          'The agent is a Python worker, meant to run on my home box, that connects out to LiveKit Cloud and keeps each visitor\'s memory in a local SQLite thread store. This site gained a token route and the /talk page, with panels for the memory and the latency of each turn. The agent is designed to end each session after 10 minutes, and the page shows an offline state when no agent joins.',
         verify:
           'The agent\'s design names an offline test for each part: the store, the merge, the write gate, heard-text-only and erasure, plus one that fails if a turn waits on extraction. This site\'s suite runs with no LiveKit settings at all, so the offline page is what every check sees. The live check, a real call against the running worker, is mine to run.',
         simplify:
@@ -153,7 +153,7 @@ brief. They follow the order of the six practices in the voice-concierge page sp
         { label: 'voice-concierge on GitHub', href: 'https://github.com/mh550/voice-concierge', kind: 'repo' },
       ],
       builtWith:
-        'The spec and the design are mine: the agent, its memory and the contract between it and this page. Claude Code agents wrote the code for both, overnight, in two runs of my agent harness.',
+        'The spec and the design are mine: the agent, its memory and the contract between it and this page. Claude Code agents wrote this page\'s code overnight in one run of my agent harness, and a second run is writing the agent.',
     },
   },
 ```
@@ -172,11 +172,11 @@ the brief's § Sentences with digits:
 |---|---|
 | `Oct 2026` | `caseStudy.timeframe` |
 | `I wrote the memory design down practice by practice …, nearly every one with a test or an eval …, so it maps across if 2.0 ships as described.` | `method.decide` |
-| `Each session ends after 10 minutes, and the page shows an offline state when the worker is not running.` | `method.build` |
+| `The agent is designed to end each session after 10 minutes, and the page shows an offline state when no agent joins.` | `method.build` |
 | `Old facts stay in the store until the thread has been idle for 30 days or the visitor erases it.` | `VC-E.cost` |
 | `Agents 2.0's own advice is one thread per person for one memory, …, so a write that loaded an old version re-reads and re-applies its changes instead of overwriting.` | `VC-F.because` |
-| `The agent and this page were built in parallel overnight, Oct 19 to Oct 20, for a demo on Oct 20, by two harness runs working to one shared contract.` | `outcome` |
-| `The agent is built on livekit-agents 1.8 and only maps onto Agents 2.0: …, and a thread that expires once it sits idle, as a 2.0 thread does.` | `outcome` |
+| `This page and its /talk demo were built overnight, Oct 19 to Oct 20, while a second harness run worked on the agent to the same written contract.` | `outcome` |
+| `The agent is written for livekit-agents 1.8 and only maps onto Agents 2.0: …, and a thread meant to expire once it sits idle, as a 2.0 thread does.` | `outcome` |
 | `https://github.com/mh550/voice-concierge` | `githubUrl`, `links[1].href` (the account name has digits) |
 
 Nothing else in the entry, the diagram copy (§ Diagram) or the `/card` button holds a digit. The digits used: 2026,
@@ -250,7 +250,7 @@ arrow), **LiveKit** (panel B), **worker** (node 4), **SQLite** (node 5). No mute
 (the `Sub` and panel-title colours stay at full opacity for AA).
 
 - `aria-label` (`LABELS['voice-concierge']`): `'The visitor\'s browser loads the /talk page, which sends a browser visitor id to this site\'s token route, and the route signs a room token. The page connects to a LiveKit Cloud room with it, and audio and text stream both ways between the page and the room. The room dispatches the agent worker on my home box; the worker connects out to LiveKit, streams audio and text with the room, and keeps each visitor\'s facts and journal in a SQLite thread store, one thread per visitor.'`
-- caption (`CAPTIONS['voice-concierge']`): `'Memory lives on my home box, outside the call: LiveKit carries the audio and text, and the worker reads and writes one thread per visitor.'`
+- caption (`CAPTIONS['voice-concierge']`): `'As designed, memory lives on my home box, outside the call: LiveKit carries the audio and text, and the worker reads and writes one thread per visitor.'`
 
 ## `/card` link (VC3-03)
 
@@ -372,7 +372,7 @@ facts, but each is a number a reader could take for a measurement, and the page 
 ## Risks
 
 - **The agent run may not finish tonight.** The copy states the design ("the agent's design names an offline
-  test") and says both halves "were built in parallel overnight". At plan time the agent repo's `main` held only the
+  test") and, as first drafted, said both halves "were built in parallel overnight" (VC3-05 cut that: the agent was at C3 of C8). At plan time the agent repo's `main` held only the
   spec. Before pasting, VC3-02 reads the agent repo's `README.md` and `docs/decisions.md` (read-only, the public
   `main`) and notes in its progress entry what it found; VC3-05's fact-check repeats that and softens any sentence
   the built code does not support (write less, not more). Michael has the last look in the morning.
@@ -408,3 +408,75 @@ left is the Next dev indicator, not on the live site.
 | `/projects/voice-concierge` · 390 (`docs/screenshots/v2/VC3-voice-concierge-390.png`, 221 KB, 390 × 7574) | Hamburger navbar; ← Projects; eyebrow "PERSONAL · OPEN SOURCE"; the title on four lines; the summary; "Designer and operator · Oct 2026"; eight tech chips; The Problem; the diagram stacked (Visitor's browser and this site with /talk page → visitor id → /api/concierge/token; down arrows "connect with the token", "audio and text streams"; LiveKit Cloud with Room; "dispatch", "audio and text streams"; My home box with Agent worker → facts and journal → SQLite thread store) and its caption; The Method (01–05); Key Decisions VC-A…VC-F, each with Cost; Outcome; Links (▶ Talk to my concierge, `</>` voice-concierge on GitHub); How it was built; ← Back to all projects; footer | Nothing to fix. Minor, left as is: the token node's sub-line breaks with "token" alone on the second line; the short decision titles (VC-C, VC-F) sit beside their badge while the longer ones wrap under it (the shared `DecisionLog`, same on every case study) |
 | `/projects/voice-concierge` · 1280 (`VC3-voice-concierge-1280.png`, 260 KB, 1280 × 4618) | Full navbar (seven links, no Talk, D49); title on three lines in the 720 px column; the diagram's three panels side by side with right arrows level with the first nodes; caption under; the method, decisions, outcome and links as at 390, wider | Nothing to fix. The panels are narrow (197 / 119 / 162 px), so the mono sub-lines wrap to three or four lines; accepted at VC3-03's review (flex ratios keep `/api/concierge/token` on one line) |
 | `/card` · 390 (`VC3-card-390.png`, 40 KB, 390 × 1322) | Photo; name; title; positioning line; Save contact (accent, full width); LinkedIn · Email · GitHub row; the new full-width "Talk to my concierge" button, same outline style as the row; the conference note; Selected work (the same three cards as before); Full portfolio →; Show QR | Nothing to fix |
+
+VC3-05 retake (after the review below changed the stream arrows to ↕ / ↔ and the caption): the same three files,
+223 / 264 / 40 KB; at 390 the panels still x 45, width 300, now y 1206 / 1569 / 1790; at 1280 unchanged (y 962,
+widths 197 / 119 / 162); scrollWidth 390 / 1280; 0 console and page errors.
+
+## Fact-check (VC3-05)
+
+Diff `git diff ade5c9f^..HEAD` (`$HARNESS_SCRATCH/VC3.diff`), read by an Opus fact-checker against the brief, the
+agent spec (§, D, B) and the agent repo's public `main` at `8bf3f64` (2026-10-20 07:08 UTC, C3 of C8 merged: store
+with the version fence and `forget_me`, worker skeleton, Anthropic LLM, Inference STT/TTS, preload at connect; not
+yet built: extraction, merge, write gate, heard-text-only (C4), visit summary (C5), the 10-minute timer and room
+RPCs (C6), run scripts (C7); README "Being built"; nothing has run live). Rule: write less, not more; the agent is
+stated as a design being built, this site's `/talk` and token route as built. Pinned by
+`case-study-voice-concierge.test.ts` § "claims match what is built" (failed first, then the copy changed).
+
+| Claim | Source | Holds? |
+|---|---|---|
+| title "a voice agent that remembers returning visitors" | §1 (the project's goal) | yes |
+| shortDescription "…on this site that remembers you…, shows…, forgets…" | §1; B5 | softened: "for this site, designed to remember you…, show…, forget…" |
+| techStack Python, LiveKit Agents, SQLite, LiveKit Inference, Anthropic API | D2, D3, D5; decisions.md "LLM provider: Anthropic direct" | yes |
+| problem "Voice agents forget you when the call ends" | Research: LiveKit's `close_on_disconnect` default | softened: "By default a LiveKit voice agent forgets you…" |
+| problem: awaited store call is a pause; whole-transcript extractor stores the wrong words | §1 anti-goals; Research (Mem0); §4.0 | yes |
+| approach "One thread… written in the background, and shown live" | B2, B4, §4.3, §6 (not built yet) | softened: "The design: one thread…" |
+| challenges (three noun phrases) | §1, §4.4, §4.2 | yes |
+| outcome "The agent and this page were built in parallel overnight… for a demo on Oct 20…" | Status line; D4 | cut: "This page and its /talk demo were built overnight, Oct 19 to Oct 20, while a second harness run worked on the agent to the same written contract. The agent is still being built." |
+| outcome "No latency numbers are measured yet…" | brief "Measured numbers: none yet" | yes |
+| outcome "The agent is built on livekit-agents 1.8… a thread that expires once it sits idle" | D2; §4.2; README (purge wired in C6) | softened: "is written for…", "a thread meant to expire…" |
+| method.diagnose, decide, verify, simplify | Research; §4.0, D6, D2, §6, §7; B3 | yes (already design language; preload merged) |
+| method.build "a Python worker on my home box…" | D3 (never run there) | softened: "meant to run on my home box" |
+| method.build "/talk page, which shows the memory and the latency of each turn as they change" | VC2 (never shown live data) | softened: "with panels for the memory and the latency of each turn" |
+| method.build "Each session ends after 10 minutes…when the worker is not running" | B7 (C6, not built); §6 | softened: "The agent is designed to end each session after 10 minutes, and the page shows an offline state when no agent joins." |
+| VC-A … VC-F (chose, over, because, cost) | §4.3, §4.4, §4.0, §4.9, B2–B6, B12 | yes (decisions, not runtime claims; the fence is built) |
+| builtWith "Claude Code agents wrote the code for both, overnight, in two runs" | Status line; harness progress | softened: "…wrote this page's code overnight in one run of my agent harness, and a second run is writing the agent." |
+| diagram nodes, subs and aria-label | D3; B2; §6; §4.2; the token route | yes |
+| diagram caption "Memory lives on my home box…" | D3 | softened: "As designed, memory lives…" |
+| `/card` "Talk to my concierge" → `/talk` | D48; `/talk` built (offline until Michael's live check) | yes |
+
+Every digit in the new sentences (19, 20, 10, 1.8, 2.0) was already in the brief; the brief's § Sentences with digits
+rows were replaced with the new sentences. Out of VC3's diff, so not changed: `src/lib/data/concierge.ts` (VC2's
+`/talk` copy) says "a voice agent I designed and built… It remembers you between visits"; see the progress entry.
+
+## Review (VC3-05)
+
+Opus code review of the same diff; nothing Critical or Important.
+
+| File | Finding | Severity | Outcome |
+|---|---|---|---|
+| `diagrams/index.tsx` `PanelConnector` | every label rendered twice (↓ set and → set, one hidden per breakpoint) | Simplification | fixed: one list; `Arrow dir="responsive"` switches its glyph at md (test: each label once) |
+| `diagrams/index.tsx` stream arrows | arrows one way while the aria-label says the streams run both ways | Minor | fixed: `twoWay` draws ↕ / ↔ (test first) |
+| `diagrams/index.tsx` connector wrapper | `justify-center` and the inner wrappers did nothing | Simplification | fixed with the one-list connector |
+| `diagrams/index.tsx` `Panel` | class list built from a template literal inside the joined array | Simplification | fixed: plain array join, like `Node` |
+| `ProjectDiagram.test.tsx` | pinned exact flex ratios and gap (jsdom can't see layout; captures do) | Minor | fixed: keeps `md:self-start`, `md:w-20`, `md:shrink-0` (the VC3-03 regressions), drops ratios and gap |
+| `ProjectDiagram.test.tsx` | "stacks at 390" title for a class-name test | Minor | renamed |
+| `ProjectsGrid.test.tsx` | `&& p.metrics?.length` silently skips any future case study without a metric | Minor | fixed: excludes `voice-concierge` by slug |
+| `data.test.ts` | title "9 projects" asserts 10 | Minor | renamed |
+| `case-study-voice-concierge.test.ts` | title claims "OpenRouter only as a fallback", untested | Minor | renamed "lists Anthropic API, not OpenRouter" |
+| `diagrams/index.tsx` dispatch arrow | points LiveKit → home box while the worker "connects out" | Minor | not changed: dispatch is a job sent to the worker over its own outbound connection; the sub-line says so |
+
+## Design pass (VC3-05, web-design-guidelines)
+
+Sonnet, Playwright on the dev server (port 7832), `/projects/voice-concierge` and `/card` at 390 and 1280, reduced
+motion, scrolled first (`$HARNESS_SCRATCH/a11y.mjs`, `a11y2.mjs`). Nothing to fix.
+
+- **Headings:** deep-dive one h1, then h2 The Problem, The Method, Key Decisions, Outcome, Links; h3 only under
+  The Method (01–05) and Key Decisions (six titles); no skips. `/card`: h1 Michael Herron, h2 Selected work.
+- **Focus rings:** every link and button shows a solid 2 px outline (accent on the deep-dive; the shared
+  `focusRing` on `/card`, incl. Talk to my concierge); 11 / 17 tab stops on the deep-dive, 11 on `/card`.
+- **Link text:** none vague or empty; no two links share a name with different hrefs (16 and 10 links).
+- **Diagram:** `role="img"` with the full aria-label; all arrow glyphs inside `aria-hidden`; 33 text elements, all
+  10 px, none below 4.5:1, no ancestor opacity; lowest the worker's sub-line 4.75:1 (muted on the accent node),
+  then 5.39:1.
+- **`/card`:** Talk to my concierge `href="/talk"`, 342 × 44 at y 452 (390), scrollWidth 390; 0 console errors.

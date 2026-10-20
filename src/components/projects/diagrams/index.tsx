@@ -36,17 +36,36 @@ function Sub({ children, className = '' }: { children: React.ReactNode; classNam
   );
 }
 
-/** A small directional marker, horizontal or vertical. */
-function Arrow({ dir = 'down', label }: { dir?: 'down' | 'right'; label?: string }) {
+/**
+ * A small directional marker: down, right, or `responsive` (down while panels stack, right from md). `twoWay`
+ * draws ↕ / ↔ for traffic in both directions.
+ */
+function Arrow({
+  dir = 'down',
+  label,
+  twoWay = false,
+}: {
+  dir?: 'down' | 'right' | 'responsive';
+  label?: string;
+  twoWay?: boolean;
+}) {
+  const down = twoWay ? '↕' : '↓';
+  const right = twoWay ? '↔' : '→';
+  const layout = { down: 'flex-col', right: 'flex-row', responsive: 'flex-col md:flex-row' }[dir];
   return (
     <div
-      className={`flex items-center justify-center gap-1.5 text-[var(--color-accent)]/70 ${
-        dir === 'right' ? 'flex-row' : 'flex-col'
-      }`}
+      className={`flex items-center justify-center gap-1.5 text-[var(--color-accent)]/70 ${layout}`}
       aria-hidden="true"
     >
       {label && <span className="font-mono text-[10px] tracking-wide">{label}</span>}
-      <span className="text-base leading-none">{dir === 'right' ? '→' : '↓'}</span>
+      {dir === 'responsive' ? (
+        <span className="text-base leading-none">
+          <span className="md:hidden">{down}</span>
+          <span className="hidden md:inline">{right}</span>
+        </span>
+      ) : (
+        <span className="text-base leading-none">{dir === 'right' ? right : down}</span>
+      )}
     </div>
   );
 }
@@ -69,7 +88,7 @@ function Panel({
         ? 'border-white/5'
         : 'border-white/10';
   return (
-    <div className={[`flex-1 rounded-xl border ${ring} bg-[var(--color-surface)]/40 p-4`, className].filter(Boolean).join(' ')}>
+    <div className={['flex-1 rounded-xl border', ring, 'bg-[var(--color-surface)]/40 p-4', className].filter(Boolean).join(' ')}>
       <p
         className={`mb-3 font-mono text-[11px] uppercase tracking-[0.2em] ${
           tone === 'accent' ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'
@@ -463,19 +482,12 @@ function FormSimplificationDiagram() {
  * Labelled arrows between two panels: pointing down while the panels stack, right once they sit side by side.
  * From md it is narrow (labels wrap) and level with the first nodes, not centred on the tallest panel.
  */
-function PanelConnector({ labels }: { labels: string[] }) {
+function PanelConnector({ arrows }: { arrows: { label: string; twoWay?: boolean }[] }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 md:mt-10 md:w-20 md:shrink-0 md:self-start">
-      <div className="flex flex-col gap-1 md:hidden">
-        {labels.map((label) => (
-          <Arrow key={label} label={label} />
-        ))}
-      </div>
-      <div className="hidden md:flex md:flex-col md:gap-2">
-        {labels.map((label) => (
-          <Arrow key={label} dir="right" label={label} />
-        ))}
-      </div>
+    <div className="flex flex-col items-center gap-1 md:mt-10 md:w-20 md:shrink-0 md:gap-2 md:self-start">
+      {arrows.map((arrow) => (
+        <Arrow key={arrow.label} dir="responsive" {...arrow} />
+      ))}
     </div>
   );
 }
@@ -490,13 +502,13 @@ function VoiceConciergeDiagram() {
         <Node>/api/concierge/token <Sub>on this site&apos;s server: signs a room token</Sub></Node>
       </Panel>
 
-      <PanelConnector labels={['connect with the token', 'audio and text streams']} />
+      <PanelConnector arrows={[{ label: 'connect with the token' }, { label: 'audio and text streams', twoWay: true }]} />
 
       <Panel title="LiveKit Cloud" tone="neutral" className="md:flex-[0.8]">
         <Node>Room <Sub>one per session</Sub></Node>
       </Panel>
 
-      <PanelConnector labels={['dispatch', 'audio and text streams']} />
+      <PanelConnector arrows={[{ label: 'dispatch' }, { label: 'audio and text streams', twoWay: true }]} />
 
       <Panel title="My home box" tone="neutral" className="md:flex-[1.2]">
         <Node accent>Agent worker <Sub>Python; connects out, no open ports</Sub></Node>
@@ -540,7 +552,7 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'form-simplification':
     'Specified on Oct 16 after using the app, not yet built: a spot is a place with photos, and everything else is optional.',
   'voice-concierge':
-    'Memory lives on my home box, outside the call: LiveKit carries the audio and text, and the worker reads and writes one thread per visitor.',
+    'As designed, memory lives on my home box, outside the call: LiveKit carries the audio and text, and the worker reads and writes one thread per visitor.',
 };
 
 // What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).

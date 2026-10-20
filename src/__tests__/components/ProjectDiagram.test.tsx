@@ -317,7 +317,7 @@ describe('voice-concierge architecture diagram (VC3-03)', () => {
     );
   });
 
-  it('stacks its three panels at 390 and top-aligns them side by side from md', () => {
+  it('uses flex-col below md and md:flex-row md:items-start from md, with three panels', () => {
     const { img } = rendered();
     const row = img.firstElementChild!;
     expect(row).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
@@ -325,32 +325,44 @@ describe('voice-concierge architecture diagram (VC3-03)', () => {
     expect(panels).toHaveLength(3);
   });
 
-  it('points each connector arrow down below md and right from md', () => {
+  function connectors(img: HTMLElement) {
+    return Array.from(img.firstElementChild!.children).filter((el) => !el.classList.contains('flex-1'));
+  }
+
+  function glyphs(arrow: Element) {
+    return arrow.querySelector('.md\\:hidden')!.textContent! + arrow.querySelector('.hidden.md\\:inline')!.textContent!;
+  }
+
+  // VC3-05 review: one list of arrows whose glyph switches at md, so each label is in the DOM once.
+  it('renders each connector label once, its arrow down below md and right from md', () => {
     const { img } = rendered();
-    const connectors = Array.from(img.firstElementChild!.children).filter((el) => !el.classList.contains('flex-1'));
-    expect(connectors).toHaveLength(2);
-    connectors.forEach((c) => {
-      expect(c.querySelector('.md\\:hidden')?.textContent).toContain('↓');
-      expect(c.querySelector('.hidden.md\\:flex')?.textContent).toContain('→');
+    const cs = connectors(img);
+    expect(cs).toHaveLength(2);
+    cs.forEach((c) => {
+      const arrows = c.querySelectorAll('[aria-hidden="true"]');
+      expect(arrows).toHaveLength(2);
+      arrows.forEach((arrow) => expect(glyphs(arrow)).toMatch(/^[↓↕][→↔]$/));
+    });
+    expect(img.textContent!.split('audio and text streams')).toHaveLength(3);
+  });
+
+  // VC3-05 review: the label says the streams run both ways, so the drawn arrows must too.
+  it('draws the audio and text streams as two-way arrows, the others one way', () => {
+    const { img } = rendered();
+    const arrows = connectors(img).flatMap((c) => Array.from(c.querySelectorAll('[aria-hidden="true"]')));
+    arrows.forEach((arrow) => {
+      expect(glyphs(arrow)).toBe(arrow.textContent!.includes('audio and text streams') ? '↕↔' : '↓→');
     });
   });
 
-  // VC3-03 review: centred on the tallest panel, the arrows pointed at empty space under the Room box, and the
-  // ~100 px connectors left the outer panels ~100 px wide at 1280 ("SQLite / thread / store" one word per line).
-  it('keeps the connectors narrow and near the top from md, and gives the outer panels more room', () => {
+  // VC3-03 review: centred on the tallest panel, the arrows pointed at empty space under the Room box, and wide
+  // connectors squeezed the outer panels. The flex ratios are checked by the 390/1280 captures, not here.
+  it('keeps the connectors narrow and near the top from md', () => {
     const { img } = rendered();
-    const row = img.firstElementChild!;
-    const children = Array.from(row.children);
-    const connectors = children.filter((el) => !el.classList.contains('flex-1'));
-    connectors.forEach((c) => {
+    connectors(img).forEach((c) => {
       expect(c).toHaveClass('md:self-start', 'md:w-20', 'md:shrink-0');
       expect(c).not.toHaveClass('md:self-center');
     });
-    const [a, b, c] = children.filter((el) => el.classList.contains('flex-1'));
-    expect(a.className).toMatch(/\bmd:flex-\[1\.5\]/);
-    expect(b.className).toMatch(/\bmd:flex-\[0\.8\]/);
-    expect(c.className).toMatch(/\bmd:flex-\[1\.2\]/);
-    expect(row).toHaveClass('md:gap-2');
   });
 
   it('makes a room per session, not per visit (the token route names a new room on every Connect)', () => {

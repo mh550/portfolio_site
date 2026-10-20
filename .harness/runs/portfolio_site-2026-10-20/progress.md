@@ -14,6 +14,15 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 08:30 · VC3-05 · passes
+
+- Fact-check (Opus, agent repo `main` at `8bf3f64`, C3 of C8, README "Being built"): 9 claims softened, 1 cut. The outcome no longer says the agent "was built" or that a demo happened ("The agent is still being built."); shortDescription, approach, method.build, builtWith and the diagram caption now state the agent as design; brief § Sentences with digits rows replaced. New test group "claims match what is built". Tests 982 → 986, suites 74.
+- Review (Opus): no Critical/Important. Applied: one-list `PanelConnector` via `Arrow dir="responsive"`, ↕/↔ for the two-way streams, `Panel` class join, test titles, ProjectsGrid excludes voice-concierge by slug, dropped exact flex-ratio asserts. Design pass (Sonnet): headings, focus rings, link text, diagram contrast (lowest 4.75:1) all PASS, nothing to fix. Plan gains § Fact-check, § Review, § Design pass; VC3 captures retaken (223/264/40 KB).
+- Hand-off: review-guide VC3 entry, asset-checklist § Voice Concierge (20 s memory-panel recording → `public/projects/voice-concierge/`), CLAUDE.md route row + 986/74, README line on /talk.
+- Verified: check.sh green; jest 986/74; content-guard + claims + opengraph 77/77; smoke 42 PASS; print PASS.
+- Proposed change: VC2's `/talk` copy (`src/lib/data/concierge.ts` `talkPage`) still says "a voice agent I designed and built… It remembers you between visits"; outside VC3's diff, so left. Soften it, or leave it as the live page's copy once the agent runs?
+- Question for Michael (still open): is order 5 right for the deep-dive? Re-read the deep-dive once the agent run finishes; if it ships the timer and extraction, "designed to" can become plain past tense.
+
 ### 2026-10-20 07:50 · VC3-04 · passes
 
 - New captures `docs/screenshots/v2/VC3-voice-concierge-390.png` (221 KB), `-1280.png` (260 KB), `VC3-card-390.png` (40 KB), 256-colour PNGs from `$HARNESS_SCRATCH/vc3-shots.mjs` (reduced motion, scrolled first). VC3 plan § What Michael will see filled (measurements + one row per screenshot). No code change; tests 982 → 982, suites 74.

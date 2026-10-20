@@ -237,7 +237,7 @@
         "`npx jest src/__tests__/lib/content-guard.test.ts src/__tests__/lib/claims-on-linked-page.test.ts src/__tests__/app/opengraph-image.test.ts` is green.",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

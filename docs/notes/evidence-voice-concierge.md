@@ -133,9 +133,9 @@ ends and line breaks and requires each piece with a digit to appear in this file
 |---|---|---|
 | Oct 2026 | `caseStudy.timeframe` | Status line (2026-10-19, revised 10-20) |
 | I wrote the memory design down practice by practice before any code, nearly every one with a test or an eval behind it, and modelled it on the thread, state and journal of LiveKit Agents 2.0, so it maps across if 2.0 ships as described. | `method.decide` | §4.0 (D6; every row but Observability names a test or an eval); D2; Research ("whether Agents 2.0 ships as described") |
-| Each session ends after 10 minutes, and the page shows an offline state when the worker is not running. | `method.build` | B7; §6 |
+| The agent is designed to end each session after 10 minutes, and the page shows an offline state when no agent joins. | `method.build` | B7; §6 |
 | Old facts stay in the store until the thread has been idle for 30 days or the visitor erases it. | decision `VC-E` cost | B6; B5 |
 | Agents 2.0's own advice is one thread per person for one memory, and a refresh or a second tab can put two jobs on one visitor, so a write that loaded an old version re-reads and re-applies its changes instead of overwriting. | decision `VC-F` because | B2; §4.2; Research "One memory per thread" |
-| The agent and this page were built in parallel overnight, Oct 19 to Oct 20, for a demo on Oct 20, by two harness runs working to one shared contract. | `detail.outcome` | Status line; D4; page spec header |
-| The agent is built on livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread that expires once it sits idle, as a 2.0 thread does. | `detail.outcome` | D2; §2; §4.2; §4.5; B6; Research "Lifecycle" |
+| This page and its /talk demo were built overnight, Oct 19 to Oct 20, while a second harness run worked on the agent to the same written contract. | `detail.outcome` | Status line; D4; page spec header |
+| The agent is written for livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread meant to expire once it sits idle, as a 2.0 thread does. | `detail.outcome` | D2; §2; §4.2; §4.5; B6; Research "Lifecycle" |
 | https://github.com/mh550/voice-concierge | `githubUrl`, `caseStudy.links[1].href` | § How it was built (PUBLIC on 2026-10-20) |

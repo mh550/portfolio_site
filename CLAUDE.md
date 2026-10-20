@@ -18,6 +18,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
+| `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
@@ -36,7 +37,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (942 tests, 73 suites after VC2-06)
+npm test             # Jest unit/integration tests (986 tests, 74 suites after VC3-05)
 npm run test:watch   # watch mode
 ```
 
