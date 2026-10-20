@@ -101,13 +101,13 @@ describe('voice-concierge claims match what is built', () => {
     expect(text).not.toMatch(/agent and this page were built/i);
     expect(text).not.toMatch(/for a demo on/i);
     expect(text).not.toMatch(/wrote the code for both/i);
-    expect(project.detail.outcome).toContain('The agent is still being built.');
+    expect(project.detail.outcome).toContain('The agent is live now');
   });
 
   it('states unbuilt agent behaviour as design', () => {
     expect(project.shortDescription).toMatch(/designed to remember/);
     expect(project.detail.approach).toMatch(/^The design:/);
-    expect(cs!.method.build).toMatch(/meant to run on my home box/);
+    expect(cs!.method.build).toMatch(/a Python worker on my home box/);
     expect(cs!.method.build).toMatch(/designed to end each session after 10 minutes/);
     expect(cs!.method.build).not.toMatch(/as they change/);
   });
