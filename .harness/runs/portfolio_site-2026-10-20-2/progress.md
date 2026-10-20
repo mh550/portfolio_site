@@ -10,12 +10,26 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
-### 2026-10-20 10:05 · B1-04 · not yet
+### 2026-10-20 10:20 · B1-04 · passes
 
-- **Landed:** `public/b/mh_harness/sweep.py` (`find_placeholders`, `find_alarm`, `main`; flag-based SIGINT/SIGTERM/SIGHUP,
-  0.1 s tick, SIGTERM all live run_ones at once then `kill_tree` each, echoes each run's `run_one.out` when it ends,
-  `report: <n> runs ended` placeholder in `_print_report`); `tests/test_sweep.py` (22 tests). Python 41 → 63 (19 s),
-  Jest 643 → 643. Spec **D54** (bad configs file / duplicate names → exit 2). Opus review pending at commit time.
+- **Landed:** `public/b/mh_harness/sweep.py` (`find_placeholders`, `find_alarm`, `main`; SIGINT/SIGTERM/SIGHUP set a flag
+  read every 0.1 s tick; Ctrl-C SIGTERMs all live run_ones at once, then `kill_tree`s each, exit 130; each run's
+  `run_one.out` echoed when it ends; `_print_report` prints the `report: <n> runs ended` placeholder) and
+  `tests/test_sweep.py` (27 tests). Python 41 → 68 (21 s), Jest 643 → 643. Spec **D54**: exit 2 on an unreadable,
+  non-array or duplicate/unsafe-name configs file (names `^[A-Za-z0-9][A-Za-z0-9_.-]*$`, duplicates compared case-folded),
+  BOM ok, `--interval`/`--alarm-after` > 0. Plan: sweep flow and the extra test names.
+- **Opus review** (9 findings), applied: an old game log is deleted before its run starts (no stale `ALARM: Traceback`), BOM
+  and bad JSON give exit 2, case-folded and path-safe names, Ctrl-C in the last tick still exits 130, the Ctrl-C test
+  always cleans up its sweep, positive floats; adapter's `# ADAPT:` comment no longer promises an empty workdir.
+- **Verified:** round1.json → the exact refusal, exit 2, `grep -c base` 0, no results.jsonl; fake-round `--dry-run` → 4
+  `cmd: … fake_game.py  cwd: …/work/…` lines, nothing created; a scratch fake round at `--parallel 2 --interval 0.5`
+  printed status lines, 4× solved, 4 rows, 4.6 s; mutations (no parallel cap, no `_stop_all` on Ctrl-C) fail their tests;
+  `ast` 3.8 ok; `.harness/check.sh` `lint ok · jest ok · build ok`.
+- **Next session (B1-05):** swap the body of `sweep._print_report(home, round_name, runs_ended)` for
+  `report.render(report.summarise(report.load_rows(home / "results.jsonl", round_name)))` and update the two tests that
+  assert `report: 4 runs ended` / `report: 2 runs ended`. The Ctrl-C test asserts that no `report:` is printed.
+- **Proposed change:** `test_stale_game_log_never_shows` passes with or without the fix here (the race needs a slow
+  run_one start); it stays as a guard.
 
 ### 2026-10-20 09:48 · B1-03 · passes
 

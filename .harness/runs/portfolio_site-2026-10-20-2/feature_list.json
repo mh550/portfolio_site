@@ -64,7 +64,7 @@
         "`public/b/mh_harness/tests/test_sweep.py` cases: four configs with FAKE_SLEEP_S=2 and `--parallel 4` finish in under 5 s wall and leave 4 rows in the tempdir's results.jsonl; the placeholder refusal exits 2 with the config name and field in stderr and creates no work/ or logs/ entry; `--dry-run` prints 4 `cmd:` lines and writes nothing; FAKE_ALARM=429 with `--interval 0.5` makes the status output contain `ALARM: 429`; FAKE_SLEEP_S=3, FAKE_LLM_CALLS=1 with `--alarm-after 0.5 --interval 0.5` prints `ALARM: no tool call`; `--repeat 2` on one config leaves rows with index 0 and 1; `cd public/b/mh_harness && python3 -m unittest discover -s tests` is green",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B1-05",

@@ -13,8 +13,9 @@ FAKE_GAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fake_game.
 
 
 # ADAPT: return (argv, cwd) that starts ONE local game run headless, using config["mcps"] (and anything else in the
-# config). workdir is this run's own empty directory (also in the env as HARNESS_WORKDIR); config["env"] is already
-# in the child's environment. Use sys.executable for Python and absolute paths, so it works from any cwd.
+# config). workdir is this run's own directory, also in the env as HARNESS_WORKDIR (sweep.py keeps config.json and
+# run_one.out in it); config["env"] is already in the child's environment. Use sys.executable for Python and
+# absolute paths, so it works from any cwd.
 def build_command(config: dict, workdir: str) -> Tuple[List[str], str]:
     return [sys.executable, FAKE_GAME], workdir
 

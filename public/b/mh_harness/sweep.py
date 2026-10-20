@@ -23,6 +23,7 @@ import adapter
 import run_one
 
 RUN_ONE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_one.py")
+NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")  # a config name becomes a file name under work/ and logs/
 TICK_S = 0.1  # how often finished runs are reaped and queued ones started; --interval only paces the status lines
 
 # (reason, pattern) in the order find_alarm checks them; 429 is a whole token, Traceback case-sensitive (D49).
@@ -80,11 +81,14 @@ def _config_problem(configs: Any) -> Optional[str]:
         return "the configs file must hold a JSON array of configs"
     seen = set()
     for i, config in enumerate(configs):
-        if not isinstance(config, dict) or not isinstance(config.get("name"), str) or not config["name"]:
+        if not isinstance(config, dict) or not isinstance(config.get("name"), str):
             return "config #{} needs a \"name\" string".format(i)
-        if config["name"] in seen:
-            return 'two configs are named "{}" (their logs and work dirs would collide)'.format(config["name"])
-        seen.add(config["name"])
+        name = config["name"]
+        if not NAME_RE.match(name):
+            return 'config name "{}" may hold only letters, digits, _ . - (it names files)'.format(name)
+        if name.casefold() in seen:  # Windows and macOS file names ignore case
+            return 'two configs are named "{}" (their logs and work dirs would collide)'.format(name)
+        seen.add(name.casefold())
     return None
 
 
@@ -113,6 +117,9 @@ def _start(config: dict, index: int, round_name: str, home: Path) -> Run:
     workdir.mkdir(parents=True, exist_ok=True)
     config_path = workdir / "config.json"
     config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    game_log = home / "logs" / (run_id + ".log")
+    if game_log.exists():
+        game_log.unlink()  # else the first status line could show an earlier round's log before run_one truncates it
     out_path = workdir / "run_one.out"
     env = dict(os.environ)
     env["MH_HARNESS_HOME"] = str(home)
@@ -123,7 +130,7 @@ def _start(config: dict, index: int, round_name: str, home: Path) -> Run:
     except BaseException:
         out_file.close()
         raise
-    return Run(run_id, proc, out_file, out_path, home / "logs" / (run_id + ".log"))
+    return Run(run_id, proc, out_file, out_path, game_log)
 
 
 def _finish(run: Run) -> None:
@@ -189,19 +196,31 @@ def _positive_int(text: str) -> int:
     return value
 
 
+def _positive_float(text: str) -> float:
+    value = float(text)
+    if not value > 0:
+        raise argparse.ArgumentTypeError("must be more than 0")
+    return value
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Run every config K times, N at a time, then print the report.")
     parser.add_argument("configs", help="JSON file holding an array of configs; its stem names the round")
     parser.add_argument("--parallel", type=_positive_int, default=4, help="runs at once, default 4")
     parser.add_argument("--repeat", type=_positive_int, default=1, help="runs per config, default 1")
-    parser.add_argument("--interval", type=float, default=15.0, help="seconds between status lines, default 15")
-    parser.add_argument("--alarm-after", type=float, default=60.0,
+    parser.add_argument("--interval", type=_positive_float, default=15.0,
+                        help="seconds between status lines, default 15")
+    parser.add_argument("--alarm-after", type=_positive_float, default=60.0,
                         help="alarm when a run has no tool call after this many seconds, default 60")
     parser.add_argument("--dry-run", action="store_true", help="print each run's command and cwd, run nothing")
     args = parser.parse_args(argv)
 
-    with open(args.configs, encoding="utf-8") as f:
-        configs = json.load(f)
+    try:
+        with open(args.configs, encoding="utf-8-sig") as f:  # -sig: Windows Notepad may save a BOM
+            configs = json.load(f)
+    except (OSError, ValueError) as exc:
+        print("refusing to start: {}: {}".format(args.configs, exc), file=sys.stderr, flush=True)
+        return 2
     problem = _config_problem(configs)
     if problem is not None:
         print("refusing to start: {}: {}".format(args.configs, problem), file=sys.stderr, flush=True)
@@ -251,6 +270,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     except BaseException:
         _stop_all(live)
         raise
+    if _interrupted:  # Ctrl-C during the last tick: still an interrupted round, no report
+        return 130
 
     _print_report(home, round_name, ended)
     return 0

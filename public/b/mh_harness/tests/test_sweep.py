@@ -22,6 +22,17 @@ ROUND1 = os.path.join(HARNESS_DIR, "configs", "round1.json")
 FAKE_ROUND = os.path.join(HARNESS_DIR, "configs", "fake-round.json")
 
 
+def stop_quietly(proc):
+    """Cleanup for a sweep the test started: SIGINT, then SIGKILL, and drain its pipes."""
+    if proc.poll() is None:
+        proc.send_signal(signal.SIGINT)
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+    proc.communicate()
+
+
 class SweepCase(HarnessHomeCase):
     def sweep(self, configs_path, *args, timeout=30):
         return subprocess.run([sys.executable, SWEEP, configs_path] + list(args), env=self.env(),
@@ -134,11 +145,57 @@ class TestSweep(SweepCase):
                 self.assertIn("refusing to start", p.stderr)
                 self.assertEqual(self.home_entries(), ["round-t.json"])
 
+    def test_unreadable_configs_file_exits_2(self):
+        bad = os.path.join(self.home, "round-t.json")
+        with open(bad, "w", encoding="utf-8") as f:
+            f.write('[{"name": "a",}]')
+        for path in (bad, os.path.join(self.home, "missing.json")):
+            with self.subTest(path=path):
+                p = self.sweep(path)
+                self.assertEqual(p.returncode, 2)
+                self.assertIn("refusing to start: " + path, p.stderr)
+                self.assertNotIn("Traceback", p.stderr)
+                self.assertEqual(self.home_entries(), ["round-t.json"])
+
+    def test_bom_configs_file_runs(self):  # Windows Notepad saves UTF-8 with a BOM
+        path = os.path.join(self.home, "round-t.json")
+        with open(path, "w", encoding="utf-8-sig") as f:
+            json.dump([make_config("a")], f)
+        p = self.sweep(path, "--dry-run")
+        self.assertEqual(p.returncode, 0, p.stderr)
+
+    def test_names_must_be_safe_and_distinct_ignoring_case(self):
+        for names in (["Base", "base"], ["a/b"], [".."], ["x y"]):
+            with self.subTest(names=names):
+                p = self.sweep(self.configs([make_config(n) for n in names]))
+                self.assertEqual(p.returncode, 2)
+                self.assertIn("refusing to start", p.stderr)
+                self.assertEqual(self.home_entries(), ["round-t.json"])
+
+    def test_non_positive_interval_is_rejected(self):
+        path = self.configs([make_config("a")])
+        for flag, value in (("--interval", "0"), ("--alarm-after", "-1")):
+            with self.subTest(flag=flag):
+                p = self.sweep(path, flag, value)
+                self.assertEqual(p.returncode, 2)
+                self.assertEqual(self.home_entries(), ["round-t.json"])
+
+    def test_stale_game_log_never_shows(self):
+        os.makedirs(os.path.join(self.home, "logs"))
+        with open(os.path.join(self.home, "logs", "a-0.log"), "w", encoding="utf-8") as f:
+            f.write("Traceback (most recent call last):\nHARNESS_TOOL {\"name\": \"old\", \"args\": {}}\n")
+        path = self.configs([make_config("a", env={"FAKE_SLEEP_S": "1", "FAKE_LLM_CALLS": "1"})])
+        p = self.sweep(path, "--interval", "0.05")
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertNotIn("ALARM: Traceback", p.stdout)
+        self.assertNotIn("tools=1", p.stdout)
+
     @unittest.skipIf(os.name == "nt", "POSIX signals")
     def test_ctrl_c_kills_every_run_and_exits_130(self):
         path = self.configs([make_config("k{}".format(i), env={"FAKE_SLEEP_S": "30"}) for i in range(2)])
         proc = subprocess.Popen([sys.executable, SWEEP, path], env=self.env(), stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        self.addCleanup(stop_quietly, proc)
         pids = [wait_for_pid_line(os.path.join(self.home, "logs", "k{}-0.log".format(i))) for i in range(2)]
         for pid in pids:
             if pid:
