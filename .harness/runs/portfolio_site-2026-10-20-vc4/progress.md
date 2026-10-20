@@ -11,6 +11,14 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 19:10 · VC5-01 · passes
+
+- Verify failed VC5-01/03/04 on one cause: D72 (room `concierge-<addr10>`, no random part) contradicts Michael's spec (`concierge-<addr10>-<random>`) and the steps. Took **D73 *default***: the spec's form again. Reason: under D72 two people on one NAT (conference Wi-Fi) who press Connect before the first join creates the room share a room and hear each other; the forged-Origin burst is a cost limit the agent and provider caps bound.
+- Docs only: plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (route rows 5/7, known limits, § Address hash, CLAUDE.md draft, Review, D72 marked superseded, D73, new § D73 rework); spec § 7 D72 superseded + D73. Tests 1114 → 1114.
+- Verified: every step read against the plan; `.harness/check.sh` → `check: lint ok · jest ok · build ok` (1114 tests); smoke 42/42 PASS.
+- Next session (VC5-03, then VC5-04): code is still D72's. Follow plan § D73 rework exactly: `limits.ts` roomNameFor + `startsWith(concierge-<bucket>-)` + tests (VC5-03); route-limits test regex/burst test, CLAUDE.md token row, review guide § VC5 (lines ~164, 194, 212) and the vc4 spec Built note (lines 81, 86–87) (VC5-04).
+- Question for Michael: D73: keep the spec's random room suffix, or go back to D72 (one room per address) and accept the shared-room race?
+
 ### 2026-10-20 18:30 · verify VC5
 
 Steps failing for VC5-01/03/04 are one cause: D72 (room name `concierge-<addr10>` without random suffix) is a deliberate security fix but the feature steps were not updated to it. The next session should update the steps' wording or revert D72, with Michael's choice.

@@ -160,7 +160,7 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
   visitor's own room for up to about 30 s after Leave, or another person behind the same NAT (two phones on the
   conference Wi-Fi). Alternative: "A conversation from your network is still open. Try again in a minute." Question:
   keep the spec's line or switch? Supersedes nothing (the spec's own wording). (VC5-05 builds; a copy change in `talkPage.status.busyVisitor` only.)
-- **D72** *default* One room per address: `roomNameFor(bucket)` is `concierge-<addr10>`, with no random part, and a
+- **D72** *default*, superseded by D73. One room per address: `roomNameFor(bucket)` is `concierge-<addr10>`, with no random part, and a
   room is this address's when its name is exactly that. Every token minted from one address before anyone joins
   names the same room, and the token's `roomConfig` (the agent dispatch) applies only to the join that creates it,
   so a script that mints a burst of tokens with a forged Origin starts one room and one agent, not one per token
@@ -168,3 +168,9 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
   shape (the bucket is still in the caller's own JWT). Side effect: two people behind one NAT pressing Connect in
   the same second share a room. Reversible in `limits.ts` alone (review guide § VC5, Undo). Question: keep it?
   (VC5-07 builds.)
+- **D73** *default* The room is the VC5 spec's `concierge-<addr10>-<randomBytes(6) hex>` again, and a room is this
+  address's when its name starts with `concierge-<addr10>-`. Supersedes D72. Why: under D72 two people behind one
+  NAT (the conference Wi-Fi) who press Connect before the first join creates the room share a room and hear each
+  other; a burst of tokens minted with a forged Origin is a cost limit that the agent's caps and the provider caps
+  bound, as a burst from many addresses already was. Question: keep the spec's form, or go back to D72 and accept
+  the shared-room race? (VC5-01 re-run plans it, § D73 rework; VC5-03 and VC5-04 re-runs build.)

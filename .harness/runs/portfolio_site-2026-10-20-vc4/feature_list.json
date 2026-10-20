@@ -117,7 +117,7 @@
       "after": [
         "VC4"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-02",
