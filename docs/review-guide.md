@@ -151,7 +151,7 @@ Run `portfolio_site-2026-10-20-vc4`, spec `docs/specs/2026-10-20-vc4-order-widge
 ## VC5: mic timing and cost protection
 
 Same run and spec as VC4, plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (its § Review is the Opus
-review table, § Live check the full staged check). Merge after VC4. Decisions D63–D71 are in
+review table, § Live check the full staged check). Merge after VC4. Decisions D63–D73 are in
 `docs/specs/2026-10-19-voice-concierge-page.md` § 7.
 
 - Changed: the browser asks for the microphone only once the concierge has joined, and the Mute button shows only
@@ -160,8 +160,8 @@ review table, § Live check the full staged check). Merge after VC4. Decisions D
   D63) → the three `LIVEKIT_*` (503) → the body (400) → LiveKit's live room list (503 if that call fails: fail
   closed) → 429 `{error:'busy', reason:'visitor'}` if your address already has a live room, `reason:'site'` if
   `CONCIERGE_MAX_ROOMS` (default 2) rooms are live → a token for room `concierge-<10 hex of your address's
-  HMAC>`, one room per address, so tokens a script mints from one address all land in one room with one agent
-  (D72). No database: the room list is the state. `/talk` shows one line per 429 ("You already have a
+  HMAC>-<12 random hex>`, a new room per Connect, so two people behind one NAT never share one (D73, which
+  supersedes D72's one room per address). No database: the room list is the state. `/talk` shows one line per 429 ("You already have a
   conversation open in another tab." / "The concierge is busy right now. Try again in a few minutes."), keeps
   Connect, and never retries by itself (D66). `server-only` (exact `0.0.1`, D67) guards `env.ts` and `rooms.ts`
   from the client bundle. The deep-dive gained one sentence on how it's protected (the agent's 5 sessions a day and
@@ -186,14 +186,14 @@ The harness never runs this (build-only). On the PR preview, in order; stop at t
    A 403 on the third means the preview host doesn't match the regex (D64): paste the host into INBOX.
    LiveKit Cloud → Rooms: nothing new (no token was signed).
 2. **One visitor, two tabs** (the three `LIVEKIT_*` for **Preview** only, redeploy, start the worker). Tab A:
-   Connect → Connected, and only then the microphone prompt. Room list: one `concierge-<10 hex>` room
+   Connect → Connected, and only then the microphone prompt. Room list: one `concierge-<10 hex>-<12 hex>` room
    with two participants (you and the agent). Tab B, same browser: Connect → "You already have a conversation
    open in another tab.", Connect still shown, no mic prompt; room list still one room. Tab A: Leave, and count
    the seconds the room stays listed; until it goes, Tab B still gets the another-tab line (D68). If it stays for
    minutes, tell the run (D68's alternative: count only rooms with a `visitor-` participant). Re-run stage 1:
-   403, 403, then 200 (a token nobody uses: no room appears) or 429 if a conversation is live. D72's check: while
-   Tab A is live, its room name has no second hex part, and stage 1's third curl from the same network answers
-   429 `visitor`.
+   403, 403, then 200 (a token nobody uses: no room appears) or 429 if a conversation is live. D73's check: while
+   Tab A is live, its room name has two hex parts (`concierge-<10 hex>-<12 hex>`), and stage 1's third curl from
+   the same network answers 429 `visitor`.
 3. **The site cap** (`CONCIERGE_MAX_ROOMS` unset = 2): two conversations live from two addresses (laptop, and a
    phone on cellular); the room list shows two `concierge-` rooms with different 10-hex parts. A third device on
    another network → "The concierge is busy right now. Try again in a few minutes.", no mic prompt; still two
@@ -204,14 +204,14 @@ The harness never runs this (build-only). On the PR preview, in order; stop at t
 
 Two things to confirm, not checkable in this run: the agent doesn't parse room names (in `mh550/voice-concierge`,
 `grep -rn 'room.name\|room_name' concierge/` must show nothing that splits on `-` or expects
-`concierge-<12 hex>`; rooms are now `concierge-<10 hex>`), and the preview regex matches your current previews (stage 1's third curl).
+`concierge-<12 hex>`; rooms are now `concierge-<10 hex>-<12 hex>`, D73), and the preview regex matches your current previews (stage 1's third curl).
 
 **Undo**, one piece at a time:
 - The site cap too tight or too loose → set `CONCIERGE_MAX_ROOMS` in Vercel (Preview and/or Production) and
   redeploy; delete it to go back to 2.
-- One room per address (D72) → `roomNameFor` in `src/lib/concierge/limits.ts` back to
-  `` `concierge-${bucket}-${randomBytes(6).toString('hex')}` `` and `roomsVerdict`'s match back to
-  `startsWith(`concierge-${bucket}-`)` (the VC5-07 commit's `limits.ts` hunk and its tests).
+- A room per Connect (D73) → back to D72's one room per address: `roomNameFor` in `src/lib/concierge/limits.ts`
+  returns `` `concierge-${bucket}` `` and `roomsVerdict` matches the name exactly (revert the VC5-03 commit, which
+  carries `limits.ts`, its tests and the route-limits test; then the room list shows `concierge-<10 hex>`).
 - The route's limits → revert the VC5-04 commit: the VC1 route returns (no Origin check, no room list, room
   `concierge-<12 hex>`); `concierge-token-route-limits.test.ts` goes with it.
 - The busy lines → revert the VC5-05 commit (a 429 then reads as offline).

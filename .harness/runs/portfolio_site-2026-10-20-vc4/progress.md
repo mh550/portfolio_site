@@ -11,6 +11,14 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 19:55 · VC5-04 · passes
+
+- Docs only (route code and its tests already D73 since VC5-03): `docs/review-guide.md` § VC5 (Changed: room `concierge-<10 hex>-<12 random hex>`, D73; stage 2 room list and "D73's check"; the agent room-name note; Undo now "back to D72" via reverting VC5-03; decisions D63–D73) and the Built note of `docs/specs/2026-10-20-vc4-order-widget-limits.md` (D72 superseded by D73, room form). Tests 1115 → 1115 (81 suites).
+- Verified each step: route order 403→503→400→503→429→200, `no-store` on every reply, `grep -n console route.ts` empty; token-route test 403 cases incl. NODE_ENV production seam; limits test ROOM `-[0-9a-f]{12}$`, bucket = test's HMAC of `203.0.113.9`, unknown bucket, MAX=4 → 200, list reject → 503, no address/bucket in bodies or console; sdk test: bad id and 403 reach neither SDK nor `listLiveRooms`; plan § Route behaviour rows 5/7 and CLAUDE.md token row match.
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS; curls on :7834: no Origin 403, evil 403, localhost 503.
+- Next: every VC5 feature now passes; `grep -rn D72` outside the spec's § 7 and the plan's history is only "superseded" mentions.
+- Question for Michael (still open): D73, a room per Connect (spec's form) vs D72 one room per address.
+
 ### 2026-10-20 19:35 · VC5-03 · passes
 
 - D73 in code: `src/lib/concierge/limits.ts` `roomNameFor` is `concierge-<bucket>-<randomBytes(6) hex>` again and `roomsVerdict` matches `startsWith(concierge-<bucket>-)`; D72 comment gone. Tests first: `concierge-limits.test.ts` 3 failed, then 23/23 passed (name regex `-[0-9a-f]{12}$`, two calls differ, `concierge-<b>-x` → visitor, bare `concierge-<b>` and `concierge-<b>x-…` are not this address's).

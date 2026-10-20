@@ -79,12 +79,13 @@ each naming what it supersedes:
   bucket; the preview-host regex), D65 (mic toggle only when live), D66 (the `busy` phase, no retry), D68 (one 5 s
   room-list attempt; every listed room counts), D69 (the 200 tests' new file), D70 (TTL stays 600 s), D71 (the
   another-tab wording), D72 (one room per address, `concierge-<addr10>`, no random part: the VC5-07 review's fix
-  for tokens minted in a burst).
+  for tokens minted in a burst), superseded by D73 (the spec's `concierge-<addr10>-<12 hex>` again, a room per
+  Connect, so two people behind one NAT never share a room; built in VC5-03, 2026-10-20).
 
 Michael must confirm two things the run could not check:
 
-1. **The agent does not parse room names.** Rooms are now `concierge-<addr10>` (were
-   `concierge-<12 hex>`; D72 dropped the spec's random part). The agent's code was not on this machine (`~/projects/voice-concierge` has docs only), so
+1. **The agent does not parse room names.** Rooms are now `concierge-<addr10>-<12 hex>` (were
+   `concierge-<12 hex>`; D73, the spec's form). The agent's code was not on this machine (`~/projects/voice-concierge` has docs only), so
    in `mh550/voice-concierge`: `grep -rn 'room.name\|room_name' concierge/` shows nothing that splits the name on
    `-` or expects the old form.
 2. **The preview-host regex matches your current previews.** `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$`
