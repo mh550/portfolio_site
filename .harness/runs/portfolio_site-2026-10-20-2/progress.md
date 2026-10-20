@@ -10,6 +10,53 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 12:30 · verify B1
+
+All 7 features hold (41 steps re-run); no feature set to false. Lib check.sh and smoke.mjs green.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| B1-01 | 1 | `grep -nE "^#+" docs/plans/2026-10-20-B1-booth-harness.md` | sections Files, Shared functions, results.jsonl row, Process control, Python 3.8 rules, Tests, Fake round, Review all present | yes |
+| B1-01 | 2 | `diff <(sed -n ... spec) PROMPTS.md` | empty (PROMPTS_SAME) | yes |
+| B1-01 | 3 | python read of configs/round1.json | 6 names in order; expected_words 2, cities 6, timeout_s 450; mcps/env/control_of as specified; JSON loads | yes |
+| B1-01 | 4 | python read of configs/fake-round.json | 4 configs, no `<`, timeout_s 60, FAKE_* env, terse_trim LLM_CALLS 2, base_ctl control_of base | yes |
+| B1-01 | 5 | `git check-ignore -q` per path; tail .gitignore | block present; the 4 paths each exit 0; public/b/h.tgz exit 1 (multi-path -q is a git error, so run one by one) | yes |
+| B1-01 | 6 | `grep -n "^- \*\*D4"` + `^## 7` | `## 7. Decisions` at line 197; D41–D50 listed as `- **D<n>** *default*` | yes |
+| B1-01 | 7 | `npx jest content-guard.test.ts` | 20/20 pass | yes |
+| B1-01 | 8 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-02 | 1 | `FAKE_LLM_CALLS=2 fake_game.py | grep -c HARNESS_TOOL`; `FAKE_EXIT=3`; `FAKE_ALARM=429` | 2; exit 3; 429 line printed; tests test_fake_game cases also pass | yes |
+| B1-02 | 2 | import run_one via python -c; read parse_telemetry/exit_reason (run_one.py:53,95) | import prints nothing; test_telemetry cases for prefix, malformed JSON, repeats, None median pass | yes |
+| B1-02 | 3 | `python3 -m unittest discover -s tests -v` | 99 tests OK in 21 s; `grep -c " ... ok"` = 99 (>= 8); named telemetry/exit_reason/fake_game cases present | yes |
+| B1-02 | 4 | `git status --short` after tests | empty (pycache ignored) | yes |
+| B1-02 | 5 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-03 | 1 | `grep -c "# ADAPT:" adapter.py`; `grep def` | 2; only build_command and parse_result; tests test_build_command_runs_fake_game, test_parse_result_* pass | yes |
+| B1-03 | 2 | sweep of fake round exercised run_one; reviewed run_one main; test_row_has_exactly_16_fields, test_writes_only_under_harness_home | work/logs/results created under script dir; 16 fields; exit codes per tests; passes | yes |
+| B1-03 | 3 | test_sigterm_exits_130_without_row, test_sigint_exits_130_without_row; `grep def` run_one | both pass; kill_tree, start_detached, main exist and sweep imports them | yes |
+| B1-03 | 4 | test_run_one cases (solved, incomplete, error tail, float timeout, timeout_kills_tree, config env); env override is `MH_HARNESS_HOME` (D46/D52) not `HARNESS_HOME` - step allows a patched base dir | all pass in tempdir; real results.jsonl untouched | yes |
+| B1-03 | 5 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-04 | 1 | `sweep.py configs/round1.json`; `ls logs work | grep -c base` | refusal text names config "base" and mcps[0]; exit=2; count 0; no results.jsonl | yes |
+| B1-04 | 2 | `sweep.py configs/fake-round.json --dry-run` | 4 `cmd: ... fake_game.py  cwd: .../work/<name>-0` lines, exit 0; no logs/work/results | yes |
+| B1-04 | 3 | ran live sweep with --interval 1; read test_sweep status/alarm/ctrl-c tests | status lines `[base-0] 2s llm=2 tools=2` seen; ctrl-c, alarm tests pass; report table printed at end | yes |
+| B1-04 | 4 | test_sweep: four_runs_in_parallel_under_5s, placeholder_refusal, dry_run, alarm_429, alarm_no_tool_call, repeat_two | all present and pass in the 99 | yes |
+| B1-04 | 5 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-05 | 1 | read report.py; test_report test_no_results_yet, test_latest_round_by_default | load_rows/summarise/render and CLI flags exist; "no results yet" exit 0 | yes |
+| B1-05 | 2 | live report output; test_sort_words_then_wall, test_noise_flag, test_projection, test_pick_* | table sorted, `base vs base_ctl: 0.0 %`, projection lines, `pick: base`; tests pass | yes |
+| B1-05 | 3 | test_report cases (median 10/20/90 -> 20, noise 10 vs 25, projection 42, pick skip, md header, latest round) | all pass | yes |
+| B1-05 | 4 | `sweep.py fake-round.json --parallel 4 --interval 1`; `report.py --md` | 2.3 s; 4 rows solved:1, `pick: base`; md table starts with `| name |` and shows same round | yes |
+| B1-05 | 5 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-06 | 1 | `wc -l README.md`; grep for `<`/TODO/[X]; test_readme (5 cases) | 44 lines; no placeholders; test_names_every_file, test_four_commands, test_windows_and_output_notes pass | yes |
+| B1-06 | 2 | rm -rf outputs; unittest (21 s); round1 refusal; fake-round --parallel 4; report --md | all as specified: green <60 s, exit 2, 4 status lines/runs, 2.3 s, four solved:1, pick; plan "Fake round" section has the commands/evidence | yes |
+| B1-06 | 3 | `sweep.py fake-round.json --parallel 2 --repeat 2` then `report.py` | every row solved:2; `base vs base_ctl: 0.0 %` noise line; pick: terse | yes |
+| B1-06 | 4 | future-import loop; grep removeprefix|match; ast.parse feature_version=(3,8) | no NOFUTURE output; grep empty; ast exit 0 (only ResourceWarnings from the check command itself) | yes |
+| B1-06 | 5 | cleanup then `git status --short`; content-guard jest | status empty; content-guard 20/20 | yes |
+| B1-06 | 6 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+| B1-07 | 1 | plan "Review" section (line 332) | findings with file:line, Critical/Important/Minor present | yes |
+| B1-07 | 2 | read Important #1 and Minors | Important fixed with test_game_children_die_when_game_exits_itself (passes); Windows half recorded as D56; test names noted | yes |
+| B1-07 | 3 | `wc -l *.py`; unittest; cleanup; git status | 829 lines (<900); 99 tests OK; status clean; kill logic shared via run_one.kill_trees | yes |
+| B1-07 | 4 | `grep -niE "secret|answer" *.py`; grep open(/Path(; `grep -rn /b/ src public` | first empty; all targets under harness_home() or read-only configs; third empty | yes |
+| B1-07 | 5 | `git diff d1f2a62..HEAD --stat -- CLAUDE.md`; read Counts line | no CLAUDE.md change; ends "0 Critical, 1 Important, 6 Minor ... fixed/left" | yes |
+| B1-07 | 6 | `.harness/check.sh` | `check: lint ok · jest ok · build ok` | yes |
+
 ### 2026-10-20 11:50 · B1-07 · passes
 
 - **Review:** Opus read `git diff d1f2a62..HEAD -- public/b docs .gitignore` (2550 lines) and found 0 Critical,
