@@ -27,7 +27,34 @@ Reproducibility: two `npm run booth-bundle` in a row give the same sha256 (`1266
 
 ## What Michael will see
 
-Filled in by B2-02 (the curl | tar check against the init server).
+Checked against the init server (`next dev`, port 7833) from empty temp dirs, run 2026-10-20 (B2-02).
+
+```bash
+curl -sL http://localhost:7833/b/h.tgz | tar xz        # one entry: mh_harness/ (17 members, same list as tar -tzf public/b/h.tgz)
+curl -sI http://localhost:7833/b/h.tgz | head -1       # HTTP/1.1 200 OK
+curl -sLO http://localhost:7833/b/mh_harness/PROMPTS.md  # per-file fallback: cmp with public/b/mh_harness/PROMPTS.md is identical
+cd mh_harness
+python3 -m unittest discover -s tests                  # Ran 99 tests in 21.4s ... OK
+python3 sweep.py configs/round1.json                   # refusing to start: config "base" field mcps[0] still has a placeholder: "<current set>"  (exit 2)
+python3 sweep.py configs/fake-round.json --parallel 4 --interval 1
+python3 report.py --md
+```
+
+Trimmed output of the fake round (about 2 s): status lines `[base-0] 2s llm=2 tools=2`, four `<name>-0: solved words=2 wall=2.04s` lines, then
+
+```
+name        words  wall_s  llm  out_tok  in_tok  tools  repeats  exits
+base            2    2.04    3      300    6000      3        0  solved:1
+base_ctl        2    2.04    3      300    6000      3        0  solved:1
+terse           2    2.04    3      300    6000      3        0  solved:1
+terse_trim      2    2.04    2      150    3000      2        0  solved:1
+pick: base
+```
+
+`report.py --md` prints the same round as a `| name | words | wall s | ...` markdown table.
+
+- Windows: the tarball is ustar (`tarfile.open(...).format == tarfile.USTAR_FORMAT`), so bsdtar (Windows `tar.exe`) reads it; bsdtar is not installed here, so that is not run. Python's stdlib opens it (17 members, equal to `tar -tzf | wc -l`), which is the fallback extractor.
+- Nothing points at `/b/`: no hit in `src/` outside the bundle test's comments, none in `.harness/smoke-routes.txt`, 0 in `/sitemap.xml`, no line in `/robots.txt`. Smoke green, no route changed. No fix was needed.
 
 ## Review
 

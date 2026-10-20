@@ -10,6 +10,13 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 13:30 · B2-02 · passes
+
+- Only docs changed: filled "What Michael will see" in `docs/plans/2026-10-20-B2-booth-bundle.md`. No code fix needed. Jest stays 648/58.
+- Verified against the 7833 server: curl | tar gives `mh_harness/` (17 members, same as `tar -tzf`); HEAD is 200; per-file PROMPTS.md identical; extracted copy: 99 tests OK in 21 s, round1 refused (names `base`, `mcps[0]`, exit 2), fake round 4 solved rows in ~2 s, `report.py --md` table; ustar format via Python tarfile, 17 members. sitemap/robots have no `/b/`; smoke green.
+- Note: bsdtar is not installed here, so the Windows tar.exe claim rests on the ustar format only. `grep '/b/' src/` hits only comments in booth-bundle.test.ts.
+- Next (B2-03): fill the plan's "Review" section.
+
 ### 2026-10-20 13:05 · B2-01 · passes
 
 - New: `scripts/build-booth-bundle.mjs` (GNU tar flags per D41 piped into `zlib.gzipSync` level 9), `npm run booth-bundle`, committed `public/b/h.tgz` (14 files, 24887 bytes, sha256 `1266b778…`), `src/__tests__/lib/booth-bundle.test.ts` (5 tests), `docs/notes/booth-bundle.md`, `docs/plans/2026-10-20-B2-booth-bundle.md` (Files + mutation check; "What Michael will see" and "Review" left for B2-02/B2-03). CLAUDE.md: `/b/h.tgz` row, `npm run booth-bundle`, count. Jest 643/57 → 648/58.

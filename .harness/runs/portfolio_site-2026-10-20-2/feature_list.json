@@ -147,7 +147,7 @@
         "`git status --short` is clean after the check apart from the plan file and any fix; if a fix was needed it is named in the plan with the test that covers it",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B2-03",
