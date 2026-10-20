@@ -6,6 +6,7 @@ import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
 import ApproachPage from '@/app/approach/page';
 import EvidencePage from '@/app/evidence/page';
+import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
 import { getProjectBySlug } from '@/lib/data';
@@ -20,6 +21,7 @@ const pages: [string, () => ReactElement][] = [
   ['/card/qr', () => <CardQrPage />],
   ['/approach', () => <ApproachPage />],
   ['/evidence', () => <EvidencePage />],
+  ['/talk', () => <TalkPage />],
   ['/projects/agent-harness', () => caseStudy('agent-harness')],
   ['/projects/home-media-server', () => caseStudy('home-media-server')],
   ['/projects/hit-list', () => caseStudy('hit-list')],

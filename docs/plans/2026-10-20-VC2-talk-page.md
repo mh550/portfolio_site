@@ -106,7 +106,7 @@ interface SessionState {
 | waiting | `ParticipantConnected` with `kind === ParticipantKind.AGENT` | live | clear the timer; `agentIdentity = p.identity`; `startAudio()` if needed |
 | waiting | timer fires | offline | teardown |
 | live | `setMicrophoneEnabled` rejects | live | `micBlocked = true` ("Microphone blocked. You can still type.") |
-| live | `ParticipantDisconnected` for `agentIdentity`, or `RoomEvent.Disconnected` | ended | teardown; transcript, memory and latency stay visible |
+| live | `ParticipantDisconnected` for `agentIdentity` (checked a microtask later: not while `room.state` is `Reconnecting`, since a full reconnect unwinds every participant first, VC2-04 review), or `RoomEvent.Disconnected` | ended | teardown; transcript, memory and latency stay visible |
 | live | Forget me → Erase | live | `forget = 'busy'`; `performRpc(...)`; `{ok:true}` → `memory` = empty, `forget = 'done'` ("Forgotten"); rejection or other reply → `forget = 'failed'`, button re-enabled, error line |
 | any but idle | Leave clicked | idle | teardown; everything cleared (`initialSession`) |
 | any | unmount | — | teardown |
@@ -356,6 +356,10 @@ each delta dispatches `{ key, who, text, final }`:
   lk.segment_id"); a line with that key is **replaced**, not appended.
 - `final` = `attributes['lk.transcription_final'] === 'true'` (core notes it flips `"false" → "true"` on the final
   STT result). A non-final line renders muted with a visible "…" marker.
+  **As built (VC2-04):** the line is `final: false` while its stream is open; when the stream closes it is final
+  unless the attribute (read after the trailer merged into `info.attributes`) is exactly `"false"`, so an agent
+  stream without the attribute can't leave the log `aria-busy`. A new segment from the same speaker, and the end of
+  the call (`ended`/`offline`), also settle any open line.
 - `who` = `participantInfo.identity === room.localParticipant.identity ? 'visitor' : 'agent'`. The agent publishes
   the visitor's transcription under the visitor's identity; this is how `components-react`'s own session messages
   tell them apart (`room-Bfb4OWAI.mjs` ~line 5489: `case t.localParticipant.identity: type: "userTranscript"`).

@@ -11,16 +11,16 @@ describe('sitemap', () => {
   const urls = sitemap().map((e) => e.url);
 
   it('lists every top-level page that exists, built from profile.siteUrl', () => {
-    const routes = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/approach', '/card'];
+    const routes = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/approach', '/card', '/talk'];
     for (const route of routes.filter(pageExists)) {
       expect(urls).toContain(route === '/' ? profile.siteUrl : `${profile.siteUrl}${route}`);
     }
-    expect(routes.filter(pageExists)).toHaveLength(8);
+    expect(routes.filter(pageExists)).toHaveLength(9);
   });
 
   it('lists every project page', () => {
     for (const p of projects) expect(urls).toContain(`${profile.siteUrl}/projects/${p.slug}`);
-    expect(urls).toHaveLength(8 + projects.length);
+    expect(urls).toHaveLength(9 + projects.length);
   });
 
   it('excludes /evidence and /card/qr', () => {

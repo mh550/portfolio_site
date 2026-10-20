@@ -110,7 +110,7 @@
         "jest.config.ts maps livekit-client and @livekit/components-react to the mocks in src/__mocks__/; no Server Component imports livekit-client (`grep -rl livekit-client src/app` is empty); the server render of /talk and the client render match (no hydration warning in the dev server log after loading /talk).",
         "`node .harness/smoke.mjs` passes /talk at 1280 and 390; `curl -s -o /dev/null -w '%{http_code}' http://localhost:$HARNESS_PORT/talk` prints 200; .harness/check.sh is green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-05",

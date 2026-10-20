@@ -166,6 +166,15 @@ don't redo it.
   `visitor-<id>` and the dispatch metadata `visitor_id` are always lower-case (RFC 9562 output form;
   `crypto.randomUUID()` is lower-case already). One visitor stays one identity on the agent side even if a client
   sends upper case. Reversible: drop the `.toLowerCase()` in `route.ts`. (VC1-03.)
+- **D44** *default* `/talk` keeps the site chrome (Navbar, skip link, Footer), is indexable (no `robots` override)
+  and is in `sitemap.ts`, but stays off the Navbar: the Navbar holds the seven sections of the site, and `/talk` is a
+  demo reached from `/card` and the deep-dive (voice-concierge spec W4). Reversible: one entry in `Navbar.tsx`'s
+  link list. (VC2-04.)
+- **D45** *default* `/talk` reads the visitor id with `getOrCreateVisitorId(browserStorage())` in the Connect click
+  handler, not in a mount effect, and creates the LiveKit `Room` in that handler too. So no state is set from an
+  effect, the server HTML and the first client render match, StrictMode cannot register the text-stream handlers
+  twice, and a visitor who never presses Connect gets no id stored. `browserStorage()` rather than
+  `window.localStorage`, because reading that property itself throws when the browser blocks site storage. (VC2-04.)
 
 ## Dependencies between milestones
 

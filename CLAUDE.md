@@ -27,6 +27,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
+| `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
 | `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
 
 ## Commands
@@ -35,7 +36,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (764 tests, 67 suites after VC2-03)
+npm test             # Jest unit/integration tests (860 tests, 70 suites after VC2-04)
 npm run test:watch   # watch mode
 ```
 
@@ -82,7 +83,10 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
-  non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`
+  non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
+  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45) and `sessionReducer.ts` the
+  phases; Jest maps `livekit-client`/`@livekit/components-react` to `src/__mocks__/` (`MockRoom.setup`, `pushText`,
+  `addAgent`). Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
