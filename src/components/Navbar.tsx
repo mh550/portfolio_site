@@ -10,6 +10,7 @@ const links = [
   { href: '/about', label: 'About' },
   { href: '/skills', label: 'Skills' },
   { href: '/projects', label: 'Projects' },
+  { href: '/talk', label: 'Talk' },
   { href: '/approach', label: 'Approach' },
   { href: '/experience', label: 'Experience' },
   { href: '/contact', label: 'Contact' },
@@ -76,7 +77,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-white/5 bg-[var(--color-surface)]">
+        <div className="md:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-white/5 bg-[var(--color-surface)]">
           <ul className="px-6 py-4 flex flex-col gap-4">
             {links.map(({ href, label }) => (
               <li key={href}>

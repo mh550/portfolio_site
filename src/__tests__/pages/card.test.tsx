@@ -62,6 +62,7 @@ describe('CardPage', () => {
     const known = new Set(projects.map((p) => p.slug));
     slugs.forEach((slug) => expect(known.has(slug)).toBe(true));
     expect(slugs).toEqual(getTopProjects(3).map((p) => p.slug));
+    expect(hrefs[1]).toBe('/projects/voice-concierge'); // D59
   });
 
   it('each selected-work link shows the title and shortDescription', () => {

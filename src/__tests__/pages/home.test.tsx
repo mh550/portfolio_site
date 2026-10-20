@@ -35,6 +35,7 @@ describe('Home page', () => {
       .getAllByRole('link', { name: /deep dive/i })
       .map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual(top.map((p) => `/projects/${p.slug}`));
+    expect(hrefs[1]).toBe('/projects/voice-concierge'); // D59
   });
 
   it('links "See all projects" to /projects', () => {

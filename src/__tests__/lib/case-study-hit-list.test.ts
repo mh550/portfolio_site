@@ -19,7 +19,7 @@ describe('hit-list entry', () => {
     expect(project.title).toBe('HitList: offline-first street-spot scouting app');
     expect(project.company).toBe('Personal · iOS (Expo)');
     expect(project.categories).toEqual(['full-stack', 'process']);
-    expect(project.order).toBe(4);
+    expect(project.order).toBe(7);
     expect(project.featured).toBe(true);
     expect(project.githubUrl).toBe(REPO);
   });

@@ -40,3 +40,12 @@ describe('Footer accessibility (M8-02)', () => {
     expect(screen.getByRole('link', { name: 'Email' })).not.toHaveAttribute('aria-label');
   });
 });
+
+describe('Footer clear of the voice widget (VC4-03, D61)', () => {
+  it('pads its bottom by 96 px below xl and 32 px from xl', () => {
+    const { container } = render(<Footer />);
+    const classes = (container.querySelector('footer')!.getAttribute('class') ?? '').split(/\s+/);
+    expect(classes).toEqual(expect.arrayContaining(['pt-8', 'pb-24', 'xl:pb-8']));
+    expect(classes).not.toContain('py-8');
+  });
+});

@@ -51,17 +51,17 @@ describe('projects data', () => {
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
-  it('carries the D12 order on every project', () => {
+  it('carries the D59 order on every project', () => {
     const orders = Object.fromEntries(projects.map((p) => [p.slug, p.order]));
     expect(orders).toEqual({
       'agent-harness': 1,
-      'linear-ai-workflow': 2,
-      'home-media-server': 3,
-      'hit-list': 4,
-      'voice-concierge': 5,
-      'ghl-jobtread-integration': 6,
-      'paint-estimator': 7,
-      'ringcentral-jobtread-integration': 8,
+      'voice-concierge': 2,
+      'ghl-jobtread-integration': 3,
+      'ringcentral-jobtread-integration': 4,
+      'home-media-server': 5,
+      'linear-ai-workflow': 6,
+      'hit-list': 7,
+      'paint-estimator': 8,
       'mirrored-google-calendars': 9,
       cherished: 10,
     });
@@ -80,20 +80,20 @@ describe('projects data', () => {
 
 describe('getTopProjects', () => {
   it('returns the first n featured projects by order', () => {
-    expect(getTopProjects(3).map((p) => p.slug)).toEqual(['agent-harness', 'linear-ai-workflow', 'home-media-server']);
+    expect(getTopProjects(3).map((p) => p.slug)).toEqual(['agent-harness', 'voice-concierge', 'ghl-jobtread-integration']);
   });
 
   it('returns every featured project, sorted by order, when n exceeds the count', () => {
     const slugs = getTopProjects(10).map((p) => p.slug);
     expect(slugs).toEqual([
       'agent-harness',
-      'linear-ai-workflow',
-      'home-media-server',
-      'hit-list',
       'voice-concierge',
       'ghl-jobtread-integration',
-      'paint-estimator',
       'ringcentral-jobtread-integration',
+      'home-media-server',
+      'linear-ai-workflow',
+      'hit-list',
+      'paint-estimator',
     ]);
     expect(slugs).not.toContain('cherished');
   });

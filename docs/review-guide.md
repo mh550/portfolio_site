@@ -70,7 +70,7 @@ Run `portfolio_site-2026-10-20`, spec `docs/specs/2026-10-19-voice-concierge-pag
 ### Merge order
 1. **VC1** (PR #14): the three LiveKit packages at exact pins (D41) and `POST /api/concierge/token`. Without the
    `LIVEKIT_*` env vars it answers 503 `{offline:true}`, so merging it changes nothing a visitor sees.
-2. **VC2**: `/talk` (`docs/plans/2026-10-20-VC2-talk-page.md`). In the sitemap, not in the Navbar (D44).
+2. **VC2**: `/talk` (`docs/plans/2026-10-20-VC2-talk-page.md`). In the sitemap, not in the Navbar (D44; VC4 adds it, D60).
 3. **VC3**: the `/projects/voice-concierge` deep-dive and diagram, and the `/card` link to `/talk`. Until VC3 is
    merged, the offline state's "Read how it works" link is a 404.
 
@@ -82,18 +82,21 @@ Run `portfolio_site-2026-10-20`, spec `docs/specs/2026-10-19-voice-concierge-pag
 - Tab from the top: Skip link, MH, menu, Connect, each with the cyan outline.
 
 ### VC3: the deep-dive and `/card` (`docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md`)
-- Changed: a tenth project, `/projects/voice-concierge` (order 5, after the four measured case studies, D47; top 3,
-  `/card` and home unchanged): problem, the five method lines, six decisions (one per memory practice), an honest
+- Changed: a tenth project, `/projects/voice-concierge` (order 5 in VC3, D47; VC4 moved it to order 2, D59, so the
+  top 3 on `/card` and home is now agent-harness, voice-concierge, ghl-jobtread-integration): problem, the five method lines, six decisions (one per memory practice), an honest
   outcome and links to `/talk` and the public agent repo, plus the architecture diagram (three panels: your
   browser and this site, LiveKit Cloud, your home box). `/card` gains a full-width "Talk to my concierge" button
-  under LinkedIn · Email · GitHub (D48); the Navbar is unchanged (D49). Fact-check, review and design pass: the
+  under LinkedIn · Email · GitHub (D48); the Navbar was unchanged in VC3 (D49; VC4 adds Talk, D60). Fact-check, review and design pass: the
   plan's § Fact-check, § Review and § Design pass tables.
 - Look at (390): `/projects/voice-concierge`: the diagram stacks top to bottom with down arrows, no sideways
   scroll; the copy reads as a design being built, not a measured product. `/card`: the new button shows without
   scrolling (it ends at 496 px of 844). Captures: `VC3-voice-concierge-390.png`, `-1280.png`, `VC3-card-390.png`.
 - Numbers: the page has none, on purpose. After real sessions, `docs/notes/voice-concierge-todo.md` says where they
   go (the evidence brief first, then `metrics` on the entry, four at most).
-- Question open: is order 5 right (INBOX `## Answers`)?
+- Answered: the order changed in VC4 (D59, Michael's answer): agent-harness, voice-concierge,
+  ghl-jobtread-integration, ringcentral-jobtread-integration, then home-media-server, linear-ai-workflow, hit-list,
+  paint-estimator, mirrored-google-calendars, cherished. New top 3: agent-harness, voice-concierge,
+  ghl-jobtread-integration.
 
 ### Morning: the live check (Michael)
 The harness never runs this (build-only policy); every check it ran saw the offline state. Start the worker first,
@@ -119,3 +122,27 @@ second microphone prompt or no sound → press "Turn on sound"; anything else, n
 **Undo:** remove the three env vars in Vercel and redeploy: the token route answers 503 and `/talk` shows the
 offline state again. Or leave the env and turn on the worker's kill switch (agent repo `MORNING.md`): the worker
 declines the job, no agent joins, and the page shows the same offline state after 10 s.
+
+## VC4: order, Navbar, widget
+
+Run `portfolio_site-2026-10-20-vc4`, spec `docs/specs/2026-10-20-vc4-order-widget-limits.md`, plan
+`docs/plans/2026-10-20-VC4-order-widget-nav.md` (its § Review is the Opus review table). Merge after VC3 and B2.
+
+- Changed: the project `order` (D59: agent-harness, voice-concierge, ghl-jobtread-integration,
+  ringcentral-jobtread-integration, then the rest), so home's Recent work and `/card`'s Selected work show those
+  first three; **Talk** in the Navbar between Projects and Approach (D60, eight links); a floating 56 px cyan disc
+  with a mic, bottom right, that links to `/talk` on every chrome page but `/talk` itself and `/card*` (D61; it
+  pulses twice on load, not at all under reduced motion, and is hidden in print; the Footer gains bottom padding
+  below `xl` so its links clear it); the `/talk` intro now reads "built with my agent harness", the words linking
+  `/projects/agent-harness`, and the voice-concierge deep-dive credits the harness (D62).
+- Look at (390): `/`: the disc bottom right, clear of the content and, scrolled to the bottom, of the footer links;
+  open the menu: eight links, Talk fifth, nothing wraps; `/card`: the three cards are agent-harness,
+  voice-concierge, ghl-jobtread-integration, and no disc; `/talk`: no disc, "my agent harness" is an underlined cyan
+  link to the harness case study.
+- Captures: `docs/screenshots/v2/VC4-home-390.png`, `VC4-home-1280.png`, `VC4-about-footer-390.png`,
+  `VC4-card-390.png`, `VC4-menu-390.png`, `VC4-talk-390.png`.
+- **Undo**, one piece at a time: the order is the `order:` values in `src/lib/data/projects.ts` (the plan's § Order
+  table has the before column); the Navbar is the one `{ href: '/talk', label: 'Talk' }` entry in `links` in
+  `src/components/Navbar.tsx`; the widget is the one `{pathname !== talkWidget.href && <VoiceWidget />}` line in
+  `src/components/SiteChrome.tsx` (then the Footer's `pb-24 xl:pb-8` can go back to `py-8`); the intro is
+  `talkPage.intro[0]` in `src/lib/data/concierge.ts`. Each has tests that pin it, so expect those to go red with it.
