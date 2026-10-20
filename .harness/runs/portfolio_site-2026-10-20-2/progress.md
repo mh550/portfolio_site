@@ -10,6 +10,25 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 09:48 · B1-03 · passes
+
+- **Landed:** `adapter.py` (two `# ADAPT:` functions, `FAKE_GAME`); `run_one.py` gains `harness_home`, `start_detached`,
+  `kill_tree(proc, grace_s=2.0)`, `child_env`, `main` + `__main__`; `tests/test_run_one.py` (23 tests). Python 18 → 41
+  tests (5 s), Jest 643 → 643. Spec **D52** (override renamed `MH_HARNESS_HOME`), **D53** (bad config exit 2; start
+  failure = `error` row); plan's Process control / Interrupts / Tests updated to match.
+- **Why D52:** this harness exports `HARNESS_HOME=/home/mh550/projects/agent-harness`, so my first manual run wrote
+  `results.jsonl`, `logs/terse_trim-2.log`, `work/terse_trim-2/` (09:36:54-56) **into agent-harness**. Cleanup there
+  was denied to me. **Michael, please run:** `cd ~/projects/agent-harness && rm -f results.jsonl
+  logs/terse_trim-2.log && rmdir work/terse_trim-2 work logs`.
+- **Opus review** (16 findings) applied: signal handler only sets a flag + 0.1 s sliced wait (no orphan on a signal
+  during `Popen`, Windows Ctrl-C works), `finally` kills an unreaped game on any exception, game grace 1 s < sweep's
+  2 s (mutation-checked: grace 2 s fails `test_sweep_kill_reaches_game_that_ignores_sigterm` and orphans the game),
+  SIGHUP, relative override resolved, float median, `\n`-only 2 KB-capped tail. Not done: Windows append atomicity.
+- **Verified:** `grep -c '# ADAPT:'` → 2; `ast` 3.8 parse ok; from `/tmp` with only `HARNESS_HOME` set, rows go to
+  `mh_harness/` (git-ignored, removed after); `.harness/check.sh` `lint ok · jest ok · build ok`; smoke green.
+- **Next session (B1-04):** sweep starts run_one with `MH_HARNESS_HOME` (not `HARNESS_HOME`), kills it with
+  `kill_tree(proc)` (default 2 s); `run_one.main` returns 130 on interrupt and 2 on a bad config.
+
 ### 2026-10-20 10:25 · B1-02 · passes
 
 - **Landed:** `public/b/mh_harness/fake_game.py` (env-driven; `HARNESS_PID` first, then per call i `HARNESS_LLM

@@ -49,7 +49,7 @@
         "`public/b/mh_harness/tests/test_run_one.py` cases (each in a tempdir via a `HARNESS_HOME` env override or a patched base dir, so the real results.jsonl is untouched): a run with FAKE_SLEEP_S=0.2 and FAKE_WORDS=2, expected_words 2 ends `solved` with wall_s > 0, llm_calls 3, tool_calls 3, and the log file contains the RESULT line; FAKE_WORDS=1 ends `incomplete`; FAKE_EXIT=2 ends `error` with error_tail a list of at most 20 strings whose last element is the RESULT line; FAKE_SLEEP_S=30 with timeout_s 1 ends `timeout` within 5 s and the child's pid is gone (`os.kill(pid, 0)` raises or, on POSIX, the process is a zombie reaped by wait); config env `FAKE_WORDS` reaches the child; the row has exactly the 16 field names; `cd public/b/mh_harness && python3 -m unittest discover -s tests` is green",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B1-04",

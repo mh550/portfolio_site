@@ -44,7 +44,7 @@ import subprocess
 from pathlib import Path
 
 def harness_home() -> Path:
-    """Base dir for results.jsonl, logs/ and work/: $HARNESS_HOME if set, else run_one.py's own directory (D46)."""
+    """Base dir for results.jsonl, logs/ and work/: $MH_HARNESS_HOME if set, else run_one.py's own directory (D46)."""
 
 def parse_telemetry(log_text: str) -> dict:
     """{'llm_calls': int, 'input_tokens': int, 'output_tokens': int, 'llm_ms_median': Optional[float],
@@ -54,7 +54,7 @@ def exit_reason(returncode: Optional[int], timed_out: bool, words_found: int, ex
     """'timeout' if timed_out; else 'error' if returncode != 0; else 'solved' if words_found >= expected_words;
        else 'incomplete'. (timed_out wins over everything; returncode may be None only when timed_out.)"""
 
-def kill_tree(proc: subprocess.Popen) -> None:
+def kill_tree(proc: subprocess.Popen, grace_s: float = 2.0) -> None:
     """Kill proc and everything it started (see Process control); returns after proc is reaped. Safe on a
        process that already exited."""
 
@@ -129,25 +129,29 @@ mode, which is enough for a handful of runs. `report.load_rows` skips blank and 
 - Always `stdin=subprocess.DEVNULL`, `stdout=log_file`, `stderr=subprocess.STDOUT`; `log_file` is opened `"wb"` by
   the caller and closed by it after the child is reaped.
 
-**Kill** (`kill_tree(proc)`):
+**Kill** (`kill_tree(proc, grace_s=2.0)`; run_one passes `GAME_GRACE_S = 1.0` for the game, so a game that ignores
+SIGTERM still dies before sweep's 2 s SIGKILL of run_one, B1-03 review):
 
-- POSIX: `os.killpg(proc.pid, SIGTERM)`; poll `proc.poll()` every 0.1 s for up to 2 s; then `os.killpg(proc.pid,
+- POSIX: `os.killpg(proc.pid, SIGTERM)`; poll `proc.poll()` every 0.1 s for up to `grace_s`; then `os.killpg(proc.pid,
   SIGKILL)` regardless (stragglers in the group), ignoring `ProcessLookupError`/`PermissionError` throughout; then
   `proc.wait()`.
-- Windows: `subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)], stdout=DEVNULL, stderr=DEVNULL)`, then
-  `proc.wait()`. `/T` follows parent pids, so it reaches the game under `run_one.py` too.
+- Windows: if `proc.poll() is None`, `subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
+  stdout=DEVNULL, stderr=DEVNULL)`; then `proc.wait()`. `/T` follows parent pids, so it reaches the game under `run_one.py` too.
 
-**run_one.py** flow: read the config → `workdir = harness_home()/"work"/f"{name}-{index}"` (mkdir parents,
+**run_one.py** flow: read the config; `name`, `float(timeout_s)` and `int(expected_words)` must parse, else a
+message on stderr and exit 2 before anything is created (D53) → `workdir = harness_home()/"work"/f"{name}-{index}"` (mkdir parents,
 exist_ok) → `argv, cwd = adapter.build_command(config, str(workdir))` → `env = {**os.environ, **config["env"],
 "HARNESS_WORKDIR": str(workdir.resolve()), "PYTHONUNBUFFERED": "1"}` (config env values are strings) → open
-`harness_home()/"logs"/f"{name}-{index}.log"` → `start_detached` → `proc.wait(timeout=float(config["timeout_s"]))`;
-on `subprocess.TimeoutExpired`: `kill_tree(proc)`, `timed_out = True` → read the log (`utf-8`, `errors="replace"`) →
+`harness_home()/"logs"/f"{name}-{index}.log"` → `start_detached` (an `OSError` is written into the log and the run
+becomes an `error` row, D53) → wait in 0.1 s slices until it exits, the deadline passes (`timed_out = True`) or a
+signal set the flag; a `finally` `kill_tree`s the game whenever it is still unreaped → read the log (`utf-8`, `errors="replace"`) →
 `parse_telemetry` + `adapter.parse_result` → append the row → print one summary line (`<name>-<K>: <exit_reason>
 words=<n> wall=<s>s`, flush) → exit code per D49.
 
-**Interrupts** (D47): `run_one.py` installs handlers for SIGTERM and SIGINT that raise a private `_Interrupted`
-exception; `main` catches it, `kill_tree`s the game if it was started, closes the log, appends **no** row and
-returns 130. `sweep.py` catches `KeyboardInterrupt` around its loop, `kill_tree`s every live `run_one.py` (whose
+**Interrupts** (D47): `run_one.py` installs handlers for SIGTERM, SIGINT and SIGHUP (where it exists) that only set
+a module flag (no exception can land inside `Popen` or `kill_tree`; the sliced wait notices it within 0.1 s, also on
+Windows, where one long `wait()` would not see Ctrl-C); the loop then `kill_tree`s the game, appends **no** row and
+returns 130. A game that already exited when the signal came still gets its row. `sweep.py` catches `KeyboardInterrupt` around its loop, `kill_tree`s every live `run_one.py` (whose
 SIGTERM handler then kills its game within the 2 s grace) and returns 130.
 
 **sweep.py** flow: load the configs (a JSON array) → `find_placeholders`: with `--dry-run` print a `warning:` line
@@ -157,7 +161,7 @@ placeholder: "<value>"` for the first hit to stderr and exit 2 before creating a
 str(home/"work"/f"{name}-{K}"))` and print `cmd: <" ".join(argv)>  cwd: <cwd>`; create nothing; exit 0 → otherwise
 loop with a 0.1 s tick: start queued runs while fewer than N are live (write `work/<name>-<K>/config.json`, then
 `start_detached([sys.executable, <abs run_one.py>, cfg, "--index", K, "--round", <configs stem>], cwd=<harness
-home>, env=os.environ + HARNESS_HOME, log_file=open(work/<name>-<K>/run_one.out, "wb"))`), reap finished ones, and
+home>, env=os.environ + MH_HARNESS_HOME, log_file=open(work/<name>-<K>/run_one.out, "wb"))`), reap finished ones, and
 every `--interval` seconds print per live run `[<name>-<K>] <int elapsed>s llm=<n> tools=<n>` from
 `parse_telemetry(<its game log>)`, plus ` ALARM: <reason>` from `find_alarm` (flush) → when all ended print
 `report.render(report.summarise(report.load_rows(home/"results.jsonl", <configs stem>)))` → exit 0. The tick, not
@@ -205,7 +209,7 @@ go to a pipe or file passes `flush=True`. `shlex.join` exists in 3.8 but quotes 
 ## Tests
 
 `cd public/b/mh_harness && python3 -m unittest discover -s tests` (green, under 60 s in total). Every test that runs
-a script uses `subprocess.run([sys.executable, <script>, …], env={**os.environ, "HARNESS_HOME": <tempdir>},
+a script uses `subprocess.run([sys.executable, <script>, …], env={**os.environ, "MH_HARNESS_HOME": <tempdir>},
 timeout=…)` so the real `results.jsonl`, `logs/` and `work/` are never touched. `fake_game.py` prints `HARNESS_PID
 <pid>` as its first line (flush) so the timeout test can find the game's pid; it also prints, for call i (from 1),
 `HARNESS_LLM {"in": 1000*i, "out": 50*i, "ms": 100*i}` then `HARNESS_TOOL {"name": "visit_city", "args": {"city":
@@ -233,7 +237,12 @@ timeout=…)` so the real `results.jsonl`, `logs/` and `work/` are never touched
   - `TestRunOne.test_config_env_reaches_child` (config `FAKE_WORDS` beats the test's own env)
   - `TestRunOne.test_row_has_exactly_16_fields`
   - `TestRunOne.test_writes_only_under_harness_home` (work/, logs/, results.jsonl appear in the tempdir)
-  - `TestRunOne.test_sigterm_exits_130_without_row` (POSIX only, `skipIf(os.name == "nt")`)
+  - `TestRunOne.test_sigterm_exits_130_without_row`, `test_sigint_exits_130_without_row` (POSIX only)
+  - `TestRunOne.test_float_timeout`, `test_rows_append`, `test_child_env_has_workdir_and_unbuffered`
+  - `TestRunOne.test_bad_config_exits_2_before_starting`, `test_start_failure_is_an_error_row` (D53)
+  - `TestRunOne.test_sweep_kill_reaches_game_that_ignores_sigterm` (POSIX: `kill_tree(run_one)` leaves no game)
+  - `TestAdapter` (4: default argv, last RESULT, none, malformed), `TestProcessControl` (POSIX: exited process,
+    grandchild), `TestImport` (shared names; `harness_home` override, relative override resolved)
 - `tests/test_sweep.py` (B1-04)
   - `TestSweep.test_four_runs_in_parallel_under_5s` (FAKE_SLEEP_S=2, `--parallel 4`: < 5 s, 4 rows)
   - `TestSweep.test_placeholder_refusal` (exit 2, stderr names the config and `mcps[0]`, no work/ or logs/)
@@ -251,7 +260,7 @@ timeout=…)` so the real `results.jsonl`, `logs/` and `work/` are never touched
   - `TestSummarise.test_pick_skips_incomplete_repeat`
   - `TestRender.test_md_starts_with_header_row`
   - `TestLoadRows.test_latest_round_by_default` (tempfile)
-  - `TestCli.test_no_results_yet` (empty HARNESS_HOME → `no results yet`, exit 0)
+  - `TestCli.test_no_results_yet` (empty MH_HARNESS_HOME → `no results yet`, exit 0)
 
 ## Fake round
 

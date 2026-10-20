@@ -215,7 +215,7 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   `run_one.py <that file> --index K --round <configs stem>`; `run_one.py`'s CONFIG.json is one object. Alternative:
   pass the configs file plus a name to `run_one.py`.
 - **D46** *default* `results.jsonl`, `logs/` and `work/` are resolved from `run_one.py`'s own directory, not the cwd,
-  so `python mh_harness/sweep.py …` from the game repo's root writes only inside `mh_harness/`; `HARNESS_HOME`
+  so `python mh_harness/sweep.py …` from the game repo's root writes only inside `mh_harness/`; `MH_HARNESS_HOME`
   overrides that base directory (the tests point it at a tempdir). Alternative: cwd-relative paths.
 - **D47** *default* Interrupts: `run_one.py` handles SIGTERM/SIGINT by killing the game's process tree and exiting
   130 without a results row; `sweep.py` on KeyboardInterrupt `kill_tree`s every live `run_one.py` and exits 130. The
@@ -236,3 +236,11 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   before Step 3 fills its MCP sets, so the dry run prints one `warning: config "<name>" field <path> still has a
   placeholder: "<value>"` line per placeholder on stderr, then every `cmd:` line, and exits 0; only a real start
   refuses (exit 2). Alternative: refuse in the dry run too (rejected: Step 2C would fail as written).
+- **D52** *default* The base-dir override is `MH_HARNESS_HOME`, not `HARNESS_HOME` (D46 edited to match): the agent
+  harness that builds this site exports `HARNESS_HOME` (its own checkout), so under that name every harness session's
+  manual run or fake round wrote `results.jsonl`, `logs/` and `work/` into another repo. A booth laptop has neither
+  variable set, so the bundle behaves the same there. Alternative: keep `HARNESS_HOME` (rejected: B1-03 hit it).
+- **D53** *default* `run_one.py` exits 2 (no row, nothing created) when the config lacks `name` or a number in
+  `timeout_s` / an int in `expected_words`, and records an `error` row (the `OSError` in `error_tail`) when the
+  adapter's command can't start, so the report shows the config instead of silently leaving it out. Alternative: a
+  traceback and exit 1.
