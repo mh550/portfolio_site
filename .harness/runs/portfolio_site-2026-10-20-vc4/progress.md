@@ -11,6 +11,53 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 · verify VC5
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC5-01 | 1 | grep '^#' on the VC5 plan | all listed sections present; Route behaviour table rows 1-7 in the stated order | yes |
+| VC5-01 | 2 | read § Origin rules, grep regex | regex and real preview host present; whole-origin URL parse rule | yes |
+| VC5-01 | 3 | read § Address hash | first XFF entry/'unknown', HMAC 10 hex, room concierge-<addr10>-<12 hex> (D73) | yes |
+| VC5-01 | 4 | read § Modules/Tests; ls src/lib/concierge | origin/limits/rooms modules named; limits test file strategy described | yes |
+| VC5-01 | 5 | read § Mic timing and § busy states; concierge.ts:44-45 | busy copy exact; mic moves to agentArrived | yes |
+| VC5-01 | 6 | read § Live check | curl stages, room list checks, undo, agent room-name caveat present | yes |
+| VC5-01 | 7 | read spec § 7 D59-D73; CLAUDE.md token row | decisions present with supersedes; row drafted and in CLAUDE.md | yes |
+| VC5-02 | 1 | grep -n 'setMic(session, true)' TalkSession.tsx | one line (272), inside agentArrived | yes |
+| VC5-02 | 2 | read TalkSession-live.test.tsx:55-113, TalkSession.test.tsx micCalls asserts; ran jest | mic not called after connect, [[true]] after addAgent; micCalls()==[] offline paths; pass | yes |
+| VC5-02 | 3 | read TalkSession-live.test.tsx:118-128 | no mic button while waiting, exactly one once agent joined; pass | yes |
+| VC5-02 | 4 | read plan § Mic timing; review-guide.md:108 | matches code; guide says prompt once concierge joined | yes |
+| VC5-02 | 5 | check.sh (green, cached); smoke all PASS; full jest | 81 suites / 1115 tests pass | yes |
+| VC5-03 | 1 | jest concierge-origin.test.ts | passes; step's cases covered | yes |
+| VC5-03 | 2 | jest concierge-limits.test.ts | passes (HMAC, room regex, verdicts, maxRooms) | yes |
+| VC5-03 | 3 | grep package.json, npm ls server-only, grep -L | "server-only": "0.0.1", ls 0.0.1, grep -L prints nothing | yes |
+| VC5-03 | 4 | read TalkSession-import.test.tsx; grep -rl livekit-client src/app | mockLoads 0 unconfigured, 1 configured; src/app grep empty | yes |
+| VC5-03 | 5 | CLAUDE.md:150; plan § server-only | D67 named; modules listed | yes |
+| VC5-03 | 6 | check.sh; smoke | green | yes |
+| VC5-04 | 1 | read route.ts; grep console | order 403,503,400,503,429,200; no-store via reply(); no console | yes |
+| VC5-04 | 2 | jest concierge-token-route tests; curl :7834 | 403/403/503 as asserted; pass | yes |
+| VC5-04 | 3 | jest concierge-token-route-limits.test.ts | pass; 200/429/503 and no-leak cases | yes |
+| VC5-04 | 4 | jest concierge-token-route-sdk.test.ts | pass; 400/403 reach no SDK or listLiveRooms | yes |
+| VC5-04 | 5 | read plan § Route behaviour; CLAUDE.md:32 | rows match code; token row names 403/429/room name | yes |
+| VC5-04 | 6 | check.sh; smoke | green | yes |
+| VC5-05 | 1 | concierge.ts:44-45; sessionReducer.test.ts busy cases | strings exact; busy from connecting only, ignored from live, connect from busy | yes |
+| VC5-05 | 2 | TalkSession.test.tsx:180-234 | both reasons, unknown reason offline, 1 fetch over 15 s, no mic; pass | yes |
+| VC5-05 | 3 | projects.ts:800; evidence-voice-concierge.md:153; jest case-study-voice-concierge, content-guard | sentence verbatim in evidence row with source; pass | yes |
+| VC5-05 | 4 | voice-concierge-todo.md § Cost protection | three layers table present | yes |
+| VC5-05 | 5 | check.sh; smoke | green | yes |
+| VC5-06 | 1 | ran .harness/talk-busy-check.mjs on a temporary dummy-env dev server (:7899); ls docs/screenshots/v2/VC5*; read plan table | captures 55-74 KB; Connect bottom 664/489, scrollWidth recorded; plan matches | yes |
+| VC5-06 | 2 | same run | 1 POST per click over 15 s, getUserMedia 0, only 429/503 console lines, 0 page errors | yes |
+| VC5-06 | 3 | curl on :7834 (no env) | 403, 403, 503 {offline:true} | yes |
+| VC5-06 | 4 | same run focus report | activeElement Connect, outline rgb(0, 212, 255) | yes |
+| VC5-06 | 5 | read plan § What Michael will see | one row per screenshot and curl line | yes |
+| VC5-06 | 6 | check.sh; smoke | green | yes |
+| VC5-07 | 1 | read plan § Review; grep LIVEKIT_/server-only in components,data | table + answers to all questions; fixes had tests; grep empty; signing only after both checks | yes |
+| VC5-07 | 2 | read review-guide.md § VC5 | staged check, room list, undo; mic after join | yes |
+| VC5-07 | 3 | CLAUDE.md; `npx jest --silent` | token row, lib/concierge line, server-only, limits test named; 1115 tests/81 suites match | yes |
+| VC5-07 | 4 | spec § 7 and vc4 spec Built note | D59-D73 with supersedes; Built note lists defaults and two confirmations | yes |
+| VC5-07 | 5 | check.sh; smoke | green | yes |
+
+40 hold, 0 fail. (An older scratch report showed FAILs only because :7834 has no LiveKit env; on a dummy-env server it passes.)
+
 ### 2026-10-20 19:55 · VC5-04 · passes
 
 - Docs only (route code and its tests already D73 since VC5-03): `docs/review-guide.md` § VC5 (Changed: room `concierge-<10 hex>-<12 random hex>`, D73; stage 2 room list and "D73's check"; the agent room-name note; Undo now "back to D72" via reverting VC5-03; decisions D63–D73) and the Built note of `docs/specs/2026-10-20-vc4-order-widget-limits.md` (D72 superseded by D73, room form). Tests 1115 → 1115 (81 suites).
