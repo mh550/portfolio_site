@@ -11,6 +11,14 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 14:40 · VC5-01 · passes
+
+- New plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (Mic timing, Route behaviour table 403→503→400→503→429 visitor→429 site→200, Origin rules with the preview regex checked against PR #16's host, Address hash, Modules, /talk busy states, server-only, Tests per feature, staged Live check, CLAUDE.md draft, empty What Michael will see/Review, Decisions). D63–D70 appended to `docs/specs/2026-10-19-voice-concierge-page.md` § 7. No code; tests unchanged at 1012/76.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (every route at 1280 and 390). An Opus reviewer checked the plan against the code. Fixes it led to, each confirmed in source: next/jest already maps `server-only` (no mapper of our own); `next dev` fills `x-forwarded-for`; `NODE_ENV` is readonly in TS, so use `jest.replaceProperty`; rooms mocks need `mockResolvedValue([])`; the livekit-client import test goes in its own file (isolateModules + render breaks hooks).
+- Next session (VC5-02): mic → `agentArrived`, toggle only when `live` (D65). VC5-03: the import test is `TalkSession-import.test.tsx`, not `TalkSession.test.tsx` (see plan § server-only).
+- Questions for Michael: (D68) after Leave the address reads "another tab" until LiveKit closes the room (≥20 s; minutes if the agent keeps the room). Keep counting every listed room (fail closed), or only rooms with a `visitor-` participant? (D70) A shell that forges Origin can mint many tokens and join them all at once, so only the provider caps bound it. Cut the token TTL from 600 s to about 60 s? (D64) Does the preview regex match your current previews? Also confirm `mh550/voice-concierge` doesn't parse room names (no agent code is checked out locally).
+- Proposed changes: VC5-01 step 3 says addr10 never appears in a response, but the visitor's own JWT carries their room name; the plan narrows this to "never in plain text" (D70). VC5-03 step 4 names `TalkSession.test.tsx`; the plan puts the test in `TalkSession-import.test.tsx` (step 4 allows an equivalent).
+
 ### 2026-10-20 18:00 · verify VC4
 
 All 6 features hold (35 steps).

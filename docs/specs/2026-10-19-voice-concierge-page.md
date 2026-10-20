@@ -120,3 +120,33 @@ other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
   Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent."; its Links
   section gains "The agent harness that built it" (`/projects/agent-harness`, kind `doc`). Supersedes the VC2 intro
   copy (`docs/plans/2026-10-20-VC2-talk-page.md` § Copy) and VC3's `builtWith`. (VC4-01 plan; built in VC4-04, recorded in `docs/notes/evidence-voice-concierge.md` § VC4 note.)
+
+VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
+
+- **D63** *default* The Origin check runs before the env check: a shell POST gets 403 even on an offline site, so
+  nothing about whether LiveKit is configured leaks to a caller from outside. Supersedes VC1's "env checked
+  first" (`docs/plans/2026-10-20-VC1-token-route.md` § Route behaviour, row 1). (VC5-01 plan; VC5-04 builds.)
+- **D64** *default* Without `x-forwarded-for` the address is `'unknown'`, one shared bucket (in practice only the
+  Jest tests: Vercel sets the header, and `next dev`/`next start` fill it from the socket). The preview allowlist is the hostname regex
+  `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$` over `https:` with no port, derived from
+  PR #16's preview host. Supersedes nothing (new). Question: does it match your current previews? (VC5-01 plan; VC5-03 and VC5-04 build.)
+- **D65** *default* The mic toggle renders only in the `live` phase (was `waiting` or `live`), so nothing can ask
+  for the microphone before the agent joins; `setMicrophoneEnabled(true)` moves into `agentArrived`. Supersedes
+  the VC2 plan's state-table row "connecting → waiting: `setMicrophoneEnabled(true)`" and its "As built (VC2-05)"
+  note (toggle in `waiting` and `live`). (VC5-01 plan; VC5-02 builds.)
+- **D66** *default* A 429 puts `/talk` in a `busy` phase (reason kept, Connect shown, the deep-dive link shown as
+  offline shows it) with no automatic retry; any other non-OK reply stays offline. Supersedes nothing (new phase). (VC5-01 plan; VC5-05 builds.)
+- **D67** `server-only` at `0.0.1`, exact pin, as a dependency (Michael approved it, spec § VC5.3); `env.ts` and
+  `rooms.ts` import it; next/jest already maps it to an empty mock. Extends D41's list of approved packages. (VC5-01 plan; VC5-03 builds.)
+- **D68** *default* `listLiveRooms` uses one 5 s attempt (`requestTimeout: 5`, `failover: false`), and every room
+  it lists counts as live, whatever its participants (fail closed on cost). Effect: after Leave, the address reads
+  busy until LiveKit closes the room. Alternative if that window is long: count only rooms with a `visitor-`
+  participant (`listParticipants` per room). Question: which do you want after stage 2 of the live check? (VC5-01 plan; VC5-03 and VC5-04 build.)
+- **D69** *default* The token route's 200 cases move from `concierge-token-route.test.ts` to
+  `concierge-token-route-limits.test.ts`, which mocks only `@/lib/concierge/rooms` (factory) and signs with the real
+  SDK. `concierge-token-route.test.ts` stays mock-free. Refines D42 (the real SDK still signs every tested token).
+  Overrides VC5-01 step 4's "only gains an allowed Origin header plus the 403 cases" (VC5-04 step 2 leaves it to
+  the plan). (VC5-01 plan; VC5-04 builds.)
+- **D70** *default* The visitor's own room name, and so their `addr10`, is inside their JWT (`video.room`); the
+  address never is, and no body carries a bucket in plain text. The token TTL stays 600 s (VC1). Question: cut it
+  to about 60 s to narrow the mint-then-join window (§ Route behaviour, known limits)? (VC5-01 plan; VC5-04 builds.)
