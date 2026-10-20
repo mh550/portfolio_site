@@ -14,6 +14,14 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 03:05 · VC2-06 · passes
+
+- **Changed:** three captures in `docs/screenshots/v2/` (`VC2-talk-390.png` 39 KB, `VC2-talk-1280.png` 51 KB, `VC2-talk-offline-390.png` 41 KB, all full page) and the plan's new § What Michael will see (numbers + one row per capture). No code changes: no layout bug found. Tests unchanged at 916/71.
+- **Verified** (script `$HARNESS_SCRATCH/vc2-shots.mjs`, port 7832, no LiveKit env): at 390 × 844 the h1 ends at 300 px and Connect at 664. Offline, the sentence ends at 700 and "Read how it works" at 747, all above the fold. `scrollWidth` is 390 idle and offline. 0 page errors; Tab goes Skip → MH → Navbar (Open menu at 390) → Connect, every stop `:focus-visible` with a 2 px `rgb(0, 212, 255)` outline. `check.sh` green; smoke 40/40. I looked at all three captures.
+- **Gotcha for later checks:** Tailwind 4's `transition-colors` also fades `outline-color`. Reading it right after Tab gives the text colour (mid-fade), so wait about 300 ms first.
+- **Next session must know:** the offline link `/projects/voice-concierge` 404s until VC3-02 builds the deep-dive. VC3-04 should click it.
+- **Proposed change (VC2-06 step 2):** offline has exactly one console line, Chromium's own `Failed to load resource: … 503` for the token POST. W1 requires the 503 and page code can't silence it, so I counted it apart from app errors (0). Suggested step wording: "0 console errors other than the browser's network line for the 503 token POST".
+
 ### 2026-10-20 02:45 · VC2-05 · passes
 
 - **Changed:** `TalkSession.tsx` now has the mic toggle (it turns on after `connect()`), `MessageBox.tsx` (new, `lk.chat`), the Forget me RPC (`isForgotten()` in `contract.ts`), `RoomContext.Provider` + `RoomAudioRenderer`, `startAudio()` and a **Turn on sound** button from `AudioPlaybackStatusChanged`. `sessionReducer` gains `micOn/micBlocked/audioBlocked/forget`. New `TalkSession-live.test.tsx` (33 tests); the components-react mock records its context room. Tests 860 → 916, suites 70 → 71.

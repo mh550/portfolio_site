@@ -141,7 +141,7 @@
         "docs/plans/2026-10-20-VC2-talk-page.md § What Michael will see has one row per screenshot: page and state · what is on screen · anything that looks wrong; any layout bug found is fixed in this feature with a test first and the screenshot retaken.",
         ".harness/check.sh is green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-07",

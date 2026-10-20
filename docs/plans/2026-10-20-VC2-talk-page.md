@@ -146,3 +146,27 @@ Rules the reducer and TalkSession keep:
   call; it sits in an always-present `aria-live` line under the button. A second Forget me while one is in flight sends nothing (`session.forgetting`). `isForgotten(reply)` in `contract.ts`: only a
   JSON object with `ok === true` counts. The Room is kept in state (`useState`) for `RoomContext.Provider`, set in
   `connect()` and cleared with the session.
+
+## What Michael will see
+
+VC2-06, 2026-10-20. Captures and measurements from the harness dev server (port 7832, no `LIVEKIT_*` env, so the
+token route answers 503 and Connect lands in offline), 390 × 844 and 1280 × 844, `reducedMotion: 'reduce'`, after
+scrolling top to bottom and back; full pages saved as 256-colour palette PNGs with sharp (script:
+`$HARNESS_SCRATCH/vc2-shots.mjs`). The round "N" at the left is the Next dev indicator, not on the live site.
+
+- **Above the fold at 390 × 844:** h1 `y 180 → bottom 300`; Connect `y 624 → bottom 664`. Offline: the status line
+  ends at 700 and "Read how it works" at 747, so both show without scrolling. At 1280: h1 ends at 255, Connect at 489.
+- **Horizontal scroll:** `document.documentElement.scrollWidth` = 390 idle and 390 offline (1280 at 1280).
+- **Errors:** 0 page errors in either state; 0 console errors idle. Offline has one console line, Chromium's own
+  network log for the token POST: `Failed to load resource: the server responded with a status of 503`. W1 requires
+  that 503 and page code can't silence it; nothing in the page logs an error.
+- **Keyboard:** Tab from the top reaches Skip to content → MH → (1280) Home, About, Skills, Projects, Approach,
+  Experience, Contact / (390) Open menu → Connect. Every stop matches `:focus-visible` with a 2 px solid
+  `rgb(0, 212, 255)` outline. The Navbar links and Connect have `transition-colors`, which in Tailwind 4 also fades
+  `outline-color` over 150 ms, so the colour is read 300 ms after each Tab (read at once it is mid-fade).
+
+| Page and state | What is on screen | Anything wrong |
+|---|---|---|
+| `/talk` idle · 390 (`docs/screenshots/v2/VC2-talk-390.png`, 39 KB, 390 × 1805) | Hamburger navbar; eyebrow "VOICE CONCIERGE"; h1 "Talk to my concierge" on two lines; the two intro paragraphs; Connect. Then stacked: Transcript ("Nothing said yet.", the disabled message box and Send), What it remembers ("Nothing remembered yet"), Latency ("No turns yet."); the Privacy list (six points); footer | Nothing to fix |
+| `/talk` offline · 390 (`VC2-talk-offline-390.png`, 41 KB, 390 × 1889) | As idle, with Connect back and "The concierge is offline right now" under it, then the accent link "Read how it works" (`/projects/voice-concierge`), above the fold; one POST to the token route, 503 | The link 404s until VC3-02 builds the deep-dive (expected, the run's next milestone). Nothing to fix in VC2 |
+| `/talk` idle · 1280 (`VC2-talk-1280.png`, 51 KB, 1280 × 1612) | Full navbar (no Talk link, D44); h1 on one line; intro in a 768 px column; two columns: Connect over the Transcript panel on the left (7 fr), What it remembers and Latency on the right (5 fr), tops level with Connect; Privacy list; footer | The empty transcript log is tall (about 450 px) before anyone speaks. It is the log's fixed height, kept so the page doesn't jump when lines arrive; left as is |
