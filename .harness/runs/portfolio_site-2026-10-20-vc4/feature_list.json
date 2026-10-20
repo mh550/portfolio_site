@@ -148,7 +148,7 @@
         "The v2 spec's Code rules line in CLAUDE.md names server-only as approved (D67) and the plan § server-only lists the modules that import it.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-04",

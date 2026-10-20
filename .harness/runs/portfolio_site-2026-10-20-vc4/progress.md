@@ -11,6 +11,15 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 19:35 · VC5-03 · passes
+
+- D73 in code: `src/lib/concierge/limits.ts` `roomNameFor` is `concierge-<bucket>-<randomBytes(6) hex>` again and `roomsVerdict` matches `startsWith(concierge-<bucket>-)`; D72 comment gone. Tests first: `concierge-limits.test.ts` 3 failed, then 23/23 passed (name regex `-[0-9a-f]{12}$`, two calls differ, `concierge-<b>-x` → visitor, bare `concierge-<b>` and `concierge-<b>x-…` are not this address's).
+- Suite stayed green only by also doing plan § D73 rework's VC5-04 test part now: `concierge-token-route-limits.test.ts` ROOM regex `-<12 hex>`, `roomOf` seeds `concierge-<bucket>-000000000000`, the D72 burst test replaced by "two calls from one address, two rooms with the same bucket". CLAUDE.md token row (`concierge-<addr10>-<12 hex>`, D73) and count updated. Tests 1114 → 1115 (81 suites).
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok` (1115 tests); smoke exit 0, 42 PASS; `npm ls server-only` 0.0.1; `grep -L "import 'server-only'"` env.ts rooms.ts empty; `grep -rl livekit-client src/app` empty; origin + import tests 11/11.
+- Next session (VC5-04): left for it per plan: `docs/review-guide.md` § VC5 (Changed, stage 2's D72 check, Undo) and the Built note in `docs/specs/2026-10-20-vc4-order-widget-limits.md` (D72 → D73). The route test changes are already done.
+- Proposed changes: VC5-03 step 3 "rooms.ts … is not yet called by the route" is stale since VC5-04 wired it; step 4 names TalkSession.test.tsx but the test lives in `TalkSession-import.test.tsx` (own module registry).
+- Question for Michael: D73 still open (random room suffix vs D72 one room per address).
+
 ### 2026-10-20 19:10 · VC5-01 · passes
 
 - Verify failed VC5-01/03/04 on one cause: D72 (room `concierge-<addr10>`, no random part) contradicts Michael's spec (`concierge-<addr10>-<random>`) and the steps. Took **D73 *default***: the spec's form again. Reason: under D72 two people on one NAT (conference Wi-Fi) who press Connect before the first join creates the room share a room and hear each other; the forged-Origin burst is a cost limit the agent and provider caps bound.
