@@ -14,6 +14,15 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 · VC2-01 · passes
+
+- **Changed:** new `docs/plans/2026-10-20-VC2-talk-page.md` (plan only, no code). It covers the file table, the component tree, the 6-phase state machine with a transition table, the 390/1280 layout and what sits above 844 px. It quotes every LiveKit signature from the installed `.d.ts`, plus the duplicate-handler throw (esm.mjs line 27472). It also fixes the Jest mock surface and helpers, the `concierge.ts` copy and the contract types. Tests unchanged at 680/60.
+- **Verified:** `check.sh` green; smoke 38/38. Cheap checks: `livekit-server-sdk` dist never imports `livekit-client`, so the Jest mapper leaves VC1's tests alone; the Navbar has 7 links; `ParticipantKind.AGENT = 4`.
+- **Next (VC2-02):** the parsers read a bad numeric field as null but reject the whole body on missing `facts`/`id`/`slot` or a non-integer `turn`. `lk.transcription` is read with `for await` and keyed by `lk.segment_id`. Visitor vs agent comes from `identity === localParticipant.identity`, the same check components-react makes.
+- **Design defaults in the plan:** the Room and the visitor id are created in the Connect click handler, never in an effect. The mic turns on after `connect()` resolves. Forget me shows only while live. `concierge.get_memory` is never called.
+- **Question for Michael:** should the mic turn on automatically after Connect, or wait for a tap? The plan auto-enables it, to match "Connect, say your name". Also, is `/talk` off the Navbar (D44) right?
+- **Proposed change:** VC2-01 step 5 calls the `/talk`-chrome default D43, but VC1-03 already used D43 for lower-casing ids, so the plan names it D44 and the visitor-id timing D45. D42 already exists, and "no components-styles" is already in D41.
+
 ### 2026-10-20 · verify VC1
 
 | Feature | Step | What you ran or read | What you saw | Holds |
