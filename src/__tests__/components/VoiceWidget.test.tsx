@@ -48,6 +48,8 @@ describe('VoiceWidget', () => {
     const { container } = render(<VoiceWidget />);
     const classes = allClasses(container);
     expect(classes.some((c) => c.startsWith('motion-safe:animate-'))).toBe(true);
+    // Two pulses, 4 s, under WCAG 2.2.2's 5 s: without the count it would loop forever
+    expect(classes).toContain('motion-safe:[animation-iteration-count:2]');
     expect(classes.filter((c) => c.startsWith('animate-'))).toEqual([]);
   });
 

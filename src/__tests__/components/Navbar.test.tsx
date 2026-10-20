@@ -115,3 +115,16 @@ describe('Navbar on /talk (VC4, D60)', () => {
     for (const a of current) expect(a).toHaveAttribute('href', '/talk');
   });
 });
+
+// VC4-06 review: eight links make the open menu ~370 px; on a short landscape phone it must scroll, not clip Contact.
+describe('Navbar mobile menu height (VC4-06)', () => {
+  it('caps the open menu at the viewport below the bar and lets it scroll', async () => {
+    mockPathname = '/';
+    render(<Navbar />);
+    await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const menu = screen.getAllByRole('link', { name: 'Contact' })[1].closest('ul')!.parentElement!;
+    const classes = menu.className.split(/\s+/);
+    expect(classes).toContain('max-h-[calc(100dvh-4rem)]');
+    expect(classes).toContain('overflow-y-auto');
+  });
+});

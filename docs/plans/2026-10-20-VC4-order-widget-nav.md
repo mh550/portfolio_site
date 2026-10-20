@@ -288,10 +288,26 @@ directory as `vc405/run.mjs`). Next's dev-only indicator (the "N" bubble bottom 
 
 ## Review
 
-Filled by VC4-06 (Opus review of the VC4 diff and the simplify pass).
+VC4-06: an Opus reviewer read `git diff f9e8a58..HEAD` (`$HARNESS_SCRATCH/VC4.diff`, 1356 lines) with the
+vercel-react-best-practices and web-design-guidelines skills. Nothing Critical or Important; the Minor fixes below
+were taken, the new Navbar test failing first. Tests 1011 → 1012.
 
-| # | Severity | Finding | Fix |
-|---|---|---|---|
+| # | File | Finding | Severity | Outcome |
+|---|---|---|---|---|
+| 1 | `VoiceWidget.tsx` | Accessible name: `aria-label` "Talk to my voice concierge" (`talkWidget.label`); ring and SVG `aria-hidden`, SVG `focusable="false"`; no visible text, so 2.5.3 label-in-name does not apply. Other links to `/talk` say "Talk to my concierge" | None | Holds; kept "voice" (an icon-only link should say what kind of concierge) |
+| 2 | `VoiceWidget.tsx`, `Navbar.tsx` | z-index: widget `z-40` under the Navbar `z-50` (the mobile menu is inside it) and the skip link `focus:z-[60]`. The open menu at 390×844 ends at ~370 px, the widget's box is y 772–828: no overlap, and the menu would paint over it if there were | None | Holds |
+| 3 | `Footer.tsx` | Footer clearance: `pb-24` (96 px) > 16 + 56 below `xl`; from 640 to 1279 the links row sits under the widget's x range, so the padding is needed; it clears from 1248 up, so `xl` is the first breakpoint that can drop it (1280: 16 px gap) | None | Holds |
+| 4 | `VoiceWidget.tsx` | Reduced motion: `motion-safe:animate-pulse` + `motion-safe:[animation-iteration-count:2]` (4 s < 2.2.2's 5 s); the production CSS puts the count after the shorthand in the same media block. Tailwind 4 has no iteration-count utility, so the arbitrary property is not an inline style a class could express | None | Holds; an `@theme` `--animate-pulse-twice` token was suggested as optional and not taken (it would depend on Tailwind emitting `@keyframes pulse` for a custom token) |
+| 5 | `Navbar.tsx` | Eight links at 390: `block` links in a 342 px column, the longest label ("Experience") ~80 px, nothing wraps; at 768 one row, 82 px spare (VC4-05) | None | Holds |
+| 6 | `concierge.ts`, `projects.ts` | Intro honesty against brand.md § Voice: D62's wording word for word, no number (tested), `builtWith` still says Claude Code agents wrote the code ("never hide that agents were used"); "overnight" and "a second run" trace to `docs/notes/evidence-voice-concierge.md`. "A second run is writing the agent" will go stale | None | Holds; the tense is a question for Michael (progress entry) |
+| 7 | `Navbar.tsx` | The eighth link makes the open menu ~370 px inside a `fixed` nav: on a landscape phone under 768 wide and under ~370 tall, Contact is clipped and can't be scrolled to | Minor | Fixed: menu `div` gets `max-h-[calc(100dvh-4rem)] overflow-y-auto`; `Navbar.test.tsx` "caps the open menu…" failed first |
+| 8 | `talk.test.tsx` | `link.className).toContain('underline')` is a substring match: `underline-offset-4` or `hover:no-underline` satisfy it | Minor | Fixed: class tokens split on whitespace |
+| 9 | `VoiceWidget.test.tsx` | Nothing pinned the iteration count the 2.2.2 argument rests on | Minor | Fixed: asserts `motion-safe:[animation-iteration-count:2]` |
+| 10 | `talk/page.tsx` | `introText` was used only by tests; the page keyed paragraphs by index | Minor | Fixed: `key={introText(p)}` |
+| 11 | `SiteChrome.tsx` | No duplicated pathname logic (the widget has no `usePathname`), but the `'/talk'` literal repeated `talkWidget.href` | Minor | Fixed: `pathname !== talkWidget.href` |
+| 12 | `VoiceWidget.tsx` | `bottom-[max(1rem,env(safe-area-inset-bottom))]` equals `bottom-4` until a `viewport-fit=cover` lands; Tailwind 4 has no safe-area utility | None | Kept (future-proof, tested) |
+| 13 | `VoiceWidget.tsx` | Icon-only: sighted visitors infer the mic disc; no tooltip | Minor | Not taken: D61's design (the disc alone); a hover/focus label is a question for later |
+| 14 | VC4 diff | No dead props, no unused exports or test helpers; the new `doc` link is internal | None | — |
 
 ## Decisions
 

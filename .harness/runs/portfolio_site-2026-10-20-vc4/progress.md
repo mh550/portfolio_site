@@ -11,6 +11,24 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 16:25 · VC4-06 · passes
+
+- **Review** (Opus, `$HARNESS_SCRATCH/VC4.diff` = `git diff f9e8a58..HEAD`, 1356 lines, both skills): plan § Review is a
+  14-row table; widget name, z-index vs Navbar/menu/skip link, Footer clearance (`xl` is the first breakpoint ≥ 1248),
+  reduced motion, eight links at 390/768 and the intro's honesty all hold. Nothing Critical or Important.
+- **Minor fixes taken**: Navbar mobile menu `max-h-[calc(100dvh-4rem)] overflow-y-auto` (new test failed first; at
+  740×360 the menu is 295 px and scrolls to Contact, at 390×844 unchanged, 304 px); talk test splits class tokens;
+  VoiceWidget test pins `motion-safe:[animation-iteration-count:2]`; `/talk` keys paragraphs by `introText(p)`;
+  SiteChrome excludes `talkWidget.href`, not a `'/talk'` literal. Tests 1011 → 1012, 76 suites.
+- **Docs**: review guide § "VC4: order, Navbar, widget" (changes, what to look at at 390, captures, undo per piece);
+  CLAUDE.md /talk row, VoiceWidget line (where it shows), counts.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS; the ts.net/CGNAT/ntfy
+  grep on VoiceWidget.tsx and concierge.ts is empty, content guard green.
+- **Question for Michael**: `builtWith` says "a second run is writing the agent" (present tense); change it once the
+  agent run is done? Not taken (optional): a visible hover/focus label on the mic disc; an `@theme` pulse token.
+- **Proposed change**: step 3's "the /talk Routes row … has the widget" read as "mentions the widget"; the row says
+  the widget on other pages links here and is not shown on `/talk` (D61).
+
 ### 2026-10-20 15:40 · VC4-05 · passes
 
 - **Screenshots** (new, 53–300 KB): `docs/screenshots/v2/VC4-home-390.png`, `VC4-home-1280.png`, `VC4-about-footer-390.png`,

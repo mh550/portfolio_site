@@ -58,8 +58,9 @@ describe('TalkPage', () => {
     expect(link.closest('p')).toHaveTextContent(
       'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
     );
-    expect(link.className).toContain('underline');
-    for (const token of focusRing.split(' ')) expect(link.className).toContain(token);
+    const classes = link.className.split(/\s+/);
+    expect(classes).toContain('underline');
+    for (const token of focusRing.split(' ')) expect(classes).toContain(token);
   });
 
   it('renders the session in its idle state: Connect, and no offline line yet', () => {

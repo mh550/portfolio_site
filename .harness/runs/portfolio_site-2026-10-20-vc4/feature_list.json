@@ -96,7 +96,7 @@
         "docs/review-guide.md gains a 'VC4: order, Navbar, widget' section: what changed, what to look at on the preview at 390 (the widget on /, the Talk link, /card's three cards, /talk's intro link), the capture names, and how to undo each piece (the order map, one Navbar entry, one SiteChrome line).",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-01",

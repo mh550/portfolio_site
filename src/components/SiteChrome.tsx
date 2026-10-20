@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { talkWidget } from '@/lib/data';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import VoiceWidget from './VoiceWidget';
@@ -29,7 +30,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       </div>
       <Footer />
       {/* Last in the DOM, so last in the tab order; /talk is where it leads (D61) */}
-      {pathname !== '/talk' && <VoiceWidget />}
+      {pathname !== talkWidget.href && <VoiceWidget />}
     </>
   );
 }
