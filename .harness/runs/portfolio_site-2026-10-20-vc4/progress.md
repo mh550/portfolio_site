@@ -11,6 +11,23 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 13:27 · VC4-01 · passes
+
+- **Plan** `docs/plans/2026-10-20-VC4-order-widget-nav.md`: § Order (before/after table; top 3 becomes agent-harness,
+  voice-concierge, ghl-jobtread-integration on `/` and `/card`), § Navbar (Talk fifth of eight), § Voice widget (full
+  TSX; `talkWidget` data in `concierge.ts`; opacity pulse ×2 under `motion-safe:` only, not `animate-ping`, which
+  would overflow at 390), § Intro wording (`IntroParagraph = string | {before, link, after}`; `builtWith` stays a
+  string + a third Links entry, kind `doc`), § Tests (every breaking test by file and name), empty Review/See tables.
+- **Decisions**: voice-concierge spec gains `## 7. Decisions` D59–D62; v2 spec D44/D49 end "Superseded by D60 (VC4).",
+  D47 "Superseded by D59 (VC4)."
+- **Footer default** (D61): `pt-8 pb-24 xl:pb-8`, not `pb-24 sm:pb-8`: at 390 the links are centred and never meet
+  the widget; the overlap is from `sm` to below `xl`, where the links row sits at the right edge.
+- **Next sessions**: init note had paint-estimator 8 / ringcentral 7; the file says paint 7 / ringcentral 8 (the plan
+  follows the file). hit-list and home-media-server tests pin `order` 4 and 3 too (now 7 and 5), listed in § Tests.
+- Verified: jest 992 tests / 75 suites (no code change), `.harness/check.sh` → `check: lint ok · jest ok · build ok`,
+  smoke exit 0 (42 PASS).
+- Question for Michael: should `/evidence` (noindex) also lose the widget? Default: it keeps it.
+
 ### 2026-10-20 · initializer
 
 **Scope.** The spec `docs/specs/2026-10-20-vc4-order-widget-limits.md` (Michael's answers of 10-20) and his brief:

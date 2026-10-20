@@ -86,3 +86,37 @@ explains the design.
 | VC1 | W1 token route, plus dependencies | — |
 | VC2 | W2 `/talk` page | VC1 |
 | VC3 | W3 deep-dive + diagram, W4 entry points | VC1 (independent of VC2's internals) |
+
+## 7. Decisions
+
+Numbered from D59: the v2 spec (`docs/specs/2026-10-18-portfolio-v2.md`, D1–D49) and the booth spec
+(`docs/specs/2026-10-20-booth-harness-bundle.md`, D41–D58) already use every lower number, and collide with each
+other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
+`docs/plans/2026-10-20-VC4-order-widget-nav.md`.
+
+- **D59** Project order (Michael, VC4 spec § VC4.1): 1 agent-harness, 2 voice-concierge, 3 ghl-jobtread-integration,
+  4 ringcentral-jobtread-integration, 5 home-media-server, then the rest in their old relative order: 6
+  linear-ai-workflow, 7 hit-list, 8 paint-estimator, 9 mirrored-google-calendars, 10 cherished. So
+  `getTopProjects(3)`, which feeds `/card`'s Selected work and the home page's Recent work, becomes agent-harness,
+  voice-concierge, ghl-jobtread-integration. Supersedes the v2 spec's D47 (voice-concierge at 5, top three
+  unchanged). (VC4-01 plan; VC4-02 builds.)
+- **D60** `/talk` is on the Navbar as "Talk", the fifth of eight links, between Projects and Approach (Michael, VC4
+  spec § VC4.2). Supersedes the v2 spec's D44 ("stays off the Navbar") and D49 ("The Navbar stays at seven links");
+  D44's other parts (chrome, indexable, in the sitemap) stand. (VC4-01 plan; VC4-02 builds.)
+- **D61** *default* The voice widget (VC4 spec § VC4.3; details are defaults): `src/components/VoiceWidget.tsx`, a
+  `next/link` to `/talk` named "Talk to my voice concierge" (`talkWidget` in `concierge.ts`), a 56 px accent disc
+  with an inline `aria-hidden` SVG microphone, `fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40`
+  (below the Navbar's `z-50`), the shared `focusRing`, `print:hidden`, and a decorative ring that pulses twice (4 s)
+  only under `motion-safe:`. `SiteChrome` renders it after the Footer on every chrome page except `/talk` (and
+  `/card*`, which has no chrome); `/evidence` keeps it. The Footer's bottom padding becomes `pb-24 xl:pb-8` so its
+  links stay clear of the widget at every width. Reversible: drop the element from `SiteChrome` and the padding from
+  `Footer`. Question for Michael: should `/evidence` lose it too? (VC4-01 plan; VC4-03 builds.)
+- **D62** The `/talk` intro and the deep-dive credit use the harness framing (Michael, VC4 spec § VC4.4). The intro's
+  first paragraph is "A voice agent I designed on LiveKit and built with my agent harness: specs in, verified
+  milestones out. It remembers you between visits.", with "my agent harness" linking `/projects/agent-harness`
+  (*default* data shape: `IntroParagraph = string | { before, link: { label, href }, after }`). The deep-dive's
+  `builtWith` stays a plain string (*default*): "The spec and the design are mine: the agent, its memory and the
+  contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out:
+  Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent."; its Links
+  section gains "The agent harness that built it" (`/projects/agent-harness`, kind `doc`). Supersedes the VC2 intro
+  copy (`docs/plans/2026-10-20-VC2-talk-page.md` § Copy) and VC3's `builtWith`. (VC4-01 plan; VC4-04 builds.)

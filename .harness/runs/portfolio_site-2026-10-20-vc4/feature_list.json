@@ -17,7 +17,7 @@
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
       "after": [],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC4-02",

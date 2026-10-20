@@ -170,6 +170,7 @@ don't redo it.
   and is in `sitemap.ts`, but stays off the Navbar: the Navbar holds the seven sections of the site, and `/talk` is a
   demo reached from `/card` and the deep-dive (voice-concierge spec W4). Reversible: one entry in `Navbar.tsx`'s
   link list. (VC2-04.)
+  Superseded by D60 (VC4).
 - **D45** *default* `/talk` reads the visitor id with `getOrCreateVisitorId(browserStorage())` in the Connect click
   handler, not in a mount effect, and creates the LiveKit `Room` in that handler too. So no state is set from an
   effect, the server HTML and the first client render match, StrictMode cannot register the text-stream handlers
@@ -189,6 +190,7 @@ don't redo it.
   linear-ai-workflow and home-media-server. `/projects` shows the new card fifth, its band showing the category `ai`
   until it has a metric. INBOX.md § Answers was empty. The feature list called this D44, already taken by `/talk`'s
   chrome. Reversible: the `order` values in `projects.ts` and the order map in `data.test.ts`. (VC3-02.)
+  Superseded by D59 (VC4).
 - **D48** *default* `/card` gains a full-width secondary button "Talk to my concierge" (`next/link` to `/talk`, same
   tab) directly under the LinkedIn / Email / GitHub row and above Selected work. It reuses the row's
   `secondaryButton` (44 px, `focusRing`). The QR leads to `/card`, so a conference visitor is one tap from the voice
@@ -198,6 +200,7 @@ don't redo it.
 - **D49** *default* The Navbar stays at seven links: `/talk` stays off it (restating D44 for VC3) and is reached from
   `/card`, the voice-concierge deep-dive (its Links section) and the sitemap. Adding it later is one entry in
   `Navbar.tsx`'s link list plus `Navbar.test.tsx`. The feature list called this D43, already taken. (VC3-03.)
+  Superseded by D60 (VC4).
 
 ## Dependencies between milestones
 
