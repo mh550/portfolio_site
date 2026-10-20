@@ -54,6 +54,10 @@ export default function CardPage() {
           <span className="sr-only"> (opens in new tab)</span>
         </a>
       </div>
+      {/* The QR leads here, so a conference visitor is one tap from the voice demo (D48) */}
+      <Link href="/talk" className={`${secondaryButton} mt-3 w-full`}>
+        Talk to my concierge
+      </Link>
 
       <section aria-labelledby="selected-work" className="mt-10 w-full text-left">
         <ConferenceNote note={profile.conferenceNote} />

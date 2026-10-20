@@ -13,6 +13,7 @@ const KEYS: DiagramKey[] = [
   'media-server',
   'hit-list',
   'form-simplification',
+  'voice-concierge',
 ];
 
 describe('ProjectDiagram accessibility (D17)', () => {
@@ -285,6 +286,97 @@ describe('hit-list diagrams publish nothing private (M6-03, D18)', () => {
     const { container, getByRole } = render(<ProjectDiagram diagram={key} />);
     expect(container.textContent).not.toContain(banned);
     expect(getByRole('img').getAttribute('aria-label')).not.toContain(banned);
+  });
+});
+
+describe('voice-concierge architecture diagram (VC3-03)', () => {
+  function rendered() {
+    const { container, getByRole } = render(<ProjectDiagram diagram="voice-concierge" />);
+    const img = getByRole('img');
+    return { container, img, text: img.textContent!, label: img.getAttribute('aria-label')! };
+  }
+
+  it.each(['browser', 'token', 'LiveKit', 'worker', 'SQLite'])('names %s in the diagram text and the label', (word) => {
+    const { text, label } = rendered();
+    expect(text.toLowerCase()).toContain(word.toLowerCase());
+    expect(label.toLowerCase()).toContain(word.toLowerCase());
+  });
+
+  it('draws the three panels with the five nodes', () => {
+    const { text } = rendered();
+    ["Visitor's browser", 'LiveKit Cloud', 'My home box'].forEach((title) => expect(text).toContain(title));
+    ['/talk page', '/api/concierge/token', 'Room', 'Agent worker', 'SQLite thread store'].forEach((node) =>
+      expect(text).toContain(node),
+    );
+  });
+
+  it('labels the arrows: visitor id, token, streams, dispatch, facts and journal', () => {
+    const { text } = rendered();
+    ['visitor id', 'connect with the token', 'audio and text streams', 'dispatch', 'facts and journal'].forEach((l) =>
+      expect(text).toContain(l),
+    );
+  });
+
+  it('stacks its three panels at 390 and top-aligns them side by side from md', () => {
+    const { img } = rendered();
+    const row = img.firstElementChild!;
+    expect(row).toHaveClass('flex-col', 'md:flex-row', 'md:items-start');
+    const panels = row.querySelectorAll(':scope > .flex-1');
+    expect(panels).toHaveLength(3);
+  });
+
+  it('points each connector arrow down below md and right from md', () => {
+    const { img } = rendered();
+    const connectors = Array.from(img.firstElementChild!.children).filter((el) => !el.classList.contains('flex-1'));
+    expect(connectors).toHaveLength(2);
+    connectors.forEach((c) => {
+      expect(c.querySelector('.md\\:hidden')?.textContent).toContain('↓');
+      expect(c.querySelector('.hidden.md\\:flex')?.textContent).toContain('→');
+    });
+  });
+
+  // VC3-03 review: centred on the tallest panel, the arrows pointed at empty space under the Room box, and the
+  // ~100 px connectors left the outer panels ~100 px wide at 1280 ("SQLite / thread / store" one word per line).
+  it('keeps the connectors narrow and near the top from md, and gives the outer panels more room', () => {
+    const { img } = rendered();
+    const row = img.firstElementChild!;
+    const children = Array.from(row.children);
+    const connectors = children.filter((el) => !el.classList.contains('flex-1'));
+    connectors.forEach((c) => {
+      expect(c).toHaveClass('md:self-start', 'md:w-20', 'md:shrink-0');
+      expect(c).not.toHaveClass('md:self-center');
+    });
+    const [a, b, c] = children.filter((el) => el.classList.contains('flex-1'));
+    expect(a.className).toMatch(/\bmd:flex-\[1\.5\]/);
+    expect(b.className).toMatch(/\bmd:flex-\[0\.8\]/);
+    expect(c.className).toMatch(/\bmd:flex-\[1\.2\]/);
+    expect(row).toHaveClass('md:gap-2');
+  });
+
+  it('makes a room per session, not per visit (the token route names a new room on every Connect)', () => {
+    const { text } = rendered();
+    expect(text).toContain('one per session');
+    expect(text).not.toContain('one per visit');
+  });
+
+  it('says in the label that the streams run both ways and memory is one thread per visitor', () => {
+    const { label } = rendered();
+    expect(label).toContain('stream both ways');
+    expect(label).toContain('one thread per visitor');
+  });
+
+  // '.ts' + '.net': split so the content guard does not flag this test.
+  it.each(['.ts' + '.net', '100.', 'http', 'livekit.cloud', 'CONCIERGE_', 'API_KEY', '.config/'])(
+    'publishes no %s in its text, label or caption',
+    (banned) => {
+      const { container, label } = rendered();
+      expect(container.textContent).not.toContain(banned);
+      expect(label).not.toContain(banned);
+    },
+  );
+
+  it('is the deep-dive\'s architecture diagram', () => {
+    expect(getProjectBySlug('voice-concierge')!.detail.architectureDiagram).toBe('voice-concierge');
   });
 });
 

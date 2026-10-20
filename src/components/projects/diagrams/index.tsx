@@ -54,10 +54,12 @@ function Arrow({ dir = 'down', label }: { dir?: 'down' | 'right'; label?: string
 function Panel({
   title,
   tone = 'neutral',
+  className = '',
   children,
 }: {
   title: string;
   tone?: 'neutral' | 'accent' | 'muted';
+  className?: string;
   children: React.ReactNode;
 }) {
   const ring =
@@ -67,7 +69,7 @@ function Panel({
         ? 'border-white/5'
         : 'border-white/10';
   return (
-    <div className={`flex-1 rounded-xl border ${ring} bg-[var(--color-surface)]/40 p-4`}>
+    <div className={[`flex-1 rounded-xl border ${ring} bg-[var(--color-surface)]/40 p-4`, className].filter(Boolean).join(' ')}>
       <p
         className={`mb-3 font-mono text-[11px] uppercase tracking-[0.2em] ${
           tone === 'accent' ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'
@@ -454,6 +456,58 @@ function FormSimplificationDiagram() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Voice concierge — browser, LiveKit Cloud, my home box               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Labelled arrows between two panels: pointing down while the panels stack, right once they sit side by side.
+ * From md it is narrow (labels wrap) and level with the first nodes, not centred on the tallest panel.
+ */
+function PanelConnector({ labels }: { labels: string[] }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-1 md:mt-10 md:w-20 md:shrink-0 md:self-start">
+      <div className="flex flex-col gap-1 md:hidden">
+        {labels.map((label) => (
+          <Arrow key={label} label={label} />
+        ))}
+      </div>
+      <div className="hidden md:flex md:flex-col md:gap-2">
+        {labels.map((label) => (
+          <Arrow key={label} dir="right" label={label} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function VoiceConciergeDiagram() {
+  return (
+    // Flex ratios: the token route's path must fit on one line, and the Room panel holds one short node.
+    <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-2">
+      <Panel title="Visitor's browser and this site" tone="accent" className="md:flex-[1.5]">
+        <Node>/talk page <Sub>in the browser: mic, text box, memory and latency panels</Sub></Node>
+        <Arrow label="visitor id" />
+        <Node>/api/concierge/token <Sub>on this site&apos;s server: signs a room token</Sub></Node>
+      </Panel>
+
+      <PanelConnector labels={['connect with the token', 'audio and text streams']} />
+
+      <Panel title="LiveKit Cloud" tone="neutral" className="md:flex-[0.8]">
+        <Node>Room <Sub>one per session</Sub></Node>
+      </Panel>
+
+      <PanelConnector labels={['dispatch', 'audio and text streams']} />
+
+      <Panel title="My home box" tone="neutral" className="md:flex-[1.2]">
+        <Node accent>Agent worker <Sub>Python; connects out, no open ports</Sub></Node>
+        <Arrow label="facts and journal" />
+        <Node>SQLite thread store <Sub>one thread per visitor</Sub></Node>
+      </Panel>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Public component                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -468,6 +522,7 @@ const DIAGRAMS: Record<DiagramKey, () => React.ReactElement> = {
   'media-server': MediaServerDiagram,
   'hit-list': HitListDiagram,
   'form-simplification': FormSimplificationDiagram,
+  'voice-concierge': VoiceConciergeDiagram,
 };
 
 const CAPTIONS: Record<DiagramKey, string> = {
@@ -484,6 +539,8 @@ const CAPTIONS: Record<DiagramKey, string> = {
   'hit-list': 'Spots, photos and the database live on the phone; only the map and the town names need a signal.',
   'form-simplification':
     'Specified on Oct 16 after using the app, not yet built: a spot is a place with photos, and everything else is optional.',
+  'voice-concierge':
+    'Memory lives on my home box, outside the call: LiveKit carries the audio and text, and the worker reads and writes one thread per visitor.',
 };
 
 // What each diagram shows, for screen readers: role="img" hides the diagram's fragmented node text (D17).
@@ -509,6 +566,8 @@ const LABELS: Record<DiagramKey, string> = {
     "On my iPhone, in Expo Go, the screens are Spots, with a list and a map, Quick Add from the camera, batch Import from the photo library, and each spot's detail and edit screens. The screens read zustand stores for spots, media, settings and location, and a save writes the offline-first SQLite database first, then the store. The database has versioned migrations, and photos are copied into the app's own storage, never written to the camera roll; the database keeps their relative paths. Only two things need a signal: Apple Maps, and Apple's geocoder, which gives untitled spots a town name, backfilling older ones at most 10 per launch. Capture comes first: take or pick the photos, review, save as a draft; the details can wait.",
   'form-simplification':
     'Before: a spot form of 20+ fields in five sections, Feature, In-Run, Landing, Details and Status, with star ratings, setup options for gear and a draft or complete status. After, as specified on Oct 16 and not yet built: seven fields on one short screen, name, location, photos, feature types, skate stopped, natural speed and notes, and only the location is needed. Natural speed is a five-step scale, None, Little, Some, Enough, Too much, shown here with Enough selected: rolls in with speed for most tricks.',
+  'voice-concierge':
+    "The visitor's browser loads the /talk page, which sends a browser visitor id to this site's token route, and the route signs a room token. The page connects to a LiveKit Cloud room with it, and audio and text stream both ways between the page and the room. The room dispatches the agent worker on my home box; the worker connects out to LiveKit, streams audio and text with the room, and keeps each visitor's facts and journal in a SQLite thread store, one thread per visitor.",
 };
 
 export default function ProjectDiagram({ diagram }: { diagram: DiagramKey }) {

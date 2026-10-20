@@ -14,7 +14,8 @@ export type DiagramKey =
   | 'harness-evolution'
   | 'media-server'
   | 'hit-list'
-  | 'form-simplification';
+  | 'form-simplification'
+  | 'voice-concierge';
 
 export interface ProjectMedia {
   type: 'image' | 'video';
@@ -785,6 +786,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         'Keeping memory off the turn path, storing only what the visitor said and heard, and making erasure win over work still in flight.',
       outcome:
         'The agent and this page were built in parallel overnight, Oct 19 to Oct 20, for a demo on Oct 20, by two harness runs working to one shared contract. No latency numbers are measured yet. They go on this page once I have measured real sessions, and until then it shows none. The agent is built on livekit-agents 1.8 and only maps onto Agents 2.0: a thread per visitor, its state, an append-only journal, voice and text in one memory, a version fence where 2.0 adds a lease, and a thread that expires once it sits idle, as a 2.0 thread does.',
+      architectureDiagram: 'voice-concierge',
     },
     caseStudy: {
       role: 'Designer and operator',

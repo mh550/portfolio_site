@@ -189,6 +189,15 @@ don't redo it.
   linear-ai-workflow and home-media-server. `/projects` shows the new card fifth, its band showing the category `ai`
   until it has a metric. INBOX.md § Answers was empty. The feature list called this D44, already taken by `/talk`'s
   chrome. Reversible: the `order` values in `projects.ts` and the order map in `data.test.ts`. (VC3-02.)
+- **D48** *default* `/card` gains a full-width secondary button "Talk to my concierge" (`next/link` to `/talk`, same
+  tab) directly under the LinkedIn / Email / GitHub row and above Selected work. It reuses the row's
+  `secondaryButton` (44 px, `focusRing`). The QR leads to `/card`, so a conference visitor is one tap from the voice
+  demo; the h1 and Save contact stay above it. `/card` still has exactly 3 `/projects/` links and 2 new-tab links.
+  The feature list called this D45, already taken. Reversible: delete the `Link` and its `card.test.tsx` test.
+  (VC3-03.)
+- **D49** *default* The Navbar stays at seven links: `/talk` stays off it (restating D44 for VC3) and is reached from
+  `/card`, the voice-concierge deep-dive (its Links section) and the sitemap. Adding it later is one entry in
+  `Navbar.tsx`'s link list plus `Navbar.test.tsx`. The feature list called this D43, already taken. (VC3-03.)
 
 ## Dependencies between milestones
 

@@ -14,6 +14,14 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 07:20 · VC3-03 · passes
+
+- `DiagramKey` + `VoiceConciergeDiagram` in `diagrams/index.tsx` (three panels, five nodes, labelled arrows; a small `PanelConnector` draws each arrow down below md and right from md; `Panel` gains an optional `className` for flex ratios). The entry sets `architectureDiagram: 'voice-concierge'`. `/card` gains "Talk to my concierge" under the LinkedIn/Email/GitHub row. v2 spec D48 (card placement) and D49 (Navbar unchanged). Tests 959 → 982, suites 74.
+- Verified: check.sh green; jest 982/74; smoke 42 PASS. Playwright: at 390 panels stacked (300 px wide each, scrollWidth 390); at 1280 side by side (197/119/162 px), arrows → and level with the first nodes; /card at 390: h1 ends at 200, Save contact at 384, Talk at 496; 0 console/page errors. Live sitemap lists /talk and /projects/voice-concierge; robots disallows only /evidence and /card/qr.
+- Opus review applied: connector centred on the tallest panel → `md:self-start md:mt-10`; panels squeezed to ~100 px → `md:w-20` connectors + flex ratios; Room sub "one per visit" → "one per session" (the token route names a new room on every Connect; plan updated). Not applied (minor): "both ways" stays in the aria-label only, as the plan says.
+- VC3-04: the 390 panels measure exactly 300 px; its step says "above 300 px", so read it as ≥ 300 or measure at the panel's border box. Scroll before full-page captures (ScrollReveal).
+- Proposed changes: steps 2–3 name D45/D43 (taken); recorded as D48/D49, as the plan said.
+
 ### 2026-10-20 06:40 · VC3-02 · passes
 
 - `projects.ts` gains the voice-concierge entry from the plan (after hit-list, order 5; ghl…cherished shift to 6–10; no metrics, no diagram yet). New `case-study-voice-concierge.test.ts` (shape, six practices, /talk demo + public repo link, digit sentences verbatim in the brief, never-publish strings); `data.test.ts` (10, order map), `case-study-types`, `ProjectsGrid` (Systems filter, no-metric band shows `ai`), `a11y-new-pages` updated. New `docs/notes/voice-concierge-todo.md`; v2 spec `D47 *default*` (order). Tests 942 → 959, suites 73 → 74.

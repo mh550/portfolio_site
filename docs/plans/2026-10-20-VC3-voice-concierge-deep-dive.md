@@ -229,7 +229,7 @@ wrapper, so it points the right way at both widths.
         A ↔ B  "audio and text streams"
 
 [Panel B · "LiveKit Cloud" · tone neutral]
-  (3) Room                            sub: one per visit
+  (3) Room                            sub: one per session (the token route names a new room on every Connect)
 
         B → C  "dispatch"
         B ↔ C  "audio and text streams"

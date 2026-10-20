@@ -207,7 +207,7 @@
         "sitemap() lists /talk and /projects/voice-concierge and robots() does not disallow either (sitemap-robots.test.ts green); `grep -n talk src/app/sitemap.ts .harness/smoke-routes.txt` shows both entries.",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC3-04",
