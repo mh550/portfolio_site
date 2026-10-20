@@ -117,7 +117,7 @@
       "after": [
         "VC4"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-02",
@@ -132,7 +132,7 @@
         "docs/plans/2026-10-20-VC5-mic-limits-server-only.md § Mic timing matches the code and docs/review-guide.md's morning check step 2 says the browser asks for the microphone once the concierge has joined (not before).",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-03",
@@ -148,7 +148,7 @@
         "The v2 spec's Code rules line in CLAUDE.md names server-only as approved (D67) and the plan § server-only lists the modules that import it.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-04",
@@ -164,7 +164,7 @@
         "docs/plans/2026-10-20-VC5-mic-limits-server-only.md § Route behaviour matches the code line by line and the CLAUDE.md /api/concierge/token row names the 403, 429 and room-name behaviour in one sentence.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-05",
@@ -179,7 +179,7 @@
         "docs/notes/voice-concierge-todo.md gains a § Cost protection naming the three layers (route limits with CONCIERGE_MAX_ROOMS default 2, the agent's 5 sessions a day and 10 minutes, the provider caps of about $45 a week) and what to change where.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-06",
@@ -195,7 +195,7 @@
         "docs/plans/2026-10-20-VC5-mic-limits-server-only.md § What Michael will see has one row per screenshot and one per curl line: state · what is on screen or printed · anything that looks wrong; any bug found is fixed in this feature with a test first and the capture retaken.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-07",
@@ -210,7 +210,7 @@
         "docs/specs/2026-10-19-voice-concierge-page.md `## 7. Decisions` holds D59–D67 (plus any added during VC5) each naming what it supersedes, and docs/specs/2026-10-20-vc4-order-widget-limits.md gains a dated 'Built' note at its end listing the defaults taken (D59–D67) and the two things Michael must confirm (the agent does not parse room names; the preview-host regex matches his current previews).",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

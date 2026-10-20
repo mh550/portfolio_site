@@ -44,3 +44,19 @@ values and labels in plain Latin text and ASCII digits, units as `ms`, `s` and `
 npx jest src/__tests__/lib/case-study-voice-concierge.test.ts src/__tests__/app/opengraph-image.test.ts src/__tests__/components/ProjectsGrid.test.tsx
 .harness/check.sh
 ```
+
+## Cost protection
+
+Every conversation costs money, so three layers bound it (VC5, `docs/specs/2026-10-20-vc4-order-widget-limits.md`
+§ VC5.2). The deep-dive says so in one sentence at the end of `caseStudy.method.build`; that sentence is copied
+verbatim into `docs/notes/evidence-voice-concierge.md` § Sentences with digits, so change both together.
+
+| Layer | What it limits | Where to change it |
+|---|---|---|
+| 1. The token route (this repo) | Only this site's origin, its Vercel previews and (dev only) `localhost` or `127.0.0.1` get a token (403 otherwise); one live conversation per network address (429 `visitor`) and `CONCIERGE_MAX_ROOMS` across the site, default 2 (429 `site`); if LiveKit's room list fails, no token (503) | `CONCIERGE_MAX_ROOMS` in the Vercel project's env (a whole number ≥ 1; anything else falls back to 2); the allowlist in `src/lib/concierge/origin.ts`; the limits in `src/lib/concierge/limits.ts`; the order in `src/app/api/concierge/token/route.ts` |
+| 2. The agent (`mh550/voice-concierge`) | Each visitor id at 5 sessions a day, each session at 10 minutes | `concierge/limits.py` in the agent repo |
+| 3. The provider accounts | About $45 a week across the accounts the agent spends on | Each provider's billing settings |
+
+If you change a number, change the deep-dive sentence and its row in the brief in the same commit:
+`case-study-voice-concierge.test.ts` fails on a sentence with a digit that the brief doesn't hold verbatim. The
+route's own numbers are pinned by `concierge-limits.test.ts` and `concierge-token-route-limits.test.ts`.

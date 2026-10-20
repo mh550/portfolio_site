@@ -163,6 +163,10 @@ does not sign). `roomConfig.name` stays empty; the room is named by the video gr
 | valid | `200 {"url": LIVEKIT_URL, "token": <jwt>}`, nothing else in the body |
 | `toJwt()` throws (should not happen with env set) | `500 {"error": "token_failed"}`, no detail echoed |
 
+Superseded in part by VC5-04 (D63, D68): an Origin check now answers 403 before the env check, and between the
+body and the token the route lists live rooms (503 on failure, 429 when busy); rooms are `concierge-<addr10>-<12 hex>`.
+See `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` § Route behaviour.
+
 - Only `POST` is exported; Next answers other methods with 405.
 - Room: `concierge-` + 12 lowercase hex from `crypto.randomBytes(6)` (Node `crypto`, imported in the route).
 - Identity `visitor-<visitor_id>` with the id lower-cased (D43, VC1-03); `ttl: 600` (seconds; a number, not a string).

@@ -65,3 +65,29 @@ One milestone per section, in this order; each is a PR (Michael merges).
 - Michael's live check (review guide): on the PR preview, two tabs → the second gets the "another tab" line;
   `curl -X POST` from a shell (no Origin) → 403.
 - Proceed on sensible defaults and record them; don't stop for questions. Michael is at a conference today.
+
+## Built (2026-10-20, run `portfolio_site-2026-10-20-vc4`)
+
+VC4 (VC4-01 – VC4-06) and VC5 (VC5-01 – VC5-07) are built on branch `harness/portfolio_site-2026-10-20-vc4`, plans
+`docs/plans/2026-10-20-VC4-order-widget-nav.md` and `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`, hand-off
+in `docs/review-guide.md` § VC4 and § VC5. Decisions are in `docs/specs/2026-10-19-voice-concierge-page.md` § 7,
+each naming what it supersedes:
+
+- Michael's answers: D59 (project order), D60 (Talk on the Navbar), D62 (harness framing), D67 (`server-only`
+  exact pin).
+- Defaults taken: D61 (widget details), D63 (Origin before env), D64 (no `x-forwarded-for` → one `'unknown'`
+  bucket; the preview-host regex), D65 (mic toggle only when live), D66 (the `busy` phase, no retry), D68 (one 5 s
+  room-list attempt; every listed room counts), D69 (the 200 tests' new file), D70 (TTL stays 600 s), D71 (the
+  another-tab wording), D72 (one room per address, `concierge-<addr10>`, no random part: the VC5-07 review's fix
+  for tokens minted in a burst), superseded by D73 (the spec's `concierge-<addr10>-<12 hex>` again, a room per
+  Connect, so two people behind one NAT never share a room; built in VC5-03, 2026-10-20).
+
+Michael must confirm two things the run could not check:
+
+1. **The agent does not parse room names.** Rooms are now `concierge-<addr10>-<12 hex>` (were
+   `concierge-<12 hex>`; D73, the spec's form). The agent's code was not on this machine (`~/projects/voice-concierge` has docs only), so
+   in `mh550/voice-concierge`: `grep -rn 'room.name\|room_name' concierge/` shows nothing that splits the name on
+   `-` or expects the old form.
+2. **The preview-host regex matches your current previews.** `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$`
+   (D64, from PR #16's host). Stage 1 of the live check (review guide § VC5): the third curl, with the preview's
+   own Origin, must print 503, not 403.

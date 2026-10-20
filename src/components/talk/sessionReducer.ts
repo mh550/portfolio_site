@@ -3,7 +3,9 @@ import type { TranscriptLine } from './Transcript';
 
 // The /talk session as one pure reducer (plan docs/plans/2026-10-20-VC2-talk-page.md § State machine). No React and
 // no LiveKit here: TalkSession owns the Room and dispatches what happened; this decides what the page shows.
-export type Phase = 'idle' | 'connecting' | 'waiting' | 'live' | 'ended' | 'offline';
+export type Phase = 'idle' | 'connecting' | 'waiting' | 'live' | 'ended' | 'offline' | 'busy';
+// Why the token route answered 429 (D66): this address already has a live room, or the site is at its cap.
+export type BusyReason = 'visitor' | 'site';
 export type ForgetStatus = 'idle' | 'busy' | 'done' | 'failed';
 
 export interface SessionState {
@@ -15,6 +17,7 @@ export interface SessionState {
   micBlocked: boolean; // setMicrophoneEnabled rejected: the session stays live, typing still works
   audioBlocked: boolean; // the browser refused autoplay (!room.canPlaybackAudio): a tap on Turn on sound fixes it
   forget: ForgetStatus; // the Forget me RPC; 'done' outlasts the call the agent then ends
+  busyReason: BusyReason | null; // set only in the busy phase
 }
 
 export type SessionAction =
@@ -22,6 +25,7 @@ export type SessionAction =
   | { type: 'connected' } // room.connect() resolved with no agent in the room yet
   | { type: 'agentJoined' } // TalkSession keeps the agent's identity (the RPC destination) on its session
   | { type: 'offline' } // 503, non-OK, fetch or connect() rejected, or no agent within 10 s
+  | { type: 'busy'; reason: BusyReason } // the token route answered 429 busy: no Room was made, no retry
   | { type: 'dropped' } // the agent left or the room disconnected (not by us)
   | { type: 'leave' }
   | { type: 'memory'; body: MemoryBody }
@@ -43,6 +47,7 @@ export const initialSession: SessionState = {
   micBlocked: false,
   audioBlocked: false,
   forget: 'idle',
+  busyReason: null,
 };
 
 // Once the call is over nothing will firm up a half-heard line: mark every line final, so the transcript log isn't
@@ -57,7 +62,7 @@ export const inRoom = (phase: Phase) => phase === 'connecting' || phase === 'wai
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
     case 'connect':
-      return state.phase === 'idle' || state.phase === 'offline' || state.phase === 'ended'
+      return state.phase === 'idle' || state.phase === 'offline' || state.phase === 'ended' || state.phase === 'busy'
         ? { ...initialSession, phase: 'connecting' }
         : state;
     case 'connected':
@@ -70,6 +75,8 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return state.phase === 'connecting' || state.phase === 'waiting'
         ? { ...state, phase: 'offline', lines: settle(state.lines) }
         : state;
+    case 'busy':
+      return state.phase === 'connecting' ? { ...state, phase: 'busy', busyReason: action.reason } : state;
     case 'dropped':
       // Before the agent arrived a dropped room reads as offline; after, the call ended and what was said stays.
       if (state.phase === 'live') return { ...state, phase: 'ended', lines: settle(state.lines) };
@@ -93,10 +100,11 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         : [...state.lines.map((line) => (line.who === next.who && !line.final ? { ...line, final: true } : line)), next];
       return { ...state, lines };
     }
+    // The mic is asked for only once the agent has joined (D65), so only a live session takes its answer.
     case 'mic':
-      return inRoom(state.phase) ? { ...state, micOn: action.on, micBlocked: false } : state;
+      return state.phase === 'live' ? { ...state, micOn: action.on, micBlocked: false } : state;
     case 'micBlocked':
-      return inRoom(state.phase) ? { ...state, micOn: false, micBlocked: true } : state;
+      return state.phase === 'live' ? { ...state, micOn: false, micBlocked: true } : state;
     case 'audio':
       return inRoom(state.phase) && state.audioBlocked !== action.blocked ? { ...state, audioBlocked: action.blocked } : state;
     case 'forgetStart':

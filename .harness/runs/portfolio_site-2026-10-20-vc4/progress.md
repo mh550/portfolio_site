@@ -11,6 +11,238 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 16:15 · verify VC5
+
+Suite (all "check.sh; smoke" rows): `lib/check.sh` answered from cache, so I ran `.harness/check.sh` uncached: `check: lint ok · jest ok · build ok`, 81 suites / 1115 tests. **Smoke first FAILED on all 42 loads**: the harness dev server on :7834 (pid 3580214, up since 15:18) answered HTTP 500 on every route after an HMR recompile at 16:00 (when the run files were written): Turbopack's CSS for VoiceWidget's `bottom-[max(1rem,env(safe-area-inset-bottom))]` came out as `env(safe-area-inset-%<binary>)`, "Parsing CSS source code failed". The source has no such text, and the production CSS in `.next-check` holds the correct `bottom:max(1rem,env(safe-area-inset-bottom))`. Two side issues: `init.sh` could not restart the server, because `server.pid` named another pid and the stale server still held the port (EADDRINUSE); and a fresh `next dev` that reused the old `.next` still served 500. Once I killed the stale server and moved `.next` to `$HARNESS_SCRATCH/next-cache-broken`, `init.sh` came up clean and `node .harness/smoke.mjs` printed 42/42 PASS. So I put this down to the dev cache and the environment, not VC5 code. If smoke goes red the same way again, clear `.next`.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC5-01 | 1 | `grep -n '^#'` plan; read § Route behaviour table | All 12 named sections present (What Michael will see / Review since filled by VC5-06/07); table rows 1–7: 403 forbidden → 503 env → 400 bad_request → 503 listRooms → 429 visitor → 429 site (default 2, invalid → 2) → 200 room `concierge-<addr10>-<12 hex>` | yes |
+| VC5-01 | 2 | read § Origin rules (plan:130-155) | site origin, regex `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$` from the real PR #16 host, dev-only localhost/127.0.0.1 any port, null forbidden, `new URL` whole-origin compare | yes |
+| VC5-01 | 3 | read § Address hash (plan:157-181) | first trimmed XFF entry or 'unknown'; HMAC-SHA256(LIVEKIT_API_SECRET) first 10 hex; room `concierge-<addr10>-<randomBytes(6) hex>`; "this address's" = prefix `concierge-<addr10>-`; never logged/returned (own JWT exception recorded as D70) | yes |
+| VC5-01 | 4 | read § Modules (plan:183-218) | origin.ts/limits.ts/rooms.ts with the exact signatures; limits test file with `jest.mock('@/lib/concierge/rooms')` factory and the SWC spyOn reason; token-route.test.ts mock-free (200s moved, D69 records the override) | yes |
+| VC5-01 | 5 | read § Mic timing, § /talk busy states | setMic(true) moves into agentArrived, toggle live-only as a decision (D65); `{type:'busy', reason}` → phase busy, reason kept, Connect shown, no retry; both copy strings exact; other non-OK offline | yes |
+| VC5-01 | 6 | read § Live check (plan:309-363); `ls ~/projects/voice-concierge` | staged curls (no Origin 403, evil 403, preview 503), two tabs → another-tab line, site cap with second device, room list per stage, undo (CONCIERGE_MAX_ROOMS, revert route commit); agent repo caveat; ls shows only CLAUDE.md docs knowledge README.md | yes |
+| VC5-01 | 7 | read plan § Decisions; spec `## 7. Decisions` (spec:90-176); plan § CLAUDE.md text | D63–D67 present with what each supersedes/extends (plus D68–D73); CLAUDE.md row drafted (plan:369-375) and equal to CLAUDE.md's token row | yes |
+| VC5-02 | 1 | `grep -n 'setMic(session, true)' src/components/talk/TalkSession.tsx` | exactly one line, 272, inside `agentArrived` (268-273), called from onParticipantConnected (275) and the post-connect scan (322) | yes |
+| VC5-02 | 2 | read TalkSession-live.test.tsx:55-113; TalkSession.test.tsx:100-116, 475-503; ran jest on src/__tests__/components/talk | `mic` not called after connect, `[[true]]` after addAgent; micCalls()==[] on configured=false, 503 and the 10 000 ms timeout path; toggle tests pass; 18 suites / 369 tests pass | yes |
+| VC5-02 | 3 | read TalkSession-live.test.tsx:116-129; concierge.ts:33-34; talk.test.tsx and a11y-new-pages.test.tsx in the full jest run | queryByRole 'Mute microphone'/'Unmute microphone' null while Waiting, exactly 1 once agent joined; TalkSession.tsx:430 `phase === 'live'`; talk and a11y green | yes |
+| VC5-02 | 4 | plan § Mic timing vs TalkSession.tsx:266-324; review-guide.md:106-109 | as-built note matches code line for line; morning step 2 says the browser asks for the mic once the concierge has joined (not before) | yes |
+| VC5-02 | 5 | `.harness/check.sh`; `node .harness/smoke.mjs` | check: lint ok · jest ok · build ok; smoke 42/42 PASS after the dev-server restart (see note above) | yes |
+| VC5-03 | 1 | read concierge-origin.test.ts; jest | every listed case asserted with the stated result (null, site, .evil suffix, http, real preview, abc123 preview, evil-…, suffix preview, localhost:7834 / 127.0.0.1:3000 dev true/false, 'null', non-URL no throw); pass | yes |
+| VC5-03 | 2 | read concierge-limits.test.ts; jest | addressOf first trimmed/'unknown'; bucket = test's createHmac slice(0,10), differs by secret, no address; roomNameFor regex and differs; verdicts null/visitor/site/null(max 5)/visitor-over-site/non-concierge ignored; maxRooms '3'→3, '0' '-1' 'abc' undefined →2; pass | yes |
+| VC5-03 | 3 | package.json:23; `npm ls server-only`; package-lock.json:9918; `head -1` env.ts rooms.ts; `grep -L "import 'server-only'" …` | `"server-only": "0.0.1"` in dependencies; npm ls server-only@0.0.1; lock entry 0.0.1; both line 1 `import 'server-only';`; grep -L printed nothing; rooms.ts maps `RoomServiceClient(...).listRooms()` to `{name}` (now wired by VC5-04, as planned) | yes |
+| VC5-03 | 4 | read TalkSession-import.test.tsx; `grep -rl livekit-client src/app` | hoisted counting `jest.mock('livekit-client')` factory: mockLoads 0 after configured={false} Connect, 1 with a Room on a configured Connect. It sits in a sibling file, not TalkSession.test.tsx: the step's "equivalent module-registry spy", with the reason in plan § server-only. grep empty | yes |
+| VC5-03 | 5 | CLAUDE.md Code rules; plan § server-only (plan:249-285) | "`server-only` is approved at `0.0.1` exact (D67): `env.ts` and `rooms.ts` import it"; plan lists exactly those two modules | yes |
+| VC5-03 | 6 | `.harness/check.sh`; smoke | lint/jest/build ok; 42/42 PASS (after restart) | yes |
+| VC5-04 | 1 | read route.ts:35-82; `grep -n console src/app/api/concierge/token/route.ts` | order: isAllowedOrigin(origin,{siteUrl: profile.siteUrl, dev: NODE_ENV!=='production'}) 403 → conciergeEnv 503 → readVisitorId 400 → listLiveRooms try/catch 503 → roomsVerdict 429 → roomNameFor(addressBucket(addressOf(headers), apiSecret)); every reply via `reply()` with no-store; grep empty | yes |
+| VC5-04 | 2 | read concierge-token-route.test.ts; jest | no jest.mock; SITE_ORIGIN default on every case; no Origin → 403 forbidden with no env; evil.example → 403 with env; localhost:7834 → 503 offline; with `jest.replaceProperty(process,'env',{NODE_ENV:'production'})` → 403; 200 cases moved to the limits file (D69 recorded); pass | yes |
+| VC5-04 | 3 | read concierge-token-route-limits.test.ts; jest | node env, rooms factory mock, real SDK: [] → 200, video.room matches ROOM and the bucket equals the HMAC of '203.0.113.9' from '203.0.113.9, 10.0.0.1'; sub/grants/dispatch metadata as VC1; own bucket → 429 visitor; two others → 429 site; three + MAX=4 → 200; reject → 503 offline; no XFF → bucketOf('unknown'); body text and console spies contain neither address nor bucket; pass | yes |
+| VC5-04 | 4 | read concierge-token-route-sdk.test.ts; jest | bad ids → 400 with addGrant/toJwt spies and listLiveRooms not called; 403 (evil, http site, 'null') reaches none; pass | yes |
+| VC5-04 | 5 | plan § Route behaviour vs route.ts; CLAUDE.md token row | rows 1–7 and the 500 row match the code line by line; the row names the 403, the 429 visitor/site and room `concierge-<addr10>-<12 hex>` (D73) in one sentence | yes |
+| VC5-04 | 6 | `.harness/check.sh`; smoke | green; 42/42 PASS (after restart) | yes |
+| VC5-05 | 1 | concierge.ts:44-45; sessionReducer.ts:65,78-79; sessionReducer.test.ts:17,23,66-91 | strings exact; busy only from connecting, connect allowed from busy, leave → initial; tests: busy from connecting keeps reason, ignored elsewhere incl. live, connect from busy → connecting with busyReason null, inRoom('busy') false | yes |
+| VC5-05 | 2 | TalkSession.tsx:71-87,218-221,397-406; TalkSession.test.tsx:180-236 | 429 busy only with error 'busy' + reason visitor/site; status shows the matching line, Connect focused, MockRoom.instances 0, advanceTimersByTime(15_000) → fetchMock 1 call, micCalls() []; reason 'other' / other error / no body → offline | yes |
+| VC5-05 | 3 | `grep -F` the sentence in projects.ts (escaped `\'`) and evidence-voice-concierge.md:153; jest case-study-voice-concierge + content-guard | sentence at the end of caseStudy.method.build (projects.ts:800) names origin-only, 1 per address, 2 site-wide, 5 sessions/day, 10 min, about $45/week; verbatim row with source (VC4 spec § VC5.2 Michael 2026-10-20; concierge/limits.py); both tests pass | yes |
+| VC5-05 | 4 | read voice-concierge-todo.md § Cost protection (line 48) | three-layer table: route (CONCIERGE_MAX_ROOMS default 2, origin.ts/limits.ts/route.ts), agent 5/day and 10 min (concierge/limits.py), provider caps about $45/week (billing); what to change where | yes |
+| VC5-05 | 5 | `.harness/check.sh`; smoke | green; 42/42 PASS (after restart) | yes |
+| VC5-06 | 1 | dummy-env `next dev -p 7899` (NEXT_DIST_DIR=.next-check), `node .harness/talk-busy-check.mjs $HARNESS_SCRATCH/vc506shots`; ls docs/screenshots/v2/VC5*; read plan § What Michael will see; looked at the busy-visitor 390 capture | statuses 'You already have a conversation open in another tab.' / 'The concierge is busy right now. Try again in a few minutes.', Connect visible, bottom 664 (390×844) / 489 (1280), scrollWidth 390/1280; my captures 56/57/73 KB; committed files 57/58/74 KB (<400 KB); plan records the same numbers | yes |
+| VC5-06 | 2 | same run (report OK lines) | 1 then 2 POSTs after 2 clicks over 15 s each (busy and 503), getUserMedia 0, mic toggle 0, console errors only "Failed to load resource … 429/503", 0 page errors | yes |
+| VC5-06 | 3 | the three curls on :7834 (no env) | 403, 403 (evil.example), 503 (Origin http://localhost:7834); `-i`: 403 has cache-control no-store and `{"error":"forbidden"}` | yes |
+| VC5-06 | 4 | same run, focus report | activeElement BUTTON 'Connect', :focus-visible true, outline solid rgb(0, 212, 255), in all four scenarios | yes |
+| VC5-06 | 5 | read plan § What Michael will see (plan:383-408) | table rows for the 4 captures and the 3 curl lines (state · on screen/printed · what looks wrong); no bug found, the offline full-stop asked as a question | yes |
+| VC5-06 | 6 | `.harness/check.sh`; smoke | green; 42/42 PASS (after restart) | yes |
+| VC5-07 | 1 | `$HARNESS_SCRATCH/VC5.diff` (166 KB); plan § Review; `grep -rn 'LIVEKIT_\|server-only' src/components src/lib/data`; route.ts; rooms test; sessionReducer.ts:104-107; `npx tsc --noEmit` | table answers every question; my reading agrees (only signing after both checks; no console; requestTimeout 5 + failover false pinned by concierge-rooms.test.ts; whole-origin compare; busy only from connecting; mic only in agentArrived, guarded). grep empty; tsc exit 0. The Important burst finding: fixed by D72, then reverted by D73 because D72 put two people on one NAT in one room. Kept as an accepted known limit (plan:98-115), as the spec's room form and VC5-03/04 steps require | yes |
+| VC5-07 | 2 | review-guide.md:151-215 and :101-109 | § VC5 "mic timing and cost protection": changes, staged check (curl → 403, two tabs → another-tab line, CONCIERGE_MAX_ROOMS stage), LiveKit room list per stage, undo per piece; morning step 2 asks for the mic once the concierge joins | yes |
+| VC5-07 | 3 | CLAUDE.md routes row, lib/concierge line, Code rules, Testing, Commands; full jest | names origin.ts, limits.ts, rooms.ts and the 403/503/400/503/429 order, server-only exact pin D67, limits test + rooms factory mock; "1115 tests, 81 suites" = jest 1115 / 81 | yes |
+| VC5-07 | 4 | spec § 7 (D59–D73); vc4 spec `## Built (2026-10-20 …)` | each decision names what it supersedes (D67 "extends D41", D69 "refines D42 / overrides VC5-01 step 4"); Built note lists D59–D73 and the two confirmations (agent doesn't parse room names; preview regex) | yes |
+| VC5-07 | 5 | `.harness/check.sh`; smoke | green; 42/42 PASS (after restart) | yes |
+
+40 hold, 0 fail.
+
+### 2026-10-20 · verify VC5
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC5-01 | 1 | grep '^#' on the VC5 plan | all listed sections present; Route behaviour table rows 1-7 in the stated order | yes |
+| VC5-01 | 2 | read § Origin rules, grep regex | regex and real preview host present; whole-origin URL parse rule | yes |
+| VC5-01 | 3 | read § Address hash | first XFF entry/'unknown', HMAC 10 hex, room concierge-<addr10>-<12 hex> (D73) | yes |
+| VC5-01 | 4 | read § Modules/Tests; ls src/lib/concierge | origin/limits/rooms modules named; limits test file strategy described | yes |
+| VC5-01 | 5 | read § Mic timing and § busy states; concierge.ts:44-45 | busy copy exact; mic moves to agentArrived | yes |
+| VC5-01 | 6 | read § Live check | curl stages, room list checks, undo, agent room-name caveat present | yes |
+| VC5-01 | 7 | read spec § 7 D59-D73; CLAUDE.md token row | decisions present with supersedes; row drafted and in CLAUDE.md | yes |
+| VC5-02 | 1 | grep -n 'setMic(session, true)' TalkSession.tsx | one line (272), inside agentArrived | yes |
+| VC5-02 | 2 | read TalkSession-live.test.tsx:55-113, TalkSession.test.tsx micCalls asserts; ran jest | mic not called after connect, [[true]] after addAgent; micCalls()==[] offline paths; pass | yes |
+| VC5-02 | 3 | read TalkSession-live.test.tsx:118-128 | no mic button while waiting, exactly one once agent joined; pass | yes |
+| VC5-02 | 4 | read plan § Mic timing; review-guide.md:108 | matches code; guide says prompt once concierge joined | yes |
+| VC5-02 | 5 | check.sh (green, cached); smoke all PASS; full jest | 81 suites / 1115 tests pass | yes |
+| VC5-03 | 1 | jest concierge-origin.test.ts | passes; step's cases covered | yes |
+| VC5-03 | 2 | jest concierge-limits.test.ts | passes (HMAC, room regex, verdicts, maxRooms) | yes |
+| VC5-03 | 3 | grep package.json, npm ls server-only, grep -L | "server-only": "0.0.1", ls 0.0.1, grep -L prints nothing | yes |
+| VC5-03 | 4 | read TalkSession-import.test.tsx; grep -rl livekit-client src/app | mockLoads 0 unconfigured, 1 configured; src/app grep empty | yes |
+| VC5-03 | 5 | CLAUDE.md:150; plan § server-only | D67 named; modules listed | yes |
+| VC5-03 | 6 | check.sh; smoke | green | yes |
+| VC5-04 | 1 | read route.ts; grep console | order 403,503,400,503,429,200; no-store via reply(); no console | yes |
+| VC5-04 | 2 | jest concierge-token-route tests; curl :7834 | 403/403/503 as asserted; pass | yes |
+| VC5-04 | 3 | jest concierge-token-route-limits.test.ts | pass; 200/429/503 and no-leak cases | yes |
+| VC5-04 | 4 | jest concierge-token-route-sdk.test.ts | pass; 400/403 reach no SDK or listLiveRooms | yes |
+| VC5-04 | 5 | read plan § Route behaviour; CLAUDE.md:32 | rows match code; token row names 403/429/room name | yes |
+| VC5-04 | 6 | check.sh; smoke | green | yes |
+| VC5-05 | 1 | concierge.ts:44-45; sessionReducer.test.ts busy cases | strings exact; busy from connecting only, ignored from live, connect from busy | yes |
+| VC5-05 | 2 | TalkSession.test.tsx:180-234 | both reasons, unknown reason offline, 1 fetch over 15 s, no mic; pass | yes |
+| VC5-05 | 3 | projects.ts:800; evidence-voice-concierge.md:153; jest case-study-voice-concierge, content-guard | sentence verbatim in evidence row with source; pass | yes |
+| VC5-05 | 4 | voice-concierge-todo.md § Cost protection | three layers table present | yes |
+| VC5-05 | 5 | check.sh; smoke | green | yes |
+| VC5-06 | 1 | ran .harness/talk-busy-check.mjs on a temporary dummy-env dev server (:7899); ls docs/screenshots/v2/VC5*; read plan table | captures 55-74 KB; Connect bottom 664/489, scrollWidth recorded; plan matches | yes |
+| VC5-06 | 2 | same run | 1 POST per click over 15 s, getUserMedia 0, only 429/503 console lines, 0 page errors | yes |
+| VC5-06 | 3 | curl on :7834 (no env) | 403, 403, 503 {offline:true} | yes |
+| VC5-06 | 4 | same run focus report | activeElement Connect, outline rgb(0, 212, 255) | yes |
+| VC5-06 | 5 | read plan § What Michael will see | one row per screenshot and curl line | yes |
+| VC5-06 | 6 | check.sh; smoke | green | yes |
+| VC5-07 | 1 | read plan § Review; grep LIVEKIT_/server-only in components,data | table + answers to all questions; fixes had tests; grep empty; signing only after both checks | yes |
+| VC5-07 | 2 | read review-guide.md § VC5 | staged check, room list, undo; mic after join | yes |
+| VC5-07 | 3 | CLAUDE.md; `npx jest --silent` | token row, lib/concierge line, server-only, limits test named; 1115 tests/81 suites match | yes |
+| VC5-07 | 4 | spec § 7 and vc4 spec Built note | D59-D73 with supersedes; Built note lists defaults and two confirmations | yes |
+| VC5-07 | 5 | check.sh; smoke | green | yes |
+
+40 hold, 0 fail. (An older scratch report showed FAILs only because :7834 has no LiveKit env; on a dummy-env server it passes.)
+
+### 2026-10-20 19:55 · VC5-04 · passes
+
+- Docs only (route code and its tests already D73 since VC5-03): `docs/review-guide.md` § VC5 (Changed: room `concierge-<10 hex>-<12 random hex>`, D73; stage 2 room list and "D73's check"; the agent room-name note; Undo now "back to D72" via reverting VC5-03; decisions D63–D73) and the Built note of `docs/specs/2026-10-20-vc4-order-widget-limits.md` (D72 superseded by D73, room form). Tests 1115 → 1115 (81 suites).
+- Verified each step: route order 403→503→400→503→429→200, `no-store` on every reply, `grep -n console route.ts` empty; token-route test 403 cases incl. NODE_ENV production seam; limits test ROOM `-[0-9a-f]{12}$`, bucket = test's HMAC of `203.0.113.9`, unknown bucket, MAX=4 → 200, list reject → 503, no address/bucket in bodies or console; sdk test: bad id and 403 reach neither SDK nor `listLiveRooms`; plan § Route behaviour rows 5/7 and CLAUDE.md token row match.
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS; curls on :7834: no Origin 403, evil 403, localhost 503.
+- Next: every VC5 feature now passes; `grep -rn D72` outside the spec's § 7 and the plan's history is only "superseded" mentions.
+- Question for Michael (still open): D73, a room per Connect (spec's form) vs D72 one room per address.
+
+### 2026-10-20 19:35 · VC5-03 · passes
+
+- D73 in code: `src/lib/concierge/limits.ts` `roomNameFor` is `concierge-<bucket>-<randomBytes(6) hex>` again and `roomsVerdict` matches `startsWith(concierge-<bucket>-)`; D72 comment gone. Tests first: `concierge-limits.test.ts` 3 failed, then 23/23 passed (name regex `-[0-9a-f]{12}$`, two calls differ, `concierge-<b>-x` → visitor, bare `concierge-<b>` and `concierge-<b>x-…` are not this address's).
+- Suite stayed green only by also doing plan § D73 rework's VC5-04 test part now: `concierge-token-route-limits.test.ts` ROOM regex `-<12 hex>`, `roomOf` seeds `concierge-<bucket>-000000000000`, the D72 burst test replaced by "two calls from one address, two rooms with the same bucket". CLAUDE.md token row (`concierge-<addr10>-<12 hex>`, D73) and count updated. Tests 1114 → 1115 (81 suites).
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok` (1115 tests); smoke exit 0, 42 PASS; `npm ls server-only` 0.0.1; `grep -L "import 'server-only'"` env.ts rooms.ts empty; `grep -rl livekit-client src/app` empty; origin + import tests 11/11.
+- Next session (VC5-04): left for it per plan: `docs/review-guide.md` § VC5 (Changed, stage 2's D72 check, Undo) and the Built note in `docs/specs/2026-10-20-vc4-order-widget-limits.md` (D72 → D73). The route test changes are already done.
+- Proposed changes: VC5-03 step 3 "rooms.ts … is not yet called by the route" is stale since VC5-04 wired it; step 4 names TalkSession.test.tsx but the test lives in `TalkSession-import.test.tsx` (own module registry).
+- Question for Michael: D73 still open (random room suffix vs D72 one room per address).
+
+### 2026-10-20 19:10 · VC5-01 · passes
+
+- Verify failed VC5-01/03/04 on one cause: D72 (room `concierge-<addr10>`, no random part) contradicts Michael's spec (`concierge-<addr10>-<random>`) and the steps. Took **D73 *default***: the spec's form again. Reason: under D72 two people on one NAT (conference Wi-Fi) who press Connect before the first join creates the room share a room and hear each other; the forged-Origin burst is a cost limit the agent and provider caps bound.
+- Docs only: plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (route rows 5/7, known limits, § Address hash, CLAUDE.md draft, Review, D72 marked superseded, D73, new § D73 rework); spec § 7 D72 superseded + D73. Tests 1114 → 1114.
+- Verified: every step read against the plan; `.harness/check.sh` → `check: lint ok · jest ok · build ok` (1114 tests); smoke 42/42 PASS.
+- Next session (VC5-03, then VC5-04): code is still D72's. Follow plan § D73 rework exactly: `limits.ts` roomNameFor + `startsWith(concierge-<bucket>-)` + tests (VC5-03); route-limits test regex/burst test, CLAUDE.md token row, review guide § VC5 (lines ~164, 194, 212) and the vc4 spec Built note (lines 81, 86–87) (VC5-04).
+- Question for Michael: D73: keep the spec's random room suffix, or go back to D72 (one room per address) and accept the shared-room race?
+
+### 2026-10-20 18:30 · verify VC5
+
+Steps failing for VC5-01/03/04 are one cause: D72 (room name `concierge-<addr10>` without random suffix) is a deliberate security fix but the feature steps were not updated to it. The next session should update the steps' wording or revert D72, with Michael's choice.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC5-01 | 1 | read plan § Mic timing, Route behaviour table, Origin rules, Address hash, Modules, /talk busy states, server-only, Tests, Live check, What Michael will see, Review, Decisions | all sections exist; table order and codes match, BUT row 5/7 read `concierge-<addr10>` (was `-*` / `-<12 hex>` until D72), so the step's room-name text no longer holds | no |
+| VC5-01 | 2 | read plan § Origin rules vs src/lib/concierge/origin.ts | regex `^portfolio-site-[a-z0-9-]+-mh550s-projects(-[a-z0-9]+)?\.vercel\.app$`, dev localhost/127.0.0.1, null → false, whole-origin compare via `new URL` | yes |
+| VC5-01 | 3 | read plan § Address hash vs limits.ts | first XFF entry/`unknown`, HMAC-SHA256 10 hex all match; Plan/step says the room name has a random suffix (`concierge-<addr10>-<12 hex>`); D72 (VC5-07) changed it to `concierge-<addr10>` with no suffix (step says `randomBytes(6)` suffix, code has none) | no |
+| VC5-01 | 4 | read plan § Modules; ls tests | origin.ts/limits.ts/rooms.ts, limits test file with `jest.mock` of rooms, token-route test mocks nothing; Modules table still lists `randomBytes` import (stale) but names hold | yes |
+| VC5-01 | 5 | read § Mic timing, § /talk busy states; data/concierge.ts | mic moved to agentArrived, toggle live-only, busy action/copy matches (lines 44-45) | yes |
+| VC5-01 | 6 | read § Live check, D63–D67 in spec | curl no Origin/evil/preview, two tabs, CONCIERGE_MAX_ROOMS, undo, agent-room-name caveat all present; D63–D67 at spec lines 126–143 | yes |
+| VC5-01 | 7 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-02 | 1 | `grep -n 'setMic(session, true)' TalkSession.tsx` | one line (272), inside agentArrived | yes |
+| VC5-02 | 2 | read TalkSession-live.test.tsx 61–113, TalkSession.test.tsx micCalls | 0 calls after connect without agent, `[[true]]` after addAgent, 0 on offline/unconfigured paths; pass in jest run | yes |
+| VC5-02 | 3 | grep tests for 'Mute microphone'; jest run | button absent while waiting, present when live (D65); talk and a11y tests pass | yes |
+| VC5-02 | 4 | read plan § Mic timing; docs/review-guide.md line 108 | plan matches code; guide says mic asked once concierge has joined | yes |
+| VC5-02 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-03 | 1 | read concierge-origin.test.ts + origin.ts; jest | origin.ts logic yields every listed true/false case (no-throw on non-URL); suite passes | yes |
+| VC5-03 | 2 | read concierge-limits.test.ts line 10,47 + limits.ts | addressOf/addressBucket/roomsVerdict/maxRooms hold; BUT roomNameFor test asserts `/^concierge-[0-9a-f]{10}$/` and no 'two calls differ' (D72), contradicting the step's `-[0-9a-f]{12}` regex | no |
+| VC5-03 | 3 | `grep -n server-only package.json`; `npm ls server-only`; `grep -L` | `"server-only": "0.0.1"` exact; npm ls 0.0.1; grep -L prints nothing; rooms.ts exists | yes |
+| VC5-03 | 4 | read TalkSession-import.test.tsx; `grep -rl livekit-client src/app` | counting jest.mock proves 0 loads unconfigured, 1 configured; grep empty | yes |
+| VC5-03 | 5 | read CLAUDE.md Code rules; plan § server-only | server-only named (D67); modules listed | yes |
+| VC5-03 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-04 | 1 | read route.ts; `grep -n console route.ts` | order 403→503→400→503→429→200 as stated, no-store on all, no console (grep empty) | yes |
+| VC5-04 | 2 | read concierge-token-route.test.ts; ran curls on :7834 | no Origin 403, evil 403, localhost 503 (dev); tests pass | yes |
+| VC5-04 | 3 | read concierge-token-route-limits.test.ts lines 19,83-91,156 | ROOM regex is `^concierge-([0-9a-f]{10})$` (no 12-hex suffix) and test title still says `-<12 hex>`; other cases (429s, 200 with MAX=4, 503, unknown bucket) pass; step's `-<12 hex>` regex does not hold (D72) | no |
+| VC5-04 | 4 | read concierge-token-route-sdk.test.ts | bad id and 403 reach no SDK or listLiveRooms call; passes | yes |
+| VC5-04 | 5 | read plan § Route behaviour + CLAUDE.md token row | matches code (room names updated per D72) | yes |
+| VC5-04 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-05 | 1 | read data/concierge.ts 44-45; sessionReducer.test.ts | both sentences present; reducer busy cases pass | yes |
+| VC5-05 | 2 | read TalkSession.test.tsx 179-232 | both reasons, unknown reason → offline, fetch count 1 after 15 s, no Room, mic 0; pass | yes |
+| VC5-05 | 3 | read projects.ts line 800; evidence note; jest | protection sentence in build copy; digit sentences covered by case-study and content-guard tests (pass) | yes |
+| VC5-05 | 4 | `grep -n 'Cost protection' docs/notes/voice-concierge-todo.md` | § at line 48 | yes |
+| VC5-05 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-06 | 1 | Read VC5-talk-busy-visitor-390.png; sizes via PIL; read plan table | 3 PNGs 56/58/75 KB, 390×844 / 1280×800; visitor line + Connect visible; plan rows exist | yes |
+| VC5-06 | 2 | reran .harness/talk-busy-check.mjs on :7834 (no dummy env; a second server on 7835 failed on the .next lock); read TalkSession.test.tsx 200 | rerun: 0 token requests because Connect skips the route without env (D46), so it can't re-prove 1/Connect; Jest: 429 → fetch called once over 15 s, getUserMedia 0, 0 errors in rerun; prior run documented in plan | yes |
+| VC5-06 | 3 | curl x3 on :7834 | 403, 403, 503 | yes |
+| VC5-06 | 4 | rerun script focus line | focus Connect, outline rgb(0, 212, 255), focusVisible true | yes |
+| VC5-06 | 5 | read plan § What Michael will see lines 394-400 | one row per screenshot and curl line, with the 3 columns | yes |
+| VC5-06 | 6 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+| VC5-07 | 1 | read plan § Review; grep LIVEKIT_/server-only in src/components src/lib/data | review table with answers present; grep finds only copy text unrelated to env (no `LIVEKIT_` or server-only import) | yes |
+| VC5-07 | 2 | read docs/review-guide.md 151+, line 108 | § VC5 present with staged check, room list, undo; mic line updated | yes |
+| VC5-07 | 3 | read CLAUDE.md; jest tail | rows/lines name origin/limits/rooms, order, server-only, limits test and mock; count 1114 tests/81 suites matches | yes |
+| VC5-07 | 4 | read spec § 7 and vc4 spec Built note | D59–D72 each in spec, Built note at line 69 | yes |
+| VC5-07 | 5 | `.harness/check.sh` (cached green) + `node .harness/smoke.mjs`; `npx jest --silent` | check: green; smoke all PASS; 81 suites, 1114 tests pass | yes |
+
+
+### 2026-10-20 17:50 · VC5-07 · passes
+
+- Opus review of `git diff e409a14^..HEAD`: no Critical. **Important, fixed (D72 *default*):** a forged-Origin shell could mint N tokens from one address before any room existed (each got a random room) → N agents. `roomNameFor` is now `concierge-<addr10>` (no random part), and `roomsVerdict` matches that exact name, so a burst of tokens shares one room and one agent dispatch (the token's roomConfig applies only to the join that creates the room). Tests first: 10 failed, then passed. Simplification: `mic`/`micBlocked` apply only when `live` (2 failed, then passed). `tsc --noEmit` went from 4 test-file errors to 0. Tests 1113 → 1114 (81 suites).
+- Docs: plan § Review table and 7 answers, the known-limits note and D72; review guide § VC5 (what changed, the 4-stage live check, the room list, undo for each piece); CLAUDE.md token row (room per address) and count; D61/D68/D70/D71 now name what they supersede; the VC4 spec has a dated Built note with D59–D72 and the two things to confirm.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -rn 'LIVEKIT_\|server-only' src/components src/lib/data` empty; SDK 2.19.1 `AbortSignal.timeout(timeout * 1e3)` checked.
+- Not fixed: `TalkSession-review.test.tsx` › "a draft from a call that ended…" still logs "A component suspended inside an act scope". It fires during the `disconnected` emit and comes from a jsdom timer after `user.type`. It is test noise from before VC5 and doesn't fail anything.
+- Questions for Michael: **D72**: keep one room per address? Side effect: two people behind one NAT who press Connect in the same second share a room. Undo is in `limits.ts` alone. Still open: D64 (preview regex vs exact `VERCEL_URL`), D68, D70 (TTL 60 s?), D71 (another-tab wording), and the offline line's missing full stop.
+- Confirm on the live check: the agent doesn't parse room names (now `concierge-<10 hex>`), and the preview regex matches your previews.
+
+### 2026-10-20 17:05 · VC5-06 · passes
+
+- New `.harness/talk-busy-check.mjs` (Playwright, `page.route` fulfils every token POST) and four captures in `docs/screenshots/v2/`: `VC5-talk-busy-visitor-390.png` 56 KB, `VC5-talk-busy-site-390.png` 57 KB, `VC5-talk-busy-visitor-1280.png` 73 KB, `VC5-talk-offline-503-390.png` 55 KB. Plan § What Michael will see filled (7 rows: 4 captures, 3 curl lines). No code change; tests 1113 → 1113 (81 suites).
+- How: `/talk` only fetches with LiveKit env (D46), so I restarted the 7834 dev server with dummy values (`wss://livekit.invalid`), ran the script (30 OK, 0 FAIL), then put the plain server back. Measured: Connect bottom y 664 at 390×844 (above the fold), 489 at 1280; scrollWidth 390; 1 POST per Connect over 15 s (2 presses → 2); getUserMedia 0; no mic toggle; focus stays on "Connect", `:focus-visible`, outline `rgb(0, 212, 255)`; only Chromium's 429/503 resource line in the console.
+- curl on the plain server: no Origin → 403, `Origin: https://evil.example` → 403, `Origin: http://localhost:7834` → 503.
+- Verified: `check: lint ok · jest ok · build ok` (1113/81); smoke exit 0 (42 PASS) at start and end.
+- Next session: `kill $(cat server.pid)` leaves next-server running (the pid is the npx wrapper). Kill the pid holding the port (`ss -ltnp`) before restarting, or the new server dies with EADDRINUSE and you test the old one.
+- Question for Michael (copy): "The concierge is offline right now" has no full stop; both busy lines have one. Add it (spec W2 wording + one pinned test)? D71 still open.
+
+### 2026-10-20 16:30 · VC5-05 · passes
+
+- `sessionReducer.ts`: `BusyReason`, phase `busy` (from `connecting` only), `busyReason` (null in `initialSession`); Connect/Leave reset it; `inRoom('busy')` false. `TalkSession.tsx`: `fetchCredentials` returns `{kind:'ok'}` | `{kind:'busy', reason}` (429 + `error:'busy'` + visitor|site only) | null; busy releases the session and dispatches, no timer, no refetch; the status line is one `statusLine` value; deep-dive link under busy too (D66). Copy `busyVisitor`/`busySite` in `concierge.ts`. Tests 1079 → 1113 (81 suites).
+- Content: protection sentence appended to the voice-concierge `caseStudy.method.build`, verbatim row in `evidence-voice-concierge.md` § Sentences with digits, pinned by a new test; `voice-concierge-todo.md` § Cost protection (three layers, where to change each). Plan § /talk busy states has "As built (VC5-05)"; CLAUDE.md count and phases line.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end. Busy tests run 15 s of fake timers with `fetchMock` at 1 call, 0 `MockRoom` instances, no mic calls; a 429 with `reason:'other'`, another error or no body, and a busy body on a 503, read offline. Mutation: dropping the `session.alive` check after the fetch fails the new late-429 test.
+- Opus review: no Critical. Applied: late-429-after-Leave and late-429-into-second-Connect tests; the focus test now starts on `<body>` (exercises the refocus effect); todo note names `127.0.0.1`. Not taken: the page line "accepts only this site's origin" (previews are the site's; the step's wording).
+- Pre-existing, for VC5-07: `TalkSession-review.test.tsx` logs "A component suspended inside an act scope" (also on HEAD before this change).
+- Question for Michael (D71): "You already have a conversation open in another tab." is also shown for ~30 s after Leave (D68) and to a second person on the same NAT (conference Wi-Fi). Keep it, or "A conversation from your network is still open. Try again in a minute."?
+- Next (VC5-06): with no LiveKit env `/talk` never fetches (`configured={false}`), so a browser can't reach busy on the dev server; screenshots of it need the component rendered with `configured` and a stubbed route.
+
+### 2026-10-20 15:50 · VC5-04 · passes
+
+- `route.ts` now checks Origin (403 `forbidden`, before env, D63) → env (503) → body (400) → `listLiveRooms` (503, error dropped) → `roomsVerdict` (429 `busy` visitor|site) → token for `roomNameFor(bucket)`; no `console`, `profile` from `@/lib/data`, `node:crypto` import gone. Tests 1052 → 1079 (80 → 81 suites): new `concierge-token-route-limits.test.ts` (rooms mocked by factory, real SDK; the VC1 200 cases moved here, D69); `concierge-token-route.test.ts` still mocks nothing, sends the site Origin, adds 6 × 403/dev/prod cases (`jest.replaceProperty` for production); the sdk test shows a bad id and a 403 reach neither SDK spy nor `listLiveRooms`.
+- Docs: CLAUDE.md token row (the plan's draft), a Testing note and the count; plan § Route behaviour has "As built (VC5-04)"; the VC1 plan's table is marked superseded in part.
+- Verified: `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -n console route.ts` empty. On `next dev` :7834 with no env, no Origin and `https://evil.example` → 403, `http://localhost:7834` and the site origin → 503. Mutations: logging the bucket fails 3 tests; dropping the 429 fails 5.
+- Opus review: no Critical or Important issues. Applied: the route comment now says the bucket is in the caller's own token (D70); the no-leak test also decodes the JWT and checks the address isn't in it.
+- For VC5-07: `npx tsc --noEmit` reports 3 errors that came in before this change (`booth-bundle.test.ts:92` `MH_HARNESS_HOME`, `concierge-rooms.test.ts:21,39` `mockResolvedValue` typed `never`). `next build` passes anyway; fix them in the cleanup pass.
+- Next session (VC5-05): `/talk` busy states. A 403 from the route reads as offline today (any non-OK reply).
+- D64 question still open (preview regex vs exact `VERCEL_URL`/`VERCEL_BRANCH_URL`); the route passes only `siteUrl` and `dev`, so switching needs only the extra `opts`.
+
+### 2026-10-20 15:20 · VC5-03 · passes
+
+- New `src/lib/concierge/origin.ts` (`isAllowedOrigin`), `limits.ts` (`addressOf`, `addressBucket`, `roomNameFor`, `roomsVerdict`, `maxRooms`, pure) and `rooms.ts` (`import 'server-only'`, `listLiveRooms` with `requestTimeout: 5, failover: false`, not wired yet). `env.ts` line 1 is `import 'server-only';`. `server-only@0.0.1` is an exact dependency (lockfile updated). CLAUDE.md Code rules name it (D67), and the `lib/concierge/` line names the new modules. Tests 1017 → 1052 (76 → 80 suites): `concierge-origin`, `concierge-limits`, `concierge-rooms` and `TalkSession-import.test.tsx`.
+- The import test has its own file, as the plan says (step 4 allows an equivalent). It reaches the mock through `jest.requireActual`: a static import of `@/__mocks__/livekit-client` is the same module path as the mapped `livekit-client`, so it would run the counting factory. Mutation check: moving the `configured` guard below the import makes the zero case fail (1).
+- Verified: `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -L` on env/rooms prints nothing; `grep -rl livekit-client src/app` is empty; `npm ls server-only` → 0.0.1.
+- Opus review: no Critical issues. Applied: `maxRooms` now also requires `Number.isSafeInteger` (a 20-digit value or Infinity would switch the cap off), plus tests for `'03'`, `:443` and a trailing-dot host.
+- Question for Michael (D64, important): the preview regex also matches a Vercel project someone else names `portfolio-site-evil-mh550s-projects` (its `<name>.vercel.app` host), so a page there could spend tokens through its visitors' browsers. Should the allowlist be exactly `https://$VERCEL_URL` + `https://$VERCEL_BRANCH_URL` instead? **Proposed change:** if yes, VC5-03 step 1's `portfolio-site-abc123-…` → true case goes, and VC5-04 passes those two env values into `opts`.
+- Next session (VC5-04): wire `listLiveRooms` + `roomsVerdict` into the route in the plan's order. `[::1]` is not a dev origin (browse `localhost`).
+
+### 2026-10-20 14:55 · VC5-02 · passes
+
+- `TalkSession.tsx`: `setMic(session, true)` moved into `agentArrived` (one line, :254; both arrivals go through it, guarded by `agentIdentity`), and the mic toggle renders only when `phase === 'live'` (D65). Tests 1012 → 1017 (76 suites): five new mic tests in `TalkSession-live.test.tsx` (none after connect alone, `[[true]]` after addAgent, agent already present, one per Room across Leave/Connect, a second agent and a reconnect add nothing, no toggle while waiting) plus `micCalls()` = [] on configured=false, 503, rejected connect() and the 10 s timer in `TalkSession.test.tsx`.
+- Two helpers that added the agent in a sync `act` (`liveRoom`, the 3 000 ms test) became `await act(async …)`: the mic's answer now lands after the arrival, and without this React logged an act warning.
+- Docs: plan § Mic timing has an "As built (VC5-02)" note; review guide morning step 2 says the browser asks for the mic once the concierge has joined; the VC2 plan's state-table rows and its VC2-05 note are marked superseded by D65; CLAUDE.md count is now 1017.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS). The Opus reviewer found no Critical or Important issues. I applied its Minor test gaps.
+- Next session (VC5-03) / VC5-07 Minors not taken: the reducer still accepts `mic`/`micBlocked` in connecting/waiting, which can no longer happen (trim it in VC5-07's simplification pass). While the browser's prompt is open the toggle reads "Unmute microphone" but a press mutes (`micWanted` is true); this is old behaviour that every session now hits. Consider disabling the toggle until the first answer.
+
+### 2026-10-20 14:40 · VC5-01 · passes
+
+- New plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (Mic timing, Route behaviour table 403→503→400→503→429 visitor→429 site→200, Origin rules with the preview regex checked against PR #16's host, Address hash, Modules, /talk busy states, server-only, Tests per feature, staged Live check, CLAUDE.md draft, empty What Michael will see/Review, Decisions). D63–D70 appended to `docs/specs/2026-10-19-voice-concierge-page.md` § 7. No code; tests unchanged at 1012/76.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (every route at 1280 and 390). An Opus reviewer checked the plan against the code. Fixes it led to, each confirmed in source: next/jest already maps `server-only` (no mapper of our own); `next dev` fills `x-forwarded-for`; `NODE_ENV` is readonly in TS, so use `jest.replaceProperty`; rooms mocks need `mockResolvedValue([])`; the livekit-client import test goes in its own file (isolateModules + render breaks hooks).
+- Next session (VC5-02): mic → `agentArrived`, toggle only when `live` (D65). VC5-03: the import test is `TalkSession-import.test.tsx`, not `TalkSession.test.tsx` (see plan § server-only).
+- Questions for Michael: (D68) after Leave the address reads "another tab" until LiveKit closes the room (≥20 s; minutes if the agent keeps the room). Keep counting every listed room (fail closed), or only rooms with a `visitor-` participant? (D70) A shell that forges Origin can mint many tokens and join them all at once, so only the provider caps bound it. Cut the token TTL from 600 s to about 60 s? (D64) Does the preview regex match your current previews? Also confirm `mh550/voice-concierge` doesn't parse room names (no agent code is checked out locally).
+- Proposed changes: VC5-01 step 3 says addr10 never appears in a response, but the visitor's own JWT carries their room name; the plan narrows this to "never in plain text" (D70). VC5-03 step 4 names `TalkSession.test.tsx`; the plan puts the test in `TalkSession-import.test.tsx` (step 4 allows an equivalent).
+
 ### 2026-10-20 18:00 · verify VC4
 
 All 6 features hold (35 steps).

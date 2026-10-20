@@ -112,6 +112,12 @@ describe('voice-concierge claims match what is built', () => {
     expect(cs!.method.build).not.toMatch(/as they change/);
   });
 
+  it('ends the build step with how cost is protected (VC5-05: route, agent and provider limits)', () => {
+    expect(cs!.method.build.endsWith(
+      "Cost has three limits: the token route accepts only this site's origin and allows one live conversation per network address and two across the site, the agent caps each visitor at 5 sessions a day and each session at 10 minutes, and my provider accounts are capped at about $45 a week."
+    )).toBe(true);
+  });
+
   it('keeps the problem to what the research found: LiveKit\'s default, not every voice agent', () => {
     expect(project.detail.problem).toMatch(/^By default a LiveKit voice agent forgets you when the call ends/);
   });

@@ -1,5 +1,6 @@
 import {
   initialSession,
+  inRoom,
   sessionReducer,
   type Phase,
   type SessionAction,
@@ -7,18 +8,19 @@ import {
 } from '@/components/talk/sessionReducer';
 import { memoryBody, metricsFull, metricsNulls } from '../../fixtures/concierge';
 
-const PHASES: Phase[] = ['idle', 'connecting', 'waiting', 'live', 'ended', 'offline'];
+const PHASES: Phase[] = ['idle', 'connecting', 'waiting', 'live', 'ended', 'offline', 'busy'];
 const at = (phase: Phase, extra: Partial<SessionState> = {}): SessionState => ({ ...initialSession, phase, ...extra });
 const line = (key: string, text: string, final = true) => ({ key, who: 'agent' as const, text, final });
 
 // Plan § State machine: [action, from, to]; every other phase leaves the state as it was.
 const transitions: [SessionAction, Phase[], Phase][] = [
-  [{ type: 'connect' }, ['idle', 'offline', 'ended'], 'connecting'],
+  [{ type: 'connect' }, ['idle', 'offline', 'ended', 'busy'], 'connecting'],
   [{ type: 'connected' }, ['connecting'], 'waiting'],
   [{ type: 'agentJoined' }, ['connecting', 'waiting'], 'live'],
   [{ type: 'offline' }, ['connecting', 'waiting'], 'offline'],
   [{ type: 'dropped' }, ['live'], 'ended'],
   [{ type: 'dropped' }, ['connecting', 'waiting'], 'offline'],
+  [{ type: 'busy', reason: 'visitor' }, ['connecting'], 'busy'],
 ];
 
 describe('sessionReducer', () => {
@@ -32,6 +34,7 @@ describe('sessionReducer', () => {
       micBlocked: false,
       audioBlocked: false,
       forget: 'idle',
+      busyReason: null,
     });
   });
 
@@ -58,6 +61,40 @@ describe('sessionReducer', () => {
     const live = at('live', { memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
     const ended = sessionReducer(live, { type: 'dropped' });
     expect(ended).toMatchObject({ phase: 'ended', memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
+  });
+
+  describe('busy (a 429 from the token route, D66)', () => {
+    it.each(['visitor', 'site'] as const)('keeps the reason (%s) from connecting', (reason) => {
+      expect(sessionReducer(at('connecting'), { type: 'busy', reason })).toEqual({
+        ...initialSession,
+        phase: 'busy',
+        busyReason: reason,
+      });
+    });
+
+    it.each(['idle', 'waiting', 'live', 'ended', 'offline'] as Phase[])('a late 429 while %s changes nothing', (phase) => {
+      const state = at(phase);
+      expect(sessionReducer(state, { type: 'busy', reason: 'site' })).toBe(state);
+    });
+
+    it('Connect from busy starts a fresh session with no reason', () => {
+      const busy = at('busy', { busyReason: 'visitor' });
+      expect(sessionReducer(busy, { type: 'connect' })).toEqual({ ...initialSession, phase: 'connecting' });
+    });
+
+    it('Leave from busy returns to the initial state', () => {
+      expect(sessionReducer(at('busy', { busyReason: 'site' }), { type: 'leave' })).toBe(initialSession);
+    });
+
+    it('is not in a room: bodies, mic and audio answers change nothing', () => {
+      expect(inRoom('busy')).toBe(false);
+      const state = at('busy', { busyReason: 'site' });
+      expect(sessionReducer(state, { type: 'memory', body: memoryBody })).toBe(state);
+      expect(sessionReducer(state, { type: 'metrics', body: metricsFull })).toBe(state);
+      expect(sessionReducer(state, { type: 'line', line: line('s1', 'Hi') })).toBe(state);
+      expect(sessionReducer(state, { type: 'mic', on: true })).toBe(state);
+      expect(sessionReducer(state, { type: 'audio', blocked: true })).toBe(state);
+    });
   });
 
   it.each(PHASES)('Leave from %s returns to the initial state', (phase) => {
@@ -110,9 +147,10 @@ describe('sessionReducer', () => {
   });
 
   describe('the microphone', () => {
-    it.each(['connecting', 'waiting', 'live'] as Phase[])('follows setMicrophoneEnabled while %s', (phase) => {
-      const on = sessionReducer(at(phase), { type: 'mic', on: true });
-      expect(on).toMatchObject({ phase, micOn: true, micBlocked: false });
+    // D65: the mic is asked for only once the agent has joined, so only a live session takes its answer.
+    it('follows setMicrophoneEnabled while live', () => {
+      const on = sessionReducer(at('live'), { type: 'mic', on: true });
+      expect(on).toMatchObject({ phase: 'live', micOn: true, micBlocked: false });
       expect(sessionReducer(on, { type: 'mic', on: false }).micOn).toBe(false);
     });
 
@@ -122,11 +160,14 @@ describe('sessionReducer', () => {
       expect(sessionReducer(blocked, { type: 'mic', on: true })).toMatchObject({ micOn: true, micBlocked: false });
     });
 
-    it.each(['idle', 'ended', 'offline'] as Phase[])('a late mic answer while %s changes nothing', (phase) => {
+    it.each(['idle', 'connecting', 'waiting', 'busy', 'ended', 'offline'] as Phase[])(
+      'a mic answer while %s changes nothing',
+      (phase) => {
       const state = at(phase);
       expect(sessionReducer(state, { type: 'mic', on: true })).toBe(state);
       expect(sessionReducer(state, { type: 'micBlocked' })).toBe(state);
-    });
+      }
+    );
   });
 
   it('tracks blocked playback while in a room, and ignores it after', () => {

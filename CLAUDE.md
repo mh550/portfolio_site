@@ -29,7 +29,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
 | `/talk` | Voice concierge (D44: chrome, sitemap; on the Navbar, D60; the VoiceWidget on every other chrome page links here, D61, and is not shown on `/talk`): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
-| `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
+| `/api/concierge/token` | POST `{visitor_id}` (UUID v4), checked in order: 403 `{error:'forbidden'}` unless the Origin is the site (`profile.siteUrl` or `https://mherron.dev`, its custom domain), this deployment's own Vercel host (`VERCEL_URL`/`VERCEL_BRANCH_URL`, D74) or (dev only) localhost (`origin.ts`); 503 `{offline:true}` without the three `LIVEKIT_*` env vars; 400 on a bad body; 503 if `listRooms` fails (`rooms.ts`); 429 `{error:'busy', reason:'visitor'\|'site'}` when this address (HMAC bucket of `x-forwarded-for`) has a live room or `CONCIERGE_MAX_ROOMS` (default 2) are live (`limits.ts`); else a 10-minute LiveKit token for room `concierge-<addr10>-<12 hex>` (D73) that dispatches agent `concierge` (`route.ts`, plans `docs/plans/2026-10-20-VC1-token-route.md`, `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`) |
 | `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
 ## Commands
@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1012 tests, 76 suites after VC4-06)
+npm test             # Jest unit/integration tests (1115 tests, 81 suites after VC5-03)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -93,8 +93,8 @@ Single source of truth for all page content — no content is hardcoded in compo
   `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`;
   also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
   Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
-  phases (Jest mocks: see Testing)
-- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`
+  phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
+- `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
@@ -122,7 +122,9 @@ anything else decorative with Tailwind's `print:hidden`; `src/__tests__/lib/prin
 - Canvas mocked inline in `HeroSection.test.tsx` with `HTMLCanvasElement.prototype.getContext = jest.fn(() => null)`
 - LiveKit: `moduleNameMapper` maps `^livekit-client$` → `src/__mocks__/livekit-client.ts` (`MockRoom.setup`, `pushText`,
   `addAgent`, `restart`) and `^@livekit/components-react$` → `src/__mocks__/livekit-components-react.tsx`; no test
-  opens a connection. Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
+  opens a connection. The token route's 200 and 429 cases are in `concierge-token-route-limits.test.ts`, which mocks
+  `@/lib/concierge/rooms` with a factory (`mockResolvedValue([])` by default); `concierge-token-route.test.ts` mocks nothing (D42, D69).
+  Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `next/navigation` mocked in `Navbar.test.tsx` with `jest.mock('next/navigation', () => ({ usePathname: () => '/' }))`
 
 ## Design System
@@ -145,6 +147,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
   decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency. `livekit-client`,
   `@livekit/components-react` and `livekit-server-sdk` are approved at exact pins (D41); keep `LIVEKIT_*` server-only.
+  `server-only` is approved at `0.0.1` exact (D67): `env.ts` and `rooms.ts` import it, so a Client Component that
+  pulls either in fails `next build` (next/jest maps it to an empty mock).
 - Content lives in `src/lib/data/*.ts` (projects, experience, skills, profile, approach, competencies); components
   render it. Reuse `ScrollReveal`, `ProjectCard`, `MetricStrip`, `MediaGallery`, `CodeBlock` and the diagrams in
   `src/components/projects/diagrams/` rather than re-implementing them.
