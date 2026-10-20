@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { AccessToken, RoomAgentDispatch, RoomConfiguration } from 'livekit-server-sdk';
+import { conciergeEnv } from '@/lib/concierge/env';
 import { isUuidV4 } from '@/lib/concierge/visitorId';
 
 export const runtime = 'nodejs';
@@ -28,12 +29,9 @@ async function readVisitorId(request: Request): Promise<string | null> {
 // Plain Response (not NextResponse) so the Jest node test can call POST() directly.
 export async function POST(request: Request) {
   // Env is read per request: offline (503) is decided before the body is touched.
-  const url = process.env.LIVEKIT_URL;
-  const apiKey = process.env.LIVEKIT_API_KEY;
-  const apiSecret = process.env.LIVEKIT_API_SECRET;
-  if (!url?.startsWith('wss://') || !apiKey || !apiSecret) {
-    return reply({ offline: true }, 503);
-  }
+  const env = conciergeEnv();
+  if (!env) return reply({ offline: true }, 503);
+  const { url, apiKey, apiSecret } = env;
 
   const visitorId = await readVisitorId(request);
   if (!visitorId) return reply({ error: 'bad_request' }, 400);

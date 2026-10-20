@@ -101,6 +101,20 @@ describe('TalkSession: the token route', () => {
     expect(MockRoom.instances).toHaveLength(0);
   });
 
+  it('when the server says LiveKit is not configured, goes offline with no request, Room or visitor id', async () => {
+    render(<TalkSession configured={false} />);
+    await connect();
+    expectOffline();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(MockRoom.instances).toHaveLength(0);
+    expect(localStorage.getItem(VISITOR_ID_KEY)).toBeNull();
+    expect(screen.getByRole('button', { name: talkPage.labels.connect })).toBeEnabled();
+    // Pressing Connect again stays offline.
+    await connect();
+    expectOffline();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('shows the offline line on any other non-OK status', async () => {
     fetchMock.mockResolvedValue(reply(500, { error: 'server' }));
     render(<TalkSession />);

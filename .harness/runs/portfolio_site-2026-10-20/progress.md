@@ -14,6 +14,14 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 04:10 · VC2-06 · passes
+
+- **Changed:** the verifier failed step 2 (offline Connect logged Chromium's "Failed to load resource … 503" console error). Fixed test-first, recorded as **D46** *default*. New `src/lib/concierge/env.ts` `conciergeEnv()` is the one LiveKit env check, used by the token route (unchanged behaviour, 503 without env) and by `/talk`'s page, which passes `TalkSession configured={…}`. Without the env, Connect goes offline at once: no fetch, no LiveKit import, no visitor id stored. Tests 933 → 942, suites 72 → 73 (`lib/concierge-env.test.ts`, plus new cases in `TalkSession.test.tsx` and `pages/talk.test.tsx`). Also updated: the plan (§ What Michael will see and the state table), review-guide morning step 2 (the redeploy also rebuilds `/talk`), and CLAUDE.md.
+- **Verified:** I retook the captures (Sonnet subagent, `vc2-shots.mjs`, :7832, no env); the files are byte-identical at 39/51/41 KB. At 390×844 the h1 ends at 300 and Connect at 664; offline, the sentence ends at 700 and the link at 747. `scrollWidth` is 390 idle and offline. **0 console and 0 page errors in both states, no `/api` request.** My own spot check (`$HARNESS_SCRATCH/vc206-check.mjs`) agrees. Every Tab stop shows a 2 px `rgb(0, 212, 255)` outline at 390 and 1280. `check.sh` green; smoke exit 0. An Opus review found no Critical or Important issues; I fixed one Minor (the page test now clears localStorage).
+- **Next session must know:** `/talk` is prerendered, so `configured` is fixed at build. Adding the env on Vercel needs a redeploy, which Vercel needs for env changes anyway.
+- **Question for Michael:** D46: OK to skip the token request when the server has no LiveKit env? Undo: drop the prop (it defaults to `true`).
+- **Proposed (Minor, not done):** add `import 'server-only'` to `env.ts`. This needs the `server-only` package, a new dependency, so it needs your OK. Also assert in a test that `livekit-client` is never imported on an unconfigured Connect.
+
 ### 2026-10-20 03:40 · VC2-01 · passes
 
 - **Changed:** `docs/plans/2026-10-20-VC2-talk-page.md` 223 → 738 lines. VC2-05's commit (409bc23) had cut the plan from 595 to 148 lines. I restored § Layout, LiveKit calls, Jest, Contract types, Copy, Decisions, Tests per feature and Risks from 049f6a6, then corrected them to the code as built. Changes: the `import('livekit-client')` + `next/dynamic` RoomAudio calls, 5 room listeners incl. `Reconnected`, `isForgotten`, the measured fold numbers at 390, the copy now matching `concierge.ts`, `Room.setup`/`restart` in the mock, `utf8Bytes` rather than `TextEncoder`, fake timers with `fireEvent`. No code change; tests unchanged at 933/72.

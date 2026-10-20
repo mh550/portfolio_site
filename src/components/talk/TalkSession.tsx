@@ -104,8 +104,9 @@ const quiet = `${button} border border-white/20 text-white hover:border-white/40
 
 // The live half of /talk (plan docs/plans/2026-10-20-VC2-talk-page.md): Connect, the token route, one Room, the
 // agent's text streams into the panels, and the offline state. Nothing here runs before Connect is pressed, so the
-// server HTML and the first client render match.
-export default function TalkSession() {
+// server HTML and the first client render match. `configured` is false when the server has no LiveKit env (D46):
+// Connect then shows offline with no request, so the browser logs no 503.
+export default function TalkSession({ configured = true }: { configured?: boolean }) {
   const [state, dispatch] = useReducer(sessionReducer, initialSession);
   const sessionRef = useRef<Session | null>(null);
   // The same Room as sessionRef's, for RoomContext during render (a ref can't be read in render). Set and cleared
@@ -191,6 +192,7 @@ export default function TalkSession() {
       release(session);
       dispatch({ type: 'offline' });
     };
+    if (!configured) return goOffline();
 
     // LiveKit and the audio renderer load alongside the token request; a failed load reads as offline, like a failed
     // connect(), and once loaded RoomAudio's next/dynamic can't fail later.

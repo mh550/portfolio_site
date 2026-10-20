@@ -27,7 +27,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
-| `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
+| `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
 | `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
 
 ## Commands
@@ -36,7 +36,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (933 tests, 72 suites after VC2-07)
+npm test             # Jest unit/integration tests (942 tests, 73 suites after VC2-06)
 npm run test:watch   # watch mode
 ```
 
@@ -89,7 +89,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
   Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
   phases (Jest mocks: see Testing)
-- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`) and the visitor id (`visitorId.ts`), shared by the token route and `/talk`
+- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

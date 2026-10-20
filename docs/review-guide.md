@@ -86,7 +86,8 @@ The harness never runs this (build-only policy); every check it ran saw the offl
 per the agent repo's `MORNING.md` (`mh550/voice-concierge`).
 1. In the Vercel project settings → Environment Variables, add `LIVEKIT_URL`, `LIVEKIT_API_KEY` and
    `LIVEKIT_API_SECRET` for **Preview** and **Production**. They stay server-only: no `NEXT_PUBLIC_` prefix.
-2. Redeploy the VC2 (or VC3) preview so the route reads them. `/talk` → Connect should go Connecting → Waiting →
+2. Redeploy the VC2 (or VC3) preview so the route reads them and `/talk`, which is prerendered, is rebuilt knowing
+   they are set (D46: without them Connect goes offline without calling the route). `/talk` → Connect should go Connecting → Waiting →
    Connected within 10 s, and the browser asks for the microphone.
 3. Say your name and what you are working on. The transcript shows both sides, and "What it remembers" fills in
    with each fact, its channel and its source.

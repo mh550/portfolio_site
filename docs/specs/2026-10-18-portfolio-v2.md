@@ -175,6 +175,13 @@ don't redo it.
   effect, the server HTML and the first client render match, StrictMode cannot register the text-stream handlers
   twice, and a visitor who never presses Connect gets no id stored. `browserStorage()` rather than
   `window.localStorage`, because reading that property itself throws when the browser blocks site storage. (VC2-04.)
+- **D46** *default* `/talk`'s page reads the LiveKit env through `conciergeEnv()` (`src/lib/concierge/env.ts`, the
+  same check the token route makes) and passes TalkSession only `configured: boolean`. When it is false, Connect shows
+  "The concierge is offline right now" without POSTing to the token route, so the browser never logs Chromium's
+  "Failed to load resource … 503" console error, and no visitor id is stored. With the env set, Connect POSTs as
+  before and a 503 or failure still reads as offline. The page is prerendered, so the flag is fixed at build time:
+  adding the env needs a redeploy, which Vercel needs for env changes anyway. Reversible: drop the prop (it defaults
+  to `true`). (VC2-06.)
 
 ## Dependencies between milestones
 
