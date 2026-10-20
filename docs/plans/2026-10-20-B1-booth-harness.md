@@ -28,6 +28,7 @@ One line per file; "B1-0n" is the session that writes it.
 - `tests/test_run_one.py` (B1-03): `run_one.py` end to end against `fake_game.py`.
 - `tests/test_sweep.py` (B1-04): `sweep.py` end to end.
 - `tests/test_report.py` (B1-05): `report.py` on in-memory rows, plus the CLI's `no results yet`.
+- `tests/test_readme.py` (B1-06): README under 60 lines, names every shipped file, the four commands, no placeholders.
 
 Created at run time and git-ignored (`.gitignore`, B1-01): `results.jsonl`, `logs/`, `work/`, `__pycache__/`.
 
@@ -285,7 +286,43 @@ rm -rf public/b/mh_harness/results.jsonl public/b/mh_harness/logs public/b/mh_ha
 find public/b/mh_harness -name __pycache__ -exec rm -rf {} +; git status --short   # clean
 ```
 
-Evidence: (B1-06 fills this in.)
+Evidence (B1-06, 2026-10-20, Python 3.12, from a clean `mh_harness/`; `<cwd>` = `public/b/mh_harness`):
+
+```text
+$ python3 -m unittest discover -s tests
+Ran 96 tests in 20.714s
+OK                                                                   real 0m20.863s
+$ python3 sweep.py configs/round1.json; echo "exit=$?"
+refusing to start: config "base" field mcps[0] still has a placeholder: "<current set>"
+exit=2
+$ python3 sweep.py configs/round1.json --dry-run                    (exit 0)
+warning: config "base" field mcps[0] still has a placeholder: "<current set>"     (… 6 warnings)
+cmd: /usr/bin/python3 <cwd>/fake_game.py  cwd: <cwd>/work/base-0                  (… 6 cmd: lines)
+$ time python3 sweep.py configs/fake-round.json --parallel 4 --interval 1
+[base-0] 1s llm=1 tools=1                                           (… 8 status lines, all four runs)
+base-0: solved words=2 wall=2.04s                                   (… 4 end lines)
+name        words  wall_s  llm  out_tok  in_tok  tools  repeats  exits
+base            2    2.04    3      300    6000      3        0  solved:1
+base_ctl        2    2.04    3      300    6000      3        0  solved:1
+terse           2    2.04    3      300    6000      3        0  solved:1
+terse_trim      2    2.04    2      150    3000      2        0  solved:1
+noise
+  base vs base_ctl: 0.0 %
+prod projection (21 cities)                                         (… 4 lines)
+pick: base                                                          real 0m2.254s, exit=0
+$ python3 report.py --md
+| name | words | wall s | llm | out tok | in tok | tools | repeats | exits |
+|---|---|---|---|---|---|---|---|---|
+| base | 2 | 2.04 | 3 | 300 | 6000 | 3 | 0 | solved:1 |                    (… 3 more rows, noise, projection, pick)
+$ rm -rf results.jsonl logs work; python3 sweep.py configs/fake-round.json --parallel 2 --repeat 2; python3 report.py
+terse           2    2.02    3      300    6000      3        0  solved:2
+base            2    2.04    3      300    6000      3        0  solved:2       (base_ctl, terse_trim: solved:2 too)
+  base vs base_ctl: 0.0 %
+pick: terse
+$ python3 -W error -c "import ast,glob; …feature_version=(3,8)…"     exit 0 (ResourceWarnings only)
+```
+
+Without the `rm -rf` the repeat run shows `solved:3`: rows accumulate per round (D55).
 
 ## Review
 

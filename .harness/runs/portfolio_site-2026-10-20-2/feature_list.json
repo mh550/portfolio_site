@@ -95,7 +95,7 @@
         "`rm -rf public/b/mh_harness/results.jsonl public/b/mh_harness/logs public/b/mh_harness/work` and `find public/b/mh_harness -name __pycache__ -exec rm -rf {} +` leave `git status --short` clean apart from the session's own commits; `npx jest src/__tests__/lib/content-guard.test.ts` is green",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B1-07",

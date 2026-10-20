@@ -10,6 +10,21 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 11:20 · B1-06 · passes
+
+- **Landed:** `public/b/mh_harness/README.md` (44 lines: one line per file, the four commands, fake-round "try it",
+  Windows `python`, output next to the scripts) and `tests/test_readme.py` (5 tests: < 60 lines, names every shipped
+  file, the four commands, no `<`/TODO/`[X]`). Python 91 → 96 tests (20.9 s), Jest unchanged. Plan: Fake round
+  evidence (39 lines) and the new test file in Files.
+- **Verified from a clean mh_harness/:** round1 → refusal naming `base`/`mcps[0]`, exit 2; `--dry-run` → 6 warnings +
+  6 `cmd:` lines, exit 0; fake round `--parallel 4 --interval 1` → 8 status lines, 4× `solved:1`, `pick: base`, 2.25 s;
+  `report.py --md` table; `--parallel 2 --repeat 2` after `rm -rf` → 4× `solved:2`, `base vs base_ctl: 0.0 %`; every
+  .py has `from __future__ import annotations` first; 3.8 grep empty; ast exit 0; content guard 20/20; smoke PASS exit 0;
+  `.harness/check.sh` `lint ok · jest ok · build ok`; cleanup leaves only this commit's files.
+- **Proposed change:** step 3 run straight after step 2 (as the plan's command block chains them) shows `solved:3`,
+  since rows accumulate per round (D55); the step should start with `rm -rf results.jsonl logs work`. The step 4 ast
+  one-liner prints ResourceWarnings under `-W error` (still exit 0); `open(f).read()` → `pathlib.Path(f).read_text()`.
+
 ### 2026-10-20 10:55 · B1-05 · passes
 
 - **Landed:** `public/b/mh_harness/report.py` (`load_rows`, `summarise`, `render`, CLI `[--round] [--prod-cities 21] [--md]`,
