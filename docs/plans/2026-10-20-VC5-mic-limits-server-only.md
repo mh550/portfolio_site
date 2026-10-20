@@ -34,6 +34,17 @@ agent within `AGENT_JOIN_TIMEOUT_MS`) still pops the browser's microphone prompt
 - The offline paths (`configured={false}`, 503, a 429, `connect()` rejecting, the 10 s timer) never reach
   `agentArrived`, so they never request the mic.
 
+**As built (VC5-02).** `agentArrived` is exactly the four lines above (clear the timer, keep the identity,
+`agentJoined`, `setMic(session, true)`); the post-connect continuation runs `onPlayback()`, `unlockAudio(room)`,
+then returns if `agentIdentity` is set or calls `agentArrived` for an agent already present, else `connected` and
+the 10 s timer. The toggle renders under `phase === 'live'`. Tests: `TalkSession-live.test.tsx` § the microphone (no
+call after `connect()` alone, `[[true]]` after `addAgent`; `[[true]]` for an agent already present; one `[[true]]`
+per Room across Leave and Connect; a second agent and a full reconnect with the agent re-announced add no call; no
+toggle while Waiting, one once live) and `TalkSession.test.tsx` (no Room and no call with `configured={false}`; no
+call on a 503, a rejected `connect()` or the 10 s offline path; no call at 3 000 ms and `[[true]]` once the agent
+joins then, under fake timers). Two helpers that add the agent inside a synchronous `act` (`liveRoom`, the 3 000 ms
+test) became `await act(async …)`: the mic's answer now settles after the arrival and must render inside `act`.
+
 ## Route behaviour
 
 `src/app/api/concierge/token/route.ts` (VC5-04), `POST` only. Checks in this order; the first that applies answers.

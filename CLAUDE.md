@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1012 tests, 76 suites after VC4-06)
+npm test             # Jest unit/integration tests (1017 tests, 76 suites after VC5-02)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```

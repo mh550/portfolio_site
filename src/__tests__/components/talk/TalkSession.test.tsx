@@ -39,6 +39,8 @@ afterEach(() => {
 });
 
 const status = () => screen.getByRole('status');
+// Every setMicrophoneEnabled call on every Room this test made.
+const micCalls = () => MockRoom.instances.flatMap((room) => room.localParticipant.setMicrophoneEnabled.mock.calls);
 const sentId = (call: number) => JSON.parse(fetchMock.mock.calls[call][1].body as string).visitor_id;
 // Drains the fetch → res.json() → connect() promise chain inside one act scope, so every update it makes renders.
 const flush = () =>
@@ -69,7 +71,9 @@ describe('TalkSession: before Connect', () => {
     expect(screen.getByRole('button', { name: 'Connect' })).toBeInTheDocument();
     expect(screen.queryByText(talkPage.offlineMessage)).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
+    // No Room, so nothing could ask for the microphone (VC5-02).
     expect(MockRoom.instances).toHaveLength(0);
+    expect(micCalls()).toEqual([]);
     expect(localStorage.getItem(VISITOR_ID_KEY)).toBeNull();
   });
 
@@ -99,6 +103,7 @@ describe('TalkSession: the token route', () => {
     await connect();
     expectOffline();
     expect(MockRoom.instances).toHaveLength(0);
+    expect(micCalls()).toEqual([]);
   });
 
   it('when the server says LiveKit is not configured, goes offline with no request, Room or visitor id', async () => {
@@ -106,7 +111,9 @@ describe('TalkSession: the token route', () => {
     await connect();
     expectOffline();
     expect(fetchMock).not.toHaveBeenCalled();
+    // No Room, so nothing could ask for the microphone (VC5-02).
     expect(MockRoom.instances).toHaveLength(0);
+    expect(micCalls()).toEqual([]);
     expect(localStorage.getItem(VISITOR_ID_KEY)).toBeNull();
     expect(screen.getByRole('button', { name: talkPage.labels.connect })).toBeEnabled();
     // Pressing Connect again stays offline.
@@ -231,6 +238,7 @@ describe('TalkSession: the room', () => {
     const room = lastRoom();
     expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
     expect(room.disconnect).toHaveBeenCalledTimes(1);
+    expect(micCalls()).toEqual([]);
   });
 
   it('is live at once when the agent is already in the room', async () => {
@@ -385,6 +393,8 @@ describe('TalkSession: waiting for the agent', () => {
     expectOffline();
     expect(room.disconnect).toHaveBeenCalledTimes(1);
     expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    // The agent never came, so the browser never asked for the microphone (VC5-02).
+    expect(micCalls()).toEqual([]);
   });
 
   it('an agent joining at 3 000 ms cancels the timeout and the session is live', async () => {
@@ -393,9 +403,12 @@ describe('TalkSession: waiting for the agent', () => {
     const room = lastRoom();
     expect(status()).toHaveTextContent(talkPage.status.waiting);
     act(() => jest.advanceTimersByTime(3_000));
-    act(() => {
+    expect(micCalls()).toEqual([]);
+    // Async: the arrival asks for the mic, and that answer renders too.
+    await act(async () => {
       addAgent(room, 'agent-1');
     });
+    expect(micCalls()).toEqual([[true]]);
     act(() => jest.advanceTimersByTime(7_000));
     expect(status()).toHaveTextContent(talkPage.status.live);
     act(() => jest.advanceTimersByTime(60_000));
@@ -444,7 +457,8 @@ describe('TalkSession: the text streams feed the panels', () => {
     render(<TalkSession />);
     await connect();
     const room = lastRoom();
-    act(() => {
+    // Async: the agent's arrival asks for the mic, and its answer must render inside act too.
+    await act(async () => {
       addAgent(room, 'agent-1');
     });
     return room;

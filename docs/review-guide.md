@@ -105,7 +105,8 @@ per the agent repo's `MORNING.md` (`mh550/voice-concierge`).
    `LIVEKIT_API_SECRET` for **Preview** and **Production**. They stay server-only: no `NEXT_PUBLIC_` prefix.
 2. Redeploy the VC2 (or VC3) preview so the route reads them and `/talk`, which is prerendered, is rebuilt knowing
    they are set (D46: without them Connect goes offline without calling the route). `/talk` → Connect should go Connecting → Waiting →
-   Connected within 10 s, and the browser asks for the microphone.
+   Connected within 10 s, and the browser asks for the microphone once the concierge has joined (not before: since
+   VC5-02 nothing asks for it while Waiting, and the Mute button appears only once Connected, D65).
 3. Say your name and what you are working on. The transcript shows both sides, and "What it remembers" fills in
    with each fact, its channel and its source.
 4. **Leave**, then **Connect** again: expect the greeting by name and "visit 2" in the memory panel.
@@ -116,8 +117,8 @@ per the agent repo's `MORNING.md` (`mh550/voice-concierge`).
    the turn); "Prompt tokens from cache" above 0 % from the second turn on; "Memory preload at connect" shown once.
    A null field shows "–": that's the agent not reporting it, not a page bug.
 
-If something fails: the page is offline (no agent joined) → check that the worker is running and not killed; a
-second microphone prompt or no sound → press "Turn on sound"; anything else, note the step and the console.
+If something fails: the page is offline (no agent joined) → check that the worker is running and not killed (no
+microphone prompt is expected then); a second microphone prompt or no sound → press "Turn on sound"; anything else, note the step and the console.
 
 **Undo:** remove the three env vars in Vercel and redeploy: the token route answers 503 and `/talk` shows the
 offline state again. Or leave the env and turn on the worker's kill switch (agent repo `MORNING.md`): the worker

@@ -132,7 +132,7 @@
         "docs/plans/2026-10-20-VC5-mic-limits-server-only.md § Mic timing matches the code and docs/review-guide.md's morning check step 2 says the browser asks for the microphone once the concierge has joined (not before).",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-03",

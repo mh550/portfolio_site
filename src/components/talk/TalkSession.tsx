@@ -245,10 +245,13 @@ export default function TalkSession({ configured = true }: { configured?: boolea
     };
     room.registerTextStreamHandler(TOPIC.transcription, onTranscription);
 
+    // The one place the mic is asked for (D65): only once the agent is there, so an offline Connect never prompts.
+    // Once per session: both callers skip it when agentIdentity is set, and a reconnect replays no arrival.
     const agentArrived = (identity: string) => {
       clearTimeout(session.timer);
       session.agentIdentity = identity;
       send({ type: 'agentJoined' });
+      setMic(session, true);
     };
     const onParticipantConnected = (p: RemoteParticipant) => {
       if (session.alive && !session.agentIdentity && isAgent(p)) agentArrived(p.identity);
@@ -296,7 +299,6 @@ export default function TalkSession({ configured = true }: { configured?: boolea
     // No extra tap: the morning check is "Connect, say your name".
     onPlayback();
     unlockAudio(room);
-    setMic(session, true);
     if (session.agentIdentity) return;
     const present = [...room.remoteParticipants.values()].find(isAgent);
     if (present) return agentArrived(present.identity);
@@ -397,7 +399,7 @@ export default function TalkSession({ configured = true }: { configured?: boolea
           >
             {inSession ? talkPage.labels.leave : talkPage.labels.connect}
           </button>
-          {(phase === 'waiting' || phase === 'live') && (
+          {phase === 'live' && (
             <button type="button" className={quiet} onClick={toggleMic}>
               {micOn ? talkPage.labels.micOn : talkPage.labels.micOff}
             </button>

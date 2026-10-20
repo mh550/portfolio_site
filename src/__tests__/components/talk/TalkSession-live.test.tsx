@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import TalkSession from '@/components/talk/TalkSession';
-import { MockRoom, addAgent, lastRoom, pushText, resetRooms } from '@/__mocks__/livekit-client';
+import { MockRoom, ParticipantKind, addAgent, lastRoom, pushText, resetRooms, restart } from '@/__mocks__/livekit-client';
 import { audioRenderer } from '@/__mocks__/livekit-components-react';
 import { talkPage } from '@/lib/data';
 import { memoryJson, metricsFullJson } from '@/__tests__/fixtures/concierge';
@@ -26,7 +26,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-// Drains the fetch → res.json() → connect() → setMicrophoneEnabled() chain inside one act scope.
+// Drains the fetch → res.json() → connect() chain (and the agent's setMicrophoneEnabled()) inside one act scope.
 const flush = () =>
   act(async () => {
     for (let i = 0; i < 20; i++) await Promise.resolve();
@@ -51,7 +51,84 @@ async function goLive(user: UserEvent = userEvent.setup()) {
 }
 
 describe('TalkSession live: the microphone', () => {
-  it('turns the mic on once connected, and the toggle mutes and unmutes it', async () => {
+  // VC5-02 (D65): nothing asks for the microphone until the agent has joined, so an offline Connect never prompts.
+  it('asks for the mic only once the agent joins: none after connect() alone, one [true] after addAgent', async () => {
+    const user = userEvent.setup();
+    render(<TalkSession />);
+    await user.click(button(labels.connect));
+    await flush();
+    const room = lastRoom();
+    const mic = room.localParticipant.setMicrophoneEnabled;
+    expect(room.connect).toHaveBeenCalledTimes(1);
+    expect(status()).toHaveTextContent(copy.waiting);
+    expect(mic).not.toHaveBeenCalled();
+    await act(async () => {
+      addAgent(room, 'agent-1');
+    });
+    await flush();
+    expect(mic.mock.calls).toEqual([[true]]);
+  });
+
+  it('asks once for an agent already in the room when connect() resolves', async () => {
+    MockRoom.setup = (room) => room.remoteParticipants.set('agent-1', { identity: 'agent-1', kind: ParticipantKind.AGENT });
+    render(<TalkSession />);
+    await userEvent.setup().click(button(labels.connect));
+    await flush();
+    expect(status()).toHaveTextContent(copy.live);
+    expect(lastRoom().localParticipant.setMicrophoneEnabled.mock.calls).toEqual([[true]]);
+  });
+
+  it('a second agent joining, or a reconnect, does not ask again', async () => {
+    const { room } = await goLive();
+    await act(async () => {
+      addAgent(room, 'agent-2');
+    });
+    await act(async () => {
+      restart(room);
+    });
+    // A full reconnect announces the agent again (ParticipantConnected) before Reconnected.
+    await act(async () => {
+      room.state = 'connected';
+      addAgent(room, 'agent-1');
+      room.emit('reconnected');
+    });
+    await flush();
+    expect(status()).toHaveTextContent(copy.live);
+    expect(room.localParticipant.setMicrophoneEnabled.mock.calls).toEqual([[true]]);
+  });
+
+  it('Leave, Connect, agent again: one [true] on each Room', async () => {
+    const { room: first, user } = await goLive();
+    await user.click(button(labels.leave));
+    await user.click(button(labels.connect));
+    await flush();
+    const second = lastRoom();
+    expect(second).not.toBe(first);
+    expect(second.localParticipant.setMicrophoneEnabled).not.toHaveBeenCalled();
+    await act(async () => {
+      addAgent(second, 'agent-1');
+    });
+    await flush();
+    expect(first.localParticipant.setMicrophoneEnabled.mock.calls).toEqual([[true]]);
+    expect(second.localParticipant.setMicrophoneEnabled.mock.calls).toEqual([[true]]);
+  });
+
+  it('the toggle shows only once the agent has joined (D65), not while waiting', async () => {
+    const user = userEvent.setup();
+    render(<TalkSession />);
+    await user.click(button(labels.connect));
+    await flush();
+    expect(status()).toHaveTextContent(copy.waiting);
+    expect(screen.queryByRole('button', { name: labels.micOn })).toBeNull();
+    expect(screen.queryByRole('button', { name: labels.micOff })).toBeNull();
+    await act(async () => {
+      addAgent(lastRoom(), 'agent-1');
+    });
+    await flush();
+    expect(screen.getAllByRole('button', { name: new RegExp(`^(${labels.micOn}|${labels.micOff})$`) })).toHaveLength(1);
+  });
+
+  it('turns the mic on once the agent joins, and the toggle mutes and unmutes it', async () => {
     const { room, user } = await goLive();
     const mic = room.localParticipant.setMicrophoneEnabled;
     expect(mic.mock.calls).toEqual([[true]]);

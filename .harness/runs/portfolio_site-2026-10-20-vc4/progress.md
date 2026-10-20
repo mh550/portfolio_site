@@ -11,6 +11,14 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 14:55 · VC5-02 · passes
+
+- `TalkSession.tsx`: `setMic(session, true)` moved into `agentArrived` (one line, :254; both arrivals go through it, guarded by `agentIdentity`), and the mic toggle renders only when `phase === 'live'` (D65). Tests 1012 → 1017 (76 suites): five new mic tests in `TalkSession-live.test.tsx` (none after connect alone, `[[true]]` after addAgent, agent already present, one per Room across Leave/Connect, a second agent and a reconnect add nothing, no toggle while waiting) plus `micCalls()` = [] on configured=false, 503, rejected connect() and the 10 s timer in `TalkSession.test.tsx`.
+- Two helpers that added the agent in a sync `act` (`liveRoom`, the 3 000 ms test) became `await act(async …)`: the mic's answer now lands after the arrival, and without this React logged an act warning.
+- Docs: plan § Mic timing has an "As built (VC5-02)" note; review guide morning step 2 says the browser asks for the mic once the concierge has joined; the VC2 plan's state-table rows and its VC2-05 note are marked superseded by D65; CLAUDE.md count is now 1017.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS). The Opus reviewer found no Critical or Important issues. I applied its Minor test gaps.
+- Next session (VC5-03) / VC5-07 Minors not taken: the reducer still accepts `mic`/`micBlocked` in connecting/waiting, which can no longer happen (trim it in VC5-07's simplification pass). While the browser's prompt is open the toggle reads "Unmute microphone" but a press mutes (`micWanted` is true); this is old behaviour that every session now hits. Consider disabling the toggle until the first answer.
+
 ### 2026-10-20 14:40 · VC5-01 · passes
 
 - New plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (Mic timing, Route behaviour table 403→503→400→503→429 visitor→429 site→200, Origin rules with the preview regex checked against PR #16's host, Address hash, Modules, /talk busy states, server-only, Tests per feature, staged Live check, CLAUDE.md draft, empty What Michael will see/Review, Decisions). D63–D70 appended to `docs/specs/2026-10-19-voice-concierge-page.md` § 7. No code; tests unchanged at 1012/76.

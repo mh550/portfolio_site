@@ -105,8 +105,8 @@ interface SessionState {
 | connecting | 200 `{url, token}` | connecting | `new Room()`; register the three handlers; add room listeners; `await room.connect(url, token)` |
 | connecting | `connect()` rejects | offline | teardown (unregister, off, `disconnect()`) |
 | connecting | `connect()` resolves, an agent is in `room.remoteParticipants` | live | `setMicrophoneEnabled(true)`; `startAudio()` if `!canPlaybackAudio` |
-| connecting | `connect()` resolves, no agent | waiting | start the 10 000 ms timer; `setMicrophoneEnabled(true)` |
-| waiting | `ParticipantConnected` with `kind === ParticipantKind.AGENT` | live | clear the timer; `agentIdentity = p.identity`; `startAudio()` if needed |
+| connecting | `connect()` resolves, no agent | waiting | start the 10 000 ms timer; `setMicrophoneEnabled(true)` (superseded by D65, VC5-02: the mic is asked for only when the agent joins) |
+| waiting | `ParticipantConnected` with `kind === ParticipantKind.AGENT` | live | clear the timer; `agentIdentity = p.identity`; `startAudio()` if needed; since D65 (VC5-02) `setMicrophoneEnabled(true)` here, and in the row above only for an agent already present |
 | waiting | timer fires | offline | teardown |
 | live | `setMicrophoneEnabled` rejects | live | `micBlocked = true` ("Microphone blocked. You can still type.") |
 | live | `ParticipantDisconnected` for `agentIdentity` (checked a microtask later: not while `room.state` is `Reconnecting`, since a full reconnect unwinds every participant first, VC2-04 review), or `RoomEvent.Disconnected` | ended | teardown; transcript, memory and latency stay visible |
@@ -138,7 +138,8 @@ Rules the reducer and TalkSession keep:
   empty `concierge.memory` and ends the session (§4), which lands in `ended` with the panel already empty.
 - **`concierge.get_memory` is not called**: the agent sends `concierge.memory` at session start (§4).
 - **As built (VC2-05):** the mic toggle shows in `waiting` and `live` (the room is connected in both; the mic is
-  already on). Its label says what a press does (`Mute microphone` / `Unmute microphone`), with no `aria-pressed`,
+  already on). *Superseded by D65 (VC5-02): the toggle shows only in `live`, and the mic is asked for when the agent
+  joins.* Its label says what a press does (`Mute microphone` / `Unmute microphone`), with no `aria-pressed`,
   so the name and the state never contradict. `micBlocked` replaces the live status line; a later press that works
   clears it. Overlapping presses each flip what was last asked for (`session.micWanted`), and only the newest
   call's answer (`session.micSeq`) reaches the label. `RoomEvent.AudioPlaybackStatusChanged` (and a check once
