@@ -251,3 +251,11 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   `logs/<name>-<K>.log` before starting it, so no status line shows an earlier round's log. Like `run_one.py`, it handles SIGINT/SIGTERM/SIGHUP with a flag checked every 0.1 s tick
   (no signal lands inside `Popen`), SIGTERMs every live `run_one.py` at once and then `kill_tree`s each, so a
   6-run Ctrl-C takes about one grace period, not six. Alternative: let duplicates overwrite each other's logs.
+- **D55** *default* A round's rows accumulate: `report.py` (and the table `sweep.py` prints) takes every
+  `results.jsonl` row whose `round` is the configs stem, so re-running `round1.json` adds repeats to the earlier
+  sweep's (`solved:3` after a 1-repeat and a 2-repeat sweep). To start a round fresh, copy the configs file under a
+  new name (`round2.json`) or delete `results.jsonl`. `report.py` imports `run_one.harness_home()` for the
+  `MH_HARNESS_HOME` rule (D46, D52), so the two never disagree. Null medians print `-`, a projection without
+  `cities` or LLM calls prints `<name>: n/a`, a control whose base has no wall time prints `n/a`, a round without
+  pairs prints `no control_of pairs`. Alternative: the sweep's table shows only its own runs (rejected: it would
+  disagree with `report.py` on the same round).

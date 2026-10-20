@@ -79,7 +79,7 @@
         "`python3 public/b/mh_harness/sweep.py public/b/mh_harness/configs/fake-round.json --parallel 4 --interval 1` ends by printing the report table with four rows and `pick: base` (or whichever solved row has the lowest wall s), and `python3 public/b/mh_harness/report.py --md` prints the same round as a markdown table",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B1-06",

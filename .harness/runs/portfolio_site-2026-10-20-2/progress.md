@@ -10,6 +10,23 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 10:55 · B1-05 · passes
+
+- **Landed:** `public/b/mh_harness/report.py` (`load_rows`, `summarise`, `render`, CLI `[--round] [--prod-cities 21] [--md]`,
+  `no results yet`, exit 0) and `tests/test_report.py` (22 tests); `sweep._print_report` now prints the report (a report
+  crash is one `report failed: …` stderr line, exit still 0; Ctrl-C during it → 130). Python 68 → 91 tests (21 s), Jest
+  643 → 643. Spec **D55**: a round's rows accumulate across sweeps (re-run = more repeats), report imports
+  `run_one.harness_home`, `-`/`n/a` rendering. Plan's import line updated.
+- **Opus review** (9 findings): 1–8 fixed with tests (hand-edited `config`/`control_of`, NaN/Infinity, BOM, unreadable path,
+  `|` in md cells, report crash, late Ctrl-C). Mutations (no wall tiebreak, threshold 30, pick ignores solved, first round
+  default, mean, projection, narrow except) each fail their tests.
+- **Verified:** fake round `--parallel 4 --interval 1` → status lines, 4-row table, `pick: base` (an earlier run printed
+  `pick: base_ctl`, the fastest solved row), exit 0, 2.4 s; `report.py --md` → `| name | words | wall s |…`; ast 3.8 ok;
+  `.harness/check.sh` `lint ok · jest ok · build ok`; smoke 38 PASS, exit 0; run files removed, tree clean.
+- **Question for Michael:** D55: should re-running `round1.json` add to that round's repeats (current behaviour) or start fresh?
+- **Proposed change:** `run_one._append_row` should add a `\n` first when the file ends mid-line (a cut-short append now
+  swallows the next good row); it's old code, not in this feature.
+
 ### 2026-10-20 10:20 · B1-04 · passes
 
 - **Landed:** `public/b/mh_harness/sweep.py` (`find_placeholders`, `find_alarm`, `main`; SIGINT/SIGTERM/SIGHUP set a flag

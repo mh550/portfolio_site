@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import IO, Any, List, Optional, Tuple
 
 import adapter
+import report
 import run_one
 
 RUN_ONE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_one.py")
@@ -184,9 +185,13 @@ def _catch_interrupts() -> None:
             signal.signal(getattr(signal, sig_name), _on_signal)
 
 
-def _print_report(home: Path, round_name: str, runs_ended: int) -> None:
-    # B1-05 replaces this with report.render(report.summarise(report.load_rows(home / "results.jsonl", round_name))).
-    print("report: {} runs ended".format(runs_ended), flush=True)
+def _print_report(home: Path, round_name: str) -> None:
+    try:
+        text = report.render(report.summarise(report.load_rows(home / "results.jsonl", round_name)))
+    except Exception as exc:  # every row is saved already: the round still succeeded
+        print("report failed: {!r}; run report.py --round {}".format(exc, round_name), file=sys.stderr, flush=True)
+        return
+    print(text, flush=True)
 
 
 def _positive_int(text: str) -> int:
@@ -244,7 +249,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     _catch_interrupts()
     live: List[Run] = []
-    ended = 0
     last_status = time.monotonic()
     try:
         while queue or live:
@@ -257,7 +261,6 @@ def main(argv: Optional[List[str]] = None) -> int:
                 if run.proc.poll() is not None:
                     live.remove(run)
                     _finish(run)
-                    ended += 1
             if live and time.monotonic() - last_status >= args.interval:
                 last_status = time.monotonic()
                 for run in live:
@@ -273,8 +276,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     if _interrupted:  # Ctrl-C during the last tick: still an interrupted round, no report
         return 130
 
-    _print_report(home, round_name, ended)
-    return 0
+    _print_report(home, round_name)
+    return 130 if _interrupted else 0
 
 
 if __name__ == "__main__":

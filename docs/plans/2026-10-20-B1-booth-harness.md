@@ -33,7 +33,7 @@ Created at run time and git-ignored (`.gitignore`, B1-01): `results.jsonl`, `log
 
 ## Shared functions
 
-All in `run_one.py` (D42). `sweep.py` does `import run_one`; `report.py` imports nothing from the harness, and
+All in `run_one.py` (D42). `sweep.py` does `import run_one`; `report.py` imports only `run_one.harness_home` (D55), and
 `sweep.py` does `import report`. Each script's directory is on `sys.path` when it is run as a script, so plain
 imports work; each test file starts with `sys.path.insert(0, <parent of tests/>)`.
 

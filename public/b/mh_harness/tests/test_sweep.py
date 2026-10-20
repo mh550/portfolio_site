@@ -8,6 +8,8 @@ import subprocess
 import sys
 import time
 import unittest
+from pathlib import Path
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HARNESS_DIR = os.path.dirname(HERE)
@@ -58,7 +60,10 @@ class TestSweep(SweepCase):
         self.assertEqual(sorted(r["name"] for r in rows), ["c0", "c1", "c2", "c3"])
         self.assertEqual({r["round"] for r in rows}, {"round-t"})
         self.assertEqual({r["exit_reason"] for r in rows}, {"solved"})
-        self.assertIn("report: 4 runs ended", p.stdout)
+        report_lines = p.stdout.split("\nname ", 1)[1].splitlines()
+        table = [line.split()[0] for line in report_lines[1:report_lines.index("")]]
+        self.assertEqual(sorted(table), ["c0", "c1", "c2", "c3"], p.stdout)
+        self.assertRegex(p.stdout, r"\npick: c[0-3]\n$")
 
     def test_parallel_limit(self):
         path = self.configs([make_config("c{}".format(i), env={"FAKE_SLEEP_S": "1"}) for i in range(4)])
@@ -135,7 +140,7 @@ class TestSweep(SweepCase):
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertEqual(sorted(r["index"] for r in self.rows()), [0, 1])
         self.assertTrue(os.path.isdir(os.path.join(self.home, "work", "r-1")))
-        self.assertIn("report: 2 runs ended", p.stdout)
+        self.assertRegex(p.stdout, r"\nr +2 .* solved:2\n")
 
     def test_bad_configs_file_exits_2(self):
         for configs in ({"name": "x"}, [make_config("x"), make_config("x")], [{"mcps": []}]):
@@ -212,8 +217,18 @@ class TestSweep(SweepCase):
         for pid in pids:
             self.assertFalse(pid_alive(pid), "game {} still running".format(pid))
         self.assertEqual(self.rows(), [])
-        self.assertNotIn(b"report:", out)
+        self.assertNotIn(b"pick:", out)
 
+
+
+class TestPrintReport(unittest.TestCase):
+    def test_report_failure_is_one_stderr_line(self):
+        with mock.patch.object(sweep.report, "summarise", side_effect=TypeError("boom")), \
+                mock.patch("sys.stdout") as out, mock.patch("sys.stderr") as err:
+            sweep._print_report(Path("/nonexistent"), "r1")
+        written = "".join(call.args[0] for call in err.write.call_args_list)
+        self.assertIn("report failed: TypeError('boom'); run report.py --round r1", written)
+        out.write.assert_not_called()
 
 class TestFindPlaceholders(unittest.TestCase):
     def test_paths(self):
