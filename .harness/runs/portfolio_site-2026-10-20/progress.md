@@ -14,6 +14,39 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 verify VC3 · verify VC3
+
+All 5 features hold (26 steps). Note: spec decision ids D43-45 were renumbered (D43-D49) because /talk took them; content is recorded.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC3-01 | 1 | Read docs/notes/evidence-voice-concierge.md; grep Status/latency/1.8 | Source commit d3a9922, Status line quoted with 10-20 00:30 revision; 'Measured numers: none yet'; livekit-agents 1.8 maps onto 2.0; memory practices, mapping table with § refs present | yes |
+| VC3-01 | 2 | Read plan sections + projects.ts entry via tsx | Plan has entry draft; entry: 64-char title, ai/systems, featured, order 5, no metrics, Oct 2026, 5 method steps, 6 decisions, lessons [], iterations undefined, /talk demo first, GitHub repo link (gh says PUBLIC) | yes |
+| VC3-01 | 3 | Read plan § Diagram, /card link, Navbar, Tests that change | All four sections present (diagram, /card link, Navbar, tests) | yes |
+| VC3-01 | 4 | case-study-voice-concierge.test.ts digit rule; grep TODO/[X] in plan | Test green; 0 TODO/[X] hits | yes |
+| VC3-01 | 5 | /home/mh550/projects/agent-harness/lib/check.sh | check: green (cached for this tree); also ran full jest: 74 suites, 986 tests pass | yes |
+| VC3-02 | 1 | Read entry; ran case-study-voice-concierge.test.ts + data.test.ts | Pass (13-suite subset 313 tests); entry values as listed; order map asserted in data.test.ts | yes |
+| VC3-02 | 2 | Read docs/notes/voice-concierge-todo.md | Names metrics array, latency_report.py p50/p95, evidence note, opengraph Latin-glyph test | yes |
+| VC3-02 | 3 | npx jest opengraph-image, project-metadata, case-study-data, claims-on-linked-page, card, home, project-page-unchanged | All pass; getTopProjects order unchanged (orders 1,2,3 = agent-harness, linear, home-media) | yes |
+| VC3-02 | 4 | curl localhost:7832/projects/voice-concierge; grep; a11y-new-pages.test.tsx | HTTP 200; Key Decisions, Outcome, Links, Talk to my concierge, How it was built present; 5 method labels via test; a11y list line 28 has the slug | yes |
+| VC3-02 | 5 | grep D4x in v2 spec | Order decision recorded as default (D-number renumbered, since D43-45 were taken by /talk; noted in spec) - content holds | yes |
+| VC3-02 | 6 | check.sh + node .harness/smoke.mjs | Green; smoke PASS all routes incl. /projects/voice-concierge @1280/@390 and /talk | yes |
+| VC3-03 | 1 | Read diagrams/index.tsx; ProjectDiagram.test.tsx | Component with Panels (browser, LiveKit Cloud, home box), md:flex ratios, aria-label names browser/token/LiveKit/worker/SQLite; tests pass; measured stacked 300px at 390, side by side at 1280 | yes |
+| VC3-03 | 2 | Read src/app/card/page.tsx:58; card.test.tsx | Link href /talk 'Talk to my concierge' w-full under row; test passes (3 /projects links, 2 blank) | yes |
+| VC3-03 | 3 | git diff vs main on Navbar.tsx; Navbar.test.tsx | No diff; test passes; spec records Navbar-stays decision (D49) | yes |
+| VC3-03 | 4 | grep talk sitemap.ts smoke-routes.txt; sitemap-robots test | Both list /talk; voice-concierge via projects; robots disallows only /evidence,/card/qr; test passes | yes |
+| VC3-03 | 5 | check.sh + smoke | Green / all PASS | yes |
+| VC3-04 | 1 | ls -la docs/screenshots/v2/VC3-* | 3 files present: 228836, 270772, 41379 bytes (all <400KB) | yes |
+| VC3-04 | 2 | Own Playwright script at 390/1280 on both pages | scrollWidth 390 / 1280; panels x45 width 300 stacked at 390, side by side at 1280 (x305/598/813); /card h1 bottom 200, Save contact 384, Talk 496 <844; 0 console/page errors | yes |
+| VC3-04 | 3 | node .harness/print-check.mjs ... /projects/voice-concierge | PASS print, exit 0 | yes |
+| VC3-04 | 4 | Read plan § What Michael will see | One row per screenshot (3 rows) with on-screen and wrong columns | yes |
+| VC3-04 | 5 | check.sh | green | yes |
+| VC3-05 | 1 | Read plan § Fact-check and § Review headings/tables | Both sections present; no Critical/Important; fact-check softened claims | yes |
+| VC3-05 | 2 | Read plan § Design pass | Present, PASS recorded; h3 count 11 on page, links/focus asserted by tests | yes |
+| VC3-05 | 3 | grep review-guide, asset-checklist, CLAUDE.md, README; jest --silent | VC3 entry and Voice Concierge section exist; counts 986 tests/74 suites match CLAUDE.md | yes |
+| VC3-05 | 4 | npx jest content-guard, claims-on-linked-page, opengraph-image | pass (inside 313-test run) | yes |
+| VC3-05 | 5 | check.sh + smoke | green; smoke all PASS | yes |
+
 ### 2026-10-20 08:30 · VC3-05 · passes
 
 - Fact-check (Opus, agent repo `main` at `8bf3f64`, C3 of C8, README "Being built"): 9 claims softened, 1 cut. The outcome no longer says the agent "was built" or that a demo happened ("The agent is still being built."); shortDescription, approach, method.build, builtWith and the diagram caption now state the agent as design; brief § Sentences with digits rows replaced. New test group "claims match what is built". Tests 982 → 986, suites 74.
