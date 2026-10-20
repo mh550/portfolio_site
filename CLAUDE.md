@@ -35,7 +35,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (725 tests, 63 suites after VC2-02)
+npm test             # Jest unit/integration tests (764 tests, 67 suites after VC2-03)
 npm run test:watch   # watch mode
 ```
 
@@ -80,6 +80,9 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
 - `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
+- `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
+  (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
+  non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

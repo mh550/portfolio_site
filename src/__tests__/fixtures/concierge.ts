@@ -79,7 +79,25 @@ export const metricsNulls: MetricsBody = {
   compacted: null,
 };
 
+// A later turn after the agent compacted the history: no background extraction reported yet, no preload (that
+// happens once, at connect).
+export const metricsCompacted: MetricsBody = {
+  turn: 3,
+  eou_ms: 190,
+  stt_ms: 105,
+  llm_ttft_ms: 420.6,
+  tts_ttfb_ms: 200,
+  total_ms: 1010,
+  memory_on_turn_path_ms: 3,
+  preload_ms: null,
+  extraction_ms: null,
+  prompt_tokens: 2000,
+  cached_tokens: 1500,
+  compacted: true,
+};
+
 export const memoryJson = JSON.stringify(memoryBody);
 export const emptyMemoryJson = JSON.stringify(emptyMemory);
 export const metricsFullJson = JSON.stringify(metricsFull);
 export const metricsNullsJson = JSON.stringify(metricsNulls);
+export const metricsCompactedJson = JSON.stringify(metricsCompacted);

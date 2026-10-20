@@ -22,6 +22,7 @@ section before building on it.
 | `src/components/talk/LatencyPanel.tsx` | VC2-03 | Presentational, no hooks. Props `{ turns: MetricsBody[] }`; calls `summarise()` and `cachedShare()` |
 | `src/components/talk/Transcript.tsx` | VC2-03 | `'use client'` (it scrolls to the newest line with a ref + effect). Props `{ lines: TranscriptLine[] }`; `aria-live="polite"` |
 | `src/components/talk/ForgetMeButton.tsx` | VC2-03 | `'use client'` (confirm step state). Props `{ onForget: () => void; busy: boolean }` |
+| `src/components/talk/TalkPanel.tsx`, `format.ts` | VC2-03 (built) | The bordered section + h2 every panel uses (fixed ids `talk-memory`, `talk-latency`, `talk-transcript`: one of each per page); `DASH`, `ms()`, `percent()`. `TranscriptLine` is exported from `Transcript.tsx`, which takes the MessageBox as `children` |
 | `src/components/talk/MessageBox.tsx` | VC2-05 | Presentational form: label, input, Send. Props `{ disabled, onSend(text) }`; keeps the draft in local state, so `'use client'` |
 | `src/lib/concierge/contract.ts` | VC2-02 | §4 types (`MemoryBody`, `MemoryFact`, `MetricsBody`), topic and RPC constants, `parseMemory(text)`, `parseMetrics(text)`: typed object or `null`, never throws |
 | `src/lib/concierge/latency.ts` | VC2-02 | `LATENCY_FIELDS`, `summarise(turns)`, `cachedShare(turn)`, `median(values)` |

@@ -42,6 +42,14 @@ export const talkPage = {
     latency: 'No turns yet.',
     newVisitor: 'a new visitor',
   },
+  // The memory panel: "Talking to {name} · visit {visits}", then one row per fact.
+  memory: {
+    talkingTo: 'Talking to',
+    visit: 'visit',
+    summary: 'Summary',
+    fact: { channel: 'Channel', source: 'Source', learnedAt: 'Learned', confidence: 'Confidence' },
+  },
+  speakers: { visitor: 'You', agent: 'Concierge' },
 };
 
 // Spec W2, in its order: what, where, how long, the id, Forget me, LiveKit's own retention.
@@ -65,5 +73,8 @@ export const latencyLabels = {
   preload_ms: 'Memory preload at connect',
   extraction_ms: 'Background extraction',
   compacted: 'History compacted',
+  turn: 'Turn',
+  yes: 'Yes',
+  no: 'No',
   columns: { label: 'Step', last: 'This turn', median: 'Median' },
 };

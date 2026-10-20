@@ -93,7 +93,7 @@
         "src/components/talk/ForgetMeButton.tsx: the first click shows a confirm step ('Erase everything the concierge remembers about you?' with Erase and Cancel); Erase calls the onForget prop exactly once; Cancel returns to the single button; the control is disabled while busy; tests with userEvent.",
         "Every button and link in these components carries focusRing, the panels' headings are h2, the components are Server-Component-safe except ForgetMeButton (the one with state) and the Transcript (if it scrolls), and `npx jest src/__tests__/components/talk` plus .harness/check.sh are green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-04",

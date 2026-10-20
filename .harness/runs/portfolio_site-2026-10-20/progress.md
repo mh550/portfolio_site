@@ -14,6 +14,13 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 01:20 · VC2-03 · passes
+
+- **Changed:** new `src/components/talk/{MemoryPanel,LatencyPanel,Transcript,ForgetMeButton,TalkPanel}.tsx` and `format.ts` (en dash for every null), 4 test files in `src/__tests__/components/talk/`, a third metrics fixture `metricsCompacted`, and panel copy (`talkPage.memory`, `talkPage.speakers`, `latencyLabels.turn/yes/no`). Tests 725 → 764, suites 63 → 67.
+- **Verified:** `check.sh` green; `npx jest src/__tests__/components/talk` 39/39; smoke 38/38 at start (no page renders these yet, so there are no screenshots until VC2-04). Opus review: 0 Critical, 3 Important, all fixed. Focus is no longer lost after Erase (the test fails without the fix). The transcript log is `aria-busy` while a line is non-final, so partial speech isn't read out. Erase is `bg-red-700` for AA contrast. 6 of 7 Minors fixed: word separators, summary shown without facts, empty name, duplicate fact ids, `useId`, no auto-scroll after the reader scrolls up. Kept the date test on the component's own `Intl` options (the plan's choice).
+- **Next (VC2-04/05):** import `TranscriptLine` from `Transcript.tsx`; pass `MessageBox` as `Transcript`'s children. Panel heading ids are fixed (`talk-memory`, `talk-latency`, `talk-transcript`), one of each per page. `ForgetMeButton` gives focus back to Forget me only when `busy` clears. Make the status line ("Forgotten", or the error) a live region in TalkSession.
+- **Defaults:** "History compacted" reads Yes if any turn this visit reported `true`. The memory preload is shown once, from the first turn that reported it. Background extraction shows only after some turn reports it.
+
 ### 2026-10-20 01:10 · VC2-02 · passes
 
 - **Changed:** new `src/lib/concierge/contract.ts` (§4 types, `TOPIC`, `RPC_FORGET_ME`, `parseMemory`/`parseMetrics`), `latency.ts` (`LATENCY_FIELDS`, `median`, `summarise`, `cachedShare`) and `src/lib/data/concierge.ts` (`talkPage`, `privacyNote`, `latencyLabels`, exported from the barrel). `visitorId.ts` gains `VISITOR_ID_KEY`, `newUuidV4`, `getOrCreateVisitorId` and `browserStorage()`. New fixtures in `src/__tests__/fixtures/concierge.ts` and 3 new test files. Tests 680 → 725, suites 60 → 63.
