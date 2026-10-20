@@ -14,6 +14,50 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 05:00 · verify VC2
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC2-01 | 1 | Read plan § Files, § State machine, § Layout | File table lists every named file; state diagram idle→connecting→waiting→live, offline from 503/fetch/10 s; layout at 390/1280 with a table of block ends above 844 px | yes |
+| VC2-01 | 2 | grep plan for each LiveKit signature and attribute name | constructor, registerTextStreamHandler, readAll, sendText, PerformRpcParams, setMicrophoneEnabled, ParticipantConnected/Disconnected, ParticipantKind, remoteParticipants, startAudio, canPlaybackAudio, RoomContext, RoomAudioRenderer, useChat throw note, lk.segment_id/transcription_final/transcribed_track_id all present | yes |
+| VC2-01 | 3 | Read plan § Jest vs jest.config.ts lines 13-14 | mapper entries for both packages (plan line 430 quotes them), fake timers, fetch mock, 'no test opens a connection' present | yes |
+| VC2-01 | 4 | Read plan § Copy | offline sentence, button labels, six privacy points, latency labels, empty states listed | yes |
+| VC2-01 | 5 | grep plan/spec for D42-D46 | Plan names the token-test, chrome/indexable/off-Navbar (renumbered D44 in spec since D43 was taken), visitor id in click handler (D45), no components-styles; wording matches step intent | yes |
+| VC2-01 | 6 | `/home/mh550/projects/agent-harness/lib/check.sh` | green (cached, same tree); full jest rerun 942 pass / 73 suites | yes |
+| VC2-02 | 1 | Read concierge-contract.test.ts; `npx jest src/__tests__/components/talk src/__tests__/lib/concierge… pages/talk` | parseMemory/parseMetrics fixtures and null-on-bad cases pass | yes |
+| VC2-02 | 2 | concierge-latency.test.ts | median 120/100/null and cachedShare cases pass | yes |
+| VC2-02 | 3 | concierge-visitor-id.test.ts | persistence, malformed, throwing storage, newUuidV4 pass | yes |
+| VC2-02 | 4 | concierge-data.test.ts | six privacy points by keyword, no http/.net/digits; offline sentence exact (line 21 region) pass | yes |
+| VC2-02 | 5 | check.sh + full jest | green; 942 pass | yes |
+| VC2-03 | 1 | MemoryPanel.test.tsx | passes with fixtures and empty case | yes |
+| VC2-03 | 2 | LatencyPanel.test.tsx | passes; null renders en dash, no NaN/null | yes |
+| VC2-03 | 3 | Transcript.test.tsx | passes; aria-live polite, non-final marked | yes |
+| VC2-03 | 4 | ForgetMeButton.test.tsx | passes; confirm, Erase once, Cancel, busy | yes |
+| VC2-03 | 5 | jest talk dir; check.sh | all talk suites pass; check green | yes |
+| VC2-04 | 1 | Read page test/sitemap/smoke-routes/a11y test; jest pages/talk | `/talk` in smoke-routes.txt, sitemap.ts, sitemap-robots (9, 9+projects), a11y-new-pages; metadata+one h1 test passes | yes |
+| VC2-04 | 2 | TalkSession.test.tsx lines 96, 125, 140 | 503 and rejection show offline + link; id sent equals stored id on second Connect | yes |
+| VC2-04 | 3 | TalkSession.test.tsx 177-198 (invocationCallOrder < connect), StrictMode | registers precede connect; unmount = unregister + disconnect once; StrictMode ok | yes |
+| VC2-04 | 4 | TalkSession.test.tsx 376-399 | 10_000 ms constant, 9_999 no offline, +1 offline; agent at 3_000 ms cancels and goes live | yes |
+| VC2-04 | 5 | TalkSession.test.tsx 453-469 | memory and metrics render; malformed changes nothing, console.error not called | yes |
+| VC2-04 | 6 | `grep -rl livekit-client src/app`; jest.config.ts; server.log | grep empty; mapper lines present; dev log has 0 'hydrat'/'warn' after 5 GET /talk | yes |
+| VC2-04 | 7 | `curl` status in Playwright run; smoke.mjs | /talk 200; smoke all PASS incl /talk 1280+390; check green | yes |
+| VC2-05 | 1 | TalkSession-live.test.tsx 54-90; src data micBlocked | setMicrophoneEnabled true/false; NotAllowedError shows 'Microphone blocked. You can still type.' and stays live | yes |
+| VC2-05 | 2 | live test 111-131 | Enter/Send via sendText lk.chat, visitor line, box cleared, whitespace ignored | yes |
+| VC2-05 | 3 | live test 182-195 | two chunks of one segment give one final line | yes |
+| VC2-05 | 4 | live test 226-266; TalkSession.tsx:363-367 | performRpc once with method concierge.forget_me, responseTimeout 10000; ok clears + Forgotten; rejection re-enables + error | yes |
+| VC2-05 | 5 | live test 326-390 | RoomAudioRenderer in RoomContext.Provider; startAudio when blocked; Leave returns idle, panels cleared | yes |
+| VC2-05 | 6 | check.sh; smoke.mjs | green; all routes PASS | yes |
+| VC2-06 | 1 | `ls -l docs/screenshots/v2/VC2*` | three PNGs exist, 39.6/52.6/42.2 KB (<400 KB); offline capture shown by plan row | yes |
+| VC2-06 | 2 | Own Playwright script at 390×844 with no LiveKit env | h1 ends 302, Connect 664 (<844); offline sentence 700, link 747; scrollWidth 390 idle and offline; 0 console/page errors; no /api request | yes |
+| VC2-06 | 3 | Same script, Tab sequence at 390 and 1280 | Skip to content → MH → nav links (Open menu at 390) → Connect; each :focus-visible with outline rgb(0, 212, 255) (read after 300 ms) | yes |
+| VC2-06 | 4 | Read plan § What Michael will see | table has a row per screenshot with state, contents, issues; D46 fix noted with tests | yes |
+| VC2-06 | 5 | check.sh | green | yes |
+| VC2-07 | 1 | Read plan § Review | Review table with file/finding/severity/outcome; Critical/Important fixed with tests in TalkSession-review.test.tsx (passes); simplifications listed | yes |
+| VC2-07 | 2 | Read plan 'Checks' table; own grep for ts.net/CGNAT/ntfy over talk dirs; offline browser run | StrictMode, release, no-RSC-import, offline-console evidence named with tests that pass; my grep empty; offline console clean | yes |
+| VC2-07 | 3 | Read docs/review-guide.md 65-106 | VC1–VC3 section: merge order, 390 look, 'Morning: the live check', env vars, undo via env removal / kill switch | yes |
+| VC2-07 | 4 | Read CLAUDE.md Routes/Components/Testing; jest tail | /talk, components/talk, lib/concierge, mocks+mapper documented; 942 tests / 73 suites matches my run | yes |
+| VC2-07 | 5 | check.sh; smoke.mjs | green; all routes PASS | yes |
+
 ### 2026-10-20 04:10 · VC2-06 · passes
 
 - **Changed:** the verifier failed step 2 (offline Connect logged Chromium's "Failed to load resource … 503" console error). Fixed test-first, recorded as **D46** *default*. New `src/lib/concierge/env.ts` `conciergeEnv()` is the one LiveKit env check, used by the token route (unchanged behaviour, 503 without env) and by `/talk`'s page, which passes `TalkSession configured={…}`. Without the env, Connect goes offline at once: no fetch, no LiveKit import, no visitor id stored. Tests 933 → 942, suites 72 → 73 (`lib/concierge-env.test.ts`, plus new cases in `TalkSession.test.tsx` and `pages/talk.test.tsx`). Also updated: the plan (§ What Michael will see and the state table), review-guide morning step 2 (the redeploy also rebuilds `/talk`), and CLAUDE.md.
