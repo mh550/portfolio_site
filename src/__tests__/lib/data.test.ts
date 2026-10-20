@@ -13,7 +13,7 @@ import {
 
 describe('projects data', () => {
   it('exports an array with 9 projects', () => {
-    expect(projects).toHaveLength(9);
+    expect(projects).toHaveLength(10);
   });
 
   it('each project has required fields', () => {
@@ -58,11 +58,12 @@ describe('projects data', () => {
       'linear-ai-workflow': 2,
       'home-media-server': 3,
       'hit-list': 4,
-      'ghl-jobtread-integration': 5,
-      'paint-estimator': 6,
-      'ringcentral-jobtread-integration': 7,
-      'mirrored-google-calendars': 8,
-      cherished: 9,
+      'voice-concierge': 5,
+      'ghl-jobtread-integration': 6,
+      'paint-estimator': 7,
+      'ringcentral-jobtread-integration': 8,
+      'mirrored-google-calendars': 9,
+      cherished: 10,
     });
   });
 
@@ -89,6 +90,7 @@ describe('getTopProjects', () => {
       'linear-ai-workflow',
       'home-media-server',
       'hit-list',
+      'voice-concierge',
       'ghl-jobtread-integration',
       'paint-estimator',
       'ringcentral-jobtread-integration',

@@ -24,7 +24,7 @@ changing the brief's § Sentences with digits first.
 | `company` | `'Personal · open source'` (as agent-harness; the repo is public) |
 | `shortDescription` | `'A LiveKit voice agent on this site that remembers you between visits, shows you what it remembers, and forgets you on request.'` (ASCII only) |
 | `categories` | `['ai', 'systems']` |
-| `techStack` | `['Python', 'LiveKit Agents', 'LiveKit Inference', 'OpenRouter', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code']` (brief § Providers, § Hosting; the page half is Next.js + TypeScript) |
+| `techStack` | `['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code']` (brief § Providers, § Hosting; the page half is Next.js + TypeScript). VC3-02: was `'OpenRouter'`; the agent repo's `docs/decisions.md` moved every LLM call to the Anthropic API, OpenRouter only as a fallback |
 | `githubUrl` | `'https://github.com/mh550/voice-concierge'`: `gh repo view mh550/voice-concierge --json visibility` printed `{"visibility":"PUBLIC"}` at plan time (2026-10-20, VC3-01). `case-study-data.test.ts` then requires the same URL in `caseStudy.links` (it is) |
 | `demoUrl` | not set (`/talk` is an internal page; it goes in `caseStudy.links` as `kind: 'demo'`) |
 | `featured` | `true` |
@@ -55,7 +55,7 @@ brief. They follow the order of the six practices in the voice-concierge page sp
     shortDescription:
       'A LiveKit voice agent on this site that remembers you between visits, shows you what it remembers, and forgets you on request.',
     categories: ['ai', 'systems'],
-    techStack: ['Python', 'LiveKit Agents', 'LiveKit Inference', 'OpenRouter', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code'],
+    techStack: ['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code'],
     githubUrl: 'https://github.com/mh550/voice-concierge',
     featured: true,
     order: 5,
@@ -280,7 +280,7 @@ pointing at D44; adding it later is one entry in `Navbar.tsx`'s link list plus `
 | `src/__tests__/lib/case-study-voice-concierge.test.ts` (new) | VC3-02 | metrics `undefined`; categories `['ai','systems']`; the six decision titles name preload, extraction/delta, heard, gate, invalidate, thread (case-insensitive); ids `VC-A`…`VC-F`; links `[0]` is `/talk` kind `demo`, `[1]` the GitHub repo (PUBLIC at plan time); `lessons` is `[]`, `iterations` `undefined`; builtWith names "Claude Code" and "harness"; § Digits rule against the brief; the entry's JSON has none of the never-publish strings in § Never publish |
 | `src/__tests__/lib/data.test.ts` | VC3-02 | 9 → 10 projects; the order map in § Order; `getTopProjects(3)` unchanged; `getTopProjects(10)` gains `voice-concierge` after `hit-list` |
 | `src/__tests__/lib/case-study-types.test.ts` | VC3-02 | `systems` → `['agent-harness', 'home-media-server', 'voice-concierge']` (process unchanged) |
-| `src/__tests__/components/ProjectsGrid.test.tsx` | VC3-02 | "shows the first metric value … of each case study without a thumbnail": the new case study has no metric, so the test covers case studies **with** metrics and adds one assertion that the voice-concierge card's band shows its category (`ai`) instead |
+| `src/__tests__/components/ProjectsGrid.test.tsx` | VC3-02 | the Systems filter test gains `voice-concierge` (found at VC3-02); "shows the first metric value … of each case study without a thumbnail": the new case study has no metric, so the test covers case studies **with** metrics and adds one assertion that the voice-concierge card's band shows its category (`ai`) instead |
 | `src/__tests__/app/opengraph-image.test.ts` | VC3-02 | no edit: it iterates every project, so the new title and shortDescription are checked against the bundled font's glyphs (both ASCII) and the no-metric path renders title and name only |
 | `src/__tests__/app/sitemap-robots.test.ts` | VC3-02 | no edit expected (`9 + projects.length`); run it |
 | `src/__tests__/pages/a11y-new-pages.test.tsx` | VC3-02 | gains `['/projects/voice-concierge', () => caseStudy('voice-concierge')]` |
@@ -349,7 +349,7 @@ numbers:
 | no latency numbers measured yet | outcome | Brief "Measured numbers: none yet"; §4.7 |
 | built on livekit-agents 1.8, only maps onto 2.0; thread, state, journal, channels, fence vs lease, idle expiry like 2.0's `idle_ttl` | outcome | D2; §2; Brief § The Agents 2.0 mapping |
 | spec and design (agent, memory, contract) by Michael; code by Claude Code agents in two harness runs | builtWith | Status line ("Owner", "Builder"); D1–D6; brand.md (credit rule) |
-| STT/TTS LiveKit Inference, LLM OpenRouter, Python | techStack | D5; §2 |
+| STT/TTS LiveKit Inference, LLM Anthropic API, Python | techStack | D5; §2; agent repo `docs/decisions.md` "LLM provider: Anthropic direct" |
 | repo is public | links, githubUrl | Brief § How it was built (gh output) |
 
 Left out on purpose: the model id and provider pair (B1 defaults, may change), the 1,500-character and 3,000-token

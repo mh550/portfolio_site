@@ -192,7 +192,7 @@
         "docs/specs/2026-10-18-portfolio-v2.md gains `D44 *default*` recording the order choice and its effect on /card and the home Recent work (none with the default), unless INBOX.md answered, in which case D44 records the answer.",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route, including the new slug it discovers from /projects."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC3-03",

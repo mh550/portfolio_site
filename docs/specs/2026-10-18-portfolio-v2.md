@@ -182,6 +182,13 @@ don't redo it.
   before and a 503 or failure still reads as offline. The page is prerendered, so the flag is fixed at build time:
   adding the env needs a redeploy, which Vercel needs for env changes anyway. Reversible: drop the prop (it defaults
   to `true`). (VC2-06.)
+- **D47** *default* The voice-concierge deep-dive takes `order: 5`, after the four case studies with measured
+  numbers (agent-harness, linear-ai-workflow, home-media-server, hit-list) and ahead of the older integration and
+  client pages, which move down one (ghl-jobtread-integration 6 … cherished 10). It is `featured`, so
+  `getTopProjects(3)` is unchanged: `/card`'s Selected work and the home page's Recent work still show agent-harness,
+  linear-ai-workflow and home-media-server. `/projects` shows the new card fifth, its band showing the category `ai`
+  until it has a metric. INBOX.md § Answers was empty. The feature list called this D44, already taken by `/talk`'s
+  chrome. Reversible: the `order` values in `projects.ts` and the order map in `data.test.ts`. (VC3-02.)
 
 ## Dependencies between milestones
 

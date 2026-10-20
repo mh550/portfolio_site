@@ -14,6 +14,16 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 06:40 · VC3-02 · passes
+
+- `projects.ts` gains the voice-concierge entry from the plan (after hit-list, order 5; ghl…cherished shift to 6–10; no metrics, no diagram yet). New `case-study-voice-concierge.test.ts` (shape, six practices, /talk demo + public repo link, digit sentences verbatim in the brief, never-publish strings); `data.test.ts` (10, order map), `case-study-types`, `ProjectsGrid` (Systems filter, no-metric band shows `ai`), `a11y-new-pages` updated. New `docs/notes/voice-concierge-todo.md`; v2 spec `D47 *default*` (order). Tests 942 → 959, suites 73 → 74.
+- Agent repo read (public `main`, `53beb41`, C2 merged: store, erasure, TTL, worker, dispatch in the tree; README "Being built"). Its `docs/decisions.md` moved every LLM call to the **Anthropic API** (OpenRouter only a fallback), so techStack says `Anthropic API`, not `OpenRouter`; brief § Providers and the plan updated with the source. `gh repo view` still PUBLIC.
+- Verified: check.sh green; jest 959/74; the step-3 jest list green, `getTopProjects(3)` unchanged; `curl /projects/voice-concierge` 200 with the five method labels, Key Decisions with VC-A…VC-F, Outcome, Links, "Talk to my concierge", "How it was built"; smoke 42 PASS incl. the new slug at 1280 and 390.
+- Next (VC3-03): add `architectureDiagram: 'voice-concierge'` with the DiagramKey. The smoke 390 capture shows the body blank below the header, as on hit-list: ScrollReveal content outside the viewport, not a bug; VC3-04 must scroll before its full-page capture.
+- VC3-05 fact-check: the outcome says the agent "was built" overnight; the agent run was at C2 of C8 when this landed. Re-read its README before the morning.
+- Proposed changes: step 5 names D44 (taken); recorded as D47, as the plan said. The plan's test table missed `ProjectsGrid`'s Systems filter test (now noted there).
+- Question for Michael: is order 5 right for the deep-dive? (INBOX `## Answers`.)
+
 ### 2026-10-20 05:40 · VC3-01 · passes
 
 - New `docs/notes/evidence-voice-concierge.md` (facts with agent-spec § / D / B refs, Status line quoted from `d3a9922`, "no latency numbers measured yet", 1.8 only maps onto 2.0, § Sentences with digits) and `docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md` (the whole entry as final TS, order, diagram node list + aria-label + caption, `/card` button, Navbar, tests that change, traceability, brand check, risks). Plan only, no code; tests 942 → 942.

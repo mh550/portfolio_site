@@ -25,6 +25,7 @@ const pages: [string, () => ReactElement][] = [
   ['/projects/agent-harness', () => caseStudy('agent-harness')],
   ['/projects/home-media-server', () => caseStudy('home-media-server')],
   ['/projects/hit-list', () => caseStudy('hit-list')],
+  ['/projects/voice-concierge', () => caseStudy('voice-concierge')],
 ];
 
 const headingLevels = (container: HTMLElement) =>

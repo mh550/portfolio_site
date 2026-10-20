@@ -77,7 +77,7 @@ every turn and survives compaction (§4.0 "History vs journal", §4.8); names ar
 | Fact | Where |
 |---|---|
 | STT and TTS through LiveKit Inference | D5 |
-| Every LLM call (conversation, extractor, summarizer) through OpenRouter, via `openai.LLM.with_openrouter(model=…)` | D5; §4.10 |
+| Every LLM call (conversation, extractor, summarizer) goes straight to the Anthropic API through `livekit-plugins-anthropic`; OpenRouter stays only as a fallback a setting switches on. This amends the spec's D5 (OpenRouter), which this row first recorded | agent repo `docs/decisions.md` § "LLM provider: Anthropic direct (Michael, 2026-10-20)", read on public `main` at VC3-02; D5; §4.10 |
 | Agent observability is on for the LiveKit Cloud project | D5; B11 |
 
 ## Hosting

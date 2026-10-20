@@ -30,13 +30,14 @@ describe('ProjectsGrid', () => {
     ]);
   });
 
-  it('filtering by Systems shows only the agent-harness and home-media-server cards', async () => {
+  it('filtering by Systems shows only the agent-harness, home-media-server and voice-concierge cards', async () => {
     const user = userEvent.setup();
     render(<ProjectsGrid />);
     await user.click(screen.getByRole('button', { name: 'Systems' }));
     expect(screen.getByRole('button', { name: 'Systems' })).toHaveAttribute('aria-pressed', 'true');
     for (const p of projects) {
-      if (['agent-harness', 'home-media-server'].includes(p.slug)) expect(screen.getByText(p.title)).toBeInTheDocument();
+      if (['agent-harness', 'home-media-server', 'voice-concierge'].includes(p.slug))
+        expect(screen.getByText(p.title)).toBeInTheDocument();
       else expect(screen.queryByText(p.title)).not.toBeInTheDocument();
     }
     expect(screen.queryByText('No projects in this category yet.')).not.toBeInTheDocument();
@@ -98,16 +99,26 @@ describe('ProjectsGrid', () => {
     expect(rendered).toEqual(expected);
   });
 
-  it('shows the first metric value in the preview band of each case study without a thumbnail', () => {
+  const cardFor = (title: string) =>
+    screen.getAllByRole('article').find((a) => within(a).queryByRole('heading', { name: title }));
+
+  it('shows the first metric value in the preview band of each case study with metrics and no thumbnail', () => {
     render(<ProjectsGrid />);
-    const caseStudies = projects.filter((p) => p.caseStudy && !p.thumbnail);
+    const caseStudies = projects.filter((p) => p.caseStudy && !p.thumbnail && p.metrics?.length);
     expect(caseStudies.length).toBeGreaterThan(0);
     for (const p of caseStudies) {
-      const card = screen.getAllByRole('article').find((a) => within(a).queryByRole('heading', { name: p.title }));
+      const card = cardFor(p.title);
       expect(card).toBeDefined();
-      const metric = p.metrics?.[0];
-      expect(metric).toBeDefined();
-      expect(within(card!).getAllByText(metric!.value).length).toBeGreaterThan(0);
+      expect(within(card!).getAllByText(p.metrics![0].value).length).toBeGreaterThan(0);
     }
+  });
+
+  it('shows the category in the voice-concierge band: it has no metric yet (VC3-02)', () => {
+    render(<ProjectsGrid />);
+    const p = projects.find((x) => x.slug === 'voice-concierge')!;
+    expect(p.metrics).toBeUndefined();
+    const card = cardFor(p.title);
+    expect(card).toBeDefined();
+    expect(within(card!).getByText('ai')).toBeInTheDocument();
   });
 });
