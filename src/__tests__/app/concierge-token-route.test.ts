@@ -136,8 +136,6 @@ describe('POST /api/concierge/token success (200)', () => {
       canSubscribe: true,
       canPublishData: true,
     });
-    // The SDK sets nbf, not iat (VC1 plan § One minted token).
-    expect(p.exp - (p.iat ?? p.nbf)).toBe(600);
     expect(p.roomConfig.emptyTimeout).toBe(30);
     expect(p.roomConfig.agents).toHaveLength(1);
     expect(p.roomConfig.agents[0].agentName).toBe('concierge');
@@ -147,10 +145,36 @@ describe('POST /api/concierge/token success (200)', () => {
     });
   });
 
-  it('accepts an upper-case v4 id and keeps it as sent in the identity', async () => {
-    const upper = VISITOR.toUpperCase();
-    const { token } = await (await postId(upper)).json();
-    expect(decodePayload(token).sub).toBe(`visitor-${upper}`);
+  it('expires the token 600 s after its nbf', async () => {
+    // The SDK reads the clock twice (exp, then nbf, no iat): freeze it so a second boundary between the reads
+    // cannot make this 599.
+    const now = Date.UTC(2026, 9, 20, 0, 0, 0, 999);
+    jest.useFakeTimers({ now });
+    try {
+      const p = decodePayload((await (await postId(VISITOR)).json()).token);
+      expect(p.nbf).toBe(Math.floor(now / 1000));
+      expect(p.exp).toBe(p.nbf + 600);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('accepts an upper-case v4 id and lower-cases it in the identity and metadata (D43)', async () => {
+    const { token } = await (await postId(VISITOR.toUpperCase())).json();
+    const p = decodePayload(token);
+    expect(p.sub).toBe(`visitor-${VISITOR}`);
+    expect(JSON.parse(p.roomConfig.agents[0].metadata).visitor_id).toBe(VISITOR);
+  });
+
+  it('ignores every body field but visitor_id', async () => {
+    const res = await post(
+      JSON.stringify({ visitor_id: VISITOR, identity: 'admin', room: 'evil', ttl: 99999, agentName: 'other' }),
+    );
+    const p = decodePayload((await res.json()).token);
+    expect(p.sub).toBe(`visitor-${VISITOR}`);
+    expect(p.video.room).toMatch(/^concierge-[0-9a-f]{12}$/);
+    expect(p.exp - p.nbf).toBeLessThanOrEqual(600);
+    expect(p.roomConfig.agents[0].agentName).toBe('concierge');
   });
 
   it('is really signed with the env secret', async () => {

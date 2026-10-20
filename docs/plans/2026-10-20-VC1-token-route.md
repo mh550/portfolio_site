@@ -165,7 +165,7 @@ does not sign). `roomConfig.name` stays empty; the room is named by the video gr
 
 - Only `POST` is exported; Next answers other methods with 405.
 - Room: `concierge-` + 12 lowercase hex from `crypto.randomBytes(6)` (Node `crypto`, imported in the route).
-- Identity `visitor-<visitor_id>`; `ttl: 600` (seconds; a number, not a string).
+- Identity `visitor-<visitor_id>` with the id lower-cased (D43, VC1-03); `ttl: 600` (seconds; a number, not a string).
 - Grants: `{ roomJoin: true, room, canPublish: true, canSubscribe: true, canPublishData: true }`.
 - `roomConfig = new RoomConfiguration({ emptyTimeout: 30, agents: [new RoomAgentDispatch({ agentName: 'concierge',
   metadata: JSON.stringify({ visitor_id, channel_hint: 'web' }) })] })`. The 10-minute session cap is the agent's
@@ -211,6 +211,39 @@ process.env.LIVEKIT_API_SECRET = 'x'.repeat(32);
 ```
 
 Save and restore `process.env` in `beforeEach`/`afterEach` so no other suite sees these values.
+
+## Review (VC1-03)
+
+Diff: `git diff 4b603a8..HEAD -- . ':!package-lock.json'` (652 lines) in the run's scratch dir, read by an Opus
+reviewer. No Critical findings. Tests 674 → 680, suites 59 → 60.
+
+| File | Finding | Severity | Outcome |
+|---|---|---|---|
+| `concierge-token-route.test.ts` | `exp - (iat ?? nbf) === 600` is flaky: the SDK reads the clock for `exp` and again for `nbf` (`AccessToken.js:122`), so a second boundary between them gives 599. A throwaway test that stepped `Date#getTime` across a boundary got `Received: 599` | Important | Fixed: the claims test runs on a frozen clock (`jest.useFakeTimers({ now })`) and pins `nbf === now` and `exp === nbf + 600`; the dead `iat ??` is gone |
+| `route.ts` | Upper- and lower-case forms of one id gave two identities and two agent-side visitors | Minor | Fixed (D43 *default*): the id is lower-cased; the test went red first, then green |
+| `concierge-token-route-sdk.test.ts` (new) | The 500 path (`token_failed`) had no test | Minor | Added: `toJwt` rejects with an error carrying the secret; the body is exactly `{error:'token_failed'}`, `no-store`, no `boom`/`LIVEKIT`/`stack`/secret |
+| `concierge-token-route-sdk.test.ts` (new) | Nothing showed a bad id stops before the SDK | Minor | Added: 37-char, 10 000-char and v1 ids → 400 with `addGrant` and `toJwt` spies never called. A separate file keeps `concierge-token-route.test.ts` mock-free (D42) |
+| `concierge-token-route.test.ts` | No test showed extra body fields are ignored | Minor | Added: `identity`, `room`, `ttl`, `agentName` in the body change nothing |
+| `visitorId.ts`, `route.ts` | `isUuidV4` returned `boolean`, so the route cast `id as string`; `readVisitorId` had redundant `typeof`/`null` checks | Nit | Simplified: `isUuidV4(s): s is string`; `readVisitorId` is one optional-chained read |
+| `concierge-token-route.test.ts` | `not.toHaveProperty('token')` after `toEqual({error})` is redundant | Nit | Kept: it reads as VC1-02 step 2 ("no `token` key") |
+| `route.ts` | `request.json()` parses a body of any size | Nit | Kept: Vercel caps request bodies at 4.5 MB, and an oversized id is rejected before the SDK (test above) |
+| `route.ts` | No Origin check or rate limit, so any script can mint tokens, and each joined room dispatches a paid agent | Minor (out of scope) | Asked of Michael in progress.md; proposed for a later milestone (the agent's 10-minute cap bounds each session) |
+
+Checks, with evidence:
+
+- **No `LIVEKIT_*` value reaches the client.** `grep -rn LIVEKIT src/components src/app --include=*.tsx` is empty;
+  `grep -rl LIVEKIT_API .next-check/static` is empty after the VC1-03 build. Only `route.ts` reads
+  `process.env.LIVEKIT_*`; `livekit-server-sdk` is imported only there; no `NEXT_PUBLIC_` variable exists.
+- **Error bodies carry no stack, env names or secret.** All four bodies are literals (`{offline:true}`,
+  `{error:'bad_request'}`, `{error:'token_failed'}`, `{url, token}`); both `catch` blocks drop the error. Pinned by the
+  500 test and "contains neither the key nor the secret".
+- **Identity and room derive only from the validated id and server randomness.** `identity: visitor-${visitorId}`
+  (the id after `isUuidV4`, lower-cased), `room = concierge-${randomBytes(6).toString('hex')}`; only `visitor_id` is
+  read from the body. Pinned by "ignores every body field but visitor_id".
+- **An id longer than 36 characters is rejected before any SDK call.** The `isUuidV4` regex is anchored (no `m`
+  flag) and `readVisitorId` returns before `new AccessToken`. Pinned by the SDK-spy tests (37 and 10 000 chars).
+- **Content guard.** `npx jest src/__tests__/lib/content-guard.test.ts`: 20/20 green on this tree, including the new
+  test file's `'x'.repeat(32)` fake secret.
 
 ## Live step (for Michael; the harness never does this)
 

@@ -2,6 +2,6 @@
 // The token route and the /talk client both use this, so they agree on what an id is.
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function isUuidV4(s: unknown): boolean {
+export function isUuidV4(s: unknown): s is string {
   return typeof s === 'string' && UUID_V4.test(s);
 }

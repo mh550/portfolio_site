@@ -162,6 +162,10 @@ don't redo it.
   (`'k'.repeat(12)`, `'x'.repeat(32)`), then decodes and verifies it; nothing is mocked there, since signing is
   local (no network). The voice-concierge spec's "mock `livekit-client` in Jest" applies to `livekit-client` and
   `@livekit/components-react`, which VC2 mocks. (VC1-02.)
+- **D43** *default* The token route lower-cases a valid visitor id before using it, so the identity
+  `visitor-<id>` and the dispatch metadata `visitor_id` are always lower-case (RFC 9562 output form;
+  `crypto.randomUUID()` is lower-case already). One visitor stays one identity on the agent side even if a client
+  sends upper case. Reversible: drop the `.toLowerCase()` in `route.ts`. (VC1-03.)
 
 ## Dependencies between milestones
 

@@ -15,12 +15,11 @@ function reply(body: unknown, status: number) {
   return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
+// Only visitor_id is read; any other field is ignored. Lower-cased so one visitor is one identity (D43).
 async function readVisitorId(request: Request): Promise<string | null> {
   try {
-    const body: unknown = await request.json();
-    if (typeof body !== 'object' || body === null) return null;
-    const id = (body as Record<string, unknown>).visitor_id;
-    return isUuidV4(id) ? (id as string) : null;
+    const id = ((await request.json()) as { visitor_id?: unknown } | null)?.visitor_id;
+    return isUuidV4(id) ? id.toLowerCase() : null;
   } catch {
     return null;
   }

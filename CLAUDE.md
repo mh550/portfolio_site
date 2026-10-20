@@ -27,6 +27,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
+| `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
 
 ## Commands
 
@@ -34,7 +35,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (643 tests, 57 suites after S3-01)
+npm test             # Jest unit/integration tests (680 tests, 60 suites after VC1-03)
 npm run test:watch   # watch mode
 ```
 
@@ -124,7 +125,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 
 ## Code rules
 - Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
-  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency.
+  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency. `livekit-client`,
+  `@livekit/components-react` and `livekit-server-sdk` are approved at exact pins (D41); keep `LIVEKIT_*` server-only.
 - Content lives in `src/lib/data/*.ts` (projects, experience, skills, profile, approach, competencies); components
   render it. Reuse `ScrollReveal`, `ProjectCard`, `MetricStrip`, `MediaGallery`, `CodeBlock` and the diagrams in
   `src/components/projects/diagrams/` rather than re-implementing them.

@@ -14,6 +14,19 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 00:36 · VC1-03 · passes
+
+- **Review:** Opus read `VC1.diff` (652 lines). No Critical findings. 1 Important: the token test's `exp - nbf === 600` was flaky,
+  because the SDK reads the clock twice (a throwaway test got 599). Now fixed with a frozen clock. Plan § Review has the 9-row table and the four leak/id checks with evidence.
+- **Changed:** `route.ts` lower-cases the id (D43 *default*); `isUuidV4` is now a type guard and `readVisitorId` is one line.
+  New `concierge-token-route-sdk.test.ts` (500 path, no SDK call on bad ids); new tests cover extra body fields and lower-casing.
+  CLAUDE.md gains the route row, D41 packages and the counts. Tests 674 → 680, suites 59 → 60.
+- **Verified:** `check.sh` green (fresh `.next-check`); `grep LIVEKIT` in tsx and `.next-check/static` both empty; content guard 20/20;
+  curl :7832 → `{"offline":true}` 503; smoke 38/38.
+- **Next (VC2-01):** the client must send `crypto.randomUUID()` (already lower-case). `isUuidV4` narrows to `string`.
+- **Question for Michael:** D43, keep lower-casing ids? Also, the route has no Origin check or rate limit, so anyone can mint tokens,
+  and each joined room dispatches the paid agent (capped at 10 min). Should a later milestone add an Origin allowlist?
+
 ### 2026-10-20 · VC1-02 · passes
 
 - **Changed:** new `src/app/api/concierge/token/route.ts` (POST only; 503 `{offline:true}` checked before the body,

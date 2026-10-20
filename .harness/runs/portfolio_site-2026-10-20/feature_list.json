@@ -46,7 +46,7 @@
         "CLAUDE.md: the Routes table gains `/api/concierge/token` (503 offline without env; a 10-minute token with agent dispatch), the Code rules line names the three LiveKit packages as approved (D41), and the test and suite counts match `npx jest --silent 2>&1 | tail -5`.",
         ".harness/check.sh is green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-01",
