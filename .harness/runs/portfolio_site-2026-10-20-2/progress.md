@@ -10,6 +10,23 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 10:05 · B1-01 · passes
+
+- **Landed:** `docs/plans/2026-10-20-B1-booth-harness.md` (Files, Shared functions, results.jsonl row, Process control,
+  Report, Python 3.8 rules, Tests with named cases, Fake round, Review); `public/b/mh_harness/PROMPTS.md` (spec §5
+  byte-identical, no file name needed fixing), `configs/round1.json`, `configs/fake-round.json`; `.gitignore` block;
+  booth spec `## 7. Decisions` D41–D51. Jest 643 → 643 (no code yet).
+- **Verified:** the `diff` of §5 vs PROMPTS.md is empty; a python assertion script checks every round1/fake-round
+  field; each path's `git check-ignore -q` exits 0 and `h.tgz` exits 1; content guard 20/20; `.harness/check.sh`
+  `lint ok · jest ok · build ok`; smoke green.
+- **Next session (B1-02):** the plan fixes names beyond the feature text: `harness_home()` and `main()` in run_one.py,
+  `fake_game.py` prints `HARNESS_PID <pid>` first (the timeout test needs it), LLM line i = `{"in": 1000*i, "out":
+  50*i, "ms": 100*i}`, and `find_alarm` skips `HARNESS_` lines so a token count of 429 never alarms.
+- **Question for Michael:** D51 *default*: `sweep.py --dry-run` warns about placeholders instead of refusing, because
+  PROMPTS.md Step 2C dry-runs round1.json before Step 3 fills it. Say `dry-run refuses` in INBOX.md to change it.
+- **Proposed change:** B1-01's check-ignore step runs `git check-ignore -q` with four paths, which git rejects
+  (`--quiet is only valid with a single pathname`, exit 128); drop `-q` (exit 0) or check per path.
+
 ### 2026-10-20 09:30 · initializer (Fable) · feature list written
 
 **Scope.** The brief wins: build the booth harness bundle (spec `docs/specs/2026-10-20-booth-harness-bundle.md`,

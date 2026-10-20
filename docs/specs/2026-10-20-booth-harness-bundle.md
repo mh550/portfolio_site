@@ -193,3 +193,46 @@ set B). All `expected_words: 2`, `cities: 6`, `timeout_s: 450`.
   mh_harness/configs/round1.json` refuses with the placeholder message;
 - a fake round (a configs file pointing at `fake_game.py`, `--parallel 4`) prints status lines and a report table;
 - no page, link, nav item or sitemap entry points at `/b/`.
+
+## 7. Decisions
+
+Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.md`); never renumber.
+
+- **D41** *default* `public/b/h.tgz` is committed, built by `npm run booth-bundle` (`scripts/build-booth-bundle.mjs`):
+  GNU tar `--sort=name --owner=0 --group=0 --numeric-owner --mtime='2026-10-20 00:00Z' --mode=go-w,a+rX
+  --format=ustar` piped to node `zlib.gzipSync` level 9, so the bytes are reproducible. Alternative: build it in a
+  `prebuild` hook on Vercel (rejected: the jest test wants the committed bytes, and a stale tarball would be invisible).
+- **D42** *default* No module beyond the §2 file list: the shared functions live in `run_one.py` (`parse_telemetry`,
+  `exit_reason`, `kill_tree`, `start_detached`) and `sweep.py` / `report.py` import them (`import run_one`,
+  `import report`); every script runs only under `if __name__ == "__main__"`. Alternative: a separate `harness_lib.py`.
+- **D43** *default* CLI flags beyond §3 so the tests are fast: `sweep.py --interval S` (default 15) and
+  `--alarm-after S` (default 60); `run_one.py --round NAME`; `timeout_s` may be a float. Alternative: module
+  constants the tests patch (rejected: the tests run the scripts as subprocesses).
+- **D44** *default* Python 3.8 rules: `from __future__ import annotations`, `typing.List/Dict/Optional/Tuple`, no
+  `X | Y` unions, no `str.removeprefix`, no `match`, no `zoneinfo`, stdlib only; `statistics.median` for medians.
+  Alternative: require 3.10+ (rejected: the booth laptop's Python is unknown).
+- **D45** *default* `sweep.py` writes each run's single config to `work/<name>-<K>/config.json` and starts
+  `run_one.py <that file> --index K --round <configs stem>`; `run_one.py`'s CONFIG.json is one object. Alternative:
+  pass the configs file plus a name to `run_one.py`.
+- **D46** *default* `results.jsonl`, `logs/` and `work/` are resolved from `run_one.py`'s own directory, not the cwd,
+  so `python mh_harness/sweep.py …` from the game repo's root writes only inside `mh_harness/`; `HARNESS_HOME`
+  overrides that base directory (the tests point it at a tempdir). Alternative: cwd-relative paths.
+- **D47** *default* Interrupts: `run_one.py` handles SIGTERM/SIGINT by killing the game's process tree and exiting
+  130 without a results row; `sweep.py` on KeyboardInterrupt `kill_tree`s every live `run_one.py` and exits 130. The
+  child's env gets `PYTHONUNBUFFERED=1` and `HARNESS_WORKDIR` (absolute). Alternative: record interrupted runs as
+  `error` rows (rejected: they would skew the round's medians).
+- **D48** *default* `configs/fake-round.json` ships beside `round1.json`: four configs (base, base_ctl, terse,
+  terse_trim) that run `fake_game.py` through the adapter's defaults, so README's "try it", the dry run and the checks
+  need no editing. README notes Windows uses `python` where it says `python3` (PROMPTS.md already says `python`).
+  Alternative: build the fake configs inside the tests only (Michael: say `drop fake-round` in INBOX.md).
+- **D49** *default* Exit codes: `run_one.py` 0 for solved/incomplete, 1 for timeout/error, 130 interrupted;
+  `sweep.py` 0 when every run ended (whatever the reasons), 2 on a placeholder refusal, 130 interrupted; `report.py`
+  always 0 (`no results yet` when the file is missing). Alarm text matches case-insensitively, except `429` (a whole
+  token) and `Traceback`. Alternative: `sweep.py` exits non-zero when any run failed.
+- **D50** *default* The bundle stays unlinked: no page, nav item, sitemap entry, smoke route or robots rule (a
+  `Disallow` would advertise it). Docs only: `docs/notes/booth-bundle.md` and a CLAUDE.md row for `/b/h.tgz` plus
+  the `npm run booth-bundle` command. Alternative: a `robots.txt` `Disallow: /b/`.
+- **D51** *default* `sweep.py --dry-run` does not refuse placeholders: PROMPTS.md Step 2C dry-runs `round1.json`
+  before Step 3 fills its MCP sets, so the dry run prints one `warning: config "<name>" field <path> still has a
+  placeholder: "<value>"` line per placeholder on stderr, then every `cmd:` line, and exits 0; only a real start
+  refuses (exit 2). Alternative: refuse in the dry run too (rejected: Step 2C would fail as written).
