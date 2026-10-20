@@ -14,6 +14,15 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 05:40 · VC3-01 · passes
+
+- New `docs/notes/evidence-voice-concierge.md` (facts with agent-spec § / D / B refs, Status line quoted from `d3a9922`, "no latency numbers measured yet", 1.8 only maps onto 2.0, § Sentences with digits) and `docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md` (the whole entry as final TS, order, diagram node list + aria-label + caption, `/card` button, Navbar, tests that change, traceability, brand check, risks). Plan only, no code; tests 942 → 942.
+- Verified: a script evals the plan's TS entry and splits every string into sentences: all 9 digit-bearing pieces are verbatim in the brief, title 64 chars ASCII, 6 decisions, no `.config/`/`CONCIERGE_`/`API_KEY`/TODO/`[X]`. An Opus fact-check found 4 Important (Forget me privacy overclaim, 2.0 "one memory per person", idle-TTL "across days", design stated as built) + Minor grammar: all applied. check.sh green; jest 942/73; smoke all PASS.
+- Repo `mh550/voice-concierge` printed PUBLIC, so the entry links it. INBOX Answers empty → order 5 default (ghl…cherished shift by one; top 3, /card and home unchanged).
+- Next session (VC3-02): paste the entry, but first read the agent repo's README/decisions (its `main` held only the spec at plan time) and soften if the agent isn't built. `ProjectsGrid.test.tsx` "every case study shows a metric" must change (no metrics here); `architectureDiagram` waits for VC3-03.
+- Proposed changes: VC3-02 step 5 / VC3-03 steps 2–3 name D44, D45, D43, already used by VC1/VC2. The plan records them as D47 (order), D48 (card button), D49 (Navbar, restating D44); please read those steps that way. The diagram's panel A is "Visitor's browser and this site" (the token route is server-side) and panel C "My home box".
+- Question for Michael: is order 5 right for the deep-dive (after the four measured case studies)? Answer under INBOX `## Answers`.
+
 ### 2026-10-20 05:00 · verify VC2
 
 | Feature | Step | What you ran or read | What you saw | Holds |

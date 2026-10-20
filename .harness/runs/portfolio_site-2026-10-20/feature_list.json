@@ -176,7 +176,7 @@
         "Every digit in the drafted copy appears in docs/notes/evidence-voice-concierge.md; the draft contains no env file path, kill-switch file name, hostname or key from the agent spec, and no 'TODO' or '[X]'.",
         ".harness/check.sh is green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC3-02",
