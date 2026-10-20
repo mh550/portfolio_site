@@ -81,7 +81,7 @@
         "docs/plans/2026-10-20-VC4-order-widget-nav.md § What Michael will see has one row per screenshot: page and state · what is on screen · anything that looks wrong; any layout bug found is fixed in this feature with a test first and the screenshot retaken.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC4-06",

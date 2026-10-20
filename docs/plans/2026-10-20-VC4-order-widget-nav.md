@@ -255,6 +255,36 @@ outline colour).
 
 | Screenshot | Page and state | What is on screen | Anything that looks wrong |
 |---|---|---|---|
+| `VC4-home-390.png` | `/`, 390×844 viewport, top of page | Hero (name, tagline, method strip on two lines, View Projects / About Me); the cyan mic disc bottom right at x 318–374, y 772–828, its ring visible | Nothing |
+| `VC4-home-1280.png` | `/`, 1280×800 viewport | Navbar with eight links on one row (Home active, Talk fifth), hero, floating logos; widget at x 1208–1264, y 728–784 | Nothing |
+| `VC4-about-footer-390.png` | `/about`, 390×844, scrolled to the bottom | Last paragraph, the snowboard clip, footer (name ©, GitHub · LinkedIn · Email on one row at y 726.5–745.5), widget below and right of the links | Nothing: 27 px between the links' bottom and the widget's top |
+| `VC4-card-390.png` | `/card`, 390 wide, full page | Photo, Save contact, LinkedIn / Email / GitHub, Talk to my concierge, conference note, Selected work: Agent Harness, Voice Concierge, GoHighLevel ↔ JobTread in that order; no widget, no Navbar | Nothing |
+| `VC4-menu-390.png` | `/`, 390×844, hamburger open | Close (×) button, the eight links stacked: Home (active, cyan), About, Skills, Projects, Talk, Approach, Experience, Contact; widget still bottom right (z-40 under the z-50 nav) | Nothing |
+| `VC4-talk-390.png` | `/talk`, 390×844 viewport | Eyebrow, "Talk to my concierge", the intro with the underlined cyan "my agent harness" link (→ `/projects/agent-harness`), the second paragraph, Connect, the Transcript panel; no widget | Nothing |
+
+Measured by a Playwright script against `next dev` on the harness port (VC4-05; script kept in the run's scratch
+directory as `vc405/run.mjs`). Next's dev-only indicator (the "N" bubble bottom left) is hidden in the captures with
+`nextjs-portal{display:none}` because production has none; nothing else is altered. All six PNGs are 53–300 KB.
+
+- **Widget vs footer at 390×844, `/about` bottom**: widget box x 318, y 772, 56×56 (bottom edge 828 = 844 − 16).
+  Footer links: GitHub x 101.3 w 46.5, LinkedIn x 171.8 w 57.0, Email x 252.8 w 36.0, all y 726.5 h 19. No
+  intersection (the widget's left edge, 318, is 29 px right of Email's right edge, 288.7, and 27 px lower).
+- **`document.documentElement.scrollWidth` at 390×844**: `/` 390, `/about` 390, `/projects` 390, `/talk` 390,
+  `/card` 390. Console errors 0 and page errors 0 on each of the five.
+- **Pulse** (`span[aria-hidden]` inside the widget, `/` at 1280): `reducedMotion: 'reduce'` → `animation-name: none`
+  (iteration count 1, duration 0s); `'no-preference'` → `animation-name: pulse`, iteration count 2, duration 2s.
+- **Keyboard on `/` at 1280**: Tab 1 Skip to content, 2 MH, 3–10 Home, About, Skills, Projects, **Talk (5th)**,
+  Approach, Experience, Contact, 11–18 the page's links (View Projects, About Me, the three project cards' links,
+  See all projects), 19–21 GitHub, LinkedIn, Email, **22 the widget**. On the widget `:focus-visible` matches and,
+  once the 150 ms `transition-colors` settles, `outline-color` is `rgb(0, 212, 255)`, solid, 2px, offset 4px. (Read
+  in the same frame as the Tab it is still `rgb(10, 10, 15)`, the text colour the transition starts from:
+  `transition-colors` in Tailwind 4 includes `outline-color`. Every `focusRing` link with `transition-colors`
+  fades in the same way; not a bug.)
+- **Print**: `node .harness/print-check.mjs http://localhost:7834 / …/VC4-print-home.png` → `PASS print`, exit 0
+  (white body, 0 visible nav/footer/canvas, 135 KB capture). The widget computes `display: none` under print media
+  and `checkVisibility()` is false; the capture's bottom shows "See all projects →" and white space, no disc.
+- **Navbar at md** (the eight-link check VC4-02 left here): at 768 the links' `ul` spans x 125–744 on one row
+  (every `li` top 20), the MH logo ends at 43, `scrollWidth` 768; at 800 and 1024 also one row. 82 px spare at 768.
 
 ## Review
 

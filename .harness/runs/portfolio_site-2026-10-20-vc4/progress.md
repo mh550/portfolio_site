@@ -11,6 +11,22 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 15:40 · VC4-05 · passes
+
+- **Screenshots** (new, 53–300 KB): `docs/screenshots/v2/VC4-home-390.png`, `VC4-home-1280.png`, `VC4-about-footer-390.png`,
+  `VC4-card-390.png`, `VC4-menu-390.png`, `VC4-talk-390.png`; plan § What Michael will see has one row per screenshot
+  plus the numbers. No layout bug found, so no code change; tests stay 1011, 76 suites.
+- Measured (Playwright on 7834, script `$HARNESS_SCRATCH/vc405/run.mjs`): `/about` bottom at 390×844, widget 318,772
+  56×56 (bottom 828), footer links y 726.5–745.5, 0 intersections; scrollWidth 390 on / /about /projects /talk /card,
+  0 console/page errors; pulse `none` under reduce, `pulse` ×2 otherwise; Tab order Skip, MH, 8 links (Talk 5th), page
+  links, footer, widget at tab 22, outline `rgb(0, 212, 255)` 2px offset 4; `/card` top 3 agent-harness,
+  voice-concierge, ghl; print-check `/` exit 0, widget `display: none`. Navbar at 768: one row, 82 px spare.
+- Gotcha for later checks: read `outline-color` ~200 ms after Tab; `transition-colors` (Tailwind 4) animates it from
+  currentColor, so a same-frame read gives `rgb(10, 10, 15)` on the widget. Not a bug.
+- Captures hide Next's dev-only "N" indicator (`nextjs-portal{display:none}`); production has none.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok` (1011 passed); smoke exit 0, 42 PASS.
+- Next (VC4-06): the Opus review + simplify of the VC4 diff (`git diff f9e8a58..HEAD`).
+
 ### 2026-10-20 15:05 · VC4-04 · passes
 
 - **Intro (D62)**: `concierge.ts` gains `IntroParagraph` + `introText`; `talkPage.intro[0]` is `{ before, link: { label:
