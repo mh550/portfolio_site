@@ -230,6 +230,12 @@ module export unreliable. So:
 - The livekit-client import that starts beside the fetch (`Promise.all([import('livekit-client'), …])`) still starts
   on a configured Connect; on busy its result is unused. Not worth a second round trip to defer it.
 
+**As built (VC5-05).** As above. `fetchCredentials` reads the body of an OK reply or a 429 only; a 429 is busy only
+for `error === 'busy'` and a `reason` of `visitor` or `site`, so a busy-shaped body on a 503 is still offline. The
+status line is one `statusLine` value computed before render. The protection sentence is appended to
+`caseStudy.method.build` (the default place) and has its row in the brief's § Sentences with digits;
+`docs/notes/voice-concierge-todo.md` § Cost protection names the three layers and where each is changed.
+
 ## server-only
 
 - `package.json` `dependencies`: `"server-only": "0.0.1"` (exact, no caret; the only published version), installed

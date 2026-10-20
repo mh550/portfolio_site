@@ -179,7 +179,7 @@
         "docs/notes/voice-concierge-todo.md gains a § Cost protection naming the three layers (route limits with CONCIERGE_MAX_ROOMS default 2, the agent's 5 sessions a day and 10 minutes, the provider caps of about $45 a week) and what to change where.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-06",

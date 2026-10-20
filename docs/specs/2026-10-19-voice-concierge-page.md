@@ -154,3 +154,8 @@ VC5's plan: `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`.
 - **D70** *default* The visitor's own room name, and so their `addr10`, is inside their JWT (`video.room`); the
   address never is, and no body carries a bucket in plain text. The token TTL stays 600 s (VC1). Question: cut it
   to about 60 s to narrow the mint-then-join window (§ Route behaviour, known limits)? (VC5-01 plan; VC5-04 builds.)
+- **D71** *default* The `busyVisitor` line keeps the spec's wording, "You already have a conversation open in another
+  tab.", although `reason: 'visitor'` means only "this network address has a live room": under D68 that is also the
+  visitor's own room for up to about 30 s after Leave, or another person behind the same NAT (two phones on the
+  conference Wi-Fi). Alternative: "A conversation from your network is still open. Try again in a minute." Question:
+  keep the spec's line or switch? (VC5-05 builds; a copy change in `talkPage.status.busyVisitor` only.)

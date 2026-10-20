@@ -13,7 +13,14 @@ import LatencyPanel from './LatencyPanel';
 import MemoryPanel from './MemoryPanel';
 import MessageBox from './MessageBox';
 import Transcript from './Transcript';
-import { initialSession, inRoom, sessionReducer, type Phase, type SessionAction } from './sessionReducer';
+import {
+  initialSession,
+  inRoom,
+  sessionReducer,
+  type BusyReason,
+  type Phase,
+  type SessionAction,
+} from './sessionReducer';
 
 // LiveKit (about 160 KB gzipped) loads on Connect, not with the page: livekit-client in connect(), the audio renderer
 // once there is a Room. Most visits never connect.
@@ -55,19 +62,25 @@ function teardown(session: Session) {
   room.disconnect().catch(() => {});
 }
 
-// The route answers 503 {offline: true} without LiveKit configured; any failure here reads as offline.
-async function fetchCredentials(visitorId: string): Promise<{ url: string; token: string } | null> {
+type Credentials = { kind: 'ok'; url: string; token: string } | { kind: 'busy'; reason: BusyReason };
+
+const isBusyReason = (value: unknown): value is BusyReason => value === 'visitor' || value === 'site';
+
+// The route answers 503 {offline: true} without LiveKit configured and 429 {error: 'busy', reason} when this address
+// or the whole site is at its room limit (D66). Any other failure, a 429 with another body included, reads as offline.
+async function fetchCredentials(visitorId: string): Promise<Credentials | null> {
   try {
     const res = await fetch(TOKEN_ROUTE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visitor_id: visitorId }),
     });
-    if (!res.ok) return null;
+    if (!res.ok && res.status !== 429) return null;
     const body: unknown = await res.json();
     if (typeof body !== 'object' || body === null) return null;
-    const { url, token } = body as Record<string, unknown>;
-    return typeof url === 'string' && typeof token === 'string' ? { url, token } : null;
+    const { url, token, error, reason } = body as Record<string, unknown>;
+    if (res.status === 429) return error === 'busy' && isBusyReason(reason) ? { kind: 'busy', reason } : null;
+    return typeof url === 'string' && typeof token === 'string' ? { kind: 'ok', url, token } : null;
   } catch {
     return null;
   }
@@ -201,6 +214,11 @@ export default function TalkSession({ configured = true }: { configured?: boolea
     const credentials = await fetchCredentials(getOrCreateVisitorId(browserStorage()));
     if (!session.alive) return;
     if (!credentials) return goOffline();
+    // No Room yet, so nothing to disconnect; no timer and no second request: the visitor presses Connect again.
+    if (credentials.kind === 'busy') {
+      release(session);
+      return dispatch({ type: 'busy', reason: credentials.reason });
+    }
     let lk: typeof import('livekit-client');
     try {
       [lk] = await livekit;
@@ -376,6 +394,16 @@ export default function TalkSession({ configured = true }: { configured?: boolea
   }
 
   const { status } = talkPage;
+  const statusLine =
+    phase === 'offline'
+      ? talkPage.offlineMessage
+      : phase === 'busy'
+        ? state.busyReason === 'visitor'
+          ? status.busyVisitor
+          : status.busySite
+        : phase === 'live' && micBlocked
+          ? status.micBlocked
+          : statusText[phase];
   // Once the call is over, "Try again" would point at a button that has gone.
   const forgetLine =
     forget === 'done'
@@ -410,14 +438,10 @@ export default function TalkSession({ configured = true }: { configured?: boolea
             </button>
           )}
           <p role="status" className="text-[var(--color-muted)]">
-            {phase === 'offline'
-              ? talkPage.offlineMessage
-              : phase === 'live' && micBlocked
-                ? status.micBlocked
-                : statusText[phase]}
+            {statusLine}
           </p>
         </div>
-        {phase === 'offline' && (
+        {(phase === 'offline' || phase === 'busy') && (
           <p>
             <Link
               href={talkPage.deepDiveHref}

@@ -176,6 +176,65 @@ describe('TalkSession: the token route', () => {
   });
 });
 
+// D66: a 429 {error:'busy'} says why Connect was refused and leaves the retry to the visitor.
+describe('TalkSession: the token route says busy (429)', () => {
+  beforeEach(() => jest.useFakeTimers());
+
+  it.each([
+    ['visitor', talkPage.status.busyVisitor],
+    ['site', talkPage.status.busySite],
+  ])('reason %s shows its line and Connect, makes no Room and never retries', async (reason, line) => {
+    fetchMock.mockResolvedValue(reply(429, { error: 'busy', reason }));
+    render(<TalkSession />);
+    // fireEvent.click doesn't move focus, so this is the case of a click that leaves focus on <body> (Safari): the
+    // page hands it to Connect as the session ends.
+    expect(document.body).toHaveFocus();
+    await connectWithFakeTimers();
+    expect(status()).toHaveTextContent(new RegExp(`^${line}$`));
+    expect(screen.getByRole('button', { name: talkPage.labels.connect })).toHaveFocus();
+    expect(screen.queryByRole('button', { name: talkPage.labels.leave })).toBeNull();
+    expect(screen.getByRole('link', { name: talkPage.deepDiveLabel })).toHaveAttribute('href', '/projects/voice-concierge');
+    expect(MockRoom.instances).toHaveLength(0);
+    act(() => jest.advanceTimersByTime(15_000));
+    await flush();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(status()).toHaveTextContent(new RegExp(`^${line}$`));
+    expect(MockRoom.instances).toHaveLength(0);
+    expect(micCalls()).toEqual([]);
+  });
+
+  it.each([
+    ['an unknown reason', { error: 'busy', reason: 'other' }],
+    ['another error', { error: 'rate', reason: 'site' }],
+    ['no body', null],
+  ])('a 429 with %s reads as offline', async (_, body) => {
+    fetchMock.mockResolvedValue(reply(429, body));
+    render(<TalkSession />);
+    await connectWithFakeTimers();
+    expectOffline();
+    expect(MockRoom.instances).toHaveLength(0);
+    expect(micCalls()).toEqual([]);
+  });
+
+  it('a busy body on any status but 429 reads as offline', async () => {
+    fetchMock.mockResolvedValue(reply(503, { error: 'busy', reason: 'site' }));
+    render(<TalkSession />);
+    await connectWithFakeTimers();
+    expectOffline();
+  });
+
+  it('Connect after busy asks again, and a 200 then makes the Room', async () => {
+    fetchMock.mockResolvedValueOnce(reply(429, { error: 'busy', reason: 'site' })).mockResolvedValueOnce(OK);
+    render(<TalkSession />);
+    await connectWithFakeTimers();
+    expect(status()).toHaveTextContent(talkPage.status.busySite);
+    await connectWithFakeTimers();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(MockRoom.instances).toHaveLength(1);
+    expect(status()).toHaveTextContent(talkPage.status.waiting);
+  });
+});
+
 describe('TalkSession: the room', () => {
   beforeEach(() => {
     fetchMock.mockResolvedValue(OK);
@@ -337,6 +396,37 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     expect(MockRoom.instances).toHaveLength(0);
     expect(screen.getByRole('button', { name: 'Connect' })).toBeInTheDocument();
     expect(status()).toHaveTextContent(/^$/);
+  });
+
+  it('a 429 that lands after Leave changes nothing', async () => {
+    const pending = deferred<unknown>();
+    fetchMock.mockReturnValue(pending.promise);
+    const user = userEvent.setup();
+    render(<TalkSession />);
+    await connect(user);
+    await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
+    pending.resolve(reply(429, { error: 'busy', reason: 'visitor' }));
+    await flush();
+    expect(status()).toHaveTextContent(/^$/);
+    expect(screen.getByRole('button', { name: talkPage.labels.connect })).toBeInTheDocument();
+  });
+
+  it("the first Connect's late 429 doesn't mark the second Connect busy", async () => {
+    const first = deferred<unknown>();
+    const second = deferred<unknown>();
+    fetchMock.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const user = userEvent.setup();
+    render(<TalkSession />);
+    await connect(user);
+    await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
+    await connect(user);
+    first.resolve(reply(429, { error: 'busy', reason: 'site' }));
+    await flush();
+    expect(status()).toHaveTextContent(talkPage.status.connecting);
+    second.resolve(OK);
+    await flush();
+    expect(MockRoom.instances).toHaveLength(1);
+    expect(status()).toHaveTextContent(talkPage.status.waiting);
   });
 
   it('unmount during the token fetch: no Room is ever made', async () => {

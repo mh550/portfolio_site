@@ -11,6 +11,16 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 16:30 · VC5-05 · passes
+
+- `sessionReducer.ts`: `BusyReason`, phase `busy` (from `connecting` only), `busyReason` (null in `initialSession`); Connect/Leave reset it; `inRoom('busy')` false. `TalkSession.tsx`: `fetchCredentials` returns `{kind:'ok'}` | `{kind:'busy', reason}` (429 + `error:'busy'` + visitor|site only) | null; busy releases the session and dispatches, no timer, no refetch; the status line is one `statusLine` value; deep-dive link under busy too (D66). Copy `busyVisitor`/`busySite` in `concierge.ts`. Tests 1079 → 1113 (81 suites).
+- Content: protection sentence appended to the voice-concierge `caseStudy.method.build`, verbatim row in `evidence-voice-concierge.md` § Sentences with digits, pinned by a new test; `voice-concierge-todo.md` § Cost protection (three layers, where to change each). Plan § /talk busy states has "As built (VC5-05)"; CLAUDE.md count and phases line.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end. Busy tests run 15 s of fake timers with `fetchMock` at 1 call, 0 `MockRoom` instances, no mic calls; a 429 with `reason:'other'`, another error or no body, and a busy body on a 503, read offline. Mutation: dropping the `session.alive` check after the fetch fails the new late-429 test.
+- Opus review: no Critical. Applied: late-429-after-Leave and late-429-into-second-Connect tests; the focus test now starts on `<body>` (exercises the refocus effect); todo note names `127.0.0.1`. Not taken: the page line "accepts only this site's origin" (previews are the site's; the step's wording).
+- Pre-existing, for VC5-07: `TalkSession-review.test.tsx` logs "A component suspended inside an act scope" (also on HEAD before this change).
+- Question for Michael (D71): "You already have a conversation open in another tab." is also shown for ~30 s after Leave (D68) and to a second person on the same NAT (conference Wi-Fi). Keep it, or "A conversation from your network is still open. Try again in a minute."?
+- Next (VC5-06): with no LiveKit env `/talk` never fetches (`configured={false}`), so a browser can't reach busy on the dev server; screenshots of it need the component rendered with `configured` and a stubbed route.
+
 ### 2026-10-20 15:50 · VC5-04 · passes
 
 - `route.ts` now checks Origin (403 `forbidden`, before env, D63) → env (503) → body (400) → `listLiveRooms` (503, error dropped) → `roomsVerdict` (429 `busy` visitor|site) → token for `roomNameFor(bucket)`; no `console`, `profile` from `@/lib/data`, `node:crypto` import gone. Tests 1052 → 1079 (80 → 81 suites): new `concierge-token-route-limits.test.ts` (rooms mocked by factory, real SDK; the VC1 200 cases moved here, D69); `concierge-token-route.test.ts` still mocks nothing, sends the site Origin, adds 6 × 403/dev/prod cases (`jest.replaceProperty` for production); the sdk test shows a bad id and a 403 reach neither SDK spy nor `listLiveRooms`.

@@ -41,6 +41,8 @@ export const talkPage = {
     waiting: 'Waiting for the concierge to join…',
     live: 'Connected. Say hello, or type below.',
     ended: 'The call ended.',
+    busyVisitor: 'You already have a conversation open in another tab.',
+    busySite: 'The concierge is busy right now. Try again in a few minutes.',
     micBlocked: 'Microphone blocked. You can still type.',
     forgetConfirm: 'Erase everything the concierge remembers about you?',
     forgotten: 'Forgotten',
