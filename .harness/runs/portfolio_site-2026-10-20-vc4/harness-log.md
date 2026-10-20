@@ -6,3 +6,4 @@
 - 2026-10-20 13:57 · VC4-05 · claude-opus-5-5 · passes=true · 4 min · 5/13 passing
 - 2026-10-20 14:06 · VC4-06 · claude-opus-5-5 · passes=true · 9 min · 6/13 passing
 - 2026-10-20 14:06 · merged main into harness/portfolio_site-2026-10-20-vc4
+- 2026-10-20 14:09 · VC4 verified and tagged run/portfolio_site-2026-10-20-vc4/VC4
