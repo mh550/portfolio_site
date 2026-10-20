@@ -384,4 +384,27 @@ facts, but each is a number a reader could take for a measurement, and the page 
 
 ## What Michael will see
 
-VC3-04 fills this: one row per screenshot (page · what is on screen · anything that looks wrong).
+VC3-04, 2026-10-20. Captures and measurements from the harness dev server (port 7832, no `LIVEKIT_*` env),
+390 × 844 and 1280 × 844, `reducedMotion: 'reduce'`, after scrolling top to bottom and back (ScrollReveal); full
+pages saved as 256-colour palette PNGs with sharp (script: `$HARNESS_SCRATCH/vc3-shots.mjs`). The round "N" at the
+left is the Next dev indicator, not on the live site.
+
+- **Horizontal scroll:** `document.documentElement.scrollWidth` = 390 on the deep-dive and on `/card` at 390 (1280
+  at 1280).
+- **Diagram at 390, stacked:** the three panels share x 45 and width 300 (the figure's content box: 342 − 2 × 1 px
+  border − 2 × 20 px padding, so full width), at y 1180, 1543, 1764, each below the one before. The step's "above
+  300 px" reads as ≥ 300: 300 is the widest a panel can be inside the shared `figure` (`p-5`), which every diagram
+  uses. **At 1280, side by side:** all three at y 962, x 305 / 598 / 813, widths 197 / 119 / 162.
+- **`/card` at 390 × 844:** h1 `y 164 → bottom 200`; Save contact `y 336 → bottom 384`; Talk to my concierge
+  `y 452 → bottom 496`, so all three show without scrolling. Link order: Save contact, LinkedIn, Email, GitHub, Talk
+  to my concierge (`/talk`), the three Selected work cards, Full portfolio, Show QR.
+- **Errors:** 0 console errors and 0 page errors on both pages at both widths.
+- **Print:** `node .harness/print-check.mjs http://localhost:7832 /projects/voice-concierge
+  $HARNESS_SCRATCH/print-voice-concierge.png` → `PASS print` (white body, black text, no visible nav/footer/canvas,
+  0 hidden reveals, every link underlined), exit 0.
+
+| Page | What is on screen | Anything wrong |
+|---|---|---|
+| `/projects/voice-concierge` · 390 (`docs/screenshots/v2/VC3-voice-concierge-390.png`, 221 KB, 390 × 7574) | Hamburger navbar; ← Projects; eyebrow "PERSONAL · OPEN SOURCE"; the title on four lines; the summary; "Designer and operator · Oct 2026"; eight tech chips; The Problem; the diagram stacked (Visitor's browser and this site with /talk page → visitor id → /api/concierge/token; down arrows "connect with the token", "audio and text streams"; LiveKit Cloud with Room; "dispatch", "audio and text streams"; My home box with Agent worker → facts and journal → SQLite thread store) and its caption; The Method (01–05); Key Decisions VC-A…VC-F, each with Cost; Outcome; Links (▶ Talk to my concierge, `</>` voice-concierge on GitHub); How it was built; ← Back to all projects; footer | Nothing to fix. Minor, left as is: the token node's sub-line breaks with "token" alone on the second line; the short decision titles (VC-C, VC-F) sit beside their badge while the longer ones wrap under it (the shared `DecisionLog`, same on every case study) |
+| `/projects/voice-concierge` · 1280 (`VC3-voice-concierge-1280.png`, 260 KB, 1280 × 4618) | Full navbar (seven links, no Talk, D49); title on three lines in the 720 px column; the diagram's three panels side by side with right arrows level with the first nodes; caption under; the method, decisions, outcome and links as at 390, wider | Nothing to fix. The panels are narrow (197 / 119 / 162 px), so the mono sub-lines wrap to three or four lines; accepted at VC3-03's review (flex ratios keep `/api/concierge/token` on one line) |
+| `/card` · 390 (`VC3-card-390.png`, 40 KB, 390 × 1322) | Photo; name; title; positioning line; Save contact (accent, full width); LinkedIn · Email · GitHub row; the new full-width "Talk to my concierge" button, same outline style as the row; the conference note; Selected work (the same three cards as before); Full portfolio →; Show QR | Nothing to fix |

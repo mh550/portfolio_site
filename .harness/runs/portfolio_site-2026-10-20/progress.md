@@ -14,6 +14,14 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 07:50 · VC3-04 · passes
+
+- New captures `docs/screenshots/v2/VC3-voice-concierge-390.png` (221 KB), `-1280.png` (260 KB), `VC3-card-390.png` (40 KB), 256-colour PNGs from `$HARNESS_SCRATCH/vc3-shots.mjs` (reduced motion, scrolled first). VC3 plan § What Michael will see filled (measurements + one row per screenshot). No code change; tests 982 → 982, suites 74.
+- Measured: deep-dive scrollWidth 390 at 390; diagram panels stacked at 390 (x 45, width 300 each, y 1180/1543/1764), side by side at 1280 (y 962, widths 197/119/162); `/card` at 390×844 h1 bottom 200, Save contact 384, Talk to my concierge 496; 0 console/page errors on both pages at both widths. Print check `PASS print`, exit 0. Smoke 42 PASS; check.sh green; jest 982/74.
+- Nothing looked wrong enough to fix; two minor notes in the plan table (token sub-line orphan, short decision titles sit beside their badge in the shared DecisionLog).
+- Proposed changes: step 2's "each panel's boundingBox width above 300 px" can't hold: 300 is the figure's content box (342 − 2 border − 2×20 padding), so the panels are full width; read as ≥ 300.
+- Next (VC3-05): the diff for review starts at the parent of `ade5c9f` (VC3-01).
+
 ### 2026-10-20 07:20 · VC3-03 · passes
 
 - `DiagramKey` + `VoiceConciergeDiagram` in `diagrams/index.tsx` (three panels, five nodes, labelled arrows; a small `PanelConnector` draws each arrow down below md and right from md; `Panel` gains an optional `className` for flex ratios). The entry sets `architectureDiagram: 'voice-concierge'`. `/card` gains "Talk to my concierge" under the LinkedIn/Email/GitHub row. v2 spec D48 (card placement) and D49 (Navbar unchanged). Tests 959 → 982, suites 74.
