@@ -10,6 +10,30 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 · verify B2
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| B2-01 | 1 | Read scripts/build-booth-bundle.mjs; ran `npm run booth-bundle` twice; `git status --short public/b/h.tgz` | Prints `wrote public/b/h.tgz (14 files, 24887 bytes)`; status clean; package.json has the script. Tar flags differ from the step's literal text (members come from `git ls-files`, D57; `--mode=a-x,a=rX,u+w`), same intent | yes |
+| B2-01 | 2 | `tar -tzf public/b/h.tgz`, greps; `git ls-files public/b/h.tgz` | 17 entries all `mh_harness/`; no pycache/pyc/results.jsonl/logs/work; all named files and 5 tests files present; tgz tracked | yes |
+| B2-01 | 3 | `npx jest src/__tests__/lib/booth-bundle.test.ts`; read the test | 6 pass (>=4): gzip magic 1f8b, single top entry, git-ls-files list, Buffer bytes equal, rebuild equal, python unittest from extracted copy with PYTHONDONTWRITEBYTECODE; node env, skip message present | yes |
+| B2-01 | 4 | Appended `x` to README.md, reran test, restored; read plan §Mutation check | Bytes-equal and rebuild tests red, others green; restored, `git status` clean; plan records it | yes |
+| B2-01 | 5 | Read docs/notes/booth-bundle.md | Has both curl lines, per-file fallback for PROMPTS.md/adapter.py, `Read mh_harness/PROMPTS.md and do Step 1`, rebuild + commit, drift test, unlinked on purpose | yes |
+| B2-01 | 6 | Read CLAUDE.md; `npx jest --silent` | Routes row and Commands line present; Tests: 649 passed, 58 suites matches CLAUDE.md | yes |
+| B2-01 | 7 | `lib/check.sh`; `node .harness/smoke.mjs` | check: green (cached, same code tree); smoke has no non-PASS lines | yes |
+| B2-02 | 1 | curl|tar from :7833 into a temp dir; `curl -sI`; `curl -sLO` PROMPTS.md + cmp | One entry mh_harness, file list equals tar -tzf; HTTP/1.1 200 OK; PROMPTS.md identical | yes |
+| B2-02 | 2 | In extracted copy: unittest, sweep round1, sweep fake-round --parallel 4 --interval 1, report --md; read plan 'What Michael will see' | 99 tests OK; refusal names base and mcps[0], exit 2; four solved rows, exit 0; markdown table printed; plan has the section | yes |
+| B2-02 | 3 | `tar --version`; python tarfile open; `tar -tzf | wc -l` | GNU tar 1.35; format 2 (USTAR); 17 members = 17 lines | yes |
+| B2-02 | 4 | `grep -rn '/b/' src/ .harness/smoke-routes.txt`; sitemap grep -c; robots.txt; smoke | Grep hits only comments in booth-bundle.test.ts (paths like public/b/), no link or route; sitemap 0; robots has no /b/; smoke green | yes |
+| B2-02 | 5 | `git status --short`; read plan headings | Clean; plan has Files, What Michael will see, Review | yes |
+| B2-02 | 6 | `lib/check.sh` | check: green (cached for this code tree) | yes |
+| B2-03 | 1 | Read plan 'Review' | Opus review of 3229eaf..HEAD from /tmp/b2.diff: 0 Critical, 3 Important, 10 Minor with file:line | yes |
+| B2-03 | 2 | Read Review table; reran booth-bundle twice | Important 1,2 fixed (D57), 3 recorded as D58 default; h.tgz status clean | yes |
+| B2-03 | 3 | Read script and test; `npx eslint scripts src/__tests__/lib/booth-bundle.test.ts` (via check.sh lint) | No unused imports, one tar invocation; check lint green | yes |
+| B2-03 | 4 | `git diff d1f2a62..HEAD --stat` grep talk/concierge; diff of package.json; src grep | 0 matching paths; package.json adds only the `booth-bundle` scripts line; no /b/ link in src; plan has anti-goals result | yes |
+| B2-03 | 5 | Compared docs/notes/booth-bundle.md and CLAUDE.md; read B2-03 progress entry | Commands agree; entry gives merge order (B1 PR #17 then B2) and the sha256 curl check | yes |
+| B2-03 | 6 | `lib/check.sh` | check: green (cached for this code tree) | yes |
+
 ### 2026-10-20 14:10 · B2-03 · passes
 
 - Opus review of `git diff 3229eaf..HEAD`: 0 Critical, 3 Important, 10 Minor. The table is in the B2 plan's "Review". Two Important were fixed RED→GREEN. (1) The test filtered the extracted tree the same way as the folder, so excluded files could ship. (2) Untracked junk such as `.pytest_cache/` got bundled. Now `scripts/build-booth-bundle.mjs` tars only `git ls-files mh_harness` (D57). The test compares against git and rebuilds into a temp dir to compare tar streams. The third Important, 21 s of Python tests inside jest, is recorded as D58 *default*. Jest 648 → 649 (58 suites). `h.tgz` is unchanged, byte for byte (sha256 `1266b778…`).
