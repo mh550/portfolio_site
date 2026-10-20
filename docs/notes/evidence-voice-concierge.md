@@ -123,6 +123,22 @@ not copied here: none of them may appear on the site.)
 | The page half (token route, `/talk`) was built by this run of the harness, VC1–VC2 | `.harness/runs/portfolio_site-2026-10-20/progress.md` |
 | Repo `github.com/mh550/voice-concierge`: `gh repo view mh550/voice-concierge --json visibility` printed `{"visibility":"PUBLIC"}` on 2026-10-20 (VC3-01) | this session |
 
+## VC4 note (2026-10-20): the harness wording
+
+Source: `docs/specs/2026-10-20-vc4-order-widget-limits.md` § VC4 item 4 (Michael's answers of 2026-10-20), built in
+VC4-04 as D62 (`docs/specs/2026-10-19-voice-concierge-page.md` § 7). The credit moves from "Claude Code agents writing
+much of the code" to the harness framing: Michael designed it, his agent harness ran the build sessions, and no
+sentence claims hand-written code (brand.md § Voice). Neither new sentence has a digit, so § Sentences with digits is
+unchanged.
+
+| Where | Before | After |
+|---|---|---|
+| `/talk` intro, first paragraph (`talkPage.intro[0]`) | This is a voice agent I designed and built on LiveKit, with Claude Code agents writing much of the code. It remembers you between visits. | A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits. ("my agent harness" links `/projects/agent-harness`) |
+| Deep-dive `caseStudy.builtWith` | … Claude Code agents wrote this page's code overnight in one run of my agent harness, and a second run is writing the agent. | … My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent. |
+| Deep-dive `caseStudy.links[2]` | (none) | The agent harness that built it → `/projects/agent-harness` (kind `doc`) |
+
+Facts behind it: § How it was built (the agent-harness is the builder; this repo's page half came from a harness run).
+
 ## Sentences with digits
 
 Every sentence of the drafted `voice-concierge` entry (`docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md`)

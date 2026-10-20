@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import ScrollReveal from '@/components/ScrollReveal';
+import { focusRing } from '@/components/focusRing';
 import TalkSession from '@/components/talk/TalkSession';
 import { conciergeEnv } from '@/lib/concierge/env';
 import { privacyNote, talkPage } from '@/lib/data';
@@ -23,8 +25,23 @@ export default function TalkPage() {
         </p>
         <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-6">{talkPage.title}</h1>
         <div className="space-y-2 text-xl leading-relaxed max-w-2xl mb-8">
-          {talkPage.intro.map((sentence) => (
-            <p key={sentence}>{sentence}</p>
+          {talkPage.intro.map((p, i) => (
+            <p key={i}>
+              {typeof p === 'string' ? (
+                p
+              ) : (
+                <>
+                  {p.before}
+                  <Link
+                    href={p.link.href}
+                    className={`text-[var(--color-accent)] underline underline-offset-4 hover:no-underline ${focusRing}`}
+                  >
+                    {p.link.label}
+                  </Link>
+                  {p.after}
+                </>
+              )}
+            </p>
           ))}
         </div>
       </ScrollReveal>

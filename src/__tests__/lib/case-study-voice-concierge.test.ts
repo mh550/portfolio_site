@@ -61,10 +61,11 @@ describe('voice-concierge entry', () => {
     practices.forEach((re, i) => expect(titles[i]).toMatch(re));
   });
 
-  it('links /talk as the demo first, then the public repo', () => {
+  it('links /talk as the demo first, then the public repo, then the harness case study (D62)', () => {
     expect(cs!.links).toEqual([
       { label: 'Talk to my concierge', href: '/talk', kind: 'demo' },
       { label: 'voice-concierge on GitHub', href: REPO, kind: 'repo' },
+      { label: 'The agent harness that built it', href: '/projects/agent-harness', kind: 'doc' },
     ]);
   });
 
@@ -76,6 +77,13 @@ describe('voice-concierge entry', () => {
   it('credits Claude Code agents under the harness (D10)', () => {
     expect(cs!.builtWith).toMatch(/Claude Code agents/);
     expect(cs!.builtWith).toMatch(/harness/);
+  });
+
+  // D62: the harness ran the build sessions; no claim of hand-written code.
+  it('says the agent harness ran the build sessions', () => {
+    expect(cs!.builtWith).toBe(
+      "The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent.",
+    );
   });
 
   it('says plainly that no latency numbers are measured and that 1.8 only maps onto 2.0', () => {

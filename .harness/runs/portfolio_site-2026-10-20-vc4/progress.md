@@ -11,6 +11,22 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 15:05 · VC4-04 · passes
+
+- **Intro (D62)**: `concierge.ts` gains `IntroParagraph` + `introText`; `talkPage.intro[0]` is `{ before, link: { label:
+  'my agent harness', href: '/projects/agent-harness' }, after }` ("A voice agent I designed on LiveKit and built with
+  my agent harness: specs in, verified milestones out. It remembers you between visits."). `talk/page.tsx` renders it
+  with `next/link` (accent, underline, `focusRing`). `grep -rn 'writing much of the code' src/` is empty.
+- **Deep-dive**: `voice-concierge` `builtWith` is the plan's sentence ("My agent harness ran the build sessions…");
+  `caseStudy.links[2]` = "The agent harness that built it" → `/projects/agent-harness`, kind `doc`.
+- Docs: evidence brief § VC4 note (before/after table), D62 marked built, CLAUDE.md (intro shape, 1011 tests).
+- Tests: talk +1 (link name/href/focusRing; paragraphs by `textContent`), concierge-data +1, case-study +1 (full
+  `builtWith`), links test gains the third entry. 1008 → 1011, 76 suites; 5 failed before the code, 0 after.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS; live HTML on 7834 shows
+  the anchor inside the `<p>` and the deep-dive link; 390 px `/talk` screenshot checked. Opus review: no findings.
+- Next (VC4-05): screenshots. Pre-existing, not mine: `npx tsc --noEmit` flags `booth-bundle.test.ts:92`
+  (`MH_HARNESS_HOME` not on the env type); the build is unaffected (tests are outside it).
+
 ### 2026-10-20 14:25 · VC4-03 · passes
 
 - **Widget (D61)**: new `src/components/VoiceWidget.tsx` (next/link to `/talk`, aria-label from `talkWidget` in

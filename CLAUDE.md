@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1008 tests, 76 suites after VC4-03)
+npm test             # Jest unit/integration tests (1011 tests, 76 suites after VC4-04)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -74,7 +74,8 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
-- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`
+- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`; `talkPage.intro` is
+  `IntroParagraph[]` (a string, or `{ before, link, after }`: "my agent harness" → `/projects/agent-harness`, D62), read through `introText`
 
 ### Components
 - `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Talk, Approach, Experience, Contact; Talk since VC4, D60) with active link highlighting, mobile hamburger (`"use client"`)

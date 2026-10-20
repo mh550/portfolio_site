@@ -64,7 +64,7 @@
         "docs/notes/evidence-voice-concierge.md records the wording change under a dated § VC4 note (source: the VC4 spec, Michael's answers of 2026-10-20); docs/specs/2026-10-19-voice-concierge-page.md D62 quotes the final intro sentence.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC4-05",

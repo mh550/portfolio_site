@@ -869,9 +869,10 @@ async function findOrCreateContact(ghlContact, jobtread) {
       links: [
         { label: 'Talk to my concierge', href: '/talk', kind: 'demo' },
         { label: 'voice-concierge on GitHub', href: 'https://github.com/mh550/voice-concierge', kind: 'repo' },
+        { label: 'The agent harness that built it', href: '/projects/agent-harness', kind: 'doc' },
       ],
       builtWith:
-        'The spec and the design are mine: the agent, its memory and the contract between it and this page. Claude Code agents wrote this page\'s code overnight in one run of my agent harness, and a second run is writing the agent.',
+        'The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote this page\'s code overnight in one run, and a second run is writing the agent.',
     },
   },
   {

@@ -3,7 +3,8 @@ import path from 'path';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TalkPage, { metadata } from '@/app/talk/page';
-import { privacyNote, talkPage } from '@/lib/data';
+import { focusRing } from '@/components/focusRing';
+import { introText, privacyNote, talkPage } from '@/lib/data';
 
 const ENV_KEYS = ['LIVEKIT_URL', 'LIVEKIT_API_KEY', 'LIVEKIT_API_SECRET'] as const;
 let savedEnv: Record<string, string | undefined>;
@@ -45,7 +46,20 @@ describe('TalkPage', () => {
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent('Talk to my concierge');
     expect(screen.getByText(talkPage.eyebrow)).toBeInTheDocument();
-    for (const sentence of talkPage.intro) expect(screen.getByText(sentence)).toBeInTheDocument();
+    const paragraphs = screen.getAllByRole('paragraph').map((p) => p.textContent);
+    for (const p of talkPage.intro) expect(paragraphs).toContain(introText(p));
+  });
+
+  // D62: the first intro sentence credits the agent harness and links its case study.
+  it('links "my agent harness" in the intro to the agent-harness case study', () => {
+    render(<TalkPage />);
+    const link = screen.getByRole('link', { name: 'my agent harness' });
+    expect(link).toHaveAttribute('href', '/projects/agent-harness');
+    expect(link.closest('p')).toHaveTextContent(
+      'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
+    );
+    expect(link.className).toContain('underline');
+    for (const token of focusRing.split(' ')) expect(link.className).toContain(token);
   });
 
   it('renders the session in its idle state: Connect, and no offline line yet', () => {

@@ -1,14 +1,24 @@
 // Copy for /talk, the voice concierge page (spec docs/specs/2026-10-19-voice-concierge-page.md W2, plan
-// docs/plans/2026-10-20-VC2-talk-page.md § Copy). First person, plain; no number but 30.
+// docs/plans/2026-10-20-VC2-talk-page.md § Copy; the intro is D62's). First person, plain; no number but 30.
+
+// An intro paragraph: plain text, or text with one link in it (D62: "my agent harness" links its case study).
+export type IntroParagraph = string | { before: string; link: { label: string; href: string }; after: string };
+
+/** A paragraph's full text, link label included: what a reader sees. */
+export const introText = (p: IntroParagraph): string => (typeof p === 'string' ? p : p.before + p.link.label + p.after);
 
 export const talkPage = {
   eyebrow: 'Voice concierge',
   title: 'Talk to my concierge',
   description: 'A voice agent that remembers you between visits, and shows you exactly what it remembers.',
   intro: [
-    'This is a voice agent I designed and built on LiveKit, with Claude Code agents writing much of the code. It remembers you between visits.',
+    {
+      before: 'A voice agent I designed on LiveKit and built with ',
+      link: { label: 'my agent harness', href: '/projects/agent-harness' },
+      after: ': specs in, verified milestones out. It remembers you between visits.',
+    },
     'This page shows what it remembers, where it learned each thing, and how long each turn took. Talk or type.',
-  ],
+  ] satisfies IntroParagraph[],
   // Exact, with no full stop: the tests and the spec match it word for word.
   offlineMessage: 'The concierge is offline right now',
   deepDiveHref: '/projects/voice-concierge',

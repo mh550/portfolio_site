@@ -1,9 +1,21 @@
-import { latencyLabels, privacyNote, talkPage } from '@/lib/data';
+import { introText, latencyLabels, privacyNote, talkPage } from '@/lib/data';
 
 describe('talkPage', () => {
   it('has the exact offline sentence and the deep-dive link', () => {
     expect(talkPage.offlineMessage).toBe('The concierge is offline right now');
     expect(talkPage.deepDiveHref).toBe('/projects/voice-concierge');
+  });
+
+  // D62: the harness framing, no hand-written-code claim and no number.
+  it('opens the intro with the harness wording, linking the agent-harness case study', () => {
+    expect(introText(talkPage.intro[0])).toBe(
+      'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
+    );
+    expect(talkPage.intro[0]).toMatchObject({ link: { label: 'my agent harness', href: '/projects/agent-harness' } });
+    for (const p of talkPage.intro) {
+      expect(introText(p)).not.toMatch(/\d/);
+      expect(introText(p)).not.toMatch(/Claude Code agents writing/);
+    }
   });
 
   it('has a title, an intro and the button labels', () => {

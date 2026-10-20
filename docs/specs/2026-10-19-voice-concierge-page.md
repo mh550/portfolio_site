@@ -119,4 +119,4 @@ other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
   contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out:
   Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent."; its Links
   section gains "The agent harness that built it" (`/projects/agent-harness`, kind `doc`). Supersedes the VC2 intro
-  copy (`docs/plans/2026-10-20-VC2-talk-page.md` § Copy) and VC3's `builtWith`. (VC4-01 plan; VC4-04 builds.)
+  copy (`docs/plans/2026-10-20-VC2-talk-page.md` § Copy) and VC3's `builtWith`. (VC4-01 plan; built in VC4-04, recorded in `docs/notes/evidence-voice-concierge.md` § VC4 note.)
