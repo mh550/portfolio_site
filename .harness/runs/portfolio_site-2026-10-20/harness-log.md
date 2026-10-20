@@ -11,3 +11,5 @@
 - 2026-10-20 01:45 · VC2-05 · claude-opus-5-5 · passes=true · 14 min · 8/15 passing
 - 2026-10-20 01:50 · VC2-06 · claude-opus-5-5 · passes=true · 4 min · 9/15 passing
 - 2026-10-20 02:13 · VC2-07 · claude-opus-5-5 · passes=true · 22 min · 10/15 passing
+- 2026-10-20 02:17 · verify VC2: VC2-01 failed the re-check, back in the queue (one more attempt)
+- 2026-10-20 02:17 · verify VC2: VC2-06 failed the re-check, back in the queue (one more attempt)
