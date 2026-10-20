@@ -96,7 +96,7 @@ interface SessionState {
 
 | From | Event | To | Effect |
 |---|---|---|---|
-| idle, offline, ended | Connect clicked | connecting | `getOrCreateVisitorId(window.localStorage)` **in the click handler**; `fetch('/api/concierge/token', POST)`; panels cleared |
+| idle, offline, ended | Connect clicked | connecting | `getOrCreateVisitorId(browserStorage())` (reading `window.localStorage` itself throws when storage is blocked; `browserStorage()` returns `undefined` then, VC2-02) **in the click handler**; `fetch('/api/concierge/token', POST)`; panels cleared |
 | connecting | fetch rejects, `res.status === 503`, `!res.ok`, or the body lacks string `url`/`token` | offline | nothing to release (no Room yet) |
 | connecting | 200 `{url, token}` | connecting | `new Room()`; register the three handlers; add room listeners; `await room.connect(url, token)` |
 | connecting | `connect()` rejects | offline | teardown (unregister, off, `disconnect()`) |
@@ -546,7 +546,7 @@ calls D43 becomes **D44**. VC2-04 appends:
   and is in `sitemap.ts`, but stays off the Navbar: the Navbar holds the seven sections of the site, and `/talk` is a
   demo reached from `/card` and the deep-dive (W4: "the Navbar only if the spec's Navbar rules allow it"). Reversible:
   one entry in `Navbar.tsx`'s link list.
-- **D45** *default* The visitor id is read in the Connect click handler (`getOrCreateVisitorId(window.localStorage)`),
+- **D45** *default* The visitor id is read in the Connect click handler (`getOrCreateVisitorId(browserStorage())` (reading `window.localStorage` itself throws when storage is blocked; `browserStorage()` returns `undefined` then, VC2-02)),
   not in a mount effect, and the Room is created in that handler too: no state is set from an effect
   (`react-hooks/set-state-in-effect`), the server and first client render match, StrictMode cannot register
   handlers twice, and a visitor who never presses Connect gets no id stored.

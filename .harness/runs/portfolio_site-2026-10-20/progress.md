@@ -14,6 +14,13 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 01:10 · VC2-02 · passes
+
+- **Changed:** new `src/lib/concierge/contract.ts` (§4 types, `TOPIC`, `RPC_FORGET_ME`, `parseMemory`/`parseMetrics`), `latency.ts` (`LATENCY_FIELDS`, `median`, `summarise`, `cachedShare`) and `src/lib/data/concierge.ts` (`talkPage`, `privacyNote`, `latencyLabels`, exported from the barrel). `visitorId.ts` gains `VISITOR_ID_KEY`, `newUuidV4`, `getOrCreateVisitorId` and `browserStorage()`. New fixtures in `src/__tests__/fixtures/concierge.ts` and 3 new test files. Tests 680 → 725, suites 60 → 63.
+- **Verified:** `check.sh` green; smoke 38/38; `tsc --noEmit` shows no concierge errors. An Opus review found 0 Critical issues. Fixed 1 Important (`afterEach` returned a value, a TS error) and 4 Minor: lone surrogates now count as 3 UTF-8 bytes, there are tests for 3-byte and 4-byte characters, the fallback test asserts `getRandomValues` ran, and `browserStorage()` handles a throwing `window.localStorage` getter. Not fixed: `turn` accepts 0 (§4 says only int).
+- **Next (VC2-04):** call `getOrCreateVisitorId(browserStorage())`, not `getOrCreateVisitorId(window.localStorage)`, because reading the property throws when storage is blocked. The plan's state table and D45 now say this. The 15 KiB check counts UTF-8 bytes by hand, because jsdom has no `TextEncoder`. Parsers drop the whole body on missing `facts`/`id`/`slot`/`value` or a non-integer `turn`; any other odd field reads as `null` (a missing `visitor` gives `{name:null, visits:0}`).
+- **Copy, question for Michael:** I changed the plan's intro line "a voice agent I built on LiveKit" to "I designed and built on LiveKit, with Claude Code agents writing much of the code", per brand.md § Voice (credit honestly). OK, or keep the short version?
+
 ### 2026-10-20 · VC2-01 · passes
 
 - **Changed:** new `docs/plans/2026-10-20-VC2-talk-page.md` (plan only, no code). It covers the file table, the component tree, the 6-phase state machine with a transition table, the 390/1280 layout and what sits above 844 px. It quotes every LiveKit signature from the installed `.d.ts`, plus the duplicate-handler throw (esm.mjs line 27472). It also fixes the Jest mock surface and helpers, the `concierge.ts` copy and the contract types. Tests unchanged at 680/60.

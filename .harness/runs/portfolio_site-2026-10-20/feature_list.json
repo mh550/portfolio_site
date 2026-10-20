@@ -78,7 +78,7 @@
         "src/lib/data/concierge.ts exports talkPage (title, intro, offlineMessage exactly 'The concierge is offline right now', deepDiveHref '/projects/voice-concierge', labels) and privacyNote: string[] with six entries that cover, in order: what is stored (facts, visit summary, transcript events), where (Michael's server), how long (30 days after the last visit), that the id is this browser and not a login, that Forget me erases everything about you on Michael's server while anonymous timing numbers with no text or id are kept, and that LiveKit's observability keeps the transcript and timing traces but no audio for 30 days and Forget me cannot erase those; exported from src/lib/data/index.ts; a test asserts each of the six by keyword and that no entry contains 'http', '.net' or a digit other than 30.",
         ".harness/check.sh is green."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-03",
