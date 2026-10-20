@@ -80,6 +80,29 @@ the real daily surface.
 
   Then extend the media checks in `src/__tests__/lib/case-study-home-media-server.test.ts` to count four files.
 
+## Voice Concierge (`/projects/voice-concierge`)
+
+One recording; the page carries the architecture diagram until it exists. Record it only after the morning live
+check (`docs/review-guide.md` § Morning) passes, from a real session against the running worker.
+
+1. **A 20 s screen recording of a live `/talk` session**: Connect, say your name and what you are working on, and
+   keep "What it remembers" in frame while it fills in with each fact (its channel and source). A phone capture at
+   390 px is fine; if you record the desktop, crop to the page. Use a throwaway name or your own, never a visitor's,
+   and press **Forget me** afterwards so the session's memory does not outlive the recording. No browser address bar
+   with a preview URL, no notifications. Export as MP4 (H.264, no audio track: the gallery plays it muted), under
+   ~2 MB.
+
+Destination: `public/projects/voice-concierge/01-memory-panel.mp4`. Entry, for `projects.ts` under the
+`voice-concierge` project's `detail` (a video always fills a 4:3 box and loops muted with a pause button):
+
+```ts
+media: [
+  { type: 'video', src: '/projects/voice-concierge/01-memory-panel.mp4', alt: 'A live /talk session: the memory panel fills in as I talk to the concierge', caption: '…' },
+],
+```
+
+The measured latency numbers are a separate step: `docs/notes/voice-concierge-todo.md`.
+
 ## MAXX Potential projects (`/projects/linear-ai-workflow`, `/projects/paint-estimator`)
 
 Only what you are allowed to share: ask MAXX first. A redacted or demo-data screenshot is fine; a customer name,

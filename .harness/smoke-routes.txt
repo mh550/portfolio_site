@@ -2,3 +2,4 @@
 /card/qr
 /approach
 /evidence
+/talk

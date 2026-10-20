@@ -4,3 +4,4 @@ export * from './experience';
 export * from './profile';
 export * from './approach';
 export * from './competencies';
+export * from './concierge';

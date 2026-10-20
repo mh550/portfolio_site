@@ -153,6 +153,51 @@ don't redo it.
   into view on paper. NodeGraph, FloatingLogos, the LoopingVideo button and the project page's back links use
   `print:hidden`. Diagrams print as their bordered boxes (highlighted nodes look like plain ones); there is no separate light
   palette for them. A figure with code may break across pages. (S3-01.)
+- **D41** *default* Three new runtime dependencies for the Voice Concierge page, pinned exactly (no `^`/`~`):
+  `livekit-client` 2.23.0, `@livekit/components-react` 2.9.24 and `livekit-server-sdk` 2.19.1, the latest of each on
+  npm on 2026-10-20. Reason: `docs/specs/2026-10-19-voice-concierge-page.md` §3, approved by Michael 10-19 (ground
+  rule 9). `@livekit/components-styles` is left out: the panels are Tailwind and `RoomAudioRenderer` renders no
+  visible UI. Details in `docs/plans/2026-10-20-VC1-token-route.md`. (VC1-01.)
+- **D42** *default* The token route's Jest test signs a real token with the real `livekit-server-sdk` and fake env
+  (`'k'.repeat(12)`, `'x'.repeat(32)`), then decodes and verifies it; nothing is mocked there, since signing is
+  local (no network). The voice-concierge spec's "mock `livekit-client` in Jest" applies to `livekit-client` and
+  `@livekit/components-react`, which VC2 mocks. (VC1-02.)
+- **D43** *default* The token route lower-cases a valid visitor id before using it, so the identity
+  `visitor-<id>` and the dispatch metadata `visitor_id` are always lower-case (RFC 9562 output form;
+  `crypto.randomUUID()` is lower-case already). One visitor stays one identity on the agent side even if a client
+  sends upper case. Reversible: drop the `.toLowerCase()` in `route.ts`. (VC1-03.)
+- **D44** *default* `/talk` keeps the site chrome (Navbar, skip link, Footer), is indexable (no `robots` override)
+  and is in `sitemap.ts`, but stays off the Navbar: the Navbar holds the seven sections of the site, and `/talk` is a
+  demo reached from `/card` and the deep-dive (voice-concierge spec W4). Reversible: one entry in `Navbar.tsx`'s
+  link list. (VC2-04.)
+- **D45** *default* `/talk` reads the visitor id with `getOrCreateVisitorId(browserStorage())` in the Connect click
+  handler, not in a mount effect, and creates the LiveKit `Room` in that handler too. So no state is set from an
+  effect, the server HTML and the first client render match, StrictMode cannot register the text-stream handlers
+  twice, and a visitor who never presses Connect gets no id stored. `browserStorage()` rather than
+  `window.localStorage`, because reading that property itself throws when the browser blocks site storage. (VC2-04.)
+- **D46** *default* `/talk`'s page reads the LiveKit env through `conciergeEnv()` (`src/lib/concierge/env.ts`, the
+  same check the token route makes) and passes TalkSession only `configured: boolean`. When it is false, Connect shows
+  "The concierge is offline right now" without POSTing to the token route, so the browser never logs Chromium's
+  "Failed to load resource … 503" console error, and no visitor id is stored. With the env set, Connect POSTs as
+  before and a 503 or failure still reads as offline. The page is prerendered, so the flag is fixed at build time:
+  adding the env needs a redeploy, which Vercel needs for env changes anyway. Reversible: drop the prop (it defaults
+  to `true`). (VC2-06.)
+- **D47** *default* The voice-concierge deep-dive takes `order: 5`, after the four case studies with measured
+  numbers (agent-harness, linear-ai-workflow, home-media-server, hit-list) and ahead of the older integration and
+  client pages, which move down one (ghl-jobtread-integration 6 … cherished 10). It is `featured`, so
+  `getTopProjects(3)` is unchanged: `/card`'s Selected work and the home page's Recent work still show agent-harness,
+  linear-ai-workflow and home-media-server. `/projects` shows the new card fifth, its band showing the category `ai`
+  until it has a metric. INBOX.md § Answers was empty. The feature list called this D44, already taken by `/talk`'s
+  chrome. Reversible: the `order` values in `projects.ts` and the order map in `data.test.ts`. (VC3-02.)
+- **D48** *default* `/card` gains a full-width secondary button "Talk to my concierge" (`next/link` to `/talk`, same
+  tab) directly under the LinkedIn / Email / GitHub row and above Selected work. It reuses the row's
+  `secondaryButton` (44 px, `focusRing`). The QR leads to `/card`, so a conference visitor is one tap from the voice
+  demo; the h1 and Save contact stay above it. `/card` still has exactly 3 `/projects/` links and 2 new-tab links.
+  The feature list called this D45, already taken. Reversible: delete the `Link` and its `card.test.tsx` test.
+  (VC3-03.)
+- **D49** *default* The Navbar stays at seven links: `/talk` stays off it (restating D44 for VC3) and is reached from
+  `/card`, the voice-concierge deep-dive (its Links section) and the sitemap. Adding it later is one entry in
+  `Navbar.tsx`'s link list plus `Navbar.test.tsx`. The feature list called this D43, already taken. (VC3-03.)
 
 ## Dependencies between milestones
 

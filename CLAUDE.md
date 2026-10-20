@@ -18,6 +18,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
+| `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
@@ -27,6 +28,8 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
+| `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
+| `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
 | `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
 ## Commands
@@ -35,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (649 tests, 58 suites after B2-03)
+npm test             # Jest unit/integration tests (992 tests, 75 suites after VC3-05 + B2)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -71,6 +74,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
+- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`)
 
 ### Components
 - `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Approach, Experience, Contact) with active link highlighting, mobile hamburger (`"use client"`)
@@ -81,6 +85,14 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer, none of them on `/card*` (`"use client"`)
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
 - `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
+- `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
+  (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
+  non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
+  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`;
+  also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
+  Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
+  phases (Jest mocks: see Testing)
+- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
@@ -106,6 +118,9 @@ anything else decorative with Tailwind's `print:hidden`; `src/__tests__/lib/prin
 - `src/__tests__/` — Jest + React Testing Library
 - `src/__mocks__/framer-motion.tsx` — global mock wired via `moduleNameMapper` in `jest.config.ts`; strips motion props, exports `useReducedMotion` (returns `false`)
 - Canvas mocked inline in `HeroSection.test.tsx` with `HTMLCanvasElement.prototype.getContext = jest.fn(() => null)`
+- LiveKit: `moduleNameMapper` maps `^livekit-client$` → `src/__mocks__/livekit-client.ts` (`MockRoom.setup`, `pushText`,
+  `addAgent`, `restart`) and `^@livekit/components-react$` → `src/__mocks__/livekit-components-react.tsx`; no test
+  opens a connection. Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `next/navigation` mocked in `Navbar.test.tsx` with `jest.mock('next/navigation', () => ({ usePathname: () => '/' }))`
 
 ## Design System
@@ -126,7 +141,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 
 ## Code rules
 - Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
-  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency.
+  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency. `livekit-client`,
+  `@livekit/components-react` and `livekit-server-sdk` are approved at exact pins (D41); keep `LIVEKIT_*` server-only.
 - Content lives in `src/lib/data/*.ts` (projects, experience, skills, profile, approach, competencies); components
   render it. Reuse `ScrollReveal`, `ProjectCard`, `MetricStrip`, `MediaGallery`, `CodeBlock` and the diagrams in
   `src/components/projects/diagrams/` rather than re-implementing them.

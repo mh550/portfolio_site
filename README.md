@@ -3,6 +3,9 @@
 Personal portfolio for Michael Herron, Systems & Process Engineer. Next.js (App Router), TypeScript, Tailwind CSS 4
 and Framer Motion, deployed on Vercel. Pages: home, about, skills, projects (with a case study per project),
 approach, experience, contact, and `/card`, a conference contact card with a QR code and vCard.
+`/talk` is the page for a voice concierge, a LiveKit agent designed to remember returning visitors and show what it
+keeps (the agent is built in [mh550/voice-concierge](https://github.com/mh550/voice-concierge)); with no `LIVEKIT_*` env it shows an
+offline state.
 
 ## Run it
 

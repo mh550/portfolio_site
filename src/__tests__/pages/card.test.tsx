@@ -3,7 +3,9 @@ import CardPage, { metadata } from '@/app/card/page';
 import { getTopProjects, profile, projects } from '@/lib/data';
 
 describe('CardPage', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   it('renders the name as h1 and the positioning', () => {
     render(<CardPage />);
@@ -73,6 +75,16 @@ describe('CardPage', () => {
     });
   });
 
+  it('Talk to my concierge links to /talk in the same tab, directly under the LinkedIn / Email / GitHub row (D48)', () => {
+    render(<CardPage />);
+    const talk = screen.getByRole('link', { name: 'Talk to my concierge' });
+    expect(talk).toHaveAttribute('href', '/talk');
+    expect(talk).not.toHaveAttribute('target');
+    expect(talk).toHaveClass('w-full');
+    const row = screen.getByRole('link', { name: 'Email' }).parentElement!;
+    expect(row.nextElementSibling).toBe(talk);
+  });
+
   it('Full portfolio links to / and Show QR links to /card/qr', () => {
     render(<CardPage />);
     expect(screen.getByRole('link', { name: 'Full portfolio' })).toHaveAttribute('href', '/');
@@ -84,6 +96,7 @@ describe('CardPage', () => {
     'LinkedIn (opens in new tab)',
     'Email',
     'GitHub (opens in new tab)',
+    'Talk to my concierge',
     'Full portfolio',
     'Show QR',
   ];

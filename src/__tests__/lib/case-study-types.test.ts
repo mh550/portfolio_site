@@ -61,8 +61,12 @@ describe('case-study types', () => {
     expect([badLink, badDecision, badIteration, badLesson, badMethod, badDiagrams, badCategory]).toHaveLength(7);
   });
 
-  it('systems holds agent-harness and home-media-server (M5); process holds agent-harness and hit-list (M6)', () => {
-    expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual(['agent-harness', 'home-media-server']);
+  it('systems holds agent-harness, home-media-server (M5) and voice-concierge (VC3); process holds agent-harness and hit-list (M6)', () => {
+    expect(getProjectsByCategory('systems').map((p) => p.slug)).toEqual([
+      'agent-harness',
+      'home-media-server',
+      'voice-concierge',
+    ]);
     expect(getProjectsByCategory('process').map((p) => p.slug)).toEqual(['agent-harness', 'hit-list']);
   });
 
