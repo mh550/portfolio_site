@@ -14,6 +14,18 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 · VC1-01 · passes
+
+- **Changed:** `package.json`/`package-lock.json` pin `livekit-client` 2.23.0, `@livekit/components-react` 2.9.24,
+  `livekit-server-sdk` 2.19.1 (latest per `npm view`; `components-styles` not installed). D41 *default* in the v2 spec.
+  New `docs/plans/2026-10-20-VC1-token-route.md`: quoted types, a decoded minted token, the route table, tests, live steps. Tests 643 → 643.
+- **Verified:** `npm ci` clean (741 packages); `check.sh` green (57 suites, 643 tests, lint and build ok); smoke 38/38.
+  A throwaway Jest test (node env) minted and decoded a real token, then was deleted.
+- **Next session (VC1-02):** the route test needs `/** @jest-environment node */` (under jsdom, jose resolves to its browser ESM build).
+  The token has `nbf`, **no `iat`**; dispatch `metadata` is a JSON *string*. Running `npm ci` kills the dev server; restart with `.harness/init.sh`.
+- **Proposed change:** VC1-01 step 3 names `@livekit/protocol/dist/gen/livekit_room_pb.d.ts`, which doesn't exist. The
+  types are in `dist/index.d.ts` (server SDK's nested copy 1.51.0; the top-level copy is 1.52.1, with the same declarations).
+
 ## 2026-10-20 · Initializer (Fable)
 
 **Scope (the brief wins):** VC1–VC3 of `docs/specs/2026-10-19-voice-concierge-page.md` only. The agent itself is

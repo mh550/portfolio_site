@@ -12,7 +12,10 @@
     "qr": "node scripts/make-qr.mjs"
   },
   "dependencies": {
+    "@livekit/components-react": "2.9.24",
     "framer-motion": "^12.34.0",
+    "livekit-client": "2.23.0",
+    "livekit-server-sdk": "2.19.1",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",

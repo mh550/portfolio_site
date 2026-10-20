@@ -15,7 +15,7 @@
         "The plan fixes the route's behaviour table: POST JSON {visitor_id}; 503 {\"offline\":true} when any of LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET is missing or LIVEKIT_URL does not start with wss://; 400 on a non-UUID-v4 id or an unreadable body; 200 {url, token} only; room `concierge-<12 hex>`; identity `visitor-<id>`; ttl 600 s; grants roomJoin, canPublish, canSubscribe, canPublishData; dispatch metadata {visitor_id, channel_hint:'web'}; emptyTimeout 30; `runtime = 'nodejs'`, `dynamic = 'force-dynamic'`; env read per request. It lists the spec §5 tests and the content-guard-safe way to set a fake secret in a test (`'x'.repeat(32)`, never a quoted literal of 12+ characters after `secret =`).",
         ".harness/check.sh is green after the install (lint, jest and `next build` all pass with the new packages present)."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC1-02",

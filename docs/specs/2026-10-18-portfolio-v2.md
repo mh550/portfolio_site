@@ -153,6 +153,11 @@ don't redo it.
   into view on paper. NodeGraph, FloatingLogos, the LoopingVideo button and the project page's back links use
   `print:hidden`. Diagrams print as their bordered boxes (highlighted nodes look like plain ones); there is no separate light
   palette for them. A figure with code may break across pages. (S3-01.)
+- **D41** *default* Three new runtime dependencies for the Voice Concierge page, pinned exactly (no `^`/`~`):
+  `livekit-client` 2.23.0, `@livekit/components-react` 2.9.24 and `livekit-server-sdk` 2.19.1, the latest of each on
+  npm on 2026-10-20. Reason: `docs/specs/2026-10-19-voice-concierge-page.md` §3, approved by Michael 10-19 (ground
+  rule 9). `@livekit/components-styles` is left out: the panels are Tailwind and `RoomAudioRenderer` renders no
+  visible UI. Details in `docs/plans/2026-10-20-VC1-token-route.md`. (VC1-01.)
 
 ## Dependencies between milestones
 
