@@ -10,6 +10,15 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 14:10 · B2-03 · passes
+
+- Opus review of `git diff 3229eaf..HEAD`: 0 Critical, 3 Important, 10 Minor. The table is in the B2 plan's "Review". Two Important were fixed RED→GREEN. (1) The test filtered the extracted tree the same way as the folder, so excluded files could ship. (2) Untracked junk such as `.pytest_cache/` got bundled. Now `scripts/build-booth-bundle.mjs` tars only `git ls-files mh_harness` (D57). The test compares against git and rebuilds into a temp dir to compare tar streams. The third Important, 21 s of Python tests inside jest, is recorded as D58 *default*. Jest 648 → 649 (58 suites). `h.tgz` is unchanged, byte for byte (sha256 `1266b778…`).
+- Verified: the RED list test showed `+ ".pytest_cache/CACHEDIR.TAG"`, then went green with the new script and the junk still present. The `--mtime` mutation turns the rebuild test red. A rebuild leaves `git status` clean. `npx eslint scripts …` prints nothing. `.harness/check.sh`: `check: lint ok · jest ok · build ok`. Smoke green. Anti-goals hold: no `/b/` link, `package.json` has only the `scripts` line, no talk/concierge paths.
+- Merge order for Michael: **#17 (B1) first**, then the B2 PR the harness opens after verifying B2 (`harness-merge/portfolio_site-2026-10-20-2-B2`). It needs B1's `public/b/mh_harness/`.
+- Before merging B2, run this against its Vercel preview: `curl -sL <B2 preview URL>/b/h.tgz | sha256sum` should print `1266b7783a77ceb331ce0aab750ede703d30aed260378f7c2538936741b5d24f`. If it prints something else, check whether preview protection served an HTML login page: `curl -sI` shows 401 then.
+- Question: D58 keeps the bundle's 99 Python tests in every `npm test`, adding about 21 s. Should they be gated behind `BOOTH_PY=1`? If yes, write `gate booth py` in INBOX.md.
+- Process note: this session briefly wrote an invented review summary before the real report arrived. All the fixes follow the real report.
+
 ### 2026-10-20 13:30 · B2-02 · passes
 
 - Only docs changed: filled "What Michael will see" in `docs/plans/2026-10-20-B2-booth-bundle.md`. No code fix needed. Jest stays 648/58.

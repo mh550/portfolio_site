@@ -22,7 +22,7 @@ curl -sLO https://michael-herron.vercel.app/b/mh_harness/adapter.py
 ```
 
 The same works for `run_one.py`, `sweep.py`, `report.py`, `fake_game.py` and `README.md`; fetch
-`configs/round1.json` from inside a `configs/` folder.
+`configs/round1.json` and `configs/fake-round.json` from inside a `configs/` folder. `tests/` is optional at the booth.
 
 Then tell the laptop's coding assistant:
 
@@ -39,12 +39,16 @@ npm run booth-bundle        # writes public/b/h.tgz (needs GNU tar; the bytes ar
 git add public/b/h.tgz      # commit it with the change
 ```
 
-Running it twice leaves `git status` clean. Run output (`__pycache__/`, `*.pyc`, `results.jsonl`, `logs/`, `work/`)
-is left out of the tarball and ignored by git.
+The tarball holds only the files git tracks under `public/b/mh_harness/` (D57), so `git add` a new file before
+rebuilding. Run output (`__pycache__/`, `results.jsonl`, `logs/`, `work/`, all git-ignored) and editor or tool junk
+(`.DS_Store`, `.pytest_cache/`) never ship. Running it twice leaves `git status` clean, also on macOS or Windows (the
+gzip OS byte is pinned), as long as node's zlib is the same major version.
 
 `src/__tests__/lib/booth-bundle.test.ts` fails when the tarball drifts from the folder: it extracts `h.tgz` to a temp
-dir, compares the file list and every file's bytes with `public/b/mh_harness/`, and runs the bundle's own unit tests
-(`python3 -m unittest discover -s tests`) from the extracted copy. A red "same bytes" test means: run
+dir, compares the file list with `git ls-files` and every file's bytes with `public/b/mh_harness/`, rebuilds the
+tarball into the temp dir (`node scripts/build-booth-bundle.mjs <out>`) and compares the tar streams (names, order,
+modes, owner, mtime), and runs the bundle's own unit tests (`python3 -m unittest discover -s tests`, about 21 s) from
+the extracted copy. A red "same bytes" test means: run
 `npm run booth-bundle` and commit `public/b/h.tgz`.
 
 ## Unlinked on purpose

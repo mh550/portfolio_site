@@ -266,3 +266,13 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   KILL_ON_JOB_CLOSE) cannot be tested on this Linux box this close to the booth. `sweep.py` also checks D53's
   `timeout_s`/`expected_words` before any run starts (exit 2), and ignores an old log it cannot delete.
   Alternative: the Job object, if the booth laptop is Windows and orphans show up.
+- **D57** *default* The bundle's members are `git ls-files mh_harness` (plus each file's parent folders), fed to tar
+  with `--no-recursion --null -T -` in sorted order, so untracked or git-ignored junk (`.pytest_cache/`, `.DS_Store`,
+  run output) never ships and no exclusion list exists to keep in sync; a new file needs `git add` before the rebuild.
+  Also `--dereference`, `--mode=a-x,a=rX,u+w` (files 0644, folders 0755 whatever the checkout's modes),
+  `TAR_OPTIONS=''`, `LC_ALL=C`, and the gzip OS byte pinned to 3 (Unix). `h.tgz` came out byte-identical to B2-01's.
+  The jest test rebuilds into a temp dir and compares the gunzipped tar streams (B2-03 review). Alternative: anchored
+  `--exclude` patterns for every kind of junk.
+- **D58** *default* The bundle's 99 Python unit tests stay in the default jest run (§2 B2 asks for it), adding about
+  21 s to `npm test` and `.harness/check.sh` and some timing-flake risk under load (B2-03 review). Alternative: run
+  them only with `BOOTH_PY=1` set (Michael: say `gate booth py` in INBOX.md).

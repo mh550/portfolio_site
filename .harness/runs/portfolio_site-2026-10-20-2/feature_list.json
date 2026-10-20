@@ -163,7 +163,7 @@
         "`docs/notes/booth-bundle.md` and CLAUDE.md agree on the commands; `.harness/runs/portfolio_site-2026-10-20-2/progress.md` gets the B2-03 entry with the exact merge order for Michael (B1 PR, then B2 PR) and the one-line curl check to run against the Vercel preview before merging",
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok`"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }
