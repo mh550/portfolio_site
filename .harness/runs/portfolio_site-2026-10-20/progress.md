@@ -14,6 +14,15 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 02:15 · VC2-07 · passes
+
+- **Changed:** Opus review of all of VC2 (`git diff d4c7d58..HEAD`), with a § Review table in `docs/plans/2026-10-20-VC2-talk-page.md`. **Important, fixed test-first:** (1) Connect and Leave are now one button, so focus survives every phase change; Forget me uses `aria-disabled`, and focus goes to Connect when a call ends. (2) LiveKit is out of `/talk`'s first load: `import('livekit-client')` on Connect plus the new `RoomAudio.tsx` via `next/dynamic`; the 151 KB gz chunk is gone from the page manifest. Also fixed: double-click and held-Enter guards, failed send keeps the draft, double Enter sends once, the draft is cleared per session, reconnect without the agent ends the call, "Connect again to retry" copy, no `@/lib/data` barrel in talk files. Simplified: reducer `agentIdentity`, `session.forgetting`, `release()`, `inRoom`, `TURN_PATH_FIELDS`. Tests 916 → 933, suites 71 → 72 (new `TalkSession-review.test.tsx`).
+- **Docs:** `docs/review-guide.md` § VC1–VC3 (merge order, what to look at at 390, the morning live check, undo). CLAUDE.md gains the talk/RoomAudio, `lib/concierge/` and LiveKit-mock lines, plus the counts.
+- **Verified:** `check.sh` green (`.harness/check.sh` run directly: 933 tests, lint, build); smoke 40/40. The new StrictMode test shows one 10 s timer and 1 listener per event, with all released on unmount. Mutation runs turn the timer, focus, double-click and Enter-repeat tests red. Leak grep empty. Chromium (Sonnet) at 390/1280: Enter on Connect gives the exact offline line with focus kept on Connect, 0 page errors, `scrollWidth` 390, and LiveKit is fetched only after Enter. A second Opus pass over the fixes found 1 Important (double Enter) and 3 Minors; all fixed. I looked at the 390 capture.
+- **Left (Minor, in the table):** the mic label ignores device or server mutes; a mic prompt granted after Leave keeps LiveKit's track for up to 15 s.
+- **Next (VC3):** `/projects/voice-concierge` is still a 404 from the offline link.
+- **Proposed change (harness):** `lib/check.sh` reports "6 tests" for this project. It reads Jest's `Snapshots: 6` line, not `Tests: 933`.
+
 ### 2026-10-20 03:05 · VC2-06 · passes
 
 - **Changed:** three captures in `docs/screenshots/v2/` (`VC2-talk-390.png` 39 KB, `VC2-talk-1280.png` 51 KB, `VC2-talk-offline-390.png` 41 KB, all full page) and the plan's new § What Michael will see (numbers + one row per capture). No code changes: no layout bug found. Tests unchanged at 916/71.

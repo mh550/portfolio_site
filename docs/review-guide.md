@@ -61,3 +61,46 @@ Nothing here deploys until you merge into `main`. Pushing `main` deploys product
 
 ### M9: hand-off docs
 - Changed: `docs/asset-checklist.md`, this file, `CLAUDE.md`, `README.md`. No code.
+
+## VC1–VC3: Voice Concierge
+
+Run `portfolio_site-2026-10-20`, spec `docs/specs/2026-10-19-voice-concierge-page.md`. One PR per milestone
+(`harness-merge/portfolio_site-2026-10-20-VC1`, then `-VC2`, `-VC3`), each cut from the one before.
+
+### Merge order
+1. **VC1** (PR #14): the three LiveKit packages at exact pins (D41) and `POST /api/concierge/token`. Without the
+   `LIVEKIT_*` env vars it answers 503 `{offline:true}`, so merging it changes nothing a visitor sees.
+2. **VC2**: `/talk` (`docs/plans/2026-10-20-VC2-talk-page.md`). In the sitemap, not in the Navbar (D44).
+3. **VC3**: the `/projects/voice-concierge` deep-dive and diagram, and the `/card` link to `/talk`. Until VC3 is
+   merged, the offline state's "Read how it works" link is a 404.
+
+### Look at on the preview (390 px)
+- `/talk` before Connect: the h1, the two intro lines and **Connect** above the fold; the privacy note below the
+  panels; no sideways scroll. Captures: `docs/screenshots/v2/VC2-talk-390.png`, `-1280.png`.
+- Press **Connect** with no env set: "The concierge is offline right now" and "Read how it works", both above the
+  fold (`VC2-talk-offline-390.png`). The one console line is the browser's own 503 for the token POST.
+- Tab from the top: Skip link, MH, menu, Connect, each with the cyan outline.
+
+### Morning: the live check (Michael)
+The harness never runs this (build-only policy); every check it ran saw the offline state. Start the worker first,
+per the agent repo's `MORNING.md` (`mh550/voice-concierge`).
+1. In the Vercel project settings → Environment Variables, add `LIVEKIT_URL`, `LIVEKIT_API_KEY` and
+   `LIVEKIT_API_SECRET` for **Preview** and **Production**. They stay server-only: no `NEXT_PUBLIC_` prefix.
+2. Redeploy the VC2 (or VC3) preview so the route reads them. `/talk` → Connect should go Connecting → Waiting →
+   Connected within 10 s, and the browser asks for the microphone.
+3. Say your name and what you are working on. The transcript shows both sides, and "What it remembers" fills in
+   with each fact, its channel and its source.
+4. **Leave**, then **Connect** again: expect the greeting by name and "visit 2" in the memory panel.
+5. Type a line in the message box and press Send: it shows as yours in the transcript and the concierge answers it.
+6. **Forget me** → **Erase**: "Forgotten", the memory panel empties and the call ends with a short goodbye.
+   Connect again: it greets you as a stranger (visit 1, nothing remembered).
+7. The latency panel: "Memory on the turn path" near 0 ms on every turn (memory is read before the call, not on
+   the turn); "Prompt tokens from cache" above 0 % from the second turn on; "Memory preload at connect" shown once.
+   A null field shows "–": that's the agent not reporting it, not a page bug.
+
+If something fails: the page is offline (no agent joined) → check that the worker is running and not killed; a
+second microphone prompt or no sound → press "Turn on sound"; anything else, note the step and the console.
+
+**Undo:** remove the three env vars in Vercel and redeploy: the token route answers 503 and `/talk` shows the
+offline state again. Or leave the env and turn on the worker's kill switch (agent repo `MORNING.md`): the worker
+declines the job, no agent joins, and the page shows the same offline state after 10 s.

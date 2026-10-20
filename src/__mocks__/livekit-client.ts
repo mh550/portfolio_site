@@ -10,6 +10,7 @@ export const RoomEvent = {
   Disconnected: 'disconnected',
   ParticipantConnected: 'participantConnected',
   ParticipantDisconnected: 'participantDisconnected',
+  Reconnected: 'reconnected',
   AudioPlaybackStatusChanged: 'audioPlaybackChanged',
 } as const;
 

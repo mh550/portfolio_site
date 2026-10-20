@@ -25,7 +25,7 @@ describe('median', () => {
 });
 
 describe('summarise', () => {
-  it('covers every numeric field of the metrics body', () => {
+  it('covers the turn path, in panel order, then background extraction', () => {
     expect([...LATENCY_FIELDS]).toEqual([
       'total_ms',
       'eou_ms',
@@ -33,10 +33,7 @@ describe('summarise', () => {
       'llm_ttft_ms',
       'tts_ttfb_ms',
       'memory_on_turn_path_ms',
-      'preload_ms',
       'extraction_ms',
-      'prompt_tokens',
-      'cached_tokens',
     ]);
     expect(Object.keys(summarise([metricsFull])).sort()).toEqual([...LATENCY_FIELDS].sort());
   });
@@ -57,8 +54,8 @@ describe('summarise', () => {
   });
 
   it('keeps a null last value while the median still uses earlier turns', () => {
-    const s = summarise([turn(1, { preload_ms: 45 }), turn(2, {})]);
-    expect(s.preload_ms).toEqual({ last: null, median: 45 });
+    const s = summarise([turn(1, { extraction_ms: 45 }), turn(2, {})]);
+    expect(s.extraction_ms).toEqual({ last: null, median: 45 });
   });
 
   it('is null everywhere for all-null turns and for no turns', () => {

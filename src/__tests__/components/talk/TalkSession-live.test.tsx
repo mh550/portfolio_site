@@ -271,10 +271,10 @@ describe('TalkSession live: Forget me', () => {
       () => new Promise<string>((_resolve, reject) => (rejectRpc = reject))
     );
     await erase(user);
-    expect(button(labels.forgetMe)).toBeDisabled();
+    expect(button(labels.forgetMe)).toHaveAttribute('aria-disabled', 'true');
     await act(async () => rejectRpc(new Error('Response timeout')));
     await flush();
-    expect(button(labels.forgetMe)).toBeEnabled();
+    expect(button(labels.forgetMe)).toHaveAttribute('aria-disabled', 'false');
     expect(screen.getByText(copy.forgetFailed)).toBeInTheDocument();
     expect(screen.queryByText(copy.forgotten)).toBeNull();
     expect(screen.getByText('Lisbon')).toBeInTheDocument();
@@ -285,7 +285,7 @@ describe('TalkSession live: Forget me', () => {
     room.localParticipant.performRpc.mockResolvedValueOnce(body);
     await erase(user);
     expect(screen.getByText(copy.forgetFailed)).toBeInTheDocument();
-    expect(button(labels.forgetMe)).toBeEnabled();
+    expect(button(labels.forgetMe)).toHaveAttribute('aria-disabled', 'false');
   });
 
   it("a reply from an earlier session never marks the next one's Forget me done", async () => {
@@ -303,11 +303,11 @@ describe('TalkSession live: Forget me', () => {
     });
     second.localParticipant.performRpc.mockImplementationOnce(() => new Promise<string>(() => {}));
     await erase(user);
-    expect(button(labels.forgetMe)).toBeDisabled();
+    expect(button(labels.forgetMe)).toHaveAttribute('aria-disabled', 'true');
     await act(async () => resolveFirst('{"ok":true}'));
     await flush();
     expect(screen.queryByText(copy.forgotten)).toBeNull();
-    expect(button(labels.forgetMe)).toBeDisabled();
+    expect(button(labels.forgetMe)).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('a reply that lands after Leave changes nothing', async () => {

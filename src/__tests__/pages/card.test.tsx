@@ -3,7 +3,9 @@ import CardPage, { metadata } from '@/app/card/page';
 import { getTopProjects, profile, projects } from '@/lib/data';
 
 describe('CardPage', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   it('renders the name as h1 and the positioning', () => {
     render(<CardPage />);

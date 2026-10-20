@@ -1,27 +1,23 @@
 'use client';
 
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import {
-  ConnectionState,
-  ParticipantKind,
-  Room,
-  RoomEvent,
-  type RemoteParticipant,
-  type TextStreamHandler,
-  type TextStreamReader,
-} from 'livekit-client';
-import { RoomAudioRenderer, RoomContext } from '@livekit/components-react';
+import type { RemoteParticipant, Room, TextStreamHandler, TextStreamReader } from 'livekit-client';
 import { isForgotten, parseMemory, parseMetrics, RPC_FORGET_ME, TOPIC } from '@/lib/concierge/contract';
 import { browserStorage, getOrCreateVisitorId } from '@/lib/concierge/visitorId';
-import { talkPage } from '@/lib/data';
+import { talkPage } from '@/lib/data/concierge';
 import { focusRing } from '@/components/focusRing';
 import ForgetMeButton from './ForgetMeButton';
 import LatencyPanel from './LatencyPanel';
 import MemoryPanel from './MemoryPanel';
 import MessageBox from './MessageBox';
 import Transcript from './Transcript';
-import { initialSession, sessionReducer, type Phase, type SessionAction } from './sessionReducer';
+import { initialSession, inRoom, sessionReducer, type Phase, type SessionAction } from './sessionReducer';
+
+// LiveKit (about 160 KB gzipped) loads on Connect, not with the page: livekit-client in connect(), the audio renderer
+// once there is a Room. Most visits never connect.
+const RoomAudio = dynamic(() => import('./RoomAudio'), { ssr: false });
 
 // Spec W2: no agent in the room this long after connect() resolves means the concierge is offline.
 export const AGENT_JOIN_TIMEOUT_MS = 10_000;
@@ -44,7 +40,6 @@ interface Session {
   sent: number; // typed messages so far: each one's transcript key
   micWanted: boolean; // what the last mic press asked for, ahead of the answer
   micSeq: number; // only the newest setMicrophoneEnabled call's answer is shown
-  forgetting: boolean; // a Forget me RPC is in flight
 }
 
 // Idempotent. Listeners come off before disconnect(), so our own disconnect doesn't read as the call dropping.
@@ -89,8 +84,6 @@ function readBody<T>(reader: TextStreamReader, parse: (text: string) => T | null
   );
 }
 
-const isAgent = (p: Pick<RemoteParticipant, 'kind'>) => p.kind === ParticipantKind.AGENT;
-
 // A browser that blocks autoplay keeps the agent silent until startAudio() runs inside a user gesture. LiveKit
 // reports a refused play() with RoomEvent.AudioPlaybackStatusChanged, which shows Turn on sound; this also runs once
 // connect() resolves and on each mic or Send click, in case one of them is enough.
@@ -118,8 +111,15 @@ export default function TalkSession() {
   // The same Room as sessionRef's, for RoomContext during render (a ref can't be read in render). Set and cleared
   // with it: made in connect(), gone on Leave, offline or a dropped call.
   const [room, setRoom] = useState<Room | null>(null);
+  // Counts Connects: MessageBox is keyed on it, so each session starts with an empty box.
+  const [sessionCount, setSessionCount] = useState(0);
+  // Connect and Leave are one button, so focus stays on it as the phase changes.
+  const primaryRef = useRef<HTMLButtonElement>(null);
+  const wasInSession = useRef(false);
+  const { phase, micOn, micBlocked, audioBlocked, forget } = state;
+  const inSession = inRoom(phase);
 
-  // The only effect: release the room on unmount. Under StrictMode's first, simulated unmount there is none yet.
+  // Release the room on unmount. Under StrictMode's first, simulated unmount there is none yet.
   useEffect(() => {
     return () => {
       // The ref holds data, not a DOM node: reading its latest value at unmount is the point.
@@ -128,10 +128,24 @@ export default function TalkSession() {
     };
   }, []);
 
-  function endSession() {
-    if (sessionRef.current) teardown(sessionRef.current);
-    sessionRef.current = null;
+  // When a call ends, a control that went with it (Forget me, or the message box turning disabled) leaves focus on
+  // <body>: hand it to Connect. Never on page load.
+  useEffect(() => {
+    const active = document.activeElement as HTMLElement | null;
+    const lost = !active || active === document.body || (active as HTMLButtonElement).disabled;
+    if (wasInSession.current && !inSession && lost) primaryRef.current?.focus({ preventScroll: true });
+    wasInSession.current = inSession;
+  }, [inSession]);
+
+  function release(session: Session) {
+    teardown(session);
     setRoom(null);
+  }
+
+  // The session stays in sessionRef after offline or a drop, so a Forget me answer that lands later is still shown.
+  function endSession() {
+    if (sessionRef.current) release(sessionRef.current);
+    sessionRef.current = null;
   }
 
   // A rejection (a NotAllowedError when the visitor or the browser refuses the mic) only notes it: the session stays
@@ -165,25 +179,37 @@ export default function TalkSession() {
       sent: 0,
       micWanted: false,
       micSeq: 0,
-      forgetting: false,
     };
     sessionRef.current = session;
+    setSessionCount((n) => n + 1);
     dispatch({ type: 'connect' });
     const send = (action: SessionAction) => {
       if (session.alive) dispatch(action);
     };
     const goOffline = () => {
       if (!session.alive) return;
-      teardown(session);
-      setRoom(null);
+      release(session);
       dispatch({ type: 'offline' });
     };
 
+    // LiveKit and the audio renderer load alongside the token request; a failed load reads as offline, like a failed
+    // connect(), and once loaded RoomAudio's next/dynamic can't fail later.
+    const livekit = Promise.all([import('livekit-client'), import('./RoomAudio')]);
+    livekit.catch(() => {});
     const credentials = await fetchCredentials(getOrCreateVisitorId(browserStorage()));
     if (!session.alive) return;
     if (!credentials) return goOffline();
+    let lk: typeof import('livekit-client');
+    try {
+      [lk] = await livekit;
+    } catch {
+      return goOffline();
+    }
+    if (!session.alive) return;
+    const { ConnectionState, ParticipantKind, RoomEvent } = lk;
+    const isAgent = (p: Pick<RemoteParticipant, 'kind'>) => p.kind === ParticipantKind.AGENT;
 
-    const room = new Room();
+    const room = new lk.Room();
     session.room = room;
     setRoom(room);
 
@@ -220,15 +246,14 @@ export default function TalkSession() {
     const agentArrived = (identity: string) => {
       clearTimeout(session.timer);
       session.agentIdentity = identity;
-      send({ type: 'agentJoined', identity });
+      send({ type: 'agentJoined' });
     };
     const onParticipantConnected = (p: RemoteParticipant) => {
       if (session.alive && !session.agentIdentity && isAgent(p)) agentArrived(p.identity);
     };
     const dropped = () => {
       if (!session.alive) return;
-      teardown(session);
-      setRoom(null);
+      release(session);
       dispatch({ type: 'dropped' });
     };
     // A full reconnect (say Wi-Fi to cellular) first unwinds every remote participant, then sets the state to
@@ -240,16 +265,22 @@ export default function TalkSession() {
         if (room.state !== ConnectionState.Reconnecting) dropped();
       });
     };
+    // A reconnect emits nothing for an agent that left during the outage: look for it once the room is back.
+    const onReconnected = () => {
+      if (session.agentIdentity && !room.remoteParticipants.has(session.agentIdentity)) dropped();
+    };
     const onPlayback = () => send({ type: 'audio', blocked: !room.canPlaybackAudio });
     room
       .on(RoomEvent.ParticipantConnected, onParticipantConnected)
       .on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
+      .on(RoomEvent.Reconnected, onReconnected)
       .on(RoomEvent.Disconnected, dropped)
       .on(RoomEvent.AudioPlaybackStatusChanged, onPlayback);
     session.removeListeners = () => {
       room
         .off(RoomEvent.ParticipantConnected, onParticipantConnected)
         .off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
+        .off(RoomEvent.Reconnected, onReconnected)
         .off(RoomEvent.Disconnected, dropped)
         .off(RoomEvent.AudioPlaybackStatusChanged, onPlayback);
     };
@@ -276,6 +307,17 @@ export default function TalkSession() {
     dispatch({ type: 'leave' });
   }
 
+  // Leave appears under the pointer as Connect turns into it: a double click on Connect must not end the call, nor
+  // must a held Enter (its repeats are dropped in onPrimaryKeyDown).
+  function onPrimaryClick(event: MouseEvent<HTMLButtonElement>) {
+    if (!inSession) void connect();
+    else if (event.detail <= 1) leave();
+  }
+
+  function onPrimaryKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.repeat) event.preventDefault();
+  }
+
   function toggleMic() {
     const session = sessionRef.current;
     if (!session?.room) return;
@@ -288,14 +330,22 @@ export default function TalkSession() {
     sessionRef.current?.room?.startAudio().catch(() => {});
   }
 
-  // The agent doesn't echo lk.chat back, so the typed line goes into the transcript here, as final. A send that
-  // fails (the room going away under it) is dropped quietly; the call's end says the rest.
-  function sendMessage(text: string) {
+  // The agent doesn't echo lk.chat back, so the typed line goes into the transcript here, as final, once it is sent.
+  // A send that fails adds no line, and MessageBox keeps the draft.
+  async function sendMessage(text: string): Promise<boolean> {
     const session = sessionRef.current;
-    if (!session?.room) return;
-    unlockAudio(session.room);
-    session.room.localParticipant.sendText(text, { topic: TOPIC.chat }).catch(() => {});
+    const room = session?.room;
+    if (!session || !room) return false;
+    unlockAudio(room);
+    try {
+      await room.localParticipant.sendText(text, { topic: TOPIC.chat });
+    } catch {
+      return false;
+    }
+    // Sent, even if the call ended meanwhile: the draft clears either way, so it can't go out twice.
+    if (!session.alive) return true;
     dispatch({ type: 'line', line: { key: `typed-${++session.sent}`, who: 'visitor', text, final: true } });
+    return true;
   }
 
   // After {ok: true} the agent sends one last, empty memory and ends the call (spec §4): the answer may arrive after
@@ -303,8 +353,8 @@ export default function TalkSession() {
   async function forgetMe() {
     const session = sessionRef.current;
     const destinationIdentity = session?.agentIdentity;
-    if (!session?.room || !destinationIdentity || session.forgetting) return;
-    session.forgetting = true;
+    // ForgetMeButton is aria-disabled while busy; this is the one guard against a second RPC.
+    if (!session?.room || !destinationIdentity || forget === 'busy') return;
     dispatch({ type: 'forgetStart' });
     let ok = false;
     try {
@@ -318,44 +368,48 @@ export default function TalkSession() {
     } catch {
       // a timeout or an error from the agent: the visitor can try again
     }
-    session.forgetting = false;
     if (sessionRef.current === session) dispatch({ type: ok ? 'forgotten' : 'forgetFailed' });
   }
 
-  const { phase, micOn, micBlocked, audioBlocked, forget } = state;
-  const inSession = phase === 'connecting' || phase === 'waiting' || phase === 'live';
-  const forgetLine = forget === 'done' ? talkPage.status.forgotten : forget === 'failed' ? talkPage.status.forgetFailed : '';
+  const { status } = talkPage;
+  // Once the call is over, "Try again" would point at a button that has gone.
+  const forgetLine =
+    forget === 'done'
+      ? status.forgotten
+      : forget === 'failed'
+        ? phase === 'live'
+          ? status.forgetFailed
+          : status.forgetFailedEnded
+        : '';
 
   return (
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
       <div className="space-y-6">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          {inSession ? (
-            <>
-              <button type="button" className={quiet} onClick={leave}>
-                {talkPage.labels.leave}
-              </button>
-              {(phase === 'waiting' || phase === 'live') && (
-                <button type="button" className={quiet} onClick={toggleMic}>
-                  {micOn ? talkPage.labels.micOn : talkPage.labels.micOff}
-                </button>
-              )}
-              {audioBlocked && (
-                <button type="button" className={primary} onClick={startAudio}>
-                  {talkPage.labels.startAudio}
-                </button>
-              )}
-            </>
-          ) : (
-            <button type="button" className={primary} onClick={() => void connect()}>
-              {talkPage.labels.connect}
+          <button
+            type="button"
+            ref={primaryRef}
+            className={inSession ? quiet : primary}
+            onClick={onPrimaryClick}
+            onKeyDown={onPrimaryKeyDown}
+          >
+            {inSession ? talkPage.labels.leave : talkPage.labels.connect}
+          </button>
+          {(phase === 'waiting' || phase === 'live') && (
+            <button type="button" className={quiet} onClick={toggleMic}>
+              {micOn ? talkPage.labels.micOn : talkPage.labels.micOff}
+            </button>
+          )}
+          {inSession && audioBlocked && (
+            <button type="button" className={primary} onClick={startAudio}>
+              {talkPage.labels.startAudio}
             </button>
           )}
           <p role="status" className="text-[var(--color-muted)]">
             {phase === 'offline'
               ? talkPage.offlineMessage
               : phase === 'live' && micBlocked
-                ? talkPage.status.micBlocked
+                ? status.micBlocked
                 : statusText[phase]}
           </p>
         </div>
@@ -370,7 +424,7 @@ export default function TalkSession() {
           </p>
         )}
         <Transcript lines={state.lines}>
-          <MessageBox disabled={phase !== 'live'} onSend={sendMessage} />
+          <MessageBox key={sessionCount} disabled={phase !== 'live'} onSend={sendMessage} />
         </Transcript>
       </div>
       <div className="space-y-6">
@@ -383,11 +437,7 @@ export default function TalkSession() {
           </p>
         </div>
       </div>
-      {room && (
-        <RoomContext.Provider value={room}>
-          <RoomAudioRenderer />
-        </RoomContext.Provider>
-      )}
+      {room && <RoomAudio room={room} />}
     </div>
   );
 }

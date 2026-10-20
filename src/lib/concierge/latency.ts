@@ -1,18 +1,17 @@
 import type { MetricsBody } from './contract';
 
-// The numeric fields of a metrics body, in the order the latency panel lists them.
-export const LATENCY_FIELDS = [
+// The turn-path steps, in the order the latency panel lists them.
+export const TURN_PATH_FIELDS = [
   'total_ms',
   'eou_ms',
   'stt_ms',
   'llm_ttft_ms',
   'tts_ttfb_ms',
   'memory_on_turn_path_ms',
-  'preload_ms',
-  'extraction_ms',
-  'prompt_tokens',
-  'cached_tokens',
 ] as const;
+// Every field the panel shows as last and median: the turn path, then background extraction. The preload is shown
+// once and the token counts only as cachedShare, so neither is summarised.
+export const LATENCY_FIELDS = [...TURN_PATH_FIELDS, 'extraction_ms'] as const;
 
 export type LatencyField = (typeof LATENCY_FIELDS)[number];
 export type LatencySummary = Record<LatencyField, { last: number | null; median: number | null }>;

@@ -156,7 +156,7 @@
         "CLAUDE.md: the Routes table gains /talk, Components gains src/components/talk/ and src/lib/concierge/ (one line each), Testing names the two LiveKit mocks and the moduleNameMapper entries, and the test and suite counts match `npx jest --silent 2>&1 | tail -5`.",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC3-01",

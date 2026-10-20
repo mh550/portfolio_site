@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { talkPage } from '@/lib/data';
+import { talkPage } from '@/lib/data/concierge';
 import { focusRing } from '@/components/focusRing';
 import TalkPanel from './TalkPanel';
 

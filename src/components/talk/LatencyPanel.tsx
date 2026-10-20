@@ -1,11 +1,8 @@
 import type { MetricsBody } from '@/lib/concierge/contract';
-import { cachedShare, median, summarise } from '@/lib/concierge/latency';
-import { latencyLabels, talkPage } from '@/lib/data';
+import { TURN_PATH_FIELDS, cachedShare, median, summarise } from '@/lib/concierge/latency';
+import { latencyLabels, talkPage } from '@/lib/data/concierge';
 import TalkPanel from './TalkPanel';
 import { DASH, ms, percent } from './format';
-
-// The turn-path steps, in the order the panel lists them.
-const TURN_ROWS = ['total_ms', 'eou_ms', 'stt_ms', 'llm_ttft_ms', 'tts_ttfb_ms', 'memory_on_turn_path_ms'] as const;
 
 const numberCell = 'whitespace-nowrap py-1.5 pl-3 text-right tabular-nums text-white';
 
@@ -57,7 +54,7 @@ export default function LatencyPanel({ turns }: { turns: MetricsBody[] }) {
           </tr>
         </thead>
         <tbody>
-          {TURN_ROWS.map((field) => (
+          {TURN_PATH_FIELDS.map((field) => (
             <Row
               key={field}
               label={latencyLabels[field]}

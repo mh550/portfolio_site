@@ -8,7 +8,6 @@ export type ForgetStatus = 'idle' | 'busy' | 'done' | 'failed';
 
 export interface SessionState {
   phase: Phase;
-  agentIdentity: string | null; // set on entering live: the RPC destination
   memory: MemoryBody | null;
   turns: MetricsBody[]; // every metrics body this session, in arrival order
   lines: TranscriptLine[];
@@ -21,7 +20,7 @@ export interface SessionState {
 export type SessionAction =
   | { type: 'connect' } // Connect clicked: a fresh session
   | { type: 'connected' } // room.connect() resolved with no agent in the room yet
-  | { type: 'agentJoined'; identity: string }
+  | { type: 'agentJoined' } // TalkSession keeps the agent's identity (the RPC destination) on its session
   | { type: 'offline' } // 503, non-OK, fetch or connect() rejected, or no agent within 10 s
   | { type: 'dropped' } // the agent left or the room disconnected (not by us)
   | { type: 'leave' }
@@ -37,7 +36,6 @@ export type SessionAction =
 
 export const initialSession: SessionState = {
   phase: 'idle',
-  agentIdentity: null,
   memory: null,
   turns: [],
   lines: [],
@@ -52,8 +50,8 @@ export const initialSession: SessionState = {
 const settle = (lines: TranscriptLine[]) =>
   lines.some((line) => !line.final) ? lines.map((line) => ({ ...line, final: true })) : lines;
 
-// Phases in which a Room exists and its text streams may still land.
-const inRoom = (phase: Phase) => phase === 'connecting' || phase === 'waiting' || phase === 'live';
+// Phases in which a Room exists and its text streams may still land: the visitor is in a session.
+export const inRoom = (phase: Phase) => phase === 'connecting' || phase === 'waiting' || phase === 'live';
 
 // An event that doesn't fit the current phase (a late callback from a session already over) changes nothing.
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
@@ -66,17 +64,17 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return state.phase === 'connecting' ? { ...state, phase: 'waiting' } : state;
     case 'agentJoined':
       return state.phase === 'connecting' || state.phase === 'waiting'
-        ? { ...state, phase: 'live', agentIdentity: action.identity }
+        ? { ...state, phase: 'live' }
         : state;
     case 'offline':
       return state.phase === 'connecting' || state.phase === 'waiting'
-        ? { ...state, phase: 'offline', agentIdentity: null, lines: settle(state.lines) }
+        ? { ...state, phase: 'offline', lines: settle(state.lines) }
         : state;
     case 'dropped':
       // Before the agent arrived a dropped room reads as offline; after, the call ended and what was said stays.
-      if (state.phase === 'live') return { ...state, phase: 'ended', agentIdentity: null, lines: settle(state.lines) };
+      if (state.phase === 'live') return { ...state, phase: 'ended', lines: settle(state.lines) };
       return state.phase === 'connecting' || state.phase === 'waiting'
-        ? { ...state, phase: 'offline', agentIdentity: null, lines: settle(state.lines) }
+        ? { ...state, phase: 'offline', lines: settle(state.lines) }
         : state;
     case 'leave':
       return initialSession;

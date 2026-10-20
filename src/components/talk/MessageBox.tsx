@@ -1,22 +1,34 @@
 'use client';
 
-import { useId, useState, type FormEvent } from 'react';
-import { talkPage } from '@/lib/data';
+import { useId, useRef, useState, type FormEvent } from 'react';
+import { talkPage } from '@/lib/data/concierge';
 import { focusRing } from '@/components/focusRing';
 
 // The text box under the transcript. Client only for the draft; the parent sends it (lk.chat) and adds the line.
-// Enter submits the form, as Send does; whitespace alone sends nothing.
-export default function MessageBox({ disabled, onSend }: { disabled: boolean; onSend: (text: string) => void }) {
+// Enter submits the form, as Send does; whitespace alone sends nothing. The draft clears only once `onSend` says it
+// went, and only if the visitor hasn't typed on since; while a send is out, another Enter sends nothing.
+export default function MessageBox({
+  disabled,
+  onSend,
+}: {
+  disabled: boolean;
+  onSend: (text: string) => Promise<boolean>;
+}) {
   const [draft, setDraft] = useState('');
   const inputId = useId();
+  const pending = useRef(false);
   const { labels } = talkPage;
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = draft.trim();
-    if (disabled || !text) return;
-    onSend(text);
-    setDraft('');
+    if (disabled || !text || pending.current) return;
+    pending.current = true;
+    const sent = draft;
+    void onSend(text).then((ok) => {
+      pending.current = false;
+      if (ok) setDraft((current) => (current === sent ? '' : current));
+    });
   };
 
   return (

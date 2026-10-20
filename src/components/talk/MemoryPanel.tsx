@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { MemoryBody, MemoryFact } from '@/lib/concierge/contract';
-import { talkPage } from '@/lib/data';
+import { talkPage } from '@/lib/data/concierge';
 import TalkPanel from './TalkPanel';
 import { DASH, orDash, percent } from './format';
 

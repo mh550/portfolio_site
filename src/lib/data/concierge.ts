@@ -35,6 +35,7 @@ export const talkPage = {
     forgetConfirm: 'Erase everything the concierge remembers about you?',
     forgotten: 'Forgotten',
     forgetFailed: "Forget me didn't go through. Try again.",
+    forgetFailedEnded: "Forget me didn't go through. Connect again to retry.",
   },
   headings: { transcript: 'Transcript', memory: 'What it remembers', latency: 'Latency', privacy: 'Privacy' },
   empty: {

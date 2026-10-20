@@ -36,8 +36,8 @@ describe('ForgetMeButton', () => {
     expect(button('Forget me')).toHaveFocus();
   });
 
-  it('after Erase, focus waits for the parent to finish, then returns to Forget me', async () => {
-    // Like TalkSession: onForget sets busy in the same click, so the button comes back disabled. The hidden
+  it('after Erase, focus is on Forget me at once (aria-disabled while busy) and stays when the parent finishes', async () => {
+    // Like TalkSession: onForget sets busy in the same click, so the button comes back aria-disabled. The hidden
     // button ends the RPC; fireEvent clicks it without moving focus.
     function Parent() {
       const [busy, setBusy] = useState(false);
@@ -51,8 +51,10 @@ describe('ForgetMeButton', () => {
     render(<Parent />);
     await userEvent.click(button('Forget me'));
     await userEvent.click(button('Erase'));
-    expect(button('Forget me')).toBeDisabled();
+    expect(button('Forget me')).toHaveFocus();
+    expect(button('Forget me')).toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(screen.getByTestId('finish'));
+    expect(button('Forget me')).toHaveAttribute('aria-disabled', 'false');
     expect(button('Forget me')).toHaveFocus();
   });
 
@@ -67,10 +69,10 @@ describe('ForgetMeButton', () => {
     expect(onForget).not.toHaveBeenCalled();
   });
 
-  it('is disabled while busy, and a click does nothing', async () => {
+  it('is aria-disabled while busy, and a click does nothing', async () => {
     const onForget = jest.fn();
     render(<ForgetMeButton onForget={onForget} busy />);
-    expect(button('Forget me')).toBeDisabled();
+    expect(button('Forget me')).toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(button('Forget me'));
     expect(screen.queryByText(CONFIRM)).not.toBeInTheDocument();
     expect(onForget).not.toHaveBeenCalled();

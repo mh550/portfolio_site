@@ -1,23 +1,23 @@
 'use client';
 
 import { useId, useRef, useState } from 'react';
-import { talkPage } from '@/lib/data';
+import { talkPage } from '@/lib/data/concierge';
 import { focusRing } from '@/components/focusRing';
 
-const buttonBase = `rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+const buttonBase = `rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${focusRing}`;
 const quiet = `${buttonBase} border border-white/20 text-white hover:border-white/40`;
 const danger = `${buttonBase} bg-red-700 text-white hover:bg-red-800`;
 
 // Forget me, with one confirm step so a stray tap can't erase anything. The parent runs the RPC (`onForget`) and
 // holds `busy` until it answers; Erase closes the confirm step at once, so it can only call `onForget` once.
-// Focus follows the control that replaces the one clicked: Cancel on opening, Forget me on closing (once it is
-// enabled again: after Erase the parent is busy, and a disabled button can't take focus).
+// Focus follows the control that replaces the one clicked: Cancel on opening, Forget me on closing. While the parent
+// is busy Forget me is aria-disabled, not disabled, so it can hold focus through the RPC.
 export default function ForgetMeButton({ onForget, busy }: { onForget: () => void; busy: boolean }) {
   const [confirming, setConfirming] = useState(false);
   const promptId = useId();
   const focusOnMount = useRef(false);
   const takeFocus = (el: HTMLButtonElement | null) => {
-    if (el && !el.disabled && focusOnMount.current) {
+    if (el && focusOnMount.current) {
       focusOnMount.current = false;
       el.focus();
     }
@@ -30,7 +30,15 @@ export default function ForgetMeButton({ onForget, busy }: { onForget: () => voi
 
   if (!confirming) {
     return (
-      <button type="button" ref={takeFocus} className={quiet} disabled={busy} onClick={() => show(true)}>
+      <button
+        type="button"
+        ref={takeFocus}
+        className={quiet}
+        aria-disabled={busy}
+        onClick={() => {
+          if (!busy) show(true);
+        }}
+      >
         {labels.forgetMe}
       </button>
     );

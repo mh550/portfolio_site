@@ -389,6 +389,28 @@ describe('TalkSession: waiting for the agent', () => {
     expect(room.disconnect).not.toHaveBeenCalled();
   });
 
+  it('under StrictMode, one agent timer and one listener per room event; unmount releases them all', async () => {
+    const events = ['participantConnected', 'participantDisconnected', 'reconnected', 'disconnected', 'audioPlaybackChanged'];
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const { unmount } = render(
+      <StrictMode>
+        <TalkSession />
+      </StrictMode>
+    );
+    await connectWithFakeTimers();
+    const room = lastRoom();
+    expect(MockRoom.instances).toHaveLength(1);
+    const agentTimers = setTimeoutSpy.mock.results.filter((_, i) => setTimeoutSpy.mock.calls[i][1] === AGENT_JOIN_TIMEOUT_MS);
+    expect(agentTimers).toHaveLength(1);
+    for (const event of events) expect(room.listenerCount(event)).toBe(1);
+    unmount();
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(agentTimers[0].value as ReturnType<typeof setTimeout>);
+    for (const event of events) expect(room.listenerCount(event)).toBe(0);
+    expect(room.textHandlers.size).toBe(0);
+    expect(room.disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('Leave while waiting stops the timer: nothing turns offline later', async () => {
     render(<TalkSession />);
     await connectWithFakeTimers();

@@ -17,15 +17,16 @@ section before building on it.
 |---|---|---|
 | `src/app/talk/page.tsx` | VC2-04 | Server Component. `metadata` (title `Talk to my concierge — Michael Herron`, description `talkPage.description`), the eyebrow, one `h1`, the intro, `<TalkSession />`, the privacy note. Imports nothing from LiveKit |
 | `src/components/talk/TalkSession.tsx` | VC2-04, VC2-05 | `'use client'`. Owns the one `Room`, the handlers, the 10 s timer and the session reducer; renders the controls, the status line, the panels, Forget me and the audio |
+| `src/components/talk/RoomAudio.tsx` | VC2-07 | `'use client'`. `RoomContext.Provider` + `RoomAudioRenderer` for one `Room`; the only static import of `@livekit/components-react`. TalkSession loads it with `next/dynamic` (`ssr: false`) once a Room exists, and `livekit-client` with `import()` on Connect, so neither is in `/talk`'s first load |
 | `src/components/talk/sessionReducer.ts` | VC2-04 | Pure reducer + `initialSession` + action types (see § State machine). No React, no LiveKit: unit-tested on its own |
 | `src/components/talk/MemoryPanel.tsx` | VC2-03 | Presentational, no hooks (Server-Component-safe). Props `{ memory: MemoryBody \| null }` |
 | `src/components/talk/LatencyPanel.tsx` | VC2-03 | Presentational, no hooks. Props `{ turns: MetricsBody[] }`; calls `summarise()` and `cachedShare()` |
 | `src/components/talk/Transcript.tsx` | VC2-03 | `'use client'` (it scrolls to the newest line with a ref + effect). Props `{ lines: TranscriptLine[] }`; `aria-live="polite"` |
 | `src/components/talk/ForgetMeButton.tsx` | VC2-03 | `'use client'` (confirm step state). Props `{ onForget: () => void; busy: boolean }` |
 | `src/components/talk/TalkPanel.tsx`, `format.ts` | VC2-03 (built) | The bordered section + h2 every panel uses (fixed ids `talk-memory`, `talk-latency`, `talk-transcript`: one of each per page); `DASH`, `ms()`, `percent()`. `TranscriptLine` is exported from `Transcript.tsx`, which takes the MessageBox as `children` |
-| `src/components/talk/MessageBox.tsx` | VC2-05 | Presentational form: label, input, Send. Props `{ disabled, onSend(text) }`; keeps the draft in local state, so `'use client'` |
+| `src/components/talk/MessageBox.tsx` | VC2-05 | Presentational form: label, input, Send. Props `{ disabled, onSend(text): Promise<boolean> }`; keeps the draft in local state, so `'use client'`, and clears it only when the send went (VC2-07) |
 | `src/lib/concierge/contract.ts` | VC2-02 | §4 types (`MemoryBody`, `MemoryFact`, `MetricsBody`), topic and RPC constants, `parseMemory(text)`, `parseMetrics(text)`: typed object or `null`, never throws |
-| `src/lib/concierge/latency.ts` | VC2-02 | `LATENCY_FIELDS`, `summarise(turns)`, `cachedShare(turn)`, `median(values)` |
+| `src/lib/concierge/latency.ts` | VC2-02 | `TURN_PATH_FIELDS` (VC2-07), `LATENCY_FIELDS`, `summarise(turns)`, `cachedShare(turn)`, `median(values)` |
 | `src/lib/concierge/visitorId.ts` | exists (VC1-02); VC2-02 adds | `isUuidV4` (exists), `newUuidV4()`, `getOrCreateVisitorId(storage?)` |
 | `src/lib/data/concierge.ts` | VC2-02 | `talkPage` (copy and labels), `privacyNote: string[]` (six entries), `latencyLabels`; exported from `src/lib/data/index.ts` |
 | `src/__mocks__/livekit-client.ts` | VC2-04 | Jest mock: `MockRoom` + test helpers (§ Jest) |
@@ -39,6 +40,7 @@ section before building on it.
 | `src/__tests__/components/talk/sessionReducer.test.ts` | VC2-04 | every transition in the table below |
 | `src/__tests__/components/talk/TalkSession.test.tsx` | VC2-04 | connect, offline (503, non-OK, rejection, connect rejection, 10 s), handler order, unmount, streams into panels |
 | `src/__tests__/components/talk/TalkSession-live.test.tsx` | VC2-05 | mic, typing, transcript segments, Forget me RPC, audio, Leave |
+| `src/__tests__/components/talk/TalkSession-review.test.tsx` | VC2-07 | the § Review fixes: focus, double click, draft, failed send, Forget me after the call, reconnect, the bundle |
 | `src/__tests__/pages/talk.test.tsx` | VC2-04 | the page: one h1, intro, privacy note, metadata |
 | edits | VC2-04 | `jest.config.ts` (two mapper lines), `.harness/smoke-routes.txt` (`/talk`), `src/app/sitemap.ts` + `sitemap-robots.test.ts` (9 routes), `a11y-new-pages.test.tsx` (`/talk`), spec D44/D45 |
 
@@ -50,10 +52,10 @@ section before building on it.
 app/talk/page.tsx (Server)
 ├─ ScrollReveal → eyebrow "Voice concierge", h1, intro          (talkPage)
 ├─ TalkSession ('use client')
-│   ├─ controls: Connect | Leave · mic toggle (live) · status line
+│   ├─ controls: Connect/Leave (one button, VC2-07) · mic toggle (live) · status line
 │   │    └─ offline: "The concierge is offline right now" + link to /projects/voice-concierge
-│   ├─ RoomContext.Provider value={room}   (only while a Room exists)
-│   │    └─ RoomAudioRenderer               (hidden <div>, one <audio> per remote audio track)
+│   ├─ RoomAudio room   (next/dynamic, only while a Room exists)
+│   │    └─ RoomContext.Provider → RoomAudioRenderer  (hidden <div>, one <audio> per remote audio track)
 │   ├─ section "Transcript"  → Transcript lines + MessageBox
 │   ├─ section "What it remembers" → MemoryPanel memory
 │   ├─ section "Latency" → LatencyPanel turns
@@ -170,3 +172,52 @@ scrolling top to bottom and back; full pages saved as 256-colour palette PNGs wi
 | `/talk` idle · 390 (`docs/screenshots/v2/VC2-talk-390.png`, 39 KB, 390 × 1805) | Hamburger navbar; eyebrow "VOICE CONCIERGE"; h1 "Talk to my concierge" on two lines; the two intro paragraphs; Connect. Then stacked: Transcript ("Nothing said yet.", the disabled message box and Send), What it remembers ("Nothing remembered yet"), Latency ("No turns yet."); the Privacy list (six points); footer | Nothing to fix |
 | `/talk` offline · 390 (`VC2-talk-offline-390.png`, 41 KB, 390 × 1889) | As idle, with Connect back and "The concierge is offline right now" under it, then the accent link "Read how it works" (`/projects/voice-concierge`), above the fold; one POST to the token route, 503 | The link 404s until VC3-02 builds the deep-dive (expected, the run's next milestone). Nothing to fix in VC2 |
 | `/talk` idle · 1280 (`VC2-talk-1280.png`, 51 KB, 1280 × 1612) | Full navbar (no Talk link, D44); h1 on one line; intro in a 768 px column; two columns: Connect over the Transcript panel on the left (7 fr), What it remembers and Latency on the right (5 fr), tops level with Connect; Privacy list; footer | The empty transcript log is tall (about 450 px) before anyone speaks. It is the log's fixed height, kept so the page doesn't jump when lines arrive; left as is |
+
+## Review
+
+VC2-07: an Opus review of `git diff d4c7d58..HEAD` (the whole of VC2, `$HARNESS_SCRATCH/VC2.diff`, 3 981 lines without
+captures and run files) with the vercel-react-best-practices and web-design-guidelines skills. Every Critical and
+Important finding was fixed with a failing test first (`TalkSession-review.test.tsx` unless named). The two focus
+fixes and the double-click guard were also mutation-checked: removing each fix turns its test red.
+
+| File | Finding | Severity | Outcome |
+|---|---|---|---|
+| `TalkSession.tsx` | Connect and Leave were different elements, so pressing either one dropped focus to `<body>`, and so did every phase change after it | Important | Fixed: one button whose label and handler switch, so it keeps focus; when a call ends with focus lost (Forget me unmounting, the input disabled) an effect hands it to Connect, never on page load. 4 tests |
+| `TalkSession.tsx` | `livekit-client` and `@livekit/components-react` were static imports: 626 KB raw / 163 KB gz in `/talk`'s first load, offline visits included | Important | Fixed: `import('livekit-client')` on Connect, alongside the token request (a failed load reads as offline); new `RoomAudio.tsx` through `next/dynamic`. In the new build the LiveKit chunk (151 KB gz) is not in `talk/page_client-reference-manifest.js`; TalkSession's own chunk is 7 KB gz. Test: only `RoomAudio.tsx` imports LiveKit values statically |
+| `TalkSession.tsx` | Leave appears where Connect was: a double click on Connect connected and left at once | Minor | Fixed: Leave ignores `event.detail > 1` |
+| `ForgetMeButton.tsx` | After Erase, Forget me came back `disabled`, so focus sat on `<body>` through the RPC and for good once the call ended (VC2-05's Minor (b)) | Minor | Fixed: `aria-disabled` + a guard; focus is on Forget me at once and goes to Connect when the agent ends the call |
+| `TalkSession.tsx`, `MessageBox.tsx` | A failed `sendText` still showed the typed line, and the draft was gone (Minor (a)) | Minor | Fixed: `onSend` returns `Promise<boolean>`; the line is added and the draft cleared only on success (and only if not typed over). 2 tests |
+| `MessageBox.tsx` | The draft survived Leave into the next session (Minor (d)) | Minor | Fixed: `key` on the box, a count of Connects, so every session (after Leave, an ended call or offline) starts empty. 2 tests |
+| `TalkSession.tsx` | A Forget me that failed after the call dropped said "Try again." with no button (Minor (e)) | Minor | Fixed: `forgetFailedEnded`, "Forget me didn't go through. Connect again to retry." |
+| `TalkSession.tsx` | A full reconnect that outlasts the agent leaves the page live with nobody there (no participant events after a restart) | Minor | Fixed: on `RoomEvent.Reconnected`, no agent in `remoteParticipants` ends the call. 2 tests |
+| `TalkSession.tsx` | A failed load of the LiveKit or `RoomAudio` chunk after Connect | Minor | Fixed with the bundle fix: both load in one `Promise.all` before the Room exists; a failure reads as offline, so `next/dynamic` never meets an unloaded chunk |
+| `ForgetMeButton.tsx` and four others | `@/lib/data` barrel in client files put all project data in the `/talk` chunk | Minor | Fixed: `@/lib/data/concierge`. Test: no talk component imports the barrel |
+| `TalkSession.tsx` | The mic label ignores mutes LiveKit doesn't report through `setMicrophoneEnabled` (server `TrackMuted`; a device pause, iOS call) (Minor (c)) | Minor | Left: the device pause (`pauseUpstream`) emits no room event, so a fix would cover only server mutes, which this agent doesn't send. Revisit with a live call |
+| `TalkSession.tsx` | Leave or unmount while the mic permission prompt is open, then grant it: LiveKit keeps the track for up to 15 s waiting for a signal connection (mic indicator lit) | Minor | Left: the fix is publishing a self-made track (`createLocalAudioTrack` + `publishTrack`) and stopping it in teardown; more code than the case is worth tonight |
+| `sessionReducer.ts` | `state.agentIdentity` duplicated `session.agentIdentity` and was never read | Simplify | Done: removed from state and the `agentJoined` action |
+| `TalkSession.tsx` | `session.forgetting` repeated `forget === 'busy'` | Simplify | Done: one guard, on the reducer's state |
+| `TalkSession.tsx` | `endSession`, `goOffline` and `dropped` each repeated teardown + `setRoom(null)` | Simplify | Done: `release(session)`. `goOffline`/`dropped` still leave the session in `sessionRef`, so a late Forget me answer shows |
+| `TalkSession.tsx` | `inSession` re-implemented the reducer's `inRoom` | Simplify | Done: `inRoom` exported and reused |
+| `LatencyPanel.tsx`, `latency.ts` | `TURN_ROWS` repeated `LATENCY_FIELDS`, and `summarise` computed medians nothing shows | Simplify | Done: `TURN_PATH_FIELDS` in `latency.ts`; `LATENCY_FIELDS` is the seven fields the panel shows |
+
+A second Opus pass read the fixes (`$HARNESS_SCRATCH/VC2-07-fixes.diff`) and found what they broke; all fixed, test-first:
+
+| File | Finding | Severity | Outcome |
+|---|---|---|---|
+| `MessageBox.tsx` | With the draft kept until `sendText` answers, Enter pressed twice sent the message twice | Important | Fixed: a `pending` ref; a second submit while one is out sends nothing. Test "Enter pressed twice before the send answers sends once" |
+| `TalkSession.tsx` | One persistent button: a held Enter on Connect auto-repeats onto Leave (keyboard clicks have `detail` 0) | Minor | Fixed: `onKeyDown` cancels `event.repeat`. Test fires a repeat keydown (user-event never sets `repeat`) and expects it cancelled; mutation-checked |
+| `TalkSession.tsx` | The focus hand-off could scroll the page when a call ends after the visitor tapped plain text | Minor | Fixed: `focus({ preventScroll: true })` |
+| `TalkSession.tsx` | A draft still survived ended/offline → Connect; a send answered just as the call dropped kept its draft | Minor | Fixed: key on a Connect count; a resolved `sendText` counts as sent even if the session ended |
+
+Known noise: the test "a draft from a call that ended is gone in the next session" logs React's "A component suspended inside an `act` scope" (the lazy `RoomAudio` remounting under user-event's click); it passes and nothing in the app suspends visibly.
+
+Checks the feature asks for, with evidence:
+
+| Check | Evidence |
+|---|---|
+| A StrictMode double mount leaves one set of handlers and one timer | `TalkSession.test.tsx` "under StrictMode, registers each topic once" (one Room, 3 registrations) and, new, "under StrictMode, one agent timer and one listener per room event" (one `setTimeout` of 10 000 ms; `listenerCount` 1 for each of the 5 events). The Room, handlers and timer are made in the Connect click handler, which StrictMode doesn't run twice; the one effect's mount body is empty. Mutation: dropping `clearTimeout` from teardown turns the new test red |
+| Every timer, handler and Room is released on unmount and on Leave | `teardown()` clears the timer, removes the 5 listeners before `disconnect()`, unregisters the 3 topics and disconnects; unmount (the effect's cleanup) and Leave (`endSession`) both run it. Tests: "on unmount unregisters all three and disconnects once", the new StrictMode test (`clearTimeout` with the agent timer, 0 listeners, 0 text handlers), "Leave unregisters, disconnects once", "Leave while waiting stops the timer", Leave/unmount during the fetch and during `connect()`. The one gap is the in-flight mic publish above (Minor, left) |
+| No Server Component imports `livekit-client` or `@livekit/components-react` | `grep -rlE "from '(livekit-client\|@livekit/components-react)'" src` (excluding mocks and tests): `TalkSession.tsx` (types only) and `RoomAudio.tsx`, both `'use client'`; `src/app/talk/page.tsx` imports neither. The bundle test pins it |
+| The offline path renders with the dev server's console clean | `curl /talk` → 200 and `POST /api/concierge/token` → 503 `{"offline":true}`; the dev log's only new lines are `GET /talk 200` and `POST /api/concierge/token 503`. In Chromium at 390 × 844 and 1280 × 800 (Sonnet run): Tab to Connect, Enter → exactly "The concierge is offline right now" + "Read how it works", focus still on Connect; 0 page errors, no hydration warning; the one console line is Chromium's `Failed to load resource: … 503` for the token POST (W1's 503, which page code can't silence); `scrollWidth` 390 / 1280; the livekit-client chunk is requested only after Enter |
+| No tailnet host, CGNAT IP or ntfy URL in the talk code | `grep -rniE 'ts\.net\|100\.(6[4-9]\|[7-9][0-9]\|1[01][0-9]\|12[0-7])\.\|ntfy' src/components/talk src/lib/concierge src/lib/data/concierge.ts` is empty (exit 1) |
+

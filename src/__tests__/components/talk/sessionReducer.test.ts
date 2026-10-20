@@ -15,7 +15,7 @@ const line = (key: string, text: string, final = true) => ({ key, who: 'agent' a
 const transitions: [SessionAction, Phase[], Phase][] = [
   [{ type: 'connect' }, ['idle', 'offline', 'ended'], 'connecting'],
   [{ type: 'connected' }, ['connecting'], 'waiting'],
-  [{ type: 'agentJoined', identity: 'agent-1' }, ['connecting', 'waiting'], 'live'],
+  [{ type: 'agentJoined' }, ['connecting', 'waiting'], 'live'],
   [{ type: 'offline' }, ['connecting', 'waiting'], 'offline'],
   [{ type: 'dropped' }, ['live'], 'ended'],
   [{ type: 'dropped' }, ['connecting', 'waiting'], 'offline'],
@@ -25,7 +25,6 @@ describe('sessionReducer', () => {
   it('starts idle with empty panels', () => {
     expect(initialSession).toEqual({
       phase: 'idle',
-      agentIdentity: null,
       memory: null,
       turns: [],
       lines: [],
@@ -50,19 +49,13 @@ describe('sessionReducer', () => {
     }
   });
 
-  it('records the agent identity on entering live and forgets it when the call ends', () => {
-    const live = sessionReducer(at('waiting'), { type: 'agentJoined', identity: 'agent-7' });
-    expect(live.agentIdentity).toBe('agent-7');
-    expect(sessionReducer(live, { type: 'dropped' }).agentIdentity).toBeNull();
-  });
-
   it('clears the panels on Connect, after an ended call', () => {
     const ended = at('ended', { memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
     expect(sessionReducer(ended, { type: 'connect' })).toEqual({ ...initialSession, phase: 'connecting' });
   });
 
   it('keeps the transcript, memory and latency when the call ends', () => {
-    const live = at('live', { agentIdentity: 'a', memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
+    const live = at('live', { memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
     const ended = sessionReducer(live, { type: 'dropped' });
     expect(ended).toMatchObject({ phase: 'ended', memory: memoryBody, turns: [metricsFull], lines: [line('s1', 'Hi')] });
   });

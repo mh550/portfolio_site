@@ -36,7 +36,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (916 tests, 71 suites after VC2-05)
+npm test             # Jest unit/integration tests (933 tests, 72 suites after VC2-07)
 npm run test:watch   # watch mode
 ```
 
@@ -71,6 +71,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
+- `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`)
 
 ### Components
 - `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Approach, Experience, Contact) with active link highlighting, mobile hamburger (`"use client"`)
@@ -84,10 +85,11 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
   non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
-  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45; also in state for `RoomContext`
-  around `RoomAudioRenderer`), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
-  phases; Jest maps `livekit-client`/`@livekit/components-react` to `src/__mocks__/` (`MockRoom.setup`, `pushText`,
-  `addAgent`). Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
+  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`;
+  also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
+  Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
+  phases (Jest mocks: see Testing)
+- `lib/concierge/` — no React, no LiveKit: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`) and the visitor id (`visitorId.ts`), shared by the token route and `/talk`
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
@@ -113,6 +115,9 @@ anything else decorative with Tailwind's `print:hidden`; `src/__tests__/lib/prin
 - `src/__tests__/` — Jest + React Testing Library
 - `src/__mocks__/framer-motion.tsx` — global mock wired via `moduleNameMapper` in `jest.config.ts`; strips motion props, exports `useReducedMotion` (returns `false`)
 - Canvas mocked inline in `HeroSection.test.tsx` with `HTMLCanvasElement.prototype.getContext = jest.fn(() => null)`
+- LiveKit: `moduleNameMapper` maps `^livekit-client$` → `src/__mocks__/livekit-client.ts` (`MockRoom.setup`, `pushText`,
+  `addAgent`, `restart`) and `^@livekit/components-react$` → `src/__mocks__/livekit-components-react.tsx`; no test
+  opens a connection. Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `next/navigation` mocked in `Navbar.test.tsx` with `jest.mock('next/navigation', () => ({ usePathname: () => '/' }))`
 
 ## Design System
