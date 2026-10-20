@@ -11,6 +11,48 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 18:00 · verify VC4
+
+All 6 features hold (35 steps).
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC4-01 | 1 | read plan headings + § Order table | all 8 sections present; order table 1–10 matches; getTopProjects(3) = agent-harness, voice-concierge, ghl-jobtread-integration stated | yes |
+| VC4-01 | 2 | read plan § Voice widget | file, next/link, aria-label, svg, safe-area bottom, h-14, z-40, focusRing, print:hidden, motion-safe pulse, Footer pb-24 xl:pb-8 all specified | yes |
+| VC4-01 | 3 | read plan § Intro wording and concierge.ts/projects.ts | intro first sentence verbatim, link shape, builtWith keeps 'Claude Code agents' and names harness | yes |
+| VC4-01 | 4 | grep spec § 7 and v2 spec | ## 7 Decisions with D59–D62; 'Superseded by D60 (VC4).' after D44 and D49 | yes |
+| VC4-01 | 5 | read plan § Tests; ran npx jest --silent | table lists data.test, case-study, Navbar tests by name; suite now 1012 tests/76 suites (later milestones add tests; plan-time count was for that commit) | yes |
+| VC4-01 | 6 | check.sh (cached green) + node .harness/smoke.mjs | green; every route PASS at 1280 and 390 | yes |
+| VC4-02 | 1 | grep order in projects.ts; read data.test.ts lines 54–83; jest | orders 1..10 exactly as listed; map test, uniqueness, getTopProjects(3) assertions present; jest green | yes |
+| VC4-02 | 2 | read case-study test line 30, card.test:65, home.test:38; git diff main..HEAD -- '*.snap' | order toBe(2); hrefs[1]=/projects/voice-concierge in both; no .snap diff | yes |
+| VC4-02 | 3 | read Navbar.tsx links, Navbar.test.tsx; grep -c | 8 links, Talk fifth; /talk test marks Talk; grep count 1; live menu lists 8 links in order | yes |
+| VC4-02 | 4 | grep spec/CLAUDE.md | D44 and D49 followed by 'Superseded by D60 (VC4)'; CLAUDE.md /talk row says on the Navbar (D60); only /evidence is 'off the Navbar' | yes |
+| VC4-02 | 5 | grep docs/review-guide.md | 'order 5' line says VC4 moved it to order 2 (D59) | yes |
+| VC4-02 | 6 | check.sh + smoke | green / all PASS | yes |
+| VC4-03 | 1 | read VoiceWidget.tsx and VoiceWidget.test.tsx | link /talk, aria-label, aria-hidden svg, fixed right-4, print:hidden, h-14 w-14, safe-area bottom, motion-safe:animate-pulse; tests assert these and no bare animate- | yes |
+| VC4-03 | 2 | read SiteChrome.tsx and SiteChrome.test.tsx 70–95 | widget after Footer when pathname !== '/talk'; it.each / /about /projects/agent-harness present, /talk absent, /card and /card/qr absent; live: widget count 1 on /,/about,/projects, 0 on /talk,/card | yes |
+| VC4-03 | 3 | a11y-new-pages.test:86 and VoiceWidget.test 'adds no heading and no landmark' | navigation count unchanged (1), widget adds none; jest green | yes |
+| VC4-03 | 4 | Footer.tsx + Footer.test:48; own Playwright at 390 | pb-24 xl:pb-8 asserted; scrollWidth 390 on / /about /projects; widget box x318 y772 56x56 clear of footer links | yes |
+| VC4-03 | 5 | read plan § Voice widget and spec D61 | classes, label, pathname rule match code; D61 names component and exclusions | yes |
+| VC4-03 | 6 | check.sh + smoke | green / all PASS | yes |
+| VC4-04 | 1 | read concierge.ts intro; grep 'writing much of the code' src/ | new first sentence verbatim, link /projects/agent-harness in data; grep empty | yes |
+| VC4-04 | 2 | read talk.test.tsx 43–60, concierge-data.test:17; live /talk | link 'my agent harness' href /projects/agent-harness asserted; full intro text asserted; no-digit and no 'Claude Code agents writing' asserted; live href correct | yes |
+| VC4-04 | 3 | read projects.ts builtWith and Links; jest | builtWith names harness, keeps 'Claude Code agents', says harness ran build sessions; link 'The agent harness that built it' (kind doc) present; evidence-verbatim test passes (jest green) | yes |
+| VC4-04 | 4 | read evidence-voice-concierge.md and spec D62 | dated '## VC4 note (2026-10-20)' with source; D62 quotes final intro | yes |
+| VC4-04 | 5 | check.sh + smoke | green / all PASS | yes |
+| VC4-05 | 1 | ls -la docs/screenshots/v2/VC4-* | six named PNGs exist, 53–300 KB each, under 400 KB; /card live order confirmed agent-harness, voice-concierge, ghl-jobtread | yes |
+| VC4-05 | 2 | own Playwright 390x844 on /about bottom, five pages | widget y772 h56 (bottom 828 = 844-16); no intersect with GitHub/LinkedIn/Email; scrollWidth 390 on / /about /projects /talk /card; 0 console/page errors | yes |
+| VC4-05 | 3 | Playwright emulate reducedMotion on / | reduce -> animation-name none; no-preference -> pulse | yes |
+| VC4-05 | 4 | Playwright Tab x22 on / at 1280 | order: Skip, MH, 8 nav links Talk fifth, page links, footer, widget; widget :focus-visible outline rgb(0, 212, 255) 2px | yes |
+| VC4-05 | 5 | node .harness/print-check.mjs http://localhost:7834 / …/p.png | PASS print, exit 0; widget print:hidden (class asserted in test) | yes |
+| VC4-05 | 6 | read plan § What Michael will see | six rows, one per screenshot, plus measurements | yes |
+| VC4-05 | 7 | check.sh + smoke | green / all PASS | yes |
+| VC4-06 | 1 | read plan § Review | 14-row table covering name, z-index, Footer, reduced motion, eight links at 390, intro honesty; Minor fixes with tests; no Critical/Important | yes |
+| VC4-06 | 2 | grep -rniE tailnet/CGNAT/ntfy on VoiceWidget.tsx concierge.ts; jest content-guard | grep empty; full jest 1012 pass incl. content-guard | yes |
+| VC4-06 | 3 | read CLAUDE.md lines 26–31, 41, 81–86; npx jest --silent | eight-link Navbar line, VoiceWidget line, /talk row, '1012 tests, 76 suites' matches jest output | yes |
+| VC4-06 | 4 | read docs/review-guide.md § VC4: order, Navbar, widget | what changed, 390 look-at list, captures; undo notes present | yes |
+| VC4-06 | 5 | check.sh + smoke | green / all PASS | yes |
+
 ### 2026-10-20 16:25 · VC4-06 · passes
 
 - **Review** (Opus, `$HARNESS_SCRATCH/VC4.diff` = `git diff f9e8a58..HEAD`, 1356 lines, both skills): plan § Review is a
