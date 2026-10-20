@@ -130,3 +130,8 @@ export function parseMetrics(text: string): MetricsBody | null {
     compacted: typeof body.compacted === 'boolean' ? body.compacted : null,
   };
 }
+
+// The concierge.forget_me reply: only exactly {"ok": true} means the agent erased the thread (§4).
+export function isForgotten(reply: string): boolean {
+  return parseObject(reply)?.ok === true;
+}

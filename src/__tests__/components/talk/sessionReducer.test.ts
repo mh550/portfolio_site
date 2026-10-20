@@ -23,7 +23,17 @@ const transitions: [SessionAction, Phase[], Phase][] = [
 
 describe('sessionReducer', () => {
   it('starts idle with empty panels', () => {
-    expect(initialSession).toEqual({ phase: 'idle', agentIdentity: null, memory: null, turns: [], lines: [] });
+    expect(initialSession).toEqual({
+      phase: 'idle',
+      agentIdentity: null,
+      memory: null,
+      turns: [],
+      lines: [],
+      micOn: false,
+      micBlocked: false,
+      audioBlocked: false,
+      forget: 'idle',
+    });
   });
 
   describe.each(transitions)('%o', (action, from, to) => {
@@ -103,6 +113,68 @@ describe('sessionReducer', () => {
       state = sessionReducer(state, { type: 'line', line: line('s2', 'Other') });
       state = sessionReducer(state, { type: 'line', line: line('s1', 'Hello there') });
       expect(state.lines).toEqual([line('s1', 'Hello there'), line('s2', 'Other')]);
+    });
+  });
+
+  describe('the microphone', () => {
+    it.each(['connecting', 'waiting', 'live'] as Phase[])('follows setMicrophoneEnabled while %s', (phase) => {
+      const on = sessionReducer(at(phase), { type: 'mic', on: true });
+      expect(on).toMatchObject({ phase, micOn: true, micBlocked: false });
+      expect(sessionReducer(on, { type: 'mic', on: false }).micOn).toBe(false);
+    });
+
+    it('a blocked mic keeps the session live; a later success clears the block', () => {
+      const blocked = sessionReducer(at('live', { micOn: true }), { type: 'micBlocked' });
+      expect(blocked).toMatchObject({ phase: 'live', micOn: false, micBlocked: true });
+      expect(sessionReducer(blocked, { type: 'mic', on: true })).toMatchObject({ micOn: true, micBlocked: false });
+    });
+
+    it.each(['idle', 'ended', 'offline'] as Phase[])('a late mic answer while %s changes nothing', (phase) => {
+      const state = at(phase);
+      expect(sessionReducer(state, { type: 'mic', on: true })).toBe(state);
+      expect(sessionReducer(state, { type: 'micBlocked' })).toBe(state);
+    });
+  });
+
+  it('tracks blocked playback while in a room, and ignores it after', () => {
+    const blocked = sessionReducer(at('live'), { type: 'audio', blocked: true });
+    expect(blocked.audioBlocked).toBe(true);
+    expect(sessionReducer(blocked, { type: 'audio', blocked: false }).audioBlocked).toBe(false);
+    const ended = at('ended');
+    expect(sessionReducer(ended, { type: 'audio', blocked: true })).toBe(ended);
+  });
+
+  describe('Forget me', () => {
+    it('starts only while live, and only once', () => {
+      const busy = sessionReducer(at('live'), { type: 'forgetStart' });
+      expect(busy.forget).toBe('busy');
+      expect(sessionReducer(busy, { type: 'forgetStart' })).toBe(busy);
+      for (const phase of PHASES.filter((p) => p !== 'live')) {
+        const state = at(phase);
+        expect(sessionReducer(state, { type: 'forgetStart' })).toBe(state);
+      }
+    });
+
+    it('{ok: true} clears the memory and is done, even once the call has ended', () => {
+      const busy = at('live', { memory: memoryBody, forget: 'busy' });
+      expect(sessionReducer(busy, { type: 'forgotten' })).toMatchObject({ memory: null, forget: 'done' });
+      const ended = sessionReducer(busy, { type: 'dropped' });
+      expect(sessionReducer(ended, { type: 'forgotten' })).toMatchObject({ phase: 'ended', memory: null, forget: 'done' });
+    });
+
+    it('a failure keeps the memory and can be retried', () => {
+      const failed = sessionReducer(at('live', { memory: memoryBody, forget: 'busy' }), { type: 'forgetFailed' });
+      expect(failed).toMatchObject({ memory: memoryBody, forget: 'failed' });
+      expect(sessionReducer(failed, { type: 'forgetStart' }).forget).toBe('busy');
+    });
+
+    it.each(['forgotten', 'forgetFailed'] as const)('%s without an RPC in flight changes nothing', (type) => {
+      const state = at('live', { memory: memoryBody });
+      expect(sessionReducer(state, { type })).toBe(state);
+    });
+
+    it('a new Connect starts with Forget me idle', () => {
+      expect(sessionReducer(at('ended', { forget: 'done' }), { type: 'connect' }).forget).toBe('idle');
     });
   });
 });

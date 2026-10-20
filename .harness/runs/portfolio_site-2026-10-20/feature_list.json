@@ -126,7 +126,7 @@
         "Agent audio plays through RoomAudioRenderer inside a RoomContext.Provider for the connected room; room.startAudio() is called when canPlaybackAudio is false after connecting; Leave disconnects and returns to the idle state with the panels cleared; any animation added honours prefers-reduced-motion (none is required).",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC2-06",

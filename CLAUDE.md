@@ -36,7 +36,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (860 tests, 70 suites after VC2-04)
+npm test             # Jest unit/integration tests (916 tests, 71 suites after VC2-05)
 npm run test:watch   # watch mode
 ```
 
@@ -84,7 +84,8 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
   non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
-  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45) and `sessionReducer.ts` the
+  `TalkSession` (`"use client"`) owns the one `Room` (made in the Connect handler, D45; also in state for `RoomContext`
+  around `RoomAudioRenderer`), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
   phases; Jest maps `livekit-client`/`@livekit/components-react` to `src/__mocks__/` (`MockRoom.setup`, `pushText`,
   `addAgent`). Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)

@@ -14,6 +14,14 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 02:45 · VC2-05 · passes
+
+- **Changed:** `TalkSession.tsx` now has the mic toggle (it turns on after `connect()`), `MessageBox.tsx` (new, `lk.chat`), the Forget me RPC (`isForgotten()` in `contract.ts`), `RoomContext.Provider` + `RoomAudioRenderer`, `startAudio()` and a **Turn on sound** button from `AudioPlaybackStatusChanged`. `sessionReducer` gains `micOn/micBlocked/audioBlocked/forget`. New `TalkSession-live.test.tsx` (33 tests); the components-react mock records its context room. Tests 860 → 916, suites 70 → 71.
+- **Verified:** `check.sh` green; smoke 40/40. Smoke first caught a 12 px horizontal scroll at 390: the grid had no column below `lg`, so it grew to the input's intrinsic width. Fixed with `grid-cols-1`; `scrollWidth` is now 390. `curl /talk` gives 200 with the message box in the server HTML, and the dev log is clean. I looked at the 390 screenshot.
+- **Review (Opus):** 0 Critical, 3 Important, all fixed test-first: (1) overlapping mic presses (`micWanted` + `micSeq`; only the newest answer is shown); (2) LiveKit sets `canPlaybackAudio` false only after a refused `play()`, so the after-connect check alone almost never fires: added the event listener and the button; (3) the old-session Forget me test didn't exercise the guard: added Erase A → Leave → Connect B → Erase B → A's reply. A mutation run shows it fails without the guard. Minor fixed: a second RPC while one is in flight sends nothing.
+- **Left for VC2-07 (Minor):** a failed `sendText` still shows the typed line; focus falls to `<body>` when the agent ends the call after Forget me; the mic label ignores track mutes from the device; the draft survives Leave; a failed RPC after the call drops shows "try again" with no button until you reconnect.
+- **Question for Michael:** the mic is turned on as soon as the room connects, while waiting for the agent (as the plan says). If the concierge is offline, visitors get a mic prompt for nothing. Should it wait until the agent joins? That's a one-line move to `agentArrived`.
+
 ### 2026-10-20 01:55 · VC2-04 · passes
 
 - **Changed:** new `src/app/talk/page.tsx` (Server Component, no LiveKit import), `src/components/talk/TalkSession.tsx` (Connect → token route → one `Room`, 3 handlers before `connect()`, 10 s agent wait, offline + deep-dive link, teardown on Leave/unmount) and `sessionReducer.ts`. Jest mocks: `src/__mocks__/livekit-client.ts` (`MockRoom.setup`, `pushText`, `addAgent`, `restart`) and `livekit-components-react.tsx`, mapped in `jest.config.ts`. `/talk` is in the smoke routes, the sitemap (9 routes) and the a11y test. Added spec D44/D45 and CLAUDE.md rows. Tests 764 → 860, suites 67 → 70.

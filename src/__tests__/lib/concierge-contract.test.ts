@@ -2,6 +2,7 @@ import {
   MAX_BODY_BYTES,
   RPC_FORGET_ME,
   TOPIC,
+  isForgotten,
   parseMemory,
   parseMetrics,
 } from '@/lib/concierge/contract';
@@ -160,5 +161,16 @@ describe('parseMetrics', () => {
     expect(parseMetrics(withMetric({ turn: 1.5 }))).toBeNull();
     expect(parseMetrics(withMetric({ turn: '1' }))).toBeNull();
     expect(parseMetrics(withMetric({ turn: null }))).toBeNull();
+  });
+});
+
+describe('isForgotten', () => {
+  it('is true only for {"ok": true}', () => {
+    expect(isForgotten('{"ok": true}')).toBe(true);
+    expect(isForgotten('{"ok": true, "erased": 3}')).toBe(true);
+  });
+
+  it.each(['{"ok": false}', '{"ok": "true"}', '{}', '[]', 'true', 'null', '', 'not json'])('is false for %p', (reply) => {
+    expect(isForgotten(reply)).toBe(false);
   });
 });

@@ -24,6 +24,7 @@ export const talkPage = {
     micOff: 'Unmute microphone',
     message: 'Message',
     messagePlaceholder: 'Type a message',
+    startAudio: 'Turn on sound',
   },
   status: {
     connecting: 'Connecting…',
