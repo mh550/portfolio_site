@@ -372,6 +372,31 @@ test and suite counts.
 
 ## What Michael will see
 
+Filled by VC5-06. `/talk` asks the route only when the server has LiveKit env (D46), so the captures come from the
+harness dev server on 7834 restarted with dummy values (`LIVEKIT_URL=wss://livekit.invalid`, a made-up key and
+secret) and put back to no env after; `.harness/talk-busy-check.mjs` fulfils every `POST /api/concierge/token` with
+`page.route`, so neither the route nor LiveKit is reached. Connect is pressed from the keyboard (focus + Enter).
+Measured in every state: Connect's bottom edge at the top of the page is y 664 at 390 × 844 (above the fold) and
+y 489 at 1280 × 800; `scrollWidth` 390 at 390 and 1280 at 1280; one token POST per press over 15 s (busy-visitor 390 and offline: two presses,
+two POSTs; 2 s for the 1280 capture); `getUserMedia` (overridden with a counter before Connect) 0 calls; no mic
+toggle; after the reply `document.activeElement` is the button "Connect", `:focus-visible` true, outline solid
+`rgb(0, 212, 255)`; console errors only Chromium's own "Failed to load resource: … status of 429 (Too Many
+Requests)" / "503 (Service Unavailable)" line, once per POST; 0 page errors. The Next.js dev badge (the "N" bottom
+left) is dev-only.
+
+| Capture or command | State | What is on screen or printed | Anything that looks wrong |
+|---|---|---|---|
+| `VC5-talk-busy-visitor-390.png` (56 KB) | 429 `{error:'busy', reason:'visitor'}`, 390 × 844, top of page | Eyebrow, h1, intro; Connect (focus ring) with "You already have a conversation open in another tab." on two lines under it; "Read how it works"; the Transcript panel starts at the fold. No mic toggle, no widget | Nothing in the layout. The wording is D71's open question (also shown for ~30 s after Leave, and to a second visitor on the same NAT) |
+| `VC5-talk-busy-site-390.png` (57 KB) | 429 `{error:'busy', reason:'site'}`, 390 × 844 | As above with "The concierge is busy right now. Try again in a few minutes." on two lines | Nothing |
+| `VC5-talk-busy-visitor-1280.png` (73 KB) | 429 visitor, 1280 × 800 | Navbar (Talk active), intro; Connect and the visitor line on one row; "Read how it works"; Transcript left, What it remembers and Latency right | Nothing |
+| `VC5-talk-offline-503-390.png` (55 KB) | 503 `{offline:true}`, 390 × 844 | As the busy captures with "The concierge is offline right now" on one line | The offline line has no full stop while both busy lines have one; it is the spec's exact wording (W2, pinned by `concierge-data.test.ts`), so left as is (question below) |
+| `curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:7834/api/concierge/token -H 'content-type: application/json' -d '{"visitor_id":"123e4567-e89b-42d3-a456-426614174000"}'` | No Origin, no env | `403` (body `{"error":"forbidden"}`) | Nothing: Origin is checked before env (D63) |
+| the same with `-H 'Origin: https://evil.example'` | Foreign Origin | `403` | Nothing |
+| the same with `-H "Origin: http://localhost:7834"` | Dev origin, no env | `503` (body `{"offline":true}`) | Nothing |
+
+Question for Michael (copy): add a full stop to "The concierge is offline right now" so the three lines match? It
+changes the spec's W2 wording and the pinned test; one line in `concierge.ts`.
+
 ## Review
 
 ## Decisions

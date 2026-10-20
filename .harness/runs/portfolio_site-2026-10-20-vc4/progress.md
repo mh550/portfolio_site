@@ -11,6 +11,15 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 17:05 · VC5-06 · passes
+
+- New `.harness/talk-busy-check.mjs` (Playwright, `page.route` fulfils every token POST) and four captures in `docs/screenshots/v2/`: `VC5-talk-busy-visitor-390.png` 56 KB, `VC5-talk-busy-site-390.png` 57 KB, `VC5-talk-busy-visitor-1280.png` 73 KB, `VC5-talk-offline-503-390.png` 55 KB. Plan § What Michael will see filled (7 rows: 4 captures, 3 curl lines). No code change; tests 1113 → 1113 (81 suites).
+- How: `/talk` only fetches with LiveKit env (D46), so I restarted the 7834 dev server with dummy values (`wss://livekit.invalid`), ran the script (30 OK, 0 FAIL), then put the plain server back. Measured: Connect bottom y 664 at 390×844 (above the fold), 489 at 1280; scrollWidth 390; 1 POST per Connect over 15 s (2 presses → 2); getUserMedia 0; no mic toggle; focus stays on "Connect", `:focus-visible`, outline `rgb(0, 212, 255)`; only Chromium's 429/503 resource line in the console.
+- curl on the plain server: no Origin → 403, `Origin: https://evil.example` → 403, `Origin: http://localhost:7834` → 503.
+- Verified: `check: lint ok · jest ok · build ok` (1113/81); smoke exit 0 (42 PASS) at start and end.
+- Next session: `kill $(cat server.pid)` leaves next-server running (the pid is the npx wrapper). Kill the pid holding the port (`ss -ltnp`) before restarting, or the new server dies with EADDRINUSE and you test the old one.
+- Question for Michael (copy): "The concierge is offline right now" has no full stop; both busy lines have one. Add it (spec W2 wording + one pinned test)? D71 still open.
+
 ### 2026-10-20 16:30 · VC5-05 · passes
 
 - `sessionReducer.ts`: `BusyReason`, phase `busy` (from `connecting` only), `busyReason` (null in `initialSession`); Connect/Leave reset it; `inRoom('busy')` false. `TalkSession.tsx`: `fetchCredentials` returns `{kind:'ok'}` | `{kind:'busy', reason}` (429 + `error:'busy'` + visitor|site only) | null; busy releases the session and dispatches, no timer, no refetch; the status line is one `statusLine` value; deep-dive link under busy too (D66). Copy `busyVisitor`/`busySite` in `concierge.ts`. Tests 1079 → 1113 (81 suites).

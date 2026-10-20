@@ -195,7 +195,7 @@
         "docs/plans/2026-10-20-VC5-mic-limits-server-only.md § What Michael will see has one row per screenshot and one per curl line: state · what is on screen or printed · anything that looks wrong; any bug found is fixed in this feature with a test first and the capture retaken.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC5-07",
