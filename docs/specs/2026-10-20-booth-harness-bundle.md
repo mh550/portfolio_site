@@ -244,3 +244,8 @@ Numbering continues the v2 spec's D1–D40 (`docs/specs/2026-10-18-portfolio-v2.
   `timeout_s` / an int in `expected_words`, and records an `error` row (the `OSError` in `error_tail`) when the
   adapter's command can't start, so the report shows the config instead of silently leaving it out. Alternative: a
   traceback and exit 1.
+- **D54** *default* `sweep.py` exits 2 (`refusing to start: <file>: <why>`, nothing created) when the configs file is
+  not a JSON array, a config has no non-empty `name` string, or two configs share a name (their `work/` and `logs/`
+  entries would collide). Like `run_one.py`, it handles SIGINT/SIGTERM/SIGHUP with a flag checked every 0.1 s tick
+  (no signal lands inside `Popen`), SIGTERMs every live `run_one.py` at once and then `kill_tree`s each, so a
+  6-run Ctrl-C takes about one grace period, not six. Alternative: let duplicates overwrite each other's logs.

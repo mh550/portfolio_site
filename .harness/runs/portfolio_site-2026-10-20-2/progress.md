@@ -10,6 +10,13 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 10:05 · B1-04 · not yet
+
+- **Landed:** `public/b/mh_harness/sweep.py` (`find_placeholders`, `find_alarm`, `main`; flag-based SIGINT/SIGTERM/SIGHUP,
+  0.1 s tick, SIGTERM all live run_ones at once then `kill_tree` each, echoes each run's `run_one.out` when it ends,
+  `report: <n> runs ended` placeholder in `_print_report`); `tests/test_sweep.py` (22 tests). Python 41 → 63 (19 s),
+  Jest 643 → 643. Spec **D54** (bad configs file / duplicate names → exit 2). Opus review pending at commit time.
+
 ### 2026-10-20 09:48 · B1-03 · passes
 
 - **Landed:** `adapter.py` (two `# ADAPT:` functions, `FAKE_GAME`); `run_one.py` gains `harness_home`, `start_detached`,

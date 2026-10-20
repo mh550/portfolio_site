@@ -154,7 +154,7 @@ Windows, where one long `wait()` would not see Ctrl-C); the loop then `kill_tree
 returns 130. A game that already exited when the signal came still gets its row. `sweep.py` catches `KeyboardInterrupt` around its loop, `kill_tree`s every live `run_one.py` (whose
 SIGTERM handler then kills its game within the 2 s grace) and returns 130.
 
-**sweep.py** flow: load the configs (a JSON array) → `find_placeholders`: with `--dry-run` print a `warning:` line
+**sweep.py** flow: load the configs (a JSON array of objects with distinct non-empty `name`s, else exit 2, D54) → `find_placeholders`: with `--dry-run` print a `warning:` line
 per hit to stderr and continue (D51); otherwise print `refusing to start: config "<name>" field <path> still has a
 placeholder: "<value>"` for the first hit to stderr and exit 2 before creating anything → build the queue of
 `(config, K)` for K in `range(repeat)` → `--dry-run`: for each, `argv, cwd = adapter.build_command(config,
@@ -252,6 +252,10 @@ timeout=…)` so the real `results.jsonl`, `logs/` and `work/` are never touched
   - `TestSweep.test_alarm_no_tool_call` (FAKE_SLEEP_S=3, FAKE_LLM_CALLS=1, `--alarm-after 0.5 --interval 0.5`)
   - `TestSweep.test_repeat_two_gives_index_0_and_1`
   - `TestFindAlarm.test_harness_lines_never_alarm` (a `HARNESS_LLM {"in": 429}` line → None)
+  - Also (B1-04): `TestSweep.test_parallel_limit` (4 × 1 s at `--parallel 2` ≥ 2 s), `test_writes_single_config_per_run`,
+    `test_dry_run_repeat_names_each_index`, `test_status_line_without_alarm`, `test_bad_configs_file_exits_2` (D54),
+    `test_ctrl_c_kills_every_run_and_exits_130` (POSIX: SIGINT → 130, both games gone, no rows, no report);
+    `TestFindPlaceholders` (3), `TestFindAlarm` (6 in all)
 - `tests/test_report.py` (B1-05), rows built in memory with a `row(name, **overrides)` helper
   - `TestSummarise.test_median_across_repeats` (wall 10, 20, 90 → 20)
   - `TestSummarise.test_sort_words_then_wall`
