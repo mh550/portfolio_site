@@ -22,3 +22,4 @@
 - 2026-10-20 15:50 · VC5-03 · claude-opus-5-5 · passes=true · 5 min · 12/13 passing
 - 2026-10-20 15:55 · VC5-04 · claude-opus-5-5 · passes=true · 4 min · 13/13 passing
 - 2026-10-20 16:00 · verify VC5: evidence short of the steps (VC5-01 7/8); re-running on opus
+- 2026-10-20 16:16 · verify VC5: evidence still short of the steps (VC5-01 7/8) after opus; not verified (needs Michael)
