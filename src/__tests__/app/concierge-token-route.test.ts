@@ -1,5 +1,6 @@
 /** @jest-environment node */
-import { TokenVerifier } from 'livekit-server-sdk';
+// Mocks nothing (D42). The 200 cases live in concierge-token-route-limits.test.ts, which mocks the room list (D69):
+// with the env set a 200 needs listRooms, which here would go to the network. Nothing in this file gets that far.
 import { POST, runtime, dynamic } from '@/app/api/concierge/token/route';
 
 const ENV_KEYS = ['LIVEKIT_URL', 'LIVEKIT_API_KEY', 'LIVEKIT_API_SECRET'] as const;
@@ -7,6 +8,7 @@ const URL_VALUE = 'wss://example.livekit.cloud';
 const KEY_VALUE = 'k'.repeat(12);
 const SECRET_VALUE = 'x'.repeat(32);
 const VISITOR = '123e4567-e89b-42d3-a456-426614174000';
+const SITE_ORIGIN = 'https://michael-herron.vercel.app';
 
 let saved: Record<string, string | undefined>;
 
@@ -16,6 +18,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  jest.restoreAllMocks();
   for (const k of ENV_KEYS) {
     if (saved[k] === undefined) delete process.env[k];
     else process.env[k] = saved[k];
@@ -28,26 +31,59 @@ function setEnv() {
   process.env.LIVEKIT_API_SECRET = SECRET_VALUE;
 }
 
-function post(body?: string) {
-  return POST(
-    new Request('http://localhost/api/concierge/token', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body,
-    }),
-  );
+// `origin: null` sends no Origin header at all.
+function post(body?: string, origin: string | null = SITE_ORIGIN) {
+  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  if (origin !== null) headers.origin = origin;
+  return POST(new Request('http://localhost/api/concierge/token', { method: 'POST', headers, body }));
 }
 
-const postId = (visitor_id: unknown) => post(JSON.stringify({ visitor_id }));
-
-function decodePayload(jwt: string) {
-  return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString('utf8'));
-}
+const postId = (visitor_id: unknown, origin?: string | null) => post(JSON.stringify({ visitor_id }), origin);
 
 describe('/api/concierge/token route config', () => {
   it('runs on Node and is never cached', () => {
     expect(runtime).toBe('nodejs');
     expect(dynamic).toBe('force-dynamic');
+  });
+});
+
+describe('POST /api/concierge/token foreign origins (403)', () => {
+  it('answers 403 {error:forbidden} with no Origin, before the env check (no env set, D63)', async () => {
+    const res = await postId(VISITOR, null);
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: 'forbidden' });
+    expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('answers 403 for another website with the env set', async () => {
+    setEnv();
+    const res = await postId(VISITOR, 'https://evil.example');
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: 'forbidden' });
+    expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('answers 403 before reading the body', async () => {
+    setEnv();
+    expect((await post('not json', 'https://evil.example')).status).toBe(403);
+  });
+
+  it('lets a localhost origin through in development (NODE_ENV test): no env, so 503', async () => {
+    const res = await postId(VISITOR, 'http://localhost:7834');
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ offline: true });
+  });
+
+  it('refuses a localhost origin in production (NODE_ENV read per request)', async () => {
+    jest.replaceProperty(process, 'env', { ...process.env, NODE_ENV: 'production' });
+    const res = await postId(VISITOR, 'http://localhost:7834');
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: 'forbidden' });
+  });
+
+  it('still lets the site origin through in production', async () => {
+    jest.replaceProperty(process, 'env', { ...process.env, NODE_ENV: 'production' });
+    expect((await postId(VISITOR)).status).toBe(503);
   });
 });
 
@@ -109,90 +145,5 @@ describe('POST /api/concierge/token bad requests (400)', () => {
     expect(json).toEqual({ error: 'bad_request' });
     expect(json).not.toHaveProperty('token');
     expect(res.headers.get('cache-control')).toBe('no-store');
-  });
-});
-
-describe('POST /api/concierge/token success (200)', () => {
-  beforeEach(setEnv);
-
-  it('returns exactly {url, token} with url = LIVEKIT_URL', async () => {
-    const res = await postId(VISITOR);
-    expect(res.status).toBe(200);
-    expect(res.headers.get('cache-control')).toBe('no-store');
-    const json = await res.json();
-    expect(Object.keys(json).sort()).toEqual(['token', 'url']);
-    expect(json.url).toBe(URL_VALUE);
-    expect(typeof json.token).toBe('string');
-  });
-
-  it('signs a token whose claims carry the identity, room, grants and agent dispatch', async () => {
-    const { token } = await (await postId(VISITOR)).json();
-    const p = decodePayload(token);
-    expect(p.sub).toBe(`visitor-${VISITOR}`);
-    expect(p.video.room).toMatch(/^concierge-[0-9a-f]{12}$/);
-    expect(p.video).toMatchObject({
-      roomJoin: true,
-      canPublish: true,
-      canSubscribe: true,
-      canPublishData: true,
-    });
-    expect(p.roomConfig.emptyTimeout).toBe(30);
-    expect(p.roomConfig.agents).toHaveLength(1);
-    expect(p.roomConfig.agents[0].agentName).toBe('concierge');
-    expect(JSON.parse(p.roomConfig.agents[0].metadata)).toEqual({
-      visitor_id: VISITOR,
-      channel_hint: 'web',
-    });
-  });
-
-  it('expires the token 600 s after its nbf', async () => {
-    // The SDK reads the clock twice (exp, then nbf, no iat): freeze it so a second boundary between the reads
-    // cannot make this 599.
-    const now = Date.UTC(2026, 9, 20, 0, 0, 0, 999);
-    jest.useFakeTimers({ now });
-    try {
-      const p = decodePayload((await (await postId(VISITOR)).json()).token);
-      expect(p.nbf).toBe(Math.floor(now / 1000));
-      expect(p.exp).toBe(p.nbf + 600);
-    } finally {
-      jest.useRealTimers();
-    }
-  });
-
-  it('accepts an upper-case v4 id and lower-cases it in the identity and metadata (D43)', async () => {
-    const { token } = await (await postId(VISITOR.toUpperCase())).json();
-    const p = decodePayload(token);
-    expect(p.sub).toBe(`visitor-${VISITOR}`);
-    expect(JSON.parse(p.roomConfig.agents[0].metadata).visitor_id).toBe(VISITOR);
-  });
-
-  it('ignores every body field but visitor_id', async () => {
-    const res = await post(
-      JSON.stringify({ visitor_id: VISITOR, identity: 'admin', room: 'evil', ttl: 99999, agentName: 'other' }),
-    );
-    const p = decodePayload((await res.json()).token);
-    expect(p.sub).toBe(`visitor-${VISITOR}`);
-    expect(p.video.room).toMatch(/^concierge-[0-9a-f]{12}$/);
-    expect(p.exp - p.nbf).toBeLessThanOrEqual(600);
-    expect(p.roomConfig.agents[0].agentName).toBe('concierge');
-  });
-
-  it('is really signed with the env secret', async () => {
-    const { token } = await (await postId(VISITOR)).json();
-    const claims = await new TokenVerifier(KEY_VALUE, SECRET_VALUE).verify(token);
-    expect(claims.sub).toBe(`visitor-${VISITOR}`);
-    await expect(new TokenVerifier(KEY_VALUE, 'y'.repeat(32)).verify(token)).rejects.toThrow();
-  });
-
-  it('gives each call its own room', async () => {
-    const a = decodePayload((await (await postId(VISITOR)).json()).token);
-    const b = decodePayload((await (await postId(VISITOR)).json()).token);
-    expect(a.video.room).not.toBe(b.video.room);
-  });
-
-  it('contains neither the key nor the secret in the response text', async () => {
-    const text = await (await postId(VISITOR)).text();
-    expect(text).not.toContain(KEY_VALUE);
-    expect(text).not.toContain(SECRET_VALUE);
   });
 });

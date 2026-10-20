@@ -11,6 +11,16 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 15:50 · VC5-04 · passes
+
+- `route.ts` now checks Origin (403 `forbidden`, before env, D63) → env (503) → body (400) → `listLiveRooms` (503, error dropped) → `roomsVerdict` (429 `busy` visitor|site) → token for `roomNameFor(bucket)`; no `console`, `profile` from `@/lib/data`, `node:crypto` import gone. Tests 1052 → 1079 (80 → 81 suites): new `concierge-token-route-limits.test.ts` (rooms mocked by factory, real SDK; the VC1 200 cases moved here, D69); `concierge-token-route.test.ts` still mocks nothing, sends the site Origin, adds 6 × 403/dev/prod cases (`jest.replaceProperty` for production); the sdk test shows a bad id and a 403 reach neither SDK spy nor `listLiveRooms`.
+- Docs: CLAUDE.md token row (the plan's draft), a Testing note and the count; plan § Route behaviour has "As built (VC5-04)"; the VC1 plan's table is marked superseded in part.
+- Verified: `check: lint ok · jest ok · build ok`; smoke exit 0 (42 PASS) at start and end; `grep -n console route.ts` empty. On `next dev` :7834 with no env, no Origin and `https://evil.example` → 403, `http://localhost:7834` and the site origin → 503. Mutations: logging the bucket fails 3 tests; dropping the 429 fails 5.
+- Opus review: no Critical or Important issues. Applied: the route comment now says the bucket is in the caller's own token (D70); the no-leak test also decodes the JWT and checks the address isn't in it.
+- For VC5-07: `npx tsc --noEmit` reports 3 errors that came in before this change (`booth-bundle.test.ts:92` `MH_HARNESS_HOME`, `concierge-rooms.test.ts:21,39` `mockResolvedValue` typed `never`). `next build` passes anyway; fix them in the cleanup pass.
+- Next session (VC5-05): `/talk` busy states. A 403 from the route reads as offline today (any non-OK reply).
+- D64 question still open (preview regex vs exact `VERCEL_URL`/`VERCEL_BRANCH_URL`); the route passes only `siteUrl` and `dev`, so switching needs only the extra `opts`.
+
 ### 2026-10-20 15:20 · VC5-03 · passes
 
 - New `src/lib/concierge/origin.ts` (`isAllowedOrigin`), `limits.ts` (`addressOf`, `addressBucket`, `roomNameFor`, `roomsVerdict`, `maxRooms`, pure) and `rooms.ts` (`import 'server-only'`, `listLiveRooms` with `requestTimeout: 5, failover: false`, not wired yet). `env.ts` line 1 is `import 'server-only';`. `server-only@0.0.1` is an exact dependency (lockfile updated). CLAUDE.md Code rules name it (D67), and the `lib/concierge/` line names the new modules. Tests 1017 → 1052 (76 → 80 suites): `concierge-origin`, `concierge-limits`, `concierge-rooms` and `TalkSession-import.test.tsx`.

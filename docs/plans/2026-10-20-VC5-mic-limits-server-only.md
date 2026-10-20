@@ -108,6 +108,16 @@ export async function POST(request: Request) {
   text). That is by design (D70): it is their bucket, not their address, and no one else sees it. "Never in a
   response" means never in plain text and never someone else's.
 
+**As built (VC5-04).** `route.ts` follows the sketch line for line: `dev` and the Origin check first (403), then
+`conciergeEnv()` (503), `readVisitorId` (400), `listLiveRooms(env)` in a `try` (503, error dropped), then
+`addressBucket(addressOf(request.headers), apiSecret)`, `roomsVerdict(…, maxRooms(process.env))` (429) and
+`roomNameFor(bucket)` for the VC1 `AccessToken` code, unchanged. `profile` comes from the `@/lib/data` barrel; the
+route no longer imports `node:crypto` (the room suffix is `limits.ts`'s). No `console.*`. Tests as § Tests says,
+D69 taken: the 200 cases moved to `concierge-token-route-limits.test.ts`; `concierge-token-route.test.ts` mocks
+nothing and keeps every 403, 503 and 400 case. Mutation checks: logging the bucket fails 3 limits tests; dropping
+the 429 line fails 5. `next dev` on port 7834 with no env: no Origin and `https://evil.example` → 403
+`{"error":"forbidden"}`; `http://localhost:7834` and the site origin → 503 `{"offline":true}`.
+
 ## Origin rules
 
 `isAllowedOrigin(origin, { siteUrl, dev })` in `src/lib/concierge/origin.ts`, pure, never throws:
