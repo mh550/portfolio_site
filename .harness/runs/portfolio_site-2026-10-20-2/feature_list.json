@@ -131,7 +131,7 @@
       "after": [
         "B1"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "B2-02",

@@ -10,6 +10,13 @@ append; numbering continues the v2 spec's D1–D40, never renumber).
 
 ---
 
+### 2026-10-20 13:05 · B2-01 · passes
+
+- New: `scripts/build-booth-bundle.mjs` (GNU tar flags per D41 piped into `zlib.gzipSync` level 9), `npm run booth-bundle`, committed `public/b/h.tgz` (14 files, 24887 bytes, sha256 `1266b778…`), `src/__tests__/lib/booth-bundle.test.ts` (5 tests), `docs/notes/booth-bundle.md`, `docs/plans/2026-10-20-B2-booth-bundle.md` (Files + mutation check; "What Michael will see" and "Review" left for B2-02/B2-03). CLAUDE.md: `/b/h.tgz` row, `npm run booth-bundle`, count. Jest 643/57 → 648/58.
+- Verified: two rebuilds give the same sha256 and leave `git status --short public/b/h.tgz` empty after commit, also with `__pycache__`/`.pyc`/`results.jsonl`/`logs`/`work` present; `tar -tzf` shows only `mh_harness/…`, none of those; mutation check (one byte on README.md) red → rebuild → green, restored; the python case runs the 99 bundle tests from the extracted copy in ~21 s with `MH_HARNESS_HOME` stripped (nothing lands in `public/`); `.harness/check.sh` prints `check: lint ok · jest ok · build ok`; smoke green.
+- Next session (B2-02): the init server on 7833 should serve `/b/h.tgz` from `public/` with no route change. The note's per-file fallback starts with `mkdir mh_harness; cd mh_harness`, so the files land in the right folder.
+- Proposed change: B2-01 step 2 says "the four tests/ files"; there are five since B1-06 (`test_readme.py`). All five are in the tarball.
+
 ### 2026-10-20 12:30 · verify B1
 
 All 7 features hold (41 steps re-run); no feature set to false. Lib check.sh and smoke.mjs green.
