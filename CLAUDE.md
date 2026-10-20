@@ -27,6 +27,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
+| `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
 ## Commands
 
@@ -34,8 +35,9 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (643 tests, 57 suites after S3-01)
+npm test             # Jest unit/integration tests (648 tests, 58 suites after B2-01)
 npm run test:watch   # watch mode
+npm run booth-bundle # rebuild public/b/h.tgz from public/b/mh_harness/, then commit it
 ```
 
 To run a single test file:
