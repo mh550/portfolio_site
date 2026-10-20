@@ -158,6 +158,10 @@ don't redo it.
   npm on 2026-10-20. Reason: `docs/specs/2026-10-19-voice-concierge-page.md` §3, approved by Michael 10-19 (ground
   rule 9). `@livekit/components-styles` is left out: the panels are Tailwind and `RoomAudioRenderer` renders no
   visible UI. Details in `docs/plans/2026-10-20-VC1-token-route.md`. (VC1-01.)
+- **D42** *default* The token route's Jest test signs a real token with the real `livekit-server-sdk` and fake env
+  (`'k'.repeat(12)`, `'x'.repeat(32)`), then decodes and verifies it; nothing is mocked there, since signing is
+  local (no network). The voice-concierge spec's "mock `livekit-client` in Jest" applies to `livekit-client` and
+  `@livekit/components-react`, which VC2 mocks. (VC1-02.)
 
 ## Dependencies between milestones
 

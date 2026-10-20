@@ -181,7 +181,7 @@ does not sign). `roomConfig.name` stays empty; the room is named by the video gr
 
 ## Tests (VC1-02, spec §5 "Token route")
 
-`src/__tests__/app/api/concierge-token.test.ts`, with `/** @jest-environment node */` on line 1. It is needed: under
+`src/__tests__/app/concierge-token-route.test.ts`, with `/** @jest-environment node */` on line 1. It is needed: under
 the default jsdom environment Jest resolves jose's `browser` export (ESM) and the import fails; under `node` it
 resolves `require` → `dist/node/cjs`. Checked tonight: a throwaway Jest test in the node environment imported
 `livekit-server-sdk`, minted and decoded a token, and passed (then deleted).
@@ -194,7 +194,7 @@ resolves `require` → `dist/node/cjs`. Checked tonight: a throwaway Jest test i
    `new TokenVerifier(key, secret).verify(token)` succeeds (the token is really signed with the env secret).
 4. Two calls give two different rooms.
 5. `runtime === 'nodejs'`, `dynamic === 'force-dynamic'`, `Cache-Control: no-store`.
-6. `src/__tests__/lib/concierge/visitorId.test.ts`: `isUuidV4` true for `crypto.randomUUID()` and an upper-case v4,
+6. `src/__tests__/lib/concierge-visitor-id.test.ts`: `isUuidV4` true for `crypto.randomUUID()` and an upper-case v4,
    false for v1/v7, wrong variant, wrong length, non-strings.
 
 D42 (recorded by VC1-02): the route test signs a real token with the real SDK and fake env, then decodes it; the

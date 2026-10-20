@@ -14,6 +14,18 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 · VC1-02 · passes
+
+- **Changed:** new `src/app/api/concierge/token/route.ts` (POST only; 503 `{offline:true}` checked before the body,
+  400 `{error:'bad_request'}`, 200 `{url, token}`, 500 `{error:'token_failed'}`; `Cache-Control: no-store` on all) and
+  `src/lib/concierge/visitorId.ts` (`isUuidV4`). Tests first: `src/__tests__/app/concierge-token-route.test.ts`
+  (real SDK, real signing, `TokenVerifier` check) and `src/__tests__/lib/concierge-visitor-id.test.ts`. 643 → 674 tests, 57 → 59 suites.
+- **Recorded:** D42 *default* in the v2 spec (route test signs with the real SDK; only `livekit-client`/components get mocked, in VC2).
+  The plan's test paths now match the feature's file names.
+- **Verified:** `check.sh` green; curl on :7832 → `{"offline":true}` HTTP 503 (GET → 405); smoke 38/38; route absent
+  from `.next-check/prerender-manifest.json`; `grep -rl LIVEKIT_API .next-check/static` empty.
+- **Next (VC1-03):** review the diff; CLAUDE.md still needs the route row, D41 packages and counts (674 tests, 59 suites).
+
 ### 2026-10-20 · VC1-01 · passes
 
 - **Changed:** `package.json`/`package-lock.json` pin `livekit-client` 2.23.0, `@livekit/components-react` 2.9.24,

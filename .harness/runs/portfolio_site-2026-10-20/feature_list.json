@@ -31,7 +31,7 @@
         "src/app/api/concierge/token/route.ts exports runtime = 'nodejs' and dynamic = 'force-dynamic', reads process.env inside the handler, and on the harness dev server `curl -s -X POST http://localhost:$HARNESS_PORT/api/concierge/token -H 'content-type: application/json' -d '{\"visitor_id\":\"123e4567-e89b-42d3-a456-426614174000\"}'` prints {\"offline\":true} with HTTP 503.",
         ".harness/check.sh is green and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC1-03",
