@@ -54,7 +54,9 @@
       "kind": "plan",
       "model": "opus",
       "description": "The /talk plan fixes the component tree, the session state machine, the Jest mocks and every LiveKit call, quoted from the installed types.",
-      "after": ["VC1"],
+      "after": [
+        "VC1"
+      ],
       "steps": [
         "docs/plans/2026-10-20-VC2-talk-page.md exists with: a file table (src/app/talk/page.tsx, src/components/talk/TalkSession.tsx, MemoryPanel, LatencyPanel, Transcript, ForgetMeButton, src/lib/concierge/{contract,latency,visitorId}.ts, src/lib/data/concierge.ts, src/__mocks__/livekit-client.ts, src/__mocks__/livekit-components-react.tsx, the tests), the session state machine (idle → connecting → waiting for agent → live → ended; offline from a 503, a fetch failure or the 10 s timeout; mic-blocked keeps the session), and the layout at 390 and 1280 (order: header and Connect, transcript with the text box, memory panel, latency panel, Forget me, privacy note; what is above 844 px at 390).",
         "The plan quotes, from node_modules/livekit-client/dist/src/**/*.d.ts and node_modules/@livekit/components-react/dist/index.d.ts, the exact signatures it will call: Room constructor and connect(url, token, opts?), disconnect, registerTextStreamHandler/unregisterTextStreamHandler with TextStreamHandler and TextStreamReader.readAll and reader.info.attributes, LocalParticipant.sendText(text, {topic}), performRpc(PerformRpcParams: destinationIdentity, method, payload, responseTimeout), setMicrophoneEnabled, RoomEvent.ParticipantConnected / Disconnected, Participant.kind and ParticipantKind.AGENT, room.remoteParticipants, room.startAudio and canPlaybackAudio, and the components-react exports it uses (RoomContext, RoomAudioRenderer, any hook). It states that a second registerTextStreamHandler on the same topic throws, so the page never also mounts useChat/useTranscriptions for lk.chat or lk.transcription, and names the lk.transcription attributes it reads (lk.segment_id, lk.transcription_final, lk.transcribed_track_id).",
@@ -63,7 +65,7 @@
         "The plan names the defaults to record in the v2 spec when built: D42 (the token test uses the real SDK with fake env and decodes the JWT; livekit-client and components-react are mocked in Jest), D43 (/talk keeps the site chrome, is indexable and in the sitemap, and stays off the Navbar), the visitor id read at Connect time rather than in a mount effect, and no @livekit/components-styles.",
         ".harness/check.sh is green (no code change is expected in this feature)."
       ],
-      "passes": true
+      "passes": false
     },
     {
       "id": "VC2-02",
@@ -141,7 +143,7 @@
         "docs/plans/2026-10-20-VC2-talk-page.md § What Michael will see has one row per screenshot: page and state · what is on screen · anything that looks wrong; any layout bug found is fixed in this feature with a test first and the screenshot retaken.",
         ".harness/check.sh is green."
       ],
-      "passes": true
+      "passes": false
     },
     {
       "id": "VC2-07",
@@ -164,7 +166,9 @@
       "kind": "plan",
       "model": "opus",
       "description": "The deep-dive plan and the evidence note every sentence of the deep-dive traces to.",
-      "after": ["VC1"],
+      "after": [
+        "VC1"
+      ],
       "steps": [
         "docs/notes/evidence-voice-concierge.md exists: the facts the page may state, each with its section number in /home/mh550/projects/voice-concierge/docs/spec.md (read-only; quote its 'Status' header line with the revision time), covering the problem, the six memory practices (preload at connect, background extraction with delta merge, heard-text-only, write gate, invalidate vs delete, one thread per visitor), the Agents 2.0 mapping (thread, lane state, journal, channels, version fence vs lease, TTL and returning visits), providers (STT/TTS via LiveKit Inference, LLM via OpenRouter), hosting (worker on Michael's home box, outbound only, SQLite), the privacy facts, and the 10-minute and 30-day limits. It says plainly that no latency numbers are measured yet and that the agent runs on livekit-agents 1.8 and only maps onto 2.0.",
         "docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md drafts the whole projects.ts entry: slug voice-concierge, title (Latin glyphs only, under 70 characters), company, categories ['ai','systems'], techStack, featured true, order from INBOX.md § Answers or the D44 default (5, shifting ghl-jobtread-integration and later by one), no metrics, detail.problem/approach/challenges/outcome in brand voice with the outcome honest about 'built overnight for a demo on 10-20, numbers to be measured', caseStudy (role, timeframe 'Oct 2026', the five method lines, six decisions each with chose/over/because/cost, lessons [], no iterations, links: /talk as kind 'demo' first and https://github.com/mh550/voice-concierge as 'repo' only if `gh repo view mh550/voice-concierge --json visibility` prints PUBLIC at plan time, builtWith crediting the spec and design to Michael and the code to Claude Code agents under his harness).",

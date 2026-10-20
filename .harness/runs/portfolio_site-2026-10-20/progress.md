@@ -14,6 +14,50 @@ below go under `## Answers`. The harness pulls before every session; read the An
 
 ---
 
+### 2026-10-20 verify · verify VC2
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| VC2-01 | 1 | read `docs/plans/2026-10-20-VC2-talk-page.md` (223 lines, 5 sections) | file table, component tree and state machine present; the "Layout" section (order, what is above 844 px) is gone; it had 13 sections at b55f3ce (590 lines), 5 at HEAD (a later commit deleted 459 lines) | no |
+| VC2-01 | 2 | grep the plan for registerTextStreamHandler, TextStreamReader, PerformRpcParams, ParticipantKind, lk.segment_id, lk.transcribed_track_id | no "LiveKit calls" section and no quoted signatures; line 10 refers to a § that does not exist; lk.* attributes unnamed | no |
+| VC2-01 | 3 | grep the plan for moduleNameMapper, fake timers, Jest section | no Jest section in the plan (deleted); the mapper is only in jest.config.ts and the mocks exist | no |
+| VC2-01 | 4 | grep the plan for the copy list (Erase, Cancel, six privacy points) | no Copy section in the plan (deleted); copy exists only in src/lib/data/concierge.ts | no |
+| VC2-01 | 5 | grep the plan for D42, D43, components-styles; grep spec | no "Decisions to record" section in the plan; D42–D45 are in the v2 spec (lines 161–173) | no |
+| VC2-01 | 6 | `check.sh` | green (6 tests, cached for this tree) | yes |
+| VC2-02 | 1 | `npx jest src/__tests__/lib/concierge-contract.test.ts` and read it | pass; fixtures parse; non-JSON returns null without throwing (tests listed in verbose run) | yes |
+| VC2-02 | 2 | `npx jest src/__tests__/lib/concierge-latency.test.ts` | pass; "gives the last value and the running median…", "even-count median is the mean of the two middles", "cached_tokens / prompt_tokens rounded to 2 decimals" | yes |
+| VC2-02 | 3 | `npx jest src/__tests__/lib/concierge-visitor-id.test.ts` | pass; stores under concierge.visitor_id, persists across two calls, replaces malformed, getItem/setItem throwing and blocked storage give a valid id | yes |
+| VC2-02 | 4 | `npx jest src/__tests__/lib/concierge-data.test.ts`; read lines 44–67 | pass; privacyNote length 6, destructured by keyword (what/where/how long/id/forget/livekit); no `http`; offline sentence exact; deep-dive link asserted | yes |
+| VC2-02 | 5 | check.sh; `npx jest --silent` | green; 72 suites, 933 tests pass | yes |
+| VC2-03 | 1 | `npx jest src/__tests__/components/talk` MemoryPanel tests | pass: "a new visitor", visit count, name, "Nothing remembered yet" for empty | yes |
+| VC2-03 | 2 | LatencyPanel.test.tsx | pass: full turn with medians and cached share; last turn beside the median; null renders an en dash | yes |
+| VC2-03 | 3 | read Transcript.tsx lines 14–60 and Transcript.test.tsx | role log with aria-live="polite", aria-busy for non-final, non-final line italic and marked; tests pass | yes |
+| VC2-03 | 4 | ForgetMeButton.test.tsx | pass: confirm on first click, Erase once even on a double click, Cancel returns. Busy now uses aria-disabled, not `disabled` (VC2-07 focus fix); behaviour is still blocked while busy | yes |
+| VC2-03 | 5 | grep focusRing/h2 in talk components; jest talk dir; check.sh | focusRing imported in Transcript, ForgetMeButton and the others; talk suites pass; check green | yes |
+| VC2-04 | 1 | read page.tsx; grep smoke-routes, sitemap.ts, sitemap-robots test, a11y-new-pages test | metadata title and description right; /talk in all four; both counts 9 (+projects); a11y list has /talk; talk.test.tsx passes | yes |
+| VC2-04 | 2 | TalkSession.test.tsx | pass: 503, other non-OK, fetch rejection and 200 without url/token show the offline line plus the deep-dive link; POSTs the stored visitor id; storage-throws case | yes |
+| VC2-04 | 3 | TalkSession.test.tsx | pass: handlers registered before connect; unmount gives 3 unregisters and 1 disconnect; StrictMode registers each topic once | yes |
+| VC2-04 | 4 | TalkSession.test.tsx fake timers | pass: offline 10000 ms after connect() resolves; agent at 3000 ms cancels the timer and goes live | yes |
+| VC2-04 | 5 | TalkSession.test.tsx | pass: memory body renders in the panel, metrics in the latency panel, malformed body changes nothing and logs no console.error | yes |
+| VC2-04 | 6 | jest.config.ts lines 13–14; `grep -rl livekit-client src/app`; `grep -ciE hydrat server.log` | both mappers present; grep empty; 0 hydration lines in the dev server log | yes |
+| VC2-04 | 7 | `node .harness/smoke.mjs`; `curl -w %{http_code} /talk` on :7832; check.sh | PASS /talk @1280 and @390, 0 failures; curl prints 200; check green | yes |
+| VC2-05 | 1 | TalkSession-live.test.tsx | pass: mic on and mute/unmute; NotAllowedError shows the blocked message and the session stays live with typing on | yes |
+| VC2-05 | 2 | TalkSession-live.test.tsx, review test | pass: Enter sends on lk.chat, line appended as visitor, box cleared; whitespace ignored; double Enter sends once | yes |
+| VC2-05 | 3 | TalkSession-live.test.tsx | pass: two streams with one lk.segment_id give one line, lk.transcription_final marks it final | yes |
+| VC2-05 | 4 | TalkSession-live.test.tsx; read TalkSession.tsx lines 361–365 | performRpc called once with method, payload and responseTimeout FORGET_TIMEOUT_MS (10 s); {ok:true} clears memory and shows Forgotten; failure path tested | yes |
+| VC2-05 | 5 | read RoomAudio.tsx; tests | RoomContext.Provider with RoomAudioRenderer; startAudio retried on user gestures; Leave tests pass; no animation added | yes |
+| VC2-05 | 6 | check.sh; smoke | green; every route PASS | yes |
+| VC2-06 | 1 | `ls -la docs/screenshots/v2 | grep talk` | VC2-talk-390.png 39 KB, -1280 52 KB, -offline-390 42 KB, all under 400 KB. Not retaken by me (the live offline sentence was seen through my own Playwright run below) | yes |
+| VC2-06 | 2 | own Playwright script at 390×844 against :7832 | h1 bottom 303, Connect bottom 664 (both <844); scrollWidth 390 idle and offline; 0 page errors; idle 0 console errors, but offline logs 1 console error ("Failed to load resource … 503") so "0 console errors in either state" does not hold as written (the plan admits it) | no |
+| VC2-06 | 3 | Playwright Tab loop at 1280×800, 350 ms wait per stop | Skip to content, MH, Home…Contact, Connect in that order; each is :focus-visible with outline rgb(0, 212, 255) solid | yes |
+| VC2-06 | 4 | read plan § What Michael will see | three rows, one per screenshot, with the three columns; no layout bug listed | yes |
+| VC2-06 | 5 | check.sh | green | yes |
+| VC2-07 | 1 | read plan § Review | two tables with file, finding, severity, outcome; Important items marked fixed with test names; TalkSession-review.test.tsx passes | yes |
+| VC2-07 | 2 | read plan § Review checks; ran StrictMode tests; the grep | StrictMode tests pass; release tests pass; no server import of livekit; offline path checked in my Playwright run; ts.net/CGNAT/ntfy grep empty | yes |
+| VC2-07 | 3 | `grep -n` docs/review-guide.md | "VC1–VC3: Voice Concierge" at line 65 and "Morning: the live check" at line 84 | yes |
+| VC2-07 | 4 | grep CLAUDE.md; `npx jest --silent` | /talk row, talk and lib/concierge lines, mocks documented; counts 933 tests / 72 suites match the run | yes |
+| VC2-07 | 5 | check.sh and smoke | green; all routes PASS | yes |
+
 ### 2026-10-20 02:15 · VC2-07 · passes
 
 - **Changed:** Opus review of all of VC2 (`git diff d4c7d58..HEAD`), with a § Review table in `docs/plans/2026-10-20-VC2-talk-page.md`. **Important, fixed test-first:** (1) Connect and Leave are now one button, so focus survives every phase change; Forget me uses `aria-disabled`, and focus goes to Connect when a call ends. (2) LiveKit is out of `/talk`'s first load: `import('livekit-client')` on Connect plus the new `RoomAudio.tsx` via `next/dynamic`; the 151 KB gz chunk is gone from the page manifest. Also fixed: double-click and held-Enter guards, failed send keeps the draft, double Enter sends once, the draft is cleared per session, reconnect without the agent ends the call, "Connect again to retry" copy, no `@/lib/data` barrel in talk files. Simplified: reducer `agentIdentity`, `session.forgetting`, `release()`, `inRoom`, `TURN_PATH_FIELDS`. Tests 916 → 933, suites 71 → 72 (new `TalkSession-review.test.tsx`).
