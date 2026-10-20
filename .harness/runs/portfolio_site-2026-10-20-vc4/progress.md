@@ -11,6 +11,20 @@ renumber), each naming the decision it supersedes.
 
 ---
 
+### 2026-10-20 13:50 · VC4-02 · passes
+
+- **Order (D59)** in `projects.ts`: 1 agent-harness, 2 voice-concierge, 3 ghl, 4 ringcentral, 5 home-media-server,
+  6 linear-ai-workflow, 7 hit-list, 8 paint-estimator, 9 mirrored, 10 cherished. Top 3 on `/` and `/card` is now
+  agent-harness, voice-concierge, ghl-jobtread-integration (live `/card` HTML shows those three in that order).
+- **Navbar (D60)**: `{ href: '/talk', label: 'Talk' }` fifth of eight; `/talk` marks only Talk (desktop + mobile).
+- Tests: data.test (D59 map, both getTopProjects lists), case-study voice-concierge 2 / home-media-server 5 /
+  hit-list 7, home + card assert link 2 is `/projects/voice-concierge`, Navbar eight links + new `/talk` test.
+  992 → 993 tests, 75 suites; no `.snap` change. Saw 12 failures before the code change, 0 after.
+- Docs: CLAUDE.md (`/talk` row "on the Navbar, D60", Navbar line, D59 note on `/projects/[slug]`, test count),
+  review guide VC3 bullets (order 5 → D59, new top 3; question answered). v2 D44/D49 already end "Superseded by D60".
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 42 PASS.
+- Next (VC4-03): the widget; the Navbar width at 768 with eight links is still VC4-05's to look at.
+
 ### 2026-10-20 13:27 · VC4-01 · passes
 
 - **Plan** `docs/plans/2026-10-20-VC4-order-widget-nav.md`: § Order (before/after table; top 3 becomes agent-harness,

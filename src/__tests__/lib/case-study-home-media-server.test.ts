@@ -22,7 +22,7 @@ describe('home-media-server entry', () => {
     expect(project.title).toBe('Self-hosted music library & DJ crate pipeline');
     expect(project.company).toBe('Personal · home server');
     expect(project.categories).toEqual(['systems', 'full-stack']);
-    expect(project.order).toBe(3);
+    expect(project.order).toBe(5);
     expect(project.featured).toBe(true);
     expect(project.githubUrl).toBe('https://github.com/mh550/dj-crate-streaming');
   });

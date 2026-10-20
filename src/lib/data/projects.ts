@@ -322,7 +322,7 @@ merge_one() {
     categories: ['integration'],
     techStack: ['Pipedream', 'Supabase', 'JavaScript', 'OAuth', 'REST APIs', 'Webhooks'],
     featured: true,
-    order: 6,
+    order: 3,
     metrics: [
       { value: '2 days → ~6 hrs', label: 'client onboarding time' },
       { value: 'Bidirectional', label: 'GHL ↔ JobTread sync' },
@@ -372,7 +372,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['integration', 'ai'],
     techStack: ['Linear', 'MCP', 'Claude Code', 'AI Agents', 'Git'],
     featured: true,
-    order: 2,
+    order: 6,
     metrics: [
       { value: '2×', label: 'sprint throughput' },
       { value: '~80%', label: 'less bug-filing time' },
@@ -400,7 +400,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     techStack: ['Python', 'SQLite', 'Docker Compose', 'Navidrome', 'beets', 'ffmpeg', 'JavaScript', 'restic'],
     githubUrl: 'https://github.com/mh550/dj-crate-streaming',
     featured: true,
-    order: 3,
+    order: 5,
     metrics: [
       { value: '831', label: 'songs, self-hosted, identical copies removed' },
       { value: '1,405', label: 'playlist entries kept intact through the retag and dedupe' },
@@ -610,7 +610,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     techStack: ['React Native', 'Expo', 'TypeScript', 'expo-router', 'zustand', 'SQLite', 'react-native-maps', 'Jest', 'GitHub Actions'],
     githubUrl: 'https://github.com/mh550/hit-list',
     featured: true,
-    order: 4,
+    order: 7,
     metrics: [
       { value: '374', label: 'tests in 37 suites, and the phone still found a crash' },
       { value: '20+ → 7', label: 'fields on a spot, specified Oct 16 after using it, not yet built' },
@@ -776,7 +776,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     techStack: ['Python', 'LiveKit Agents', 'LiveKit Inference', 'Anthropic API', 'SQLite', 'Next.js', 'TypeScript', 'Claude Code'],
     githubUrl: 'https://github.com/mh550/voice-concierge',
     featured: true,
-    order: 5,
+    order: 2,
     detail: {
       problem:
         'By default a LiveKit voice agent forgets you when the call ends, and memory is easy to add badly. A store call awaited inside the turn is a pause the caller hears. An extractor that reads the whole transcript can store what the agent said, or the part of a reply the visitor talked over, as if the visitor had said it. I wanted a concierge for this site that remembers returning visitors, by voice or by text, and lets each of them see and erase what it keeps.',
@@ -883,7 +883,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['integration'],
     techStack: ['n8n', 'Zapier', 'REST APIs', 'Webhooks', 'JavaScript'],
     featured: true,
-    order: 8,
+    order: 4,
     metrics: [
       { value: '1 thread', label: 'per customer' },
       { value: 'Zapier → n8n', label: 'platform migration' },
@@ -909,7 +909,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
     categories: ['full-stack'],
     techStack: ['React Native', 'TypeScript', 'Node.js'],
     featured: true,
-    order: 7,
+    order: 8,
     metrics: [
       { value: '3 levels', label: 'job → area → feature → task' },
       { value: 'Go-live', label: 'joined at launch' },

@@ -19,7 +19,7 @@ describe('Navbar', () => {
 
   it('renders all nav links', () => {
     render(<Navbar />);
-    const links = ['Home', 'About', 'Skills', 'Projects', 'Approach', 'Experience', 'Contact'];
+    const links = ['Home', 'About', 'Skills', 'Projects', 'Talk', 'Approach', 'Experience', 'Contact'];
     for (const label of links) {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     }
@@ -32,6 +32,7 @@ describe('Navbar', () => {
       About: '/about',
       Skills: '/skills',
       Projects: '/projects',
+      Talk: '/talk',
       Approach: '/approach',
       Experience: '/experience',
       Contact: '/contact',
@@ -44,16 +45,17 @@ describe('Navbar', () => {
     }
   });
 
-  it('lists the seven links in order in the desktop list and the mobile menu (M8)', async () => {
+  it('lists the eight links in order in the desktop list and the mobile menu (M8, D60)', async () => {
     const user = userEvent.setup();
     render(<Navbar />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
-    const order = ['Home', 'About', 'Skills', 'Projects', 'Approach', 'Experience', 'Contact'];
+    const order = ['Home', 'About', 'Skills', 'Projects', 'Talk', 'Approach', 'Experience', 'Contact'];
     const lists = screen.getAllByRole('list');
     expect(lists).toHaveLength(2);
     for (const list of lists) {
       expect(within(list).getAllByRole('link').map((a) => a.textContent)).toEqual(order);
       expect(within(list).getByRole('link', { name: 'Approach' })).toHaveAttribute('href', '/approach');
+      expect(within(list).getByRole('link', { name: 'Talk' })).toHaveAttribute('href', '/talk');
     }
     expect(screen.queryByRole('link', { name: /evidence|card/i })).not.toBeInTheDocument();
   });
@@ -100,5 +102,16 @@ describe('Navbar on /approach (M8-02)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
     const current = screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page');
     expect(current.map((a) => a.textContent)).toEqual(['Approach', 'Approach']);
+  });
+});
+
+describe('Navbar on /talk (VC4, D60)', () => {
+  it('marks only Talk as the current page, in the desktop list and the mobile menu', async () => {
+    mockPathname = '/talk';
+    render(<Navbar />);
+    await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const current = screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page');
+    expect(current.map((a) => a.textContent)).toEqual(['Talk', 'Talk']);
+    for (const a of current) expect(a).toHaveAttribute('href', '/talk');
   });
 });

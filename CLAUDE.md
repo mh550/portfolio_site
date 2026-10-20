@@ -17,7 +17,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/about` | About |
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
-| `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`) |
+| `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
 | `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
@@ -28,7 +28,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
 | `/michael-herron.vcf` | vCard 3.0 from `buildVCard(profile)` (`src/lib/vcard.ts`), static route handler |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
-| `/talk` | Voice concierge (D44: chrome, sitemap, off the Navbar): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
+| `/talk` | Voice concierge (D44: chrome, sitemap; on the Navbar, D60): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
 | `/api/concierge/token` | POST `{visitor_id}` (UUID v4): 503 `{offline:true}` without the three `LIVEKIT_*` env vars; else a 10-minute LiveKit token that dispatches agent `concierge` (`route.ts`, plan `docs/plans/2026-10-20-VC1-token-route.md`) |
 | `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
@@ -38,7 +38,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (992 tests, 75 suites after VC3-05 + B2)
+npm test             # Jest unit/integration tests (993 tests, 75 suites after VC4-02)
 npm run test:watch   # watch mode
 npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
@@ -77,7 +77,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`)
 
 ### Components
-- `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Approach, Experience, Contact) with active link highlighting, mobile hamburger (`"use client"`)
+- `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Talk, Approach, Experience, Contact; Talk since VC4, D60) with active link highlighting, mobile hamburger (`"use client"`)
 - `components/Footer.tsx` — social links
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper (`data-scroll-reveal`, forced visible in print); skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)

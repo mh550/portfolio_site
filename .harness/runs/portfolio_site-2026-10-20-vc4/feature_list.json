@@ -33,7 +33,7 @@
         "docs/review-guide.md's VC3 bullet 'order 5 … top 3, /card and home unchanged' and its 'Question open: is order 5 right' line are updated to say the order changed in VC4 (D59), with the new top 3.",
         "The suite is green: .harness/check.sh prints `check: lint ok · jest ok · build ok` and `node .harness/smoke.mjs` passes every route."
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VC4-03",

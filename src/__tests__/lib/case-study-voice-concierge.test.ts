@@ -27,7 +27,7 @@ describe('voice-concierge entry', () => {
     expect(project).toBeDefined();
     expect(project.title).toBe('Voice Concierge: a voice agent that remembers returning visitors');
     expect(project.categories).toEqual(['ai', 'systems']);
-    expect(project.order).toBe(5);
+    expect(project.order).toBe(2);
     expect(project.featured).toBe(true);
     expect(project.githubUrl).toBe(REPO);
     expect(project.demoUrl).toBeUndefined();
