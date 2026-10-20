@@ -1,0 +1,10 @@
+[
+  {"name": "base", "mcps": ["fake"], "env": {"FAKE_SLEEP_S": "2", "FAKE_WORDS": "2", "FAKE_LLM_CALLS": "3"},
+   "expected_words": 2, "cities": 6, "timeout_s": 60, "control_of": null},
+  {"name": "base_ctl", "mcps": ["fake"], "env": {"FAKE_SLEEP_S": "2", "FAKE_WORDS": "2", "FAKE_LLM_CALLS": "3"},
+   "expected_words": 2, "cities": 6, "timeout_s": 60, "control_of": "base"},
+  {"name": "terse", "mcps": ["fake"], "env": {"FAKE_SLEEP_S": "2", "FAKE_WORDS": "2", "FAKE_LLM_CALLS": "3"},
+   "expected_words": 2, "cities": 6, "timeout_s": 60, "control_of": null},
+  {"name": "terse_trim", "mcps": ["fake"], "env": {"FAKE_SLEEP_S": "2", "FAKE_WORDS": "2", "FAKE_LLM_CALLS": "2"},
+   "expected_words": 2, "cities": 6, "timeout_s": 60, "control_of": null}
+]
