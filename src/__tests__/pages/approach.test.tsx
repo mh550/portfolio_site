@@ -4,7 +4,7 @@ import {
   approachIntro,
   getCaseStudyAnchors,
   getProjectBySlug,
-  methodSteps,
+  loopSteps,
   principles,
   resolvedExamples,
 } from '@/lib/data';
@@ -37,7 +37,7 @@ describe('ApproachPage', () => {
   it('shows the five method labels and their lines, visible at every width', () => {
     render(<ApproachPage />);
     const strip = screen.getByRole('list', { name: 'The five steps' });
-    for (const step of methodSteps) {
+    for (const step of loopSteps) {
       expect(within(strip).getByText(step.label)).toBeInTheDocument();
       const line = within(strip).getByText(step.line);
       expect(line.closest('.sr-only')).toBeNull();

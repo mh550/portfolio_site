@@ -13,6 +13,12 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 05:45 · P1-02 · passes
+
+`profile.ts`: positioning "Agentic Systems Engineer", v3 subline (tagline unchanged). `approach.ts`: `LoopStepId`, `LoopStep`, `loopSteps` (five rows verbatim from v3 spec § 2, principles per plan); `aboutIntro[1]` = "I work the way my harness runs: Spec, Context, Build, Verify, Learn."; `methodSteps` untouched. `MethodStrip` maps `loopSteps`. Tests updated/added in profile, vcard, vcf-route, layout-metadata, card, HeroSection, MethodStrip, home, about, approach (lib + page's strip loop now reads `loopSteps`): 1111 → 1122 tests, 80 suites. brand.md § Positioning has a `### v3` subsection (10-18 kept as history); D76/D77 marked as built in the v2 spec and plan; CLAUDE.md MethodStrip line.
+Verified: tests red first (11 suites failing), then `.harness/check.sh` green (lint · jest · build); smoke exit 0, 42 PASS; case-study-anchors + case-study suites 35 pass, unedited; 390 px home and about screenshots read the new strings and loop; `grep -rni 'Systems & Process\|I find where work breaks' src public` → nothing.
+Next session (P1-03): the old logos still overlap the strip at 1280 (pipedream next to the buttons, the lightning bolt left of Spec); the loop lines made the strip ~82 px tall as planned, so measure with the new tree. `approachIntro` stays until P1-05 (the /approach page reads it). Next free decision: **D81**. No new questions.
+
 ### 2026-10-21 05:10 · P1-01 · passes
 
 Wrote `docs/plans/2026-10-21-P1-angle.md` (Positioning table of 10 files before/after, Loop strip type + five rows + step→principle links resolved on this tree, 12 logos with export names, generator, header and 12 positions measured at 1280×720/800/900, About, Approach fold, Site-wide strings, Tests table per feature, empty What Michael will see / Review tables, Decisions) and recorded **D76–D80** *default* in the v2 spec § v3 decisions. Docs only: 1111 tests / 80 suites, unchanged.

@@ -7,7 +7,7 @@ const EXPECTED =
     'VERSION:3.0',
     'N:Herron;Michael;;;',
     'FN:Michael Herron',
-    'TITLE:Systems & Process Engineer',
+    'TITLE:Agentic Systems Engineer',
     'EMAIL;TYPE=INTERNET:mherron734@gmail.com',
     'URL:https://michael-herron.vercel.app',
     'X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/mherron734/',

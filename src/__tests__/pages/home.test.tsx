@@ -14,6 +14,14 @@ function recentWork() {
 }
 
 describe('Home page', () => {
+  it('shows the loop strip Spec → Context → Build → Verify → Learn and no Diagnose text (D77)', () => {
+    const { container } = render(<HomePage />);
+    const items = within(screen.getByRole('list', { name: 'How I work' })).getAllByRole('listitem');
+    expect(items).toHaveLength(5);
+    ['Spec', 'Context', 'Build', 'Verify', 'Learn'].forEach((label, i) => expect(items[i]).toHaveTextContent(label));
+    expect(container.textContent).not.toMatch(/Diagnose/);
+  });
+
   it('renders the hero, then the Recent work section', () => {
     render(<HomePage />);
     const h1 = screen.getByRole('heading', { level: 1 });

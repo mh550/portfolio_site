@@ -94,7 +94,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
-- `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
+- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid (sorted by `order`) using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves

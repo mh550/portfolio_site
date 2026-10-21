@@ -61,6 +61,18 @@ describe('AboutPage', () => {
     expect(h1.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('the intro holds the v3 subline and the five loop labels in order (D76, D77)', () => {
+    render(<AboutPage />);
+    const intro = screen.getByText(aboutIntro.join(' '));
+    const text = intro.textContent ?? '';
+    expect(text).toContain(
+      'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
+    );
+    const at = ['Spec', 'Context', 'Build', 'Verify', 'Learn'].map((l) => text.indexOf(l));
+    for (const i of at) expect(i).toBeGreaterThanOrEqual(0);
+    for (let i = 1; i < at.length; i++) expect(at[i]).toBeGreaterThan(at[i - 1]);
+  });
+
   it('describes the page without the old positioning', () => {
     expect(String(metadata.description)).not.toMatch(/full-stack and integration engineer/i);
   });

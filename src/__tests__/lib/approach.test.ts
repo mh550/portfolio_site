@@ -1,4 +1,4 @@
-import { aboutIntro, methodSteps, profile, type MethodStep } from '@/lib/data';
+import { aboutIntro, loopSteps, methodSteps, principles, profile, type LoopStep, type MethodStep } from '@/lib/data';
 
 describe('methodSteps', () => {
   it('has the five steps in method order', () => {
@@ -30,7 +30,46 @@ describe('methodSteps', () => {
   });
 });
 
-describe('aboutIntro (D13, D32)', () => {
+describe('loopSteps (D77)', () => {
+  it('has the five loop steps in order, with unique ids', () => {
+    expect(loopSteps.map((s) => s.id)).toEqual(['spec', 'context', 'build', 'verify', 'learn']);
+    expect(new Set(loopSteps.map((s) => s.id)).size).toBe(5);
+  });
+
+  it('has the labels and lines verbatim from the v3 spec § 2', () => {
+    expect(loopSteps.map(({ label, line }) => [label, line])).toEqual([
+      ['Spec', 'I write down what done means before anything is built.'],
+      ['Context', 'Every session starts fresh, from state kept on disk, not from memory.'],
+      ['Build', 'Test first, one feature at a time, the smallest system that fixes the real problem.'],
+      ['Verify', 'An independent check, with evidence per step, before anything merges.'],
+      ['Learn', 'Every run is measured and written down, and the next plan reads it.'],
+    ]);
+  });
+
+  it('maps each step to its principle per the P1 plan', () => {
+    expect(Object.fromEntries(loopSteps.map((s) => [s.id, s.principle]))).toEqual({
+      spec: 'decisions-explicit',
+      context: 'automate-bookkeeping',
+      build: 'simplify-after-use',
+      verify: 'verify-what-the-human-sees',
+      learn: 'fakes-mirror-reality',
+    });
+  });
+
+  it('names a principle that exists for every step', () => {
+    const ids = principles.map((p) => p.id);
+    for (const step of loopSteps) expect(ids).toContain(step.principle);
+  });
+
+  it('has exactly the LoopStep fields', () => {
+    for (const step of loopSteps) {
+      const keys: (keyof LoopStep)[] = ['id', 'label', 'line', 'principle'];
+      expect(Object.keys(step).sort()).toEqual([...keys].sort());
+    }
+  });
+});
+
+describe('aboutIntro (D13, D32, D77)', () => {
   it('is at most three sentences', () => {
     expect(aboutIntro.length).toBeGreaterThan(0);
     expect(aboutIntro.length).toBeLessThanOrEqual(3);
@@ -41,10 +80,17 @@ describe('aboutIntro (D13, D32)', () => {
     expect(aboutIntro[0]).toBe(profile.subline);
   });
 
-  it('names every method step', () => {
-    const text = aboutIntro.join(' ');
-    for (const step of methodSteps) {
-      expect(text).toContain(step.label);
-    }
+  it('opens with the v3 subline (D76)', () => {
+    expect(aboutIntro[0]).toBe(
+      'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
+    );
+  });
+
+  it('names the five loop labels in order', () => {
+    expect(aboutIntro[1]).toBe('I work the way my harness runs: Spec, Context, Build, Verify, Learn.');
+  });
+
+  it('no longer names the case-study method', () => {
+    expect(aboutIntro.join(' ')).not.toMatch(/Diagnose|Decide|Simplify/);
   });
 });

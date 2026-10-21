@@ -10,7 +10,7 @@ export interface MethodStep {
   line: string;
 }
 
-// The method every case study follows (docs/notes/brand.md). M2's hero strip and M7's /approach reuse it.
+// The method every case study follows (docs/notes/brand.md): the case-study anchors and /evidence read it (D77).
 export const methodSteps: MethodStep[] = [
   { id: 'diagnose', label: 'Diagnose', line: 'I find where the work actually breaks down before I build anything.' },
   { id: 'decide', label: 'Decide', line: 'I write down what I chose, what I passed on, and why.' },
@@ -19,10 +19,54 @@ export const methodSteps: MethodStep[] = [
   { id: 'simplify', label: 'Simplify', line: 'Once it runs, I cut what nobody needs.' },
 ];
 
-// The About page's "What I do" intro (D13, D32): the subline, the method, the supporting phrase (brand.md).
+export type LoopStepId = 'spec' | 'context' | 'build' | 'verify' | 'learn';
+
+export interface LoopStep {
+  id: LoopStepId;
+  label: string;
+  line: string;
+  /** The principle whose first linkable example is this step's one link on /about (D77). */
+  principle: Principle['id'];
+}
+
+// The loop the harness runs, which is also how I work (v3 spec § 2, D77): the hero strip and /about read it.
+export const loopSteps: LoopStep[] = [
+  {
+    id: 'spec',
+    label: 'Spec',
+    line: 'I write down what done means before anything is built.',
+    principle: 'decisions-explicit',
+  },
+  {
+    id: 'context',
+    label: 'Context',
+    line: 'Every session starts fresh, from state kept on disk, not from memory.',
+    principle: 'automate-bookkeeping',
+  },
+  {
+    id: 'build',
+    label: 'Build',
+    line: 'Test first, one feature at a time, the smallest system that fixes the real problem.',
+    principle: 'simplify-after-use',
+  },
+  {
+    id: 'verify',
+    label: 'Verify',
+    line: 'An independent check, with evidence per step, before anything merges.',
+    principle: 'verify-what-the-human-sees',
+  },
+  {
+    id: 'learn',
+    label: 'Learn',
+    line: 'Every run is measured and written down, and the next plan reads it.',
+    principle: 'fakes-mirror-reality',
+  },
+];
+
+// The About page's "What I do" intro (D13, D32, D77): the subline, the loop, the supporting phrase (brand.md).
 export const aboutIntro: string[] = [
   profile.subline,
-  `I work in five steps: ${methodSteps.map((s) => s.label).join(', ')}.`,
+  `I work the way my harness runs: ${loopSteps.map((s) => s.label).join(', ')}.`,
   'I own delivery from requirements to release.',
 ];
 

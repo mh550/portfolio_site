@@ -11,6 +11,7 @@ describe('CardPage', () => {
     render(<CardPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(profile.name);
     expect(screen.getByText(profile.positioning)).toBeInTheDocument();
+    expect(screen.getByText('Agentic Systems Engineer')).toBeInTheDocument();
   });
 
   it('renders the subline', () => {
@@ -125,8 +126,11 @@ describe('CardPage', () => {
   });
 
   it('metadata title and description', () => {
-    expect(metadata.title).toBe('Michael Herron — Systems & Process Engineer');
+    expect(metadata.title).toBe('Michael Herron — Agentic Systems Engineer');
     expect(metadata.description).toBe(profile.subline);
+    expect(metadata.description).toBe(
+      'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
+    );
     // No openGraph/twitter of its own: Next replaces (not merges) these per segment, so the card inherits the root
     // block (siteName, type, headshot, summary card) and fills og:title/description from its own title/description
     expect(metadata).not.toHaveProperty('openGraph');

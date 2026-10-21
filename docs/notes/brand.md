@@ -10,7 +10,20 @@ Michael does product-owner, project-manager and process-engineering work, but ev
 n8n/Zapier/Pipedream logos), has no metrics, no diagrams, no links, and nothing newer than March 2026. It *tells*.
 v2 must *show*: real systems, the decisions behind them, what broke, what he changed, and the numbers.
 
-## Positioning (decided by Michael, 2026-10-18)
+## Positioning
+
+### v3 (2026-10-21, D76/D77 *default*, Michael picks the final words)
+
+- **Headline: "Agentic Systems Engineer".** Same places as below (hero eyebrow, `<title>`, `/card`, vCard `TITLE`,
+  Open Graph); still a positioning line, not a job title. "Systems & process" stays as *how* he works.
+- **Tagline (keep):** "I build simple, elegant systems that fit the humans who run them."
+- **Subline:** "I build the harnesses, memory and verification around AI agents, and the integrations they run on."
+- **The loop (hero strip and About):** Spec → Context → Build → Verify → Learn, the loop the harness runs. The five
+  verbs Diagnose → Decide → Build → Verify → Simplify stay the spine of every case study. How I work moves to
+  `/about#how-i-work` (P1-04/P1-05; `/approach` redirects there).
+
+### 2026-10-18 (decided by Michael; history, superseded by v3 above)
+
 
 - **Headline title: "Systems & Process Engineer".** It appears in the hero eyebrow, the site `<title>`, the
   `/card` page, the vCard `TITLE`, and Open Graph metadata. It is a positioning line, **not** a job title.
