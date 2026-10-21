@@ -231,6 +231,9 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.
+- Contact: `node .harness/contact-check.mjs [dir]` loads `/contact` at 390×844 and 1280×800, asserts no vertical
+  scroll (also prints the Footer's bottom edge), the panel closed and the pill clear of the tiles, and saves the
+  viewport captures `P4-contact-{390,1280}.png` (D97).
 - Print: `node .harness/print-check.mjs [base] [path] [out.png]` emulates print media (white body, no visible
   nav/footer/canvas, `pre` wrapped, links underlined) and saves a full-page capture; exit 1 on a failure.
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).

@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P4-02 · passes
+
+- New `.harness/contact-check.mjs`: loads /contact as a first visitor at 390×844 and 1280×800, prints `scrollHeight <= innerHeight: true` (844 ≤ 844, 800 ≤ 800), the Footer's bottom edge (776 → 68 px spare; 710 → 90 px spare, since scrollHeight never goes below the viewport), panel closed (0 dialogs, pill aria-expanded false), pill and tile boxes (pill 238,780–374,828 vs last tile bottom 491 at 390; 1128,736–1264,784 vs GitHub tile 813–1128 × 287–429 at 1280: no intersection), no callout (Footer in sight), no console errors; exit 0.
+- Captures `docs/screenshots/v3/P4-contact-390.png` (32 KB) and `P4-contact-1280.png` (39 KB), viewport only; I looked at both. Described in `docs/plans/2026-10-21-P4-contact.md` § What Michael will see. CLAUDE.md § How to verify names the script.
+- Verified: `node .harness/smoke.mjs` exit 0 (0 FAIL, /contact PASS at both widths); `print-check.mjs … /contact` → PASS print, exit 0; `.harness/check.sh` → `check: lint ok · jest ok · build ok`. Tests 1642 → 1642 (a check feature: no app code changed).
+- Next (P4-03, review): diff is the script, the plan section, the two PNGs and one CLAUDE.md bullet.
+
 ### 2026-10-21 · P4-01 · passes
 
 - /contact is one screen (D97): `src/app/contact/page.tsx` = h1, one line `profile.location · profile.availability`, a `grid sm:grid-cols-3` of three `<a>` tiles (glyph, label, value); eyebrow, subheader, closing note gone. New `profile.availability`; new `src/components/logos/extra.ts` (authored LinkedIn "in" and mail, `fill-rule: evenodd`; simple-icons 16.9.0 has no LinkedIn); `Logo` takes either key. Plan `docs/plans/2026-10-21-P4-contact.md` (height budget per element). Tests 1629 → 1642 (contact.test rewritten, Logo extra cases, profile `availability`, /contact in a11y-new-pages).
