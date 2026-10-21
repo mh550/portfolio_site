@@ -11,16 +11,22 @@ describe('sitemap', () => {
   const urls = sitemap().map((e) => e.url);
 
   it('lists every top-level page that exists, built from profile.siteUrl', () => {
-    const routes = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/approach', '/card', '/talk'];
+    const routes = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/card', '/talk'];
     for (const route of routes.filter(pageExists)) {
       expect(urls).toContain(route === '/' ? profile.siteUrl : `${profile.siteUrl}${route}`);
     }
-    expect(routes.filter(pageExists)).toHaveLength(9);
+    expect(routes.filter(pageExists)).toHaveLength(8);
+  });
+
+  it('lists exactly the eight static pages, no redirects (D79)', () => {
+    const statics = urls.filter((u) => !u.startsWith(`${profile.siteUrl}/projects/`));
+    const routes = ['/about', '/skills', '/projects', '/experience', '/contact', '/card', '/talk'];
+    expect(statics).toEqual([profile.siteUrl, ...routes.map((r) => `${profile.siteUrl}${r}`)]);
   });
 
   it('lists every project page', () => {
     for (const p of projects) expect(urls).toContain(`${profile.siteUrl}/projects/${p.slug}`);
-    expect(urls).toHaveLength(9 + projects.length);
+    expect(urls).toHaveLength(8 + projects.length);
   });
 
   it('excludes /evidence and /card/qr', () => {

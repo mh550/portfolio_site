@@ -4,9 +4,10 @@ import { loopSteps, type LoopStepId } from '@/lib/data';
 
 interface MethodStripProps {
   className?: string;
-  /** The list's accessible name; /approach, whose h1 is "How I work", passes its own. */
+  /** The list's accessible name; /about, under its How I work h2, passes its own. */
   label?: string;
-  /** Show each step's line at every width (D31, /approach). Default: labels only below md (the hero). */
+  /** Show each step's line at every width (D31, /about). Default: labels only below md (the hero).
+   *  Its two users: the hero and /about's How I work section (/approach redirects there, D79). */
   showLines?: boolean;
   /** One link under a step's line (D80, /about How I work: `loopStepExample`). */
   examples?: Partial<Record<LoopStepId, { href: string; text: string }>>;

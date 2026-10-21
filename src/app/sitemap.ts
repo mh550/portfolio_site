@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { profile, sortByOrder } from '@/lib/data';
 
 // /evidence (noindex) and /card/qr are left out on purpose; robots.ts disallows them
-const routes = ['/', '/about', '/skills', '/projects', '/approach', '/experience', '/contact', '/card', '/talk'];
+const routes = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/card', '/talk'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

@@ -11,7 +11,7 @@ import {
   roles,
 } from '@/lib/data';
 
-// Every number in an /approach example or /evidence item must appear in the content of the page its link opens,
+// Every number in a principle example (all 17, though since D79 only five show, on /about How I work) or /evidence item must appear in the content of the page its link opens,
 // so the link backs the claim. Repo links (https) are not checked.
 const numbers = (s: string): string[] => s.match(/\d+(?:[.,]\d+)*/g) ?? [];
 
@@ -32,7 +32,7 @@ const claims = [
   ...competencies.flatMap((c) => resolvedItems(c)).filter((i) => !i.href.startsWith('https://')),
 ];
 
-describe('claims on /approach and /evidence', () => {
+describe('claims on How I work and /evidence', () => {
   it('checks every internal link', () => {
     expect(claims.length).toBe(17 + 20);
     for (const { href } of claims) expect(linkedContent(href)).toBeDefined();

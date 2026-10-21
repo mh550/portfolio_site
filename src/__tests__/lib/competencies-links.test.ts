@@ -21,7 +21,7 @@ const BRIEFS_AND_SPEC = [
   'docs/specs/2026-10-18-portfolio-v2.md',
 ].map(read);
 
-const ROUTES = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/approach', '/card'];
+const ROUTES = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/card'];
 const ANCHORS = ['diagnose', 'decide', 'build', 'verify', 'simplify', 'decisions', 'iterations', 'lessons'];
 const REPOS = ['agent-harness', 'hit-list', 'dj-crate-streaming', 'portfolio_site'].map(
   (r) => `https://github.com/mh550/${r}`,

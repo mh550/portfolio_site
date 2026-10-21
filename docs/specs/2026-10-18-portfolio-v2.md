@@ -475,7 +475,8 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   Home, About, Skills, Projects, Talk, Experience, Contact. Supersedes D60's "fifth of eight links, between Projects
   and Approach" (Talk stays fifth) and the M7 page / M8-02 Navbar entry for `/approach`; D49's seven links are back,
   with Talk where Approach was. Reversible: remove the
-  redirect, `git revert` P1-05. (P1-05 builds.)
+  redirect, `git revert` P1-05. (*Built in P1-05*: the `next.config.ts` `redirects()` entry; `curl -sI /approach` →
+  308, `location: /about#how-i-work`, hash kept, so no stub.)
 - **D80** *default*: `/about` gains a "How I work" section (`#how-i-work`) between the story and Philosophy: the loop
   strip with lines at every width and one case-study link per step. Extends D13 (About keeps Michael's story); the
   intro stays three sentences. (*Built in P1-04*: `loopStepExample` in `approach.ts`, `MethodStrip`'s `examples`;

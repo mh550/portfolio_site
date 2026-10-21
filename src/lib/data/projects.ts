@@ -1011,7 +1011,7 @@ export function getCaseStudyAnchors(project: Project): string[] {
 }
 
 /** A link into `slug`'s page as this branch renders it: null when the project is missing, and the anchor kept only
- *  when the page renders it. `resolvedExamples` (/approach) and `resolvedItems` (/evidence) both go through it. */
+ *  when the page renders it. `resolvedExamples` (/about How I work) and `resolvedItems` (/evidence) both go through it. */
 export function resolveProjectLink(slug: string, anchor?: string): { slug: string; anchor?: string } | null {
   const project = getProjectBySlug(slug);
   if (!project) return null;

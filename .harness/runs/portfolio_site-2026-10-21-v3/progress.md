@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 07:45 · P1-05 · passes
+
+`/approach` is a 308 to `/about#how-i-work` from `next.config.ts` `redirects()` (hash kept under `curl -sI`, so no `permanentRedirect` stub; plan § Approach fold says so). Deleted `src/app/approach/page.tsx`, `approach.test.tsx`, `approachIntro`, `approachClosing`. Navbar has seven links; sitemap, smoke-routes, a11y-new-pages, competencies-links ROUTES and sitemap-robots drop `/approach` (sitemap test now pins the exact eight static URLs). New `approach-redirect.test.ts`; `.harness/smoke.mjs` also checks the 308 + Location on no-argument runs. CLAUDE.md (route row, Navbar, MethodStrip, approach.ts, test count), review-guide `## P0–P1 (v3)` (merge note, undo), D79 marked built. Tests 1155 → 1140, 82 suites (the page's own tests went with it).
+Verified: redirect + Navbar tests red first (2 failing); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, every route PASS plus `/approach → /about#how-i-work`; Sonnet browser check at 390 and 1280: 308 → 200, `#how-i-work` top 96 px, seven links in order, About aria-current, no console errors, no horizontal scroll; 390 screenshot looked at. Opus review: 3 Minor, all fixed (comments said /evidence reads `principles`, it doesn't; claims test comment; smoke had no runtime redirect check).
+Next session (P1-06): next free decision **D81**.
+Question for Michael: since D79 only five principle examples show (first sentence each, on /about How I work); the six principle titles/summaries and the other twelve examples are on no page but still in `approach.ts` (and checked by claims-on-linked-page). Keep them as data, or should P1-08 delete them?
+
 ### 2026-10-21 07:20 · P1-04 · passes
 
 `/about` has `<section id="how-i-work" aria-labelledby="how-i-work-heading">` (h2 How I work, `scroll-mt-24`) between the story and Philosophy: `MethodStrip showLines label="The loop" examples=…`, one link per step from the new `loopStepExample(step)` in `approach.ts` (first linkable example of the step's principle → `{ href, text: first sentence }`, throws if none). `MethodStrip` gains an optional `examples` prop (hero passes none, unchanged). New `docs/notes/about-narrative-bullets.md`: 14 sourced bullets, 2 failure stories. Tests: about (+6), MethodStrip (+2), approach lib (+3), a11y-new-pages now covers `/about`: 1141 → 1155 tests, 82 suites. D80 marked built in the v2 spec and plan; CLAUDE.md /about row, MethodStrip line, test count.

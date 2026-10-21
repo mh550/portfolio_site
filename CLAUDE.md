@@ -22,7 +22,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
-| `/approach` | How I work: `MethodStrip showLines` + six `principles` whose examples link via `resolvedExamples` (`approach.ts`) |
+| `/approach` | permanent redirect to /about#how-i-work (D79): 308 from `next.config.ts` `redirects()`, pinned by `src/__tests__/app/approach-redirect.test.ts`; no page, off the Navbar, sitemap and smoke routes |
 | `/evidence` | Noindex, off the Navbar: six `competencies` × 2–4 linked items via `resolvedItems` (`competencies.ts`, D7; rubric stub `docs/notes/maxx-level-4.md`) |
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
@@ -37,7 +37,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1155 tests, 82 suites after P1-04)
+npm test             # Jest unit/integration tests (1140 tests, 82 suites after P1-05)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -71,13 +71,13 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
 - `experience.ts` — `Role[]` + `Education` object
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
-- `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
+- `approach.ts` — `methodSteps` (five steps), `loopSteps` and the six `principles` (`resolvedExamples`, `loopStepExample` for /about How I work); `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
 - `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`; `talkPage.intro` is
   `IntroParagraph[]` (a string, or `{ before, link, after }`: "my agent harness" → `/projects/agent-harness`, D62), read through `introText`
 
 ### Components
-- `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Talk, Approach, Experience, Contact; Talk since VC4, D60) with active link highlighting, mobile hamburger (menu scrolls under `100dvh`) (`"use client"`)
+- `components/Navbar.tsx` — fixed top nav (seven links: Home, About, Skills, Projects, Talk, Experience, Contact; Talk since VC4, D60; Approach gone since D79) with active link highlighting, mobile hamburger (menu scrolls under `100dvh`) (`"use client"`)
 - `components/Footer.tsx` — social links; `pb-24 xl:pb-8` so the links row clears the VoiceWidget (D61)
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper (`data-scroll-reveal`, forced visible in print); skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
@@ -88,7 +88,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer + VoiceWidget (not on `/talk`, `talkWidget.href`), none of them on `/card*` (`"use client"`)
 - `components/VoiceWidget.tsx` — the floating 56 px link to `/talk` (`talkWidget` in `concierge.ts`, D61): `fixed right-4`, safe-area bottom, `z-40`, `print:hidden`, a ring that pulses twice only under `motion-safe:`; shown on every chrome page (`/evidence` too) but not on `/talk` or `/card*`
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
-- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
+- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, about, evidence)
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
   non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
@@ -98,7 +98,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
-- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md), `/approach` and `/about` (`showLines`: lines at every width; `/about` passes `examples`, one link per step)
+- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid (sorted by `order`) using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves

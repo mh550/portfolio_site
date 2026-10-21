@@ -218,3 +218,26 @@ Two things to confirm, not checkable in this run: the agent doesn't parse room n
 - The mic timing → revert the VC5-02 commit (mic asked on connect again, toggle while Waiting).
 - `server-only` → remove the two `import 'server-only'` lines and the dependency.
 - Everything off → remove the three `LIVEKIT_*` and redeploy (503, `/talk` offline).
+
+## P0–P1 (v3)
+
+Run `portfolio_site-2026-10-21-v3`, spec `docs/specs/2026-10-21-portfolio-v3.md`, plan `docs/plans/2026-10-21-P1-angle.md`
+(its § What Michael will see and § Review are filled in by P1-07 and P1-08). Decisions D75–D80 are in
+`docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions.
+
+**Merge note.** P0 (booth removed, D75) and P1 (positioning, loop strip, logos, About intro and How I work, the
+approach fold) are on branch `harness/portfolio_site-2026-10-21-v3` in commit order; merge them before P2–P5, which
+are cut after P1. Nothing deploys until you merge into `main`.
+
+- Changed (P1-05, D79): `/approach` is gone as a page. `next.config.ts` `redirects()` answers `/approach` with
+  308 `location: /about#how-i-work` (the hash survives, so no `permanentRedirect` stub was needed). The Navbar has
+  seven links (Home, About, Skills, Projects, Talk, Experience, Contact); the sitemap and the smoke routes drop
+  `/approach`. `principles`, `resolvedExamples` and `exampleHref` stay in `approach.ts` (How I work reads five examples
+  through `loopStepExample`; the six principle titles, summaries and other twelve examples are now on no page);
+  `approachIntro` and `approachClosing` are deleted.
+- Look at (390): open `$P/approach` on the preview: it lands on `/about` scrolled to How I work, and About is the
+  highlighted nav link. `curl -sI $P/approach` shows `308` and `location: /about#how-i-work`.
+
+**Undo the redirect.** Delete the `redirects()` entry in `next.config.ts` (then `/approach` is a 404), or bring the
+page back with `git revert` of the P1-05 commit: page, test, Navbar link, sitemap and smoke-route entries return
+together.

@@ -99,12 +99,9 @@ export interface Principle {
   examples: PrincipleExample[];
 }
 
-// /approach (M7). Copy and sources: docs/plans/2026-10-18-M7-approach-evidence.md § Principles, Approach page.
-export const approachIntro: string[] = [
-  'I work in five steps, at work and at home.',
-  'Most examples below link to the place in a case study where it happened, including the times it went wrong.',
-];
-
+// The principles (M7; /approach page until D79). Since D79 the only page that reads them is /about How I work,
+// through `loopStepExample` (one example per loop step, first sentence); the rest is unrendered. Copy and sources:
+// docs/plans/2026-10-18-M7-approach-evidence.md § Principles.
 export const principles: Principle[] = [
   {
     id: 'diagnose-first',
@@ -242,8 +239,6 @@ export const principles: Principle[] = [
     ],
   },
 ];
-
-export const approachClosing = 'This site update was built that way, one verified milestone at a time.';
 
 /** The examples that can link on this branch: an example whose project is missing drops out, and an anchor the
  *  project does not render (no caseStudy, or an empty section) is dropped from its example. */
