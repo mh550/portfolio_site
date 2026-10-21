@@ -76,7 +76,8 @@ the failure stories brand.md says to keep. No prose paragraphs; bullets only.
 redirect to `/about#how-i-work` (`next.config.ts` `redirects`), where a short "How I work" section shows the loop
 strip with `showLines` and **one** example link per step into a case study (reuse `principles[].examples`: pick the
 first example that has a page). Remove Approach from the Navbar, the sitemap and `smoke-routes.txt`; keep
-`approach.ts`'s `principles` (the `/evidence` page and the case studies still read them). Delete
+`approach.ts`'s `principles` (How I work picks its links from them; *P1-08: neither `/evidence` nor the case studies
+read them, see D81*). Delete
 `src/app/approach/page.tsx` and its test; add a redirect test.
 
 **P1 features** (sizing guide): plan · profile + loop strip + logos (+ the generator) · about intro + bullets note ·

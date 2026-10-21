@@ -2,7 +2,7 @@ import { profile } from './profile';
 // Import cycle (projects.ts imports methodSteps): use these only inside functions, never at module load.
 import { resolveProjectLink } from './projects';
 
-export type MethodStepId = 'diagnose' | 'decide' | 'build' | 'verify' | 'simplify';
+type MethodStepId = 'diagnose' | 'decide' | 'build' | 'verify' | 'simplify';
 
 export interface MethodStep {
   id: MethodStepId;
@@ -70,16 +70,16 @@ export const aboutIntro: string[] = [
   'I own delivery from requirements to release.',
 ];
 
-export type ProjectSlug =
+type ProjectSlug =
   | 'agent-harness'
   | 'home-media-server'
   | 'hit-list'
   | 'linear-ai-workflow'
   | 'ghl-jobtread-integration';
 /** The ids a case study renders that an example may link to (`getCaseStudyAnchors`). */
-export type CaseStudyAnchor = MethodStepId | 'decisions' | 'iterations' | 'lessons';
+type CaseStudyAnchor = MethodStepId | 'decisions' | 'iterations' | 'lessons';
 
-export interface PrincipleExample {
+interface PrincipleExample {
   /** Absent only for the D14 example, which has no page to link (D34). */
   projectSlug?: ProjectSlug;
   anchor?: CaseStudyAnchor;

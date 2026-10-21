@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 09:40 · P1-08 · passes
+
+Opus review of `P1.diff` (after P0-01..HEAD, 2866 lines) + `P0-01.diff` (2588) from scratch: **0 Critical, 0 Important**, 7 Minor, 5 Nit, all in the plan's § Review table. Fixed test-first in their own commits: #1 FloatingLogos now draws with `Logo` (it had no user; new test red first), #3 the old-angle guard also catches the 10-18 subline (red first on about.test:78, now built from parts), #9 MethodStrip test asserts every `methodSteps` line absent, #7 booth lines out of `.gitignore`. Docs: "Superseded by D7x (v3)" lines on D1/D23/D32/D39 (v2 spec) and D60 (VC page spec); D77/D79 built notes record the deletions; review guide § P0–P1 has P0-01…P1-08 bullets and D75–D81; CLAUDE.md count and Logo line. Simplification: four types in approach.ts no longer exported (nothing imports them); no duplicated strings. **D81** *default*: `principles` stays whole as data (corrects the v3 spec's reason: /evidence and the case studies don't read it). Tests 1145 → 1146, 84 suites.
+Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `npx eslint .` and `tsc --noEmit` clean; smoke exit 0, 41 PASS + `/approach → /about#how-i-work`; logos-check → logos: 12, overlaps: 0; 1280 home screenshot looked at (logos unchanged).
+Next session: P1 is done; next free decision **D82**.
+Question for Michael (repeats P1-05's, now D81): keep the six principle titles/summaries and the thirteen unrendered examples in `approach.ts`, or trim them? Also left for you: the Philosophy quote's pre-v3 wording (spec says it stays) and the D77 mapping (Context and Build links match their steps loosely).
+
 ### 2026-10-21 08:50 · P1-07 · passes
 
 Six P1 captures in `docs/screenshots/v3/` (home/about/card × 1280/390, 97–354 KB; three quantized from 476/528/514 KB), taken with the new `.harness/captures.mjs` (scrolls each page through so ScrollReveal sections show, prints eyebrow, strip rows, How I work links, "Glad we met", scroll). Plan § What Michael will see filled: one row per capture + `/approach` and print rows + an observation. `print-check.mjs` failed on /about with `nonBlackText: 1`: the `<source>` in the video has no computed style (colour `""`); the check now skips empty colours (never run on /about before). CLAUDE.md How to verify names captures.mjs. Tests 1145 / 84 suites, unchanged.
