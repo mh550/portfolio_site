@@ -4,6 +4,8 @@ export interface Profile {
   tagline: string;
   subline: string;
   location: string;
+  // Follows the location on /contact: "Durham, NC · open to remote, hybrid or relocation." (D97)
+  availability: string;
   email: string;
   linkedin: string;
   github: string;
@@ -20,6 +22,7 @@ export const profile: Profile = {
   tagline: 'I build simple, elegant systems that fit the humans who run them.',
   subline: 'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
   location: 'Durham, NC',
+  availability: 'open to remote, hybrid or relocation',
   email: 'mherron734@gmail.com',
   linkedin: 'https://www.linkedin.com/in/mherron734/',
   github: 'https://github.com/mh550',

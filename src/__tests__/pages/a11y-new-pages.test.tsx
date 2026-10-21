@@ -6,6 +6,7 @@ import { fireEvent, render } from '@testing-library/react';
 import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
+import ContactPage from '@/app/contact/page';
 import EvidencePage from '@/app/evidence/page';
 import ExperiencePage from '@/app/experience/page';
 import TalkPage from '@/app/talk/page';
@@ -27,6 +28,7 @@ const pages: [string, () => ReactElement][] = [
   ['/about', () => <AboutPage />],
   ['/card', () => <CardPage />],
   ['/card/qr', () => <CardQrPage />],
+  ['/contact', () => <ContactPage />],
   ['/evidence', () => <EvidencePage />],
   ['/experience', () => <ExperiencePage />],
   [

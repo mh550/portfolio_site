@@ -13,6 +13,50 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · verify P4
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P4-01 | 1 | read docs/plans/2026-10-21-P4-contact.md headings | Layout (ASCII 1280 + height table), Glyphs, Tests, What Michael will see, Review, Decisions (D97, authored LinkedIn/mail in extra.ts); extra.ts comment says no siLinkedin | yes |
+| P4-01 | 2 | read src/app/contact/page.tsx; `grep -c 'Whether you have\|Currently based\|always up for'` | h1 Let's Talk, one <p> `{location} · {availability}.`, `grid sm:grid-cols-3`, 3 `<a>` tiles each with one Logo svg; grep prints 0 | yes |
+| P4-01 | 3 | read contact.test.tsx + profile.test.ts; ran `npx jest src/__tests__/pages` | asserts h1, one p text, 3 links/hrefs, names, target/rel, one svg per tile, removed texts absent; profile.test covers availability; 150 pass | yes |
+| P4-01 | 4 | read a11y-new-pages.test.tsx; ran it; read metadata | /contact in pages list (one h1, focus-visible, no vague links); muted contrast case (4.5:1; I computed 5.71); description mentions agentic systems engineer | yes |
+| P4-01 | 5 | `lib/check.sh`; `node .harness/smoke.mjs` | check green (cached, same tree); smoke all PASS incl. /contact at 1280 and 390, /approach redirect | yes |
+| P4-02 | 1 | `node .harness/contact-check.mjs` (HARNESS_PORT=7835) | `scrollHeight <= innerHeight: true (800<=800)` at 1280, same at 390; panel closed; tile boxes vs pill printed, no intersection; exit ok | yes |
+| P4-02 | 2 | `ls -l`/`file` the PNGs; read plan § What Michael will see | 1280×800 40 KB and 390×844 33 KB viewport PNGs; section describes tiles, glyphs, line, pill position | yes |
+| P4-02 | 3 | smoke; `print-check.mjs http://localhost:7835 /contact …` | smoke all PASS; print-check PASS exit 0 (white bg, no nav/footer/canvas) | yes |
+| P4-02 | 4 | `lib/check.sh` | check: green | yes |
+| P4-03 | 1 | read plan § Review | 9 findings rows with severity, file:line, resolution; simplification pass recorded; diff range base exists ('HARNESS: after P4-01' commit) | yes |
+| P4-03 | 2 | read Review resolutions; `npx eslint src`; tests | Important #1/#2 fixed with tests in contact.test.tsx (no aria-label, sr-only note, wbr); Minors resolved with reasons; eslint clean | yes |
+| P4-03 | 3 | grep review-guide.md, CLAUDE.md, v2 spec | `## P4 (v3)` at review-guide:341; CLAUDE.md row 'one screen, three tiles'; D97 at spec line 669 | yes |
+| P4-03 | 4 | `lib/check.sh`; smoke | check green; smoke every route PASS | yes |
+
+Result: 3 hold, 0 fail.
+
+---
+
+### 2026-10-21 · P4-03 · passes
+
+- Opus review of P4 (`$HARNESS_SCRATCH/P4.diff` per the step, plus `P4-full.diff` from P4-01's parent): 0 Critical, 2 Important, 7 Minor; all rows in `docs/plans/2026-10-21-P4-contact.md` § Review. Fixed test-first: tile names come from their text with an `sr-only` "(opens in new tab)" like the rest of the site (no `aria-label`; Chrome aria snapshot: "Email mherron734@gmail.com", "LinkedIn linkedin.com/in/mherron734 (opens in new tab)"); `<wbr>` after each `@` and `/` so the 640–767 px three-column tiles wrap "mherron734@ / gmail.com" instead of mid-word. `contact-check.mjs`: names from the label, try/finally (dead port → `contact-check: 1 FAIL`, exit 1), screenshot dir resolved from the repo root.
+- Docs: `## P4 (v3)` in `docs/review-guide.md`; CLAUDE.md `/contact` row "one screen, three tiles"; D97 gains the brand-guidelines note. Captures re-taken (same geometry). Tests 1642 → 1646.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `node .harness/smoke.mjs` exit 0 (0 FAIL); `contact-check.mjs` ok (Footer 776/844, 710/800); print-check /contact PASS.
+- Question for Michael (D97): LinkedIn's brand guidelines ask people not to recreate the "in" mark; keep the hand-drawn one or swap in their official asset (one path in `extra.ts`)?
+- Proposed change: P4-03 step 1's base (`HARNESS: after P4-01`'s parent) is the WIP commit after P4-01's code, so its diff holds only P4-02; a build milestone's review should diff from the parent of its first `P<n>-01:` commit (`--grep='^P4-01:'`). P5-07 is fine as written (P5-01 is the plan, its code starts at P5-02).
+
+### 2026-10-21 · P4-02 · passes
+
+- New `.harness/contact-check.mjs`: loads /contact as a first visitor at 390×844 and 1280×800, prints `scrollHeight <= innerHeight: true` (844 ≤ 844, 800 ≤ 800), the Footer's bottom edge (776 → 68 px spare; 710 → 90 px spare, since scrollHeight never goes below the viewport), panel closed (0 dialogs, pill aria-expanded false), pill and tile boxes (pill 238,780–374,828 vs last tile bottom 491 at 390; 1128,736–1264,784 vs GitHub tile 813–1128 × 287–429 at 1280: no intersection), no callout (Footer in sight), no console errors; exit 0.
+- Captures `docs/screenshots/v3/P4-contact-390.png` (32 KB) and `P4-contact-1280.png` (39 KB), viewport only; I looked at both. Described in `docs/plans/2026-10-21-P4-contact.md` § What Michael will see. CLAUDE.md § How to verify names the script.
+- Verified: `node .harness/smoke.mjs` exit 0 (0 FAIL, /contact PASS at both widths); `print-check.mjs … /contact` → PASS print, exit 0; `.harness/check.sh` → `check: lint ok · jest ok · build ok`. Tests 1642 → 1642 (a check feature: no app code changed).
+- Next (P4-03, review): diff is the script, the plan section, the two PNGs and one CLAUDE.md bullet.
+
+### 2026-10-21 · P4-01 · passes
+
+- /contact is one screen (D97): `src/app/contact/page.tsx` = h1, one line `profile.location · profile.availability`, a `grid sm:grid-cols-3` of three `<a>` tiles (glyph, label, value); eyebrow, subheader, closing note gone. New `profile.availability`; new `src/components/logos/extra.ts` (authored LinkedIn "in" and mail, `fill-rule: evenodd`; simple-icons 16.9.0 has no LinkedIn); `Logo` takes either key. Plan `docs/plans/2026-10-21-P4-contact.md` (height budget per element). Tests 1629 → 1642 (contact.test rewritten, Logo extra cases, profile `availability`, /contact in a11y-new-pages).
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `node .harness/smoke.mjs` exit 0; a Sonnet browser pass on :7835: scrollHeight = innerHeight at 390×844 (844) and 1280×800 (800), also at 640×900 and 820×1180, no tile overflow, pill (238,780 at 390) clear of the tiles; I looked at the 390 capture and the LinkedIn glyph (holes cut).
+- Next (P4-02): the numbers above came from a throwaway script in scratch; `.harness/contact-check.mjs` still has to be written. scrollHeight reports innerHeight when content is shorter; the real spare is the Footer bottom: 776 of 844 at 390, 710 of 800 at 1280.
+- Question for Michael: the LinkedIn "in" is hand-drawn (D97), not LinkedIn's artwork. Keep it, or swap in their official asset from LinkedIn's brand page?
+
 ### 2026-10-21 · verify P3
 
 All 10 P3 features hold (56 steps). `passes` unchanged.

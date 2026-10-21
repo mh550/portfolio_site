@@ -445,7 +445,7 @@
       "after": [
         "P1"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P4-02",
@@ -462,7 +462,7 @@
       "after": [
         "P4-01"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P4-03",
@@ -479,7 +479,7 @@
       "after": [
         "P4-02"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P5-01",

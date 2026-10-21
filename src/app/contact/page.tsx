@@ -1,88 +1,67 @@
+import { Fragment } from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import ScrollReveal from '@/components/ScrollReveal';
+import Logo from '@/components/logos/Logo';
+import { focusRing } from '@/components/focusRing';
 import { profile } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Contact — Michael Herron',
-  description: "Get in touch with Michael Herron — let's build something.",
+  description: 'Reach Michael Herron, agentic systems engineer in Durham, NC: email, LinkedIn or GitHub.',
 };
 
 // 'https://www.linkedin.com/in/x/' → 'linkedin.com/in/x'
 const display = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
 
-const links = [
-  {
-    label: 'Email',
-    value: profile.email,
-    href: `mailto:${profile.email}`,
-    description: 'Best way to reach me',
-  },
-  {
-    label: 'LinkedIn',
-    value: display(profile.linkedin),
-    href: profile.linkedin,
-    description: 'Connect professionally',
-  },
-  {
-    label: 'GitHub',
-    value: display(profile.github),
-    href: profile.github,
-    description: 'See my code',
-  },
-];
+// A line break after each @ and /, so a narrow tile (three columns at sm) wraps 'mherron734@' 'gmail.com', not mid-word
+const breakable = (value: string) =>
+  value.split(/(?<=[@/])/).map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ));
 
+const tiles = [
+  { label: 'Email', glyph: 'mail', value: profile.email, href: `mailto:${profile.email}`, external: false },
+  { label: 'LinkedIn', glyph: 'linkedin', value: display(profile.linkedin), href: profile.linkedin, external: true },
+  { label: 'GitHub', glyph: 'github', value: display(profile.github), href: profile.github, external: true },
+] as const;
+
+// One screen at 390 × 844 and 1280 × 800 with the Navbar and Footer (D97; height budget in
+// docs/plans/2026-10-21-P4-contact.md § Layout): the h1, one line, three tiles that are each one link.
 export default function ContactPage() {
   return (
-    <main className="max-w-2xl mx-auto px-6 py-20">
+    <main className="max-w-5xl mx-auto px-6 py-8 sm:py-16">
       <ScrollReveal>
-        <p className="font-mono text-[var(--color-accent)] text-sm tracking-[0.3em] uppercase mb-4">
-          Contact
+        <h1 className="text-4xl sm:text-6xl font-bold leading-tight mb-3 sm:mb-4">Let&apos;s Talk</h1>
+        <p className="text-[var(--color-muted)] sm:text-lg mb-8 sm:mb-10">
+          {profile.location} · {profile.availability}.
         </p>
-        <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-6">
-          Let&apos;s Talk
-        </h1>
-        <p className="text-[var(--color-muted)] text-lg leading-relaxed mb-14">
-          Whether you have a project in mind, a role to fill, or just want to connect —
-          I&apos;m always up for a good conversation.
-        </p>
-      </ScrollReveal>
-
-      {/* Contact cards */}
-      <div className="space-y-4">
-        {links.map(({ label, value, href, description }, i) => (
-          <ScrollReveal key={label} delay={0.05 + i * 0.06}>
-            <Link
+        <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
+          {tiles.map(({ label, glyph, value, href, external }) => (
+            <a
+              key={label}
               href={href}
-              target={href.startsWith('mailto') ? undefined : '_blank'}
-              rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
-              className="group flex items-center justify-between p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-surface-alt)] transition-all"
-              aria-label={`${label}: ${value}`}
+              {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              className={`group flex sm:flex-col items-center sm:items-start gap-4 p-4 sm:p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-surface-alt)] transition-colors ${focusRing}`}
             >
-              <div>
-                <p className="font-mono text-xs text-[var(--color-muted)] tracking-widest uppercase mb-1">
-                  {label}
-                </p>
-                <p className="text-[var(--color-foreground)] font-medium">{value}</p>
-                <p className="text-[var(--color-muted)] text-sm mt-0.5">{description}</p>
-              </div>
-              <span
-                aria-hidden="true"
-                className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] transition-colors text-xl"
-              >
-                →
+              <Logo
+                name={glyph}
+                decorative
+                className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-focus-visible:text-[var(--color-accent)] transition-colors"
+              />
+              <span className="min-w-0">
+                <span className="block font-mono text-xs text-[var(--color-muted)] tracking-widest uppercase">
+                  {label}{' '}
+                </span>
+                <span className="block mt-1 font-medium text-[var(--color-foreground)] wrap-anywhere">
+                  {breakable(value)}
+                </span>
+                {external && <span className="sr-only"> (opens in new tab)</span>}
               </span>
-            </Link>
-          </ScrollReveal>
-        ))}
-      </div>
-
-      {/* Closing note */}
-      <ScrollReveal delay={0.2}>
-        <div className="mt-14 pt-8 border-t border-white/5">
-          <p className="text-[var(--color-muted)] text-sm leading-relaxed">
-            Currently based in Durham, NC. Open to remote, hybrid, or relocation for the right opportunity.
-          </p>
+            </a>
+          ))}
         </div>
       </ScrollReveal>
     </main>

@@ -9,6 +9,7 @@ describe('profile data', () => {
       subline:
         'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
       location: 'Durham, NC',
+      availability: 'open to remote, hybrid or relocation',
       email: 'mherron734@gmail.com',
       linkedin: 'https://www.linkedin.com/in/mherron734/',
       github: 'https://github.com/mh550',
@@ -28,6 +29,7 @@ describe('profile data', () => {
       'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
     ],
     ['location', 'Durham, NC'],
+    ['availability', 'open to remote, hybrid or relocation'],
     ['email', 'mherron734@gmail.com'],
     ['linkedin', 'https://www.linkedin.com/in/mherron734/'],
     ['github', 'https://github.com/mh550'],
