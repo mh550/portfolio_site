@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import ExperiencePage, { metadata } from '@/app/experience/page';
-import { roles, education } from '@/lib/data';
+import { bulletText, roles, education } from '@/lib/data';
 
 describe('ExperiencePage', () => {
   it('renders the main heading', () => {
@@ -19,7 +19,7 @@ describe('ExperiencePage', () => {
   it('renders role bullet points', () => {
     render(<ExperiencePage />);
     // Spot-check one bullet from Builder Clarity role
-    expect(screen.getByText(/First engineer hired/)).toBeInTheDocument();
+    expect(screen.getByText(/As first engineer, led the move from Zapier/)).toBeInTheDocument();
   });
 
   it('renders Education section', () => {
@@ -49,59 +49,46 @@ describe('ExperiencePage', () => {
   });
 });
 
-describe('Experience titles and bullets (M2-03)', () => {
+describe('Experience from the resume (P2-01; supersedes the M2-03 bullets)', () => {
   const byCompany = (company: string) => {
     const role = roles.find((r) => r.company === company);
     if (!role) throw new Error(`no role for ${company}`);
     return role;
   };
-  const bulletsOf = (company: string) => byCompany(company).bullets.join('\n');
+  const bulletsOf = (company: string) => byCompany(company).bullets.map(bulletText).join('\n');
 
   it('keeps the job titles exactly', () => {
     expect(byCompany('MAXX Potential').title).toBe('Full-Stack Software Engineer');
     expect(byCompany('Builder Clarity').title).toBe('Founding Full-Stack Software Engineer');
-    expect(byCompany('Tahoma Films').title).toBe('AI Workflow Engineer');
-    expect(byCompany('High Cascade Snowboard Camp').title).toBe('Snowboard Coach');
   });
 
-  it('corrects the High Cascade bullet to an age range (D9)', () => {
-    const bullets = byCompany('High Cascade Snowboard Camp').bullets;
-    expect(bullets.some((b) => b.startsWith('Mentored 12–18-year-old snowboarders'))).toBe(true);
-    expect(bullets.join('\n')).not.toMatch(/per session/);
-  });
-
-  it('gives MAXX Potential the metrics-bank bullets', () => {
-    const text = bulletsOf('MAXX Potential');
-    for (const s of [
-      'Linear',
-      'AI-agent workflow',
-      '2×',
-      '~80%',
-      'de facto project manager',
-      'Foundational Capability Patterns',
-      'AI-assisted rapid prototyping',
-      'git-tracked database migrations',
-      'onboarded the team',
-    ]) {
-      expect(text).toContain(s);
-    }
-  });
-
-  it('gives Builder Clarity the metrics-bank bullets', () => {
+  it('gives Builder Clarity the metrics-bank figures', () => {
     const text = bulletsOf('Builder Clarity');
-    for (const s of ['3 clients', '~2 days', '~6 hours', '~8 hrs/week', '4+ sources', 'Agile/Scrum in Linear']) {
+    for (const s of ['3 clients', '~2 days', '~6 hours', '~8 hrs/week', '4+ sources']) {
       expect(text).toContain(s);
     }
+  });
+
+  it('gives MAXX Potential the 2× and ~80% figures', () => {
+    const text = bulletsOf('MAXX Potential');
+    for (const s of ['2× sprint throughput', '~80% less bug-filing time']) expect(text).toContain(s);
   });
 
   it('drops the overclaiming "Pioneered" bullet', () => {
-    expect(roles.flatMap((r) => r.bullets).some((b) => b.includes('Pioneered'))).toBe(false);
+    expect(roles.flatMap((r) => r.bullets.map(bulletText)).some((b) => b.includes('Pioneered'))).toBe(false);
   });
 
-  it('renders the new bullets on the page', () => {
-    render(<ExperiencePage />);
-    expect(screen.getByText(/2× sprint throughput/)).toBeInTheDocument();
-    expect(screen.getByText(/Mentored 12–18-year-old snowboarders/)).toBeInTheDocument();
+  it('renders the resume bullets on the page, links in place', () => {
+    const { container } = render(<ExperiencePage />);
+    for (const b of roles.flatMap((r) => r.bullets)) expect(container).toHaveTextContent(bulletText(b));
+    expect(screen.getByRole('link', { name: 'agentic bug-fix workflow' })).toHaveAttribute(
+      'href',
+      '/projects/linear-ai-workflow',
+    );
+    expect(screen.getByRole('link', { name: 'unified per-job communications log' })).toHaveAttribute(
+      'href',
+      '/projects/ringcentral-jobtread-integration',
+    );
   });
 
   it('describes the page without the old positioning', () => {

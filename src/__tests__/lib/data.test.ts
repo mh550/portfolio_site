@@ -162,8 +162,8 @@ describe('skills data', () => {
 });
 
 describe('experience data', () => {
-  it('exports 4 roles', () => {
-    expect(roles).toHaveLength(4);
+  it('exports the 2 resume roles (P2-01; the other two are earlierRoles, D82)', () => {
+    expect(roles).toHaveLength(2);
   });
 
   it('all roles have required fields', () => {

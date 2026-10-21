@@ -491,3 +491,13 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   copy is Michael's to cut or reuse. Corrects the v3 spec § 3's reason ("the `/evidence` page and the case studies
   still read them": neither does). Reversible: trim `Principle` to `{ id, examples }` and drop the unused examples.
   (P1-08 review; asks Michael's P1-05 question.)
+- **D82** *default*: Tahoma Films and High Cascade Snowboard Camp are not on the resume v4 (v3 spec § 8); they stay on
+  `/experience` as a compact "Earlier" list (title · company · period, no bullets, `earlierRoles` in
+  `experience.ts`) rather than being deleted (v3 spec § 3: show character). Supersedes their bullets (M2-03, D9's
+  age-range bullet). Reversible: drop `earlierRoles` and its section. (P2-01; plan `docs/plans/2026-10-21-P2-experience.md`.)
+- **D83** *default*: six `/evidence` items cite `/experience` lines the resume text drops (Foundational Capability
+  Patterns, git-tracked migrations ×2, de facto PM, Agile/Scrum in Linear, the High Cascade mentoring). They stay
+  (each still traces to brand.md or the spec) and keep linking to `/experience`, which still shows the role; the High
+  Cascade item drops its age range ("Mentored young snowboarders at High Cascade…") so every number on `/evidence`
+  is still on the page it links (`claims-on-linked-page`). Reversible: one edit in `competencies.ts`. Question for
+  Michael: keep, relink or drop them? (P2-01.)

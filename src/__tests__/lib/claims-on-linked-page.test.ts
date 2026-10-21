@@ -1,6 +1,7 @@
 /** @jest-environment node */
 import {
   competencies,
+  earlierRoles,
   education,
   evidenceIntro,
   exampleHref,
@@ -8,6 +9,7 @@ import {
   principles,
   resolvedExamples,
   resolvedItems,
+  resumeProjects,
   roles,
 } from '@/lib/data';
 
@@ -17,7 +19,7 @@ const numbers = (s: string): string[] => s.match(/\d+(?:[.,]\d+)*/g) ?? [];
 
 function linkedContent(href: string): string | undefined {
   const [route] = href.split('#');
-  if (route === '/experience') return JSON.stringify({ roles, education });
+  if (route === '/experience') return JSON.stringify({ roles, resumeProjects, earlierRoles, education });
   const slug = route.match(/^\/projects\/([^/]+)$/)?.[1];
   return slug ? JSON.stringify(getProjectBySlug(slug)) : undefined;
 }

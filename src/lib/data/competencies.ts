@@ -156,7 +156,7 @@ export const competencies: Competency[] = [
       {
         // D35: High Cascade coaching is labelled Personal.
         context: 'Personal',
-        text: 'Mentored 12–18-year-old snowboarders at High Cascade: targeted drills, safe progression, patient feedback',
+        text: 'Mentored young snowboarders at High Cascade: targeted drills, safe progression, patient feedback',
         href: '/experience',
         source: 'Mentored 12–18-year-old snowboarders',
       },

@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P2-01 · passes
+
+- `experience.ts` now carries resume v4 (§ 8) word for word. `Bullet` (string or `{ text, links }`) and `bulletText`; `roles` holds only MAXX and Builder Clarity, three bullets each, with the four § 3 links. New: `resumeProjects` (agent harness, music server: href, repo, period, two bullets each) and `earlierRoles` (Tahoma, High Cascade: no bullets, D82). Coursework is the six resume items. New `components/experience/BulletWithLinks.tsx` (Server Component); `/experience` renders the bullets through it. Plan: `docs/plans/2026-10-21-P2-experience.md`.
+- Tests: 1146 → 1160 (84 → 86 suites). New `experience-data.test.ts` (holds the § 8 strings) and `BulletWithLinks.test.tsx`. Updated `experience.test.tsx` and `data.test.ts` (2 roles). `claims-on-linked-page` now reads the projects and earlier roles too.
+- Verified: `.harness/check.sh` printed `lint ok · jest ok · build ok`; smoke.mjs passed every route; curl /experience showed the four links with the right hrefs.
+- Next session (P2-02): the page doesn't render `resumeProjects` or `earlierRoles` yet, so Tahoma and High Cascade are missing from /experience until then. `Role.type` is still unused (P2-04 decides). The M2-03 High Cascade age-range test is gone along with that bullet.
+- D83 *default*: six /evidence items cite /experience lines that the resume dropped (Capability Patterns, migrations ×2, de facto PM, Agile/Scrum, mentoring). They keep their link. The mentoring item lost "12–18" so the claims check holds. **Michael: keep, relink or drop these six?** D82: is the Earlier list OK?
+
 ### 2026-10-21 verify · verify P1
 
 Re-ran check.sh (green), full jest (84 suites, 1146 tests), smoke.mjs (all PASS), logos-check, print-check, captures.mjs; read the code and tests named below. All 8 features hold.

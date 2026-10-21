@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { roles, education, profile } from '@/lib/data';
 import ScrollReveal from '@/components/ScrollReveal';
 import TimelineLine from '@/components/TimelineLine';
+import BulletWithLinks from '@/components/experience/BulletWithLinks';
 
 export const metadata: Metadata = {
   title: 'Experience — Michael Herron',
@@ -50,7 +51,7 @@ export default function ExperiencePage() {
                       <span aria-hidden="true" className="text-[var(--color-accent)]/50 mt-0.5 shrink-0">
                         —
                       </span>
-                      {bullet}
+                      <BulletWithLinks bullet={bullet} />
                     </li>
                   ))}
                 </ul>
