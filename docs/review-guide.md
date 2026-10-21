@@ -289,3 +289,51 @@ by P2-04). Decisions D82–D84 are in `docs/specs/2026-10-18-portfolio-v2.md` §
 **Undo.** `git revert` the P2 commits (P2-01 … P2-04, newest first). The data, page, component and tests come back
 together; `/experience` returns to the four M2-03 roles. To drop only the Earlier list (D82), delete `earlierRoles`
 and its section.
+
+## P3 (v3)
+
+Same run and branch as P0–P2, plan `docs/plans/2026-10-21-P3-concierge-in-site.md` (§ What Michael will see by P3-09,
+§ Review by P3-10). Decisions D85–D96 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P2.
+The site accepts contract v1 and v2 bodies (D95), so it can merge before or after the agent's v2 in
+`mh550/voice-concierge`; the six-kind memory view and Guide me need the v2 agent.
+
+- Changed (P3-02, D95): `contract.ts` reads contract v2 (`about_visitor`, `about_agent`, `retention_days`, the
+  `concierge.navigate` topic); a v1 body parses as before. `memoryCache.ts` keeps the last body per visitor id.
+- Changed (P3-03, D85): the call lives in `ConciergeProvider` above every chrome page (not `/card*`), so it keeps
+  going across client navigations; `/talk`'s `TalkSession` is markup over `useConcierge()` (471 → 42 lines).
+- Changed (P3-04, P3-05, D86–D89): the "Ask my site" pill on every chrome page but `/talk` opens a non-modal drawer
+  (420 px right at `lg`, a bottom sheet below); a first-visit callout above it; Talk is off the Navbar (six links).
+- Changed (P3-06, D90): the memory strip (five chips with counts) and the Memory · Latency · Privacy tabs, in the
+  drawer and on `/talk`; Forget me is always on the Memory tab, disabled before a call.
+- Changed (P3-07, D91–D93, D96): before a call the drawer shows the last memory greyed with "as of" (gone after
+  `retention_days` or Forget me); a 429 for your own earlier room retries for 60 s ("Closing your earlier
+  conversation…"); the intro and deep-dive copy lose "specs in, verified milestones out" and "pack".
+- Changed (P3-08, D94): with Guide me on (the switch in the drawer's header) the agent can open one of the five
+  pages or a project page, at most every 8 s, never from `/talk`, and the transcript says "Taking you to <name>".
+- Changed (P3-09, P3-10): `.harness/concierge-check.mjs` and nine captures `docs/screenshots/v3/P3-*.png`; the review
+  table is the plan's § Review.
+
+**Morning check (a real call, on the branch's Vercel preview `$P`).** It needs the `LIVEKIT_*` env on the Preview
+environment and the agent running (v2 for steps 4–5); the harness never touched either.
+
+1. Open `$P/projects` in a fresh private window at phone width. The callout "This site talks…" sits above the pill;
+   Close it. Reload: it stays gone.
+2. Tap the pill: the drawer opens with its title focused. Connect, allow the mic. The status reads "Connected. Say
+   hello, or type below." and the pill (behind the drawer) shows a dot.
+3. Say your name. The transcript shows both sides; the strip's Profile count goes up once (it pulses); the Memory tab
+   shows it under About you, with its source.
+4. Ask "show me the agent harness". With Guide me on, the page changes to `/projects/agent-harness` and the transcript
+   reads "Taking you to …"; the call keeps going. Turn Guide me off and ask again: the page stays.
+5. Minimize, open About from the Navbar, tap the pill: the same call and transcript. Memory tab → Forget me → Erase:
+   "Forgotten", the call ends, and after a reload the drawer shows no cached memory.
+6. Desktop width: the drawer is a 420 px column on the right; Esc closes it and focus lands on the pill.
+
+**What to look at.** At 390 the bottom sheet covers the page, so a Guide me follow is visible only as the notice
+(D94 question). On a shared network a second visitor may see "Closing your earlier conversation…" (D92 question). The
+cached memory shows to anyone on the same browser before Connect (D96 question).
+
+**Undo.** Everything is client-side and env-free: `git revert` the P3 commits newest first (P3-10 … P3-02); the
+`/talk` page from VC2 comes back whole with them. To keep the provider and only drop a part: Guide me off by default is
+`readGuideMe()` returning true only for a stored `'on'` (`ConciergeProvider.tsx`, and `useState(false)` for it); the callout goes by deleting `<Callout />`
+in `SiteChrome.tsx`; the cached memory by not calling `loadMemory` in the provider. Turning the concierge off entirely
+needs no deploy of code: remove the `LIVEKIT_*` env from the environment and the pill's Connect reads offline.
