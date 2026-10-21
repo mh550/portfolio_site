@@ -66,7 +66,7 @@ export const talkPage = {
     talkingTo: 'Talking to',
     visit: 'visit',
     summary: 'Summary',
-    fact: { channel: 'Channel', source: 'Source', learnedAt: 'Learned', confidence: 'Confidence' },
+    fact: { learnedAt: 'Learned' },
   },
   // The Memory tab and the strip (D90, plan § Memory view): the v2 body's six kinds of memory in two sections.
   memoryView: {

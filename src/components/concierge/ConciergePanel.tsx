@@ -1,20 +1,17 @@
 'use client';
 
 import { useEffect, useRef, type KeyboardEvent } from 'react';
-import { talkPage, talkWidget } from '@/lib/data/concierge';
+import { talkWidget } from '@/lib/data/concierge';
 import MessageBox from '@/components/talk/MessageBox';
 import Transcript from '@/components/talk/Transcript';
 import CallControls from './CallControls';
 import { useConcierge } from './ConciergeProvider';
 import DeepDiveLink from './DeepDiveLink';
 import GuideMeSwitch from './GuideMeSwitch';
-import MemoryStrip from './MemoryStrip';
-import PanelTabs from './PanelTabs';
-import { shownMemory } from './status';
+import MemorySection from './MemorySection';
 import { quiet } from './buttons';
 
 const TITLE_ID = 'concierge-panel-title';
-const MEMORY_ID = 'concierge-panel-memory';
 
 // The concierge on every chrome page but /talk (D86, plan docs/plans/2026-10-21-P3-concierge-in-site.md § Panel): a
 // non-modal drawer, 420 px on the right from lg, a bottom sheet under the Navbar below it. Under the message box, the
@@ -22,7 +19,7 @@ const MEMORY_ID = 'concierge-panel-memory';
 // scroll lock: the page stays usable while the call goes on. In the DOM only while open; Minimize and Esc close it
 // and leave the call alone, and the widget takes focus back (VoiceWidget).
 export default function ConciergePanel() {
-  const { state, cachedMemory, sessionCount, sendMessage, forgetMe, panel, minimizePanel } = useConcierge();
+  const { state, sessionCount, sendMessage, panel, minimizePanel } = useConcierge();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const open = panel === 'open';
 
@@ -31,7 +28,6 @@ export default function ConciergePanel() {
   }, [open]);
 
   if (!open) return null;
-  const shown = shownMemory(state, cachedMemory);
 
   // A control that handles Esc itself (a confirm step) calls preventDefault, and the panel stays; so does an Esc that
   // ends an IME composition in the message box.
@@ -76,13 +72,7 @@ export default function ConciergePanel() {
       <Transcript lines={state.lines} fill>
         <MessageBox key={sessionCount} disabled={state.phase !== 'live'} onSend={sendMessage} />
       </Transcript>
-      <section aria-labelledby={MEMORY_ID} className="space-y-3 border-t border-white/10 p-4">
-        <h2 id={MEMORY_ID} className="sr-only">
-          {talkPage.memoryView.heading}
-        </h2>
-        <MemoryStrip memory={shown.memory} asOf={shown.asOf} />
-        <PanelTabs state={state} shown={shown} onForget={() => void forgetMe()} compact />
-      </section>
+      <MemorySection compact className="space-y-3 border-t border-white/10 p-4" />
     </section>
   );
 }

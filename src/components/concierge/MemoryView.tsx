@@ -1,7 +1,8 @@
 import { useId, type ReactNode } from 'react';
 import type { AboutAgent, Episode, MemoryBody, MemoryEvent, MemoryFact } from '@/lib/concierge/contract';
 import { latencyLabels, talkPage } from '@/lib/data/concierge';
-import ForgetMeButton, { quiet as forgetLook } from '@/components/talk/ForgetMeButton';
+import ForgetMeButton from '@/components/talk/ForgetMeButton';
+import { quietSmall } from './buttons';
 import type { ForgetStatus } from '@/components/talk/sessionReducer';
 import { DASH, count, dateTime, day, percent } from '@/components/talk/format';
 
@@ -303,7 +304,7 @@ export default function MemoryView({
           <ForgetMeButton onForget={onForget} busy={forget === 'busy'} />
         ) : (
           <>
-            <button type="button" disabled aria-describedby={hintId} className={forgetLook}>
+            <button type="button" disabled aria-describedby={hintId} className={quietSmall}>
               {talkPage.labels.forgetMe}
             </button>
             <p id={hintId} className="text-[var(--color-muted)]">

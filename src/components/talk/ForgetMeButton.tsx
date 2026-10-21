@@ -2,12 +2,7 @@
 
 import { useId, useRef, useState } from 'react';
 import { talkPage } from '@/lib/data/concierge';
-import { focusRing } from '@/components/focusRing';
-
-const buttonBase = `rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${focusRing}`;
-// Also the disabled Forget me the Memory tab shows before a call (MemoryView), so the two look the same.
-export const quiet = `${buttonBase} border border-white/20 text-white hover:border-white/40`;
-const danger = `${buttonBase} bg-red-700 text-white hover:bg-red-800`;
+import { danger, quietSmall as quiet } from '@/components/concierge/buttons';
 
 // Forget me, with one confirm step so a stray tap can't erase anything. The parent runs the RPC (`onForget`) and
 // holds `busy` until it answers; Erase closes the confirm step at once, so it can only call `onForget` once.
