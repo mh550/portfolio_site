@@ -43,10 +43,3 @@ next-env.d.ts
 
 # claude code worktrees
 /.claude/worktrees/
-
-# booth harness run output (public/b/h.tgz stays tracked)
-public/b/mh_harness/__pycache__/
-public/b/mh_harness/**/__pycache__/
-public/b/mh_harness/results.jsonl
-public/b/mh_harness/logs/
-public/b/mh_harness/work/
