@@ -621,7 +621,7 @@
         "The suite is green: `.harness/check.sh` prints `check: lint ok · jest ok · build ok` (no code changed)."
       ],
       "after": [],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P6-02",

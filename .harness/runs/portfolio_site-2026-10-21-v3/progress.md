@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 10:15 · P6-01 · passes
+
+- New `docs/design/2026-10-21-projects-showcase-options.html` (docs only; tests 1859 → 1859). Three options for `/projects`, each drawn at 1280 × 800 and 390 × 844 in the site tokens with real titles, metrics and iteration texts: (A) one graph for projects and stack, Agent Harness selected with its 9 `skills.ts` edges and a side panel / bottom sheet; (B) case-file grid, company tab, a cover standing in for each project's `architectureDiagram`, `metrics[0]` band, today's category chips; (C) a dated log of the 17 `caseStudy.iterations`. Each has a 10-second read, cost (fields reused, new components), 3–5 references and risks; then a comparison table, **recommendation B** (fastest read for hiring managers, cheapest, covers from 9 existing diagrams), and what A shares with the P5 graph (data, `lib/graph`, selection model, List view; D99's d3-force caveat).
+- Verified: frontend-design skill used. `grep -c '<script src\|<link [^>]*href="http'` → 0, no images/fonts fetched; one-off Playwright run (`node $HARNESS_SCRATCH/p6-01-check.mjs <file>`, command in the file's footer): 1280 and 390 both 0 console errors, 0 external requests, scrollWidth 1280/1280 and 390/390. All 12 reference URLs answer 200 with `curl -sIL -o /dev/null -w '%{http_code}'` (codes in the trailing comment). Sources list at the end of the file.
+- An Opus review checked every number and code claim against the repo: 0 untraced numbers, 2 Important + 3 Minor, all fixed (Tailscale → Edge functions as the 6th infra node; the GoHighLevel cover now uses its diagram's own nodes, not techStack; Mirrored Google Calendars and Cherished have no metrics either; D99 d3-force caveat added to A; band wording uses `metrics[0]`, "14 of 17 in October").
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: does B (case files) match what you want for `/projects`, or do you prefer A on `/skills` later? Next step if B: render three diagrams at card width and look at 390.
+
 ### 2026-10-21 verify P5
 
 | Feature | Step | What you ran or read | What you saw | Holds |
