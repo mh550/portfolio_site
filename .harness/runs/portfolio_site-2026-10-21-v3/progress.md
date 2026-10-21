@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P6-04 · passes
+- Reviewed the three P6 files; added `## Review (P6-04)` to `docs/notes/2026-10-21-framework-options.md` and `## P6 (v3): recommendations` to `docs/review-guide.md`. No code changed; tests 1859 → 1859.
+- URLs: 46 unique, all 200 by `curl -sIL`. HTML files: no external script/link/img/@import.
+- Chromium at 1280 and 390: 0 console errors, scrollWidth == innerWidth on both files.
+- Numbers traced to projects.ts, skills.ts, evidence notes and `wc`/`find` counts (10/8/4, 17/14/3, 51/9, 734/592/1969, 100/55); all matched; mockup counts carry the "illustrative" tag. No findings to fix.
+- `.harness/check.sh`: lint ok · jest ok · build ok.
+
 ### 2026-10-21 11:20 · P6-03 · passes
 
 - New `docs/notes/2026-10-21-framework-options.md` (docs only; tests 1859 → 1859). Six foundations with licence, stack, last push and what each gives: daedalOS (MIT, Next 16 Pages Router + styled-components), `@react95/core` (MIT with a Microsoft-imagery carve-out, so GitHub says NOASSERTION), 98.css, NES.css (last push 2024-01-17), M4TT72 Terminal (Svelte 4), WebTUI (pre-1.0 CSS); plus five left out (ryOS is AGPL-3.0) and why no CRT kit. Each has porting steps and an hour range with its assumption (fork daedalOS 60–90 h, fork M4TT72 80–120 h; borrows 6–30 h).

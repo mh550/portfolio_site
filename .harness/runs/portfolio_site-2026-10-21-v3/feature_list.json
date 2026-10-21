@@ -673,7 +673,7 @@
         "P6-02",
         "P6-03"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

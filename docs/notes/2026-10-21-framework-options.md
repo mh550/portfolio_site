@@ -226,3 +226,46 @@ Question for Michael: borrow (as above), or do you want to see a daedalOS fork s
 - Direction 1, the token-only pass, "a cartridge could still appear once": `docs/design/2026-10-21-design-directions.html`
   § Recommendation.
 - Hour ranges: this note's own estimates, with the assumption under each.
+
+## Review (P6-04, 2026-10-21)
+
+Covers the three P6 files: this note, `docs/design/2026-10-21-design-directions.html` and
+`docs/design/2026-10-21-projects-showcase-options.html`.
+
+**URLs.** `grep -ohE 'https?://[^" )<>`]+'` over the three files, trailing punctuation stripped, de-duplicated:
+46 URLs; `curl -sIL -o /dev/null -m 20 -w '%{http_code}'` on each: 46 × 200, none redirected to a non-200. Nothing
+fixed or removed.
+
+**Self-contained.** `grep -nE '<script[^>]*src|<link[^>]*href="?http|<img[^>]*src="?http|@import|url\(http'
+docs/design/*.html` prints nothing. Both HTML files have inline CSS only.
+
+**Render.** Headless Chromium (Playwright), `file://` load, 500 ms wait, console/page errors and failed requests
+counted, `document.documentElement.scrollWidth` against `innerWidth`:
+
+```
+design-directions 1280: scrollWidth 1280 inner 1280 errors 0
+design-directions  390: scrollWidth  390 inner  390 errors 0
+projects-showcase 1280: scrollWidth 1280 inner 1280 errors 0
+projects-showcase  390: scrollWidth  390 inner  390 errors 0
+```
+
+**Numbers.** Every digit-bearing line was extracted (285 + 122 lines from the HTML text, 86 from this note) and
+traced. Re-run against the repo today:
+
+| Claim | Source | Result |
+|---|---|---|
+| 10 projects, 8 featured, 4 case studies | `grep -c "^    slug:"` / `featured: true` / `caseStudy: {` in `projects.ts` | 10, 8, 4 |
+| 55 passing, 52 merged in 12 PRs, +374 tests, ≈ $2.53 | `projects.ts` metrics; `docs/notes/evidence-agent-harness.md` l. 70, `about-narrative-bullets.md` l. 23 | match |
+| 2 days → ~6 hrs | `projects.ts` (GoHighLevel metric) | match |
+| 1,359 tests; 20+ → 7 fields | `projects.ts`; `evidence-media-server.md` l. 58, 69 | match |
+| 17 iterations, 3 projects, 14 in Oct 2026 | `when:` entries in `projects.ts`: 6 + 5 + 6; only "Sep 2026", "Sep 17–18" and "Feb 12–14" are not October | match |
+| 51 nodes, six clusters, Agent Harness 9 project edges | `skills.ts` (`id:` count between `nodes` and `edges`; `projectStacks['agent-harness']`) | 51, 6, 9 |
+| 1859 tests, 100 files, 55 with RTL | CLAUDE.md; `find`/`grep -rl` commands in § Sources | 100, 55 |
+| 8 data files, 1969 lines; ConciergeProvider 734 lines; `lib/concierge` 9 files, 592 lines; 45 components; 11 pages; 6 case-study components | `wc -l`, `ls`, `find` | all match |
+| Agent Harness title 66 characters | `projects.ts` title string | 66 |
+| Contrast ratios (spot-checked 14.76, 5.93, 16.67) | WCAG 2 formula on the listed hex pairs | match |
+| Memory counts (Profile 3 … Working 9), transcript lines, meter needles | "illustrative" tag on each mockup (lines 471, 672, 881 of the directions file; `no latency is measured yet`) | labelled |
+| Font sizes, pixel cell sizes, hour ranges | the files' own design choices and estimates | stated as such |
+
+**Findings.** None needed a fix, so there is no before/after. One caveat: the 17/14 iteration figure depends on the
+free-text `when:` strings, which the showcase file already notes.
