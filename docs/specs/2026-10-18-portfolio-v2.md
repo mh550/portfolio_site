@@ -666,3 +666,11 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   Question for Michael: on a shared browser the copy shows before Connect and only a live call can erase it (Forget
   me is disabled until then, D90); add a local "Clear this browser's copy" control beside the disabled Forget me,
   or drop the cache before a call entirely? Reversible: delete the line and the `memoryExpired` call.
+- **D97** *default* (P4-01): `/contact` is one screen (v3 spec § 6): the h1, one line from `profile.location` and the
+  new `profile.availability` ("Durham, NC · open to remote, hybrid or relocation."), then three equal tiles (mail,
+  LinkedIn, GitHub), each one link with a glyph, the label and the value; the eyebrow, the subheader and the closing
+  note go. simple-icons 16.9.0 has no LinkedIn mark (removed at the brand's request), so the "in" glyph is authored in
+  `src/components/logos/extra.ts` next to an authored envelope (both `fill-rule: evenodd`; `Logo` takes either key,
+  `paths.ts` stays generated); GitHub keeps the generated path. Supersedes spec § 6's "simple-icons paths for LinkedIn"
+  and the pre-v3 contact copy. Height budget in `docs/plans/2026-10-21-P4-contact.md` § Layout. Reversible: swap the
+  path in `extra.ts`, or put the copy back.

@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P4-01 · passes
+
+- /contact is one screen (D97): `src/app/contact/page.tsx` = h1, one line `profile.location · profile.availability`, a `grid sm:grid-cols-3` of three `<a>` tiles (glyph, label, value); eyebrow, subheader, closing note gone. New `profile.availability`; new `src/components/logos/extra.ts` (authored LinkedIn "in" and mail, `fill-rule: evenodd`; simple-icons 16.9.0 has no LinkedIn); `Logo` takes either key. Plan `docs/plans/2026-10-21-P4-contact.md` (height budget per element). Tests 1629 → 1642 (contact.test rewritten, Logo extra cases, profile `availability`, /contact in a11y-new-pages).
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `node .harness/smoke.mjs` exit 0; a Sonnet browser pass on :7835: scrollHeight = innerHeight at 390×844 (844) and 1280×800 (800), also at 640×900 and 820×1180, no tile overflow, pill (238,780 at 390) clear of the tiles; I looked at the 390 capture and the LinkedIn glyph (holes cut).
+- Next (P4-02): the numbers above came from a throwaway script in scratch; `.harness/contact-check.mjs` still has to be written. scrollHeight reports innerHeight when content is shorter; the real spare is the Footer bottom: 776 of 844 at 390, 710 of 800 at 1280.
+- Question for Michael: the LinkedIn "in" is hand-drawn (D97), not LinkedIn's artwork. Keep it, or swap in their official asset from LinkedIn's brand page?
+
 ### 2026-10-21 · verify P3
 
 All 10 P3 features hold (56 steps). `passes` unchanged.

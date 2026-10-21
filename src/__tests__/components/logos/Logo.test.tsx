@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import Logo from '@/components/logos/Logo';
+import { extraPaths } from '@/components/logos/extra';
 import { logoPaths } from '@/components/logos/paths';
 
 describe('Logo', () => {
@@ -26,5 +27,28 @@ describe('Logo', () => {
   it('passes className through', () => {
     const { container } = render(<Logo name="github" className="w-6 h-6" />);
     expect(container.querySelector('svg')).toHaveClass('w-6', 'h-6');
+  });
+});
+
+// P4-01, D97: the authored marks in extra.ts (simple-icons 16.9.0 has no LinkedIn) cut their holes with evenodd
+describe('Logo with an authored mark', () => {
+  it.each([
+    ['linkedin', 'LinkedIn'],
+    ['mail', 'Email'],
+  ] as const)('%s renders its extra.ts path with fill-rule evenodd', (name, title) => {
+    const { container } = render(<Logo name={name} />);
+    const path = container.querySelector('path')!;
+    expect(path).toHaveAttribute('d', extraPaths[name].path);
+    expect(path).toHaveAttribute('fill-rule', 'evenodd');
+    expect(screen.getByRole('img', { name: title })).toBeInTheDocument();
+  });
+
+  it('leaves a generated mark on the default fill rule', () => {
+    const { container } = render(<Logo name="github" />);
+    expect(container.querySelector('path')).not.toHaveAttribute('fill-rule');
+  });
+
+  it('keeps extra.ts keys apart from the generated ones', () => {
+    for (const key of Object.keys(extraPaths)) expect(Object.keys(logoPaths)).not.toContain(key);
   });
 });
