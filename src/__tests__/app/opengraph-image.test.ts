@@ -92,6 +92,10 @@ describe('projects/[slug]/opengraph-image', () => {
     expect(typeof og.default).toBe('function');
   });
 
+  it('alt text carries the v3 positioning (D76)', () => {
+    expect(og.alt).toBe('Project case study from Michael Herron, Agentic Systems Engineer');
+  });
+
   it('generateStaticParams returns every project slug', async () => {
     const params = await og.generateStaticParams();
     expect(params).toEqual(projects.map((p) => ({ slug: p.slug })));

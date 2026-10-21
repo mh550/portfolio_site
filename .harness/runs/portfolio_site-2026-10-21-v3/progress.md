@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 08:20 · P1-06 · passes
+
+`/skills` and `/projects` metadata descriptions rewritten for the agentic angle (plan § Site-wide strings; every other page's description was read and holds or follows `profile`). The grep's last hit was a ProjectsGrid test title, renamed. New `lib/positioning-strings.test.ts` (old-angle phrases on no non-binary file in src/public, spacing/hyphen/`&amp;` variants) and `pages/projects.test.tsx`; OG test pins the alt with the new positioning; card-qr asserts the literal. brand.md heading is now `### v3 (2026-10-21)`. CLAUDE.md: spec line names the v3 spec, `/` and `/about` rows, approach.ts line, count. Plan § Tests: rows added, snapshot row says unchanged. Tests 1140 → 1145, 82 → 84 suites.
+Verified: skills/projects tests red first; positioning-strings red against the old ProjectsGrid title and a planted `Systems &amp; Process` svg; `git diff --stat <after P0-01>..HEAD` on __snapshots__ empty; grep empty; `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0, 41 PASS. Opus review: 2 Minor + 2 Nit, all fixed (no "integration platforms" overclaim, skills description cut to ~105 chars, wider regex, binary deny-list instead of a text allow-list).
+Next session (P1-07): next free decision **D81**. No new questions.
+Proposed change: `/projects`' visible lede ("integrations, full-stack apps, and tools") still has no agentic word; outside P1-06's metadata scope, P6's copy notes could pick it up.
+
 ### 2026-10-21 07:45 · P1-05 · passes
 
 `/approach` is a 308 to `/about#how-i-work` from `next.config.ts` `redirects()` (hash kept under `curl -sI`, so no `permanentRedirect` stub; plan § Approach fold says so). Deleted `src/app/approach/page.tsx`, `approach.test.tsx`, `approachIntro`, `approachClosing`. Navbar has seven links; sitemap, smoke-routes, a11y-new-pages, competencies-links ROUTES and sitemap-robots drop `/approach` (sitemap test now pins the exact eight static URLs). New `approach-redirect.test.ts`; `.harness/smoke.mjs` also checks the 308 + Location on no-argument runs. CLAUDE.md (route row, Navbar, MethodStrip, approach.ts, test count), review-guide `## P0–P1 (v3)` (merge note, undo), D79 marked built. Tests 1155 → 1140, 82 suites (the page's own tests went with it).

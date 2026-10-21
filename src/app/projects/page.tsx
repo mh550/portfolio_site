@@ -4,7 +4,7 @@ import ProjectsGrid from '@/components/projects/ProjectsGrid';
 
 export const metadata: Metadata = {
   title: 'Projects — Michael Herron',
-  description: 'Integration systems, full-stack apps, and automation projects.',
+  description: 'Agentic systems, integrations, full-stack apps and automation.',
 };
 
 export default function ProjectsPage() {

@@ -12,7 +12,9 @@ v2 must *show*: real systems, the decisions behind them, what broke, what he cha
 
 ## Positioning
 
-### v3 (2026-10-21, D76/D77 *default*, Michael picks the final words)
+### v3 (2026-10-21)
+
+D76/D77 *default* in the v2 spec § v3 decisions; Michael picks the final words.
 
 - **Headline: "Agentic Systems Engineer".** Same places as below (hero eyebrow, `<title>`, `/card`, vCard `TITLE`,
   Open Graph); still a positioning line, not a job title. "Systems & process" stays as *how* he works.
@@ -23,7 +25,6 @@ v2 must *show*: real systems, the decisions behind them, what broke, what he cha
   `/about#how-i-work` (P1-04/P1-05; `/approach` redirects there).
 
 ### 2026-10-18 (decided by Michael; history, superseded by v3 above)
-
 
 - **Headline title: "Systems & Process Engineer".** It appears in the hero eyebrow, the site `<title>`, the
   `/card` page, the vCard `TITLE`, and Open Graph metadata. It is a positioning line, **not** a job title.

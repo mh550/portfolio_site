@@ -22,6 +22,7 @@ describe('CardQrPage', () => {
     render(<CardQrPage />);
     const name = screen.getByRole('heading', { level: 1, name: profile.name });
     const positioning = screen.getByText(profile.positioning);
+    expect(positioning).toHaveTextContent('Agentic Systems Engineer');
     const img = screen.getByRole('img');
     expect(img.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(name.compareDocumentPosition(positioning) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

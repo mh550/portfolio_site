@@ -4,7 +4,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export const metadata: Metadata = {
   title: 'Skills — Michael Herron',
-  description: 'Skills grouped by capability: process and delivery, systems and architecture, building, and operating and verifying.',
+  description: 'The tools and practices behind the agentic systems, integrations and apps I build, grouped by capability.',
 };
 
 export default function SkillsPage() {

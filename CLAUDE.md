@@ -6,15 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Michael Herron's personal portfolio site — a bold, expressive multi-page site built with Next.js (App Router), TypeScript, Tailwind CSS, and Framer Motion. Deployed on Vercel.
 
-**Spec:** `docs/specs/2026-10-18-portfolio-v2.md` — read this before implementing any new section or feature.
+**Spec:** `docs/specs/2026-10-21-portfolio-v3.md` is the current spec (v3: agentic-systems positioning, the loop, the
+concierge in the site); read it before implementing any new section or feature. `docs/specs/2026-10-18-portfolio-v2.md`
+stays the record of decisions: v3 defaults are appended to its `## v3 decisions` section (from D75).
 **Plans:** `docs/plans/` — one file per milestone (`<date>-<milestone>-<topic>.md`). Hand-off: `docs/review-guide.md`, `docs/asset-checklist.md`.
 
 ## Routes
 
 | Route | Section |
 |---|---|
-| `/` | Hero / Landing |
-| `/about` | About: `aboutIntro`, the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
+| `/` | Hero: eyebrow `profile.positioning` ("Agentic Systems Engineer", D76), tagline, subline, the loop strip (`MethodStrip`, `loopSteps` Spec → Learn, D77), twelve FloatingLogos at `xl` (D78); then Recent work (`getTopProjects(3)`) |
+| `/about` | About: `aboutIntro` (the v3 subline + the five loop labels), the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
@@ -37,7 +39,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1140 tests, 82 suites after P1-05)
+npm test             # Jest unit/integration tests (1145 tests, 84 suites after P1-06)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -71,7 +73,8 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
 - `experience.ts` — `Role[]` + `Education` object
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
-- `approach.ts` — `methodSteps` (five steps), `loopSteps` and the six `principles` (`resolvedExamples`, `loopStepExample` for /about How I work); `competencies.ts` — the six `/evidence` competencies
+- `approach.ts` — `methodSteps` (Diagnose → Simplify, the case studies' spine) next to `loopSteps` (Spec → Learn, the
+  hero and /about strip, D77), and the six `principles` (`resolvedExamples`, `loopStepExample` for /about How I work); `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
 - `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`; `talkPage.intro` is
   `IntroParagraph[]` (a string, or `{ before, link, after }`: "my agent harness" → `/projects/agent-harness`, D62), read through `introText`
@@ -173,7 +176,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).
 
 ## Decisions and plans
-- Spec: `docs/specs/2026-10-18-portfolio-v2.md` (settled: D1–D14; new defaults appended there as `D<n> *default*`).
+- Spec: `docs/specs/2026-10-21-portfolio-v3.md` (current). Decisions: `docs/specs/2026-10-18-portfolio-v2.md` (settled:
+  D1–D14; new defaults appended there as `D<n> *default*`, v3's in `## v3 decisions` from D75).
 - Context: `docs/notes/brand.md`, `docs/notes/evidence-*.md`; older groundwork in `docs/notes/SITE_UPDATE_PLAN.md`.
 - Plans: `docs/plans/<date>-<milestone>-<topic>.md`.
 
