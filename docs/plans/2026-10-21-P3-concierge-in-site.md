@@ -11,6 +11,15 @@ LiveKit env, and the page must work against a v1 agent (today's) and a v2 agent 
 
 ## Ownership
 
+*Built in P3-03* as below, with two differences: the six actions are made once per `configured` in one `useMemo`
+(not one `useCallback` each), and the Forget me guard is a `forgetting` flag on the `Session`, so `forgetMe` reads no
+state. P3-03 builds only the members it owns (`state`, `room`, `sessionCount`, `configured` and the six moved
+actions); the later rows arrive with their features.
+Review additions: the widget shows a live call (`VoiceWidget live`, `talkWidget.liveLabel`) until the drawer lands,
+`pageshow` resets only a call `pagehide` ended, and the open question for P3-04/P3-10: livekit-client's own
+`disconnectOnPageLeave` (default on) also listens for `beforeunload`, which a `mailto:` click fires in some browsers;
+with the provider owning page-leave, `new Room({ disconnectOnPageLeave: false })` may be the better default.
+
 Today `src/components/talk/TalkSession.tsx` (471 lines) owns everything: the reducer, the `Session` ref, the Room,
 the token request, the stream handlers and the markup, and its unmount ends the call. P3-03 moves the call one level
 up, into `src/components/concierge/ConciergeProvider.tsx` (`'use client'`), mounted by `SiteChrome` around the chrome

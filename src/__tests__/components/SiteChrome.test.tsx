@@ -1,5 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import SiteChrome from '@/components/SiteChrome';
+import { useConcierge } from '@/components/concierge/ConciergeProvider';
+import TalkSession from '@/components/talk/TalkSession';
+import { addAgent, lastRoom, resetRooms } from '@/__mocks__/livekit-client';
+import { talkPage, talkWidget } from '@/lib/data';
 
 let mockPath = '/';
 jest.mock('next/navigation', () => ({ usePathname: () => mockPath }));
@@ -89,5 +93,93 @@ describe('SiteChrome', () => {
   it.each(['/card', '/card/qr'])('%s: no voice widget', (path) => {
     renderAt(path);
     expect(widget()).toBeNull();
+  });
+
+  // P3-03, D85: the concierge's call lives around the chrome, so a page's content can read it; /card* has none.
+  function Probe() {
+    const { state, configured } = useConcierge();
+    return <p data-testid="concierge">{`${state.phase} ${configured}`}</p>;
+  }
+
+  function renderProbeAt(pathname: string, configured?: boolean) {
+    mockPath = pathname;
+    return render(
+      <SiteChrome configured={configured}>
+        <Probe />
+      </SiteChrome>
+    );
+  }
+
+  it.each(['/', '/about', '/talk', '/projects/agent-harness', '/evidence'])('%s: the ConciergeProvider is there', (path) => {
+    renderProbeAt(path, true);
+    expect(screen.getByTestId('concierge')).toHaveTextContent('idle true');
+  });
+
+  it('passes configured through, false when it is not given', () => {
+    renderProbeAt('/');
+    expect(screen.getByTestId('concierge')).toHaveTextContent('idle false');
+  });
+
+  it.each(['/card', '/card/qr'])('%s: no ConciergeProvider', (path) => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => renderProbeAt(path, true)).toThrow('useConcierge must be used inside ConciergeProvider');
+    jest.restoreAllMocks();
+  });
+
+  // D85: a client-side navigation changes the pathname and the page under SiteChrome; the provider, and the call,
+  // stay. The widget on the next page shows the call is still on and leads back to Leave.
+  describe('a live call across a navigation', () => {
+    const realFetch = global.fetch;
+    beforeEach(() => {
+      localStorage.clear();
+      global.fetch = jest.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ url: 'wss://concierge.test.invalid', token: 'test-token' }),
+      })) as unknown as typeof fetch;
+    });
+    afterEach(() => {
+      global.fetch = realFetch;
+      resetRooms();
+    });
+
+    const flush = () =>
+      act(async () => {
+        for (let i = 0; i < 30; i++) await Promise.resolve();
+      });
+
+    it('/talk → /about keeps the Room connected, and the widget names the live call', async () => {
+      mockPath = '/talk';
+      const { rerender } = render(
+        <SiteChrome configured>
+          <TalkSession />
+        </SiteChrome>
+      );
+      await act(async () => {
+        screen.getByRole('button', { name: talkPage.labels.connect }).click();
+      });
+      await flush();
+      const room = lastRoom();
+      await act(async () => {
+        addAgent(room, 'agent-1');
+      });
+      await flush();
+
+      mockPath = '/about';
+      rerender(
+        <SiteChrome configured>
+          <Probe />
+        </SiteChrome>
+      );
+      expect(room.disconnect).not.toHaveBeenCalled();
+      expect(screen.getByTestId('concierge')).toHaveTextContent('live true');
+      expect(screen.getByRole('link', { name: talkWidget.liveLabel })).toHaveAttribute('href', '/talk');
+    });
+
+    it('with no call the widget keeps its usual name', () => {
+      renderAt('/about');
+      expect(screen.getByRole('link', { name: talkWidget.label })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: talkWidget.liveLabel })).toBeNull();
+    });
   });
 });

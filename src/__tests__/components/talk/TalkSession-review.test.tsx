@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import TalkSession from '@/components/talk/TalkSession';
+import { renderTalk } from '@/__tests__/helpers/concierge';
 import { MockRoom, addAgent, lastRoom, resetRooms, restart } from '@/__mocks__/livekit-client';
 import { talkPage } from '@/lib/data/concierge';
 
@@ -50,7 +50,7 @@ async function goLive(user: UserEvent) {
 describe('TalkSession review: focus', () => {
   it('Connect becomes Leave in place, so focus stays on it', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await user.click(button(labels.connect));
     await flush();
     expect(button(labels.leave)).toHaveFocus();
@@ -59,7 +59,7 @@ describe('TalkSession review: focus', () => {
   it('offline (503): focus is on Connect again', async () => {
     global.fetch = jest.fn(async () => reply(503, { offline: true })) as unknown as typeof fetch;
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await user.click(button(labels.connect));
     await flush();
     expect(status()).toHaveTextContent(talkPage.offlineMessage);
@@ -68,7 +68,7 @@ describe('TalkSession review: focus', () => {
 
   it('Leave puts focus on Connect', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await goLive(user);
     await user.click(button(labels.leave));
     expect(button(labels.connect)).toHaveFocus();
@@ -76,7 +76,7 @@ describe('TalkSession review: focus', () => {
 
   it('after Erase focus stays on Forget me while the RPC runs, and moves to Connect when the agent ends the call', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     let resolveRpc: (body: string) => void = () => {};
     room.localParticipant.performRpc.mockImplementationOnce(() => new Promise<string>((resolve) => (resolveRpc = resolve)));
@@ -96,7 +96,7 @@ describe('TalkSession review: focus', () => {
     // user-event never sets KeyboardEvent.repeat, so the repeats are fired by hand. fireEvent returns false when the
     // handler called preventDefault(), which is what stops the browser's click.
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     button(labels.connect).focus();
     await user.keyboard('{Enter}');
     await flush();
@@ -106,13 +106,13 @@ describe('TalkSession review: focus', () => {
   });
 
   it('does not take focus on page load', () => {
-    render(<TalkSession />);
+    renderTalk();
     expect(document.body).toHaveFocus();
   });
 
   it('a double click on Connect connects and does not leave', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await user.dblClick(button(labels.connect));
     await flush();
     expect(button(labels.leave)).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('TalkSession review: focus', () => {
 describe('TalkSession review: the message box', () => {
   it('a failed send keeps the draft and adds no line', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     room.localParticipant.sendText.mockRejectedValueOnce(new Error('engine not connected'));
     await user.type(messageBox(), 'Hello there{Enter}');
@@ -134,7 +134,7 @@ describe('TalkSession review: the message box', () => {
 
   it('a send that works adds the line and clears the draft', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await goLive(user);
     await user.type(messageBox(), 'Hello there{Enter}');
     await flush();
@@ -145,7 +145,7 @@ describe('TalkSession review: the message box', () => {
 
   it('Enter pressed twice before the send answers sends once', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     let resolveSend: () => void = () => {};
     room.localParticipant.sendText.mockImplementationOnce(
@@ -161,7 +161,7 @@ describe('TalkSession review: the message box', () => {
 
   it('a draft from a call that ended is gone in the next session', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     await user.type(messageBox(), 'half a thought');
     await act(async () => {
@@ -175,7 +175,7 @@ describe('TalkSession review: the message box', () => {
 
   it('a draft typed in one session is gone after Leave', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await goLive(user);
     await user.type(messageBox(), 'half a thought');
     await user.click(button(labels.leave));
@@ -187,7 +187,7 @@ describe('TalkSession review: the message box', () => {
 describe('TalkSession review: after the call', () => {
   it('a Forget me that fails once the call has ended says to connect again', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     let rejectRpc: (reason: Error) => void = () => {};
     room.localParticipant.performRpc.mockImplementationOnce(
@@ -206,7 +206,7 @@ describe('TalkSession review: after the call', () => {
 
   it('a reconnect after which the agent is gone ends the call', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     await act(async () => {
       restart(room);
@@ -223,7 +223,7 @@ describe('TalkSession review: after the call', () => {
 
   it('a reconnect with the agent back stays live', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     const room = await goLive(user);
     await act(async () => {
       restart(room);
@@ -241,17 +241,26 @@ describe('TalkSession review: after the call', () => {
 });
 
 describe('TalkSession review: the bundle', () => {
-  const dir = join(process.cwd(), 'src/components/talk');
-  const files = readdirSync(dir).filter((f) => /\.tsx?$/.test(f));
+  // P3-03: the call moved into src/components/concierge (ConciergeProvider is in every chrome page's bundle).
+  const files = ['src/components/talk', 'src/components/concierge'].flatMap((dir) =>
+    readdirSync(join(process.cwd(), dir))
+      .filter((f) => /\.tsx?$/.test(f))
+      .map((f) => join(dir, f))
+  );
+  const source = (file: string) => readFileSync(join(process.cwd(), file), 'utf8');
+
+  it('reads both component folders, the provider included', () => {
+    expect(files).toEqual(expect.arrayContaining(['src/components/concierge/ConciergeProvider.tsx']));
+  });
 
   it('only RoomAudio.tsx imports LiveKit values statically; the rest import types, or load it on Connect', () => {
     const valueImport = /^import (?!type\b)[^;]*from '(livekit-client|@livekit\/components-react)'/m;
-    const offenders = files.filter((f) => f !== 'RoomAudio.tsx' && valueImport.test(readFileSync(join(dir, f), 'utf8')));
+    const offenders = files.filter((f) => !f.endsWith('/RoomAudio.tsx') && valueImport.test(source(f)));
     expect(offenders).toEqual([]);
   });
 
   it('the talk components import their copy from @/lib/data/concierge, not the whole data barrel', () => {
-    const offenders = files.filter((f) => /from '@\/lib\/data'/.test(readFileSync(join(dir, f), 'utf8')));
+    const offenders = files.filter((f) => /from '@\/lib\/data'/.test(source(f)));
     expect(offenders).toEqual([]);
   });
 });

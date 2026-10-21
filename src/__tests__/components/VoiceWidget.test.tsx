@@ -13,7 +13,11 @@ describe('VoiceWidget', () => {
     const { container } = render(<VoiceWidget />);
     const link = screen.getByRole('link', { name: 'Talk to my voice concierge' });
     expect(link).toHaveAttribute('href', '/talk');
-    expect(talkWidget).toEqual({ label: 'Talk to my voice concierge', href: '/talk' });
+    expect(talkWidget).toEqual({
+      label: 'Talk to my voice concierge',
+      liveLabel: 'Live call with my concierge: back to it',
+      href: '/talk',
+    });
     expect(container.querySelectorAll('a')).toHaveLength(1);
   });
 
@@ -59,5 +63,20 @@ describe('VoiceWidget', () => {
     expect(screen.queryAllByRole('navigation')).toHaveLength(0);
     expect(screen.queryAllByRole('region')).toHaveLength(0);
     expect(screen.queryAllByRole('complementary')).toHaveLength(0);
+  });
+
+  // P3-03 review: the call outlives /talk (D85), so while one is on the widget says so, and leads back to Leave.
+  it('without a call: no live dot', () => {
+    const { container } = render(<VoiceWidget />);
+    expect(container.querySelector('[data-live-dot]')).toBeNull();
+  });
+
+  it('during a call: named for the live call, with an aria-hidden live dot, still a link to /talk', () => {
+    const { container } = render(<VoiceWidget live />);
+    const link = screen.getByRole('link', { name: talkWidget.liveLabel });
+    expect(link).toHaveAttribute('href', '/talk');
+    const dot = container.querySelector('[data-live-dot]');
+    expect(dot).not.toBeNull();
+    expect(dot).toHaveAttribute('aria-hidden', 'true');
   });
 });

@@ -96,5 +96,7 @@ export const latencyLabels = {
 // The floating link to /talk on every other chrome page (D61, VoiceWidget): the label is its accessible name.
 export const talkWidget = {
   label: 'Talk to my voice concierge',
+  // While a call is on (it outlives /talk, D85): the widget leads back to Leave and the mic toggle.
+  liveLabel: 'Live call with my concierge: back to it',
   href: '/talk',
 };

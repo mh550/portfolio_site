@@ -2,7 +2,7 @@ import type { MemoryBody, MetricsBody } from '@/lib/concierge/contract';
 import type { TranscriptLine } from './Transcript';
 
 // The /talk session as one pure reducer (plan docs/plans/2026-10-20-VC2-talk-page.md § State machine). No React and
-// no LiveKit here: TalkSession owns the Room and dispatches what happened; this decides what the page shows.
+// no LiveKit here: ConciergeProvider owns the Room (D85) and dispatches what happened; this decides what the page shows.
 export type Phase = 'idle' | 'connecting' | 'waiting' | 'live' | 'ended' | 'offline' | 'busy';
 // Why the token route answered 429 (D66): this address already has a live room, or the site is at its cap.
 export type BusyReason = 'visitor' | 'site';
@@ -23,7 +23,7 @@ export interface SessionState {
 export type SessionAction =
   | { type: 'connect' } // Connect clicked: a fresh session
   | { type: 'connected' } // room.connect() resolved with no agent in the room yet
-  | { type: 'agentJoined' } // TalkSession keeps the agent's identity (the RPC destination) on its session
+  | { type: 'agentJoined' } // the provider keeps the agent's identity (the RPC destination) on its session
   | { type: 'offline' } // 503, non-OK, fetch or connect() rejected, or no agent within 10 s
   | { type: 'busy'; reason: BusyReason } // the token route answered 429 busy: no Room was made, no retry
   | { type: 'dropped' } // the agent left or the room disconnected (not by us)

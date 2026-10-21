@@ -3,29 +3,31 @@ import path from 'path';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TalkPage, { metadata } from '@/app/talk/page';
+import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { focusRing } from '@/components/focusRing';
 import { introText, privacyNote, talkPage } from '@/lib/data';
 
-const ENV_KEYS = ['LIVEKIT_URL', 'LIVEKIT_API_KEY', 'LIVEKIT_API_SECRET'] as const;
-let savedEnv: Record<string, string | undefined>;
 const fetchMock = jest.fn(async () => ({ ok: false, status: 503, json: async () => ({ offline: true }) }));
 const realFetch = global.fetch;
 
 beforeEach(() => {
-  savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
-  for (const k of ENV_KEYS) delete process.env[k];
   fetchMock.mockClear();
   global.fetch = fetchMock as unknown as typeof fetch;
 });
 
 afterEach(() => {
-  for (const k of ENV_KEYS) {
-    if (savedEnv[k] === undefined) delete process.env[k];
-    else process.env[k] = savedEnv[k];
-  }
   global.fetch = realFetch;
   localStorage.clear();
 });
+
+// The call is ConciergeProvider's, around the chrome (D85); `configured` reaches it from layout.tsx
+// (layout-concierge.test.tsx), not from this page.
+const renderPage = ({ configured = false } = {}) =>
+  render(
+    <ConciergeProvider configured={configured}>
+      <TalkPage />
+    </ConciergeProvider>
+  );
 
 async function pressConnect() {
   await userEvent.setup().click(screen.getByRole('button', { name: talkPage.labels.connect }));
@@ -41,7 +43,7 @@ describe('TalkPage', () => {
   });
 
   it('renders one h1, the eyebrow and the intro', () => {
-    render(<TalkPage />);
+    renderPage();
     const h1s = screen.getAllByRole('heading', { level: 1 });
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent('Talk to my concierge');
@@ -52,7 +54,7 @@ describe('TalkPage', () => {
 
   // D62: the first intro sentence credits the agent harness and links its case study.
   it('links "my agent harness" in the intro to the agent-harness case study', () => {
-    render(<TalkPage />);
+    renderPage();
     const link = screen.getByRole('link', { name: 'my agent harness' });
     expect(link).toHaveAttribute('href', '/projects/agent-harness');
     expect(link.closest('p')).toHaveTextContent(
@@ -64,32 +66,29 @@ describe('TalkPage', () => {
   });
 
   it('renders the session in its idle state: Connect, and no offline line yet', () => {
-    render(<TalkPage />);
+    renderPage();
     expect(screen.getByRole('button', { name: talkPage.labels.connect })).toBeInTheDocument();
     expect(screen.queryByText(talkPage.offlineMessage)).toBeNull();
   });
 
-  // Without LiveKit env the token route can only answer 503, which Chromium logs as a console error: the page knows
+  // Without LiveKit env the token route can only answer 503, which Chromium logs as a console error: the layout knows
   // that at render time and Connect goes offline without the request (D46).
-  it('without the LiveKit env, Connect shows the offline line and makes no request', async () => {
-    render(<TalkPage />);
+  it('unconfigured, Connect shows the offline line and makes no request', async () => {
+    renderPage({ configured: false });
     await pressConnect();
     expect(screen.getByRole('status')).toHaveTextContent(talkPage.offlineMessage);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('with the LiveKit env set, Connect asks the token route', async () => {
-    process.env.LIVEKIT_URL = 'wss://concierge.test.invalid';
-    process.env.LIVEKIT_API_KEY = 'k'.repeat(12);
-    process.env.LIVEKIT_API_SECRET = 'x'.repeat(32);
-    render(<TalkPage />);
+  it('configured, Connect asks the token route', async () => {
+    renderPage({ configured: true });
     await pressConnect();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('status')).toHaveTextContent(talkPage.offlineMessage);
   });
 
   it('renders the privacy note, every point, after the session', () => {
-    render(<TalkPage />);
+    renderPage();
     const privacy = screen.getByRole('region', { name: talkPage.headings.privacy });
     const items = within(privacy).getAllByRole('listitem');
     expect(items.map((li) => li.textContent)).toEqual(privacyNote);
@@ -101,5 +100,12 @@ describe('TalkPage', () => {
     const source = fs.readFileSync(path.join(process.cwd(), 'src/app/talk/page.tsx'), 'utf8');
     expect(source).not.toMatch(/['"]use client['"]/);
     expect(source).not.toMatch(/livekit/);
+  });
+
+  // D85: the env check moved to layout.tsx; the page passes TalkSession nothing.
+  it('no longer reads the LiveKit env or passes configured', () => {
+    const source = fs.readFileSync(path.join(process.cwd(), 'src/app/talk/page.tsx'), 'utf8');
+    expect(source).not.toMatch(/concierge\/env/);
+    expect(source).toMatch(/<TalkSession \/>/);
   });
 });

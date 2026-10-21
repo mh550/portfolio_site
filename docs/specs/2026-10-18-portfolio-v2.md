@@ -515,7 +515,16 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   disconnects and a bfcache `pageshow` resets to idle. Supersedes D46's "the `/talk` page passes `configured` to
   TalkSession" (the env check stands); D45 (Room and visitor id made in the Connect handler, now the provider's)
   and D44 (chrome, indexable, sitemap) stand. Reversible: `git revert` P3-03. (P3-01 plan
-  `docs/plans/2026-10-21-P3-concierge-in-site.md` § Ownership; P3-03 builds.)
+  `docs/plans/2026-10-21-P3-concierge-in-site.md` § Ownership; P3-03 builds.) *As built (P3-03):* the provider holds
+  the reducer, the session ref, the Room and the six actions (made once per `configured` in a `useMemo`) and renders
+  `RoomAudio`; the Forget me guard is now a `forgetting` flag on the session, not the reducer's `forget`. `SiteChrome`
+  takes `configured` (default `false`); `status.ts`, `buttons.ts` and `CallControls.tsx` (the Connect/Leave button
+  and its focus rule) moved to `src/components/concierge/` for the drawer to reuse. Tests render through
+  `renderTalk()` (`src/__tests__/helpers/concierge.tsx`); `layout-concierge.test.tsx` pins the layout's prop. From
+  the P3-03 review: until P3-04's drawer, a call that outlives `/talk` is shown by the widget (`live`: the name
+  `talkWidget.liveLabel`, "Live call with my concierge: back to it", and a red dot), so Leave and the mic toggle are
+  one click away on every page; and a bfcache `pageshow` resets only a call that `pagehide` actually ended (an ended,
+  offline or Forgotten state comes back as it was).
 - **D86** *default*: the concierge panel is a non-modal drawer (`role="dialog" aria-modal="false"`, labelled by its
   title): 420 px on the right at ≥ 1024 px, a full-height bottom sheet under the Navbar below that, `z-[45]`
   (Navbar `z-50`, pill `z-40`), rendered only while open, no focus trap, no `inert`, no scroll lock; Esc and

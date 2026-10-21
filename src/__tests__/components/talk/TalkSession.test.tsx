@@ -1,7 +1,7 @@
-import { StrictMode } from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import TalkSession, { AGENT_JOIN_TIMEOUT_MS } from '@/components/talk/TalkSession';
+import { AGENT_JOIN_TIMEOUT_MS } from '@/components/concierge/ConciergeProvider';
+import { renderTalk } from '@/__tests__/helpers/concierge';
 import {
   MockRoom,
   ParticipantKind,
@@ -67,7 +67,7 @@ function expectOffline() {
 
 describe('TalkSession: before Connect', () => {
   it('shows Connect and no offline line, and touches nothing on mount', () => {
-    render(<TalkSession />);
+    renderTalk();
     expect(screen.getByRole('button', { name: 'Connect' })).toBeInTheDocument();
     expect(screen.queryByText(talkPage.offlineMessage)).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('TalkSession: before Connect', () => {
   });
 
   it('renders the three panels, empty', () => {
-    render(<TalkSession />);
+    renderTalk();
     for (const name of ['Transcript', 'What it remembers', 'Latency']) {
       expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
     }
@@ -88,7 +88,7 @@ describe('TalkSession: before Connect', () => {
 describe('TalkSession: the token route', () => {
   it('POSTs the visitor id as JSON to /api/concierge/token', async () => {
     fetchMock.mockResolvedValue(reply(503, { offline: true }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('/api/concierge/token');
@@ -99,7 +99,7 @@ describe('TalkSession: the token route', () => {
 
   it('shows the offline line and the deep-dive link on a 503, without creating a Room', async () => {
     fetchMock.mockResolvedValue(reply(503, { offline: true }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expectOffline();
     expect(MockRoom.instances).toHaveLength(0);
@@ -107,7 +107,7 @@ describe('TalkSession: the token route', () => {
   });
 
   it('when the server says LiveKit is not configured, goes offline with no request, Room or visitor id', async () => {
-    render(<TalkSession configured={false} />);
+    renderTalk({ configured: false });
     await connect();
     expectOffline();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -124,21 +124,21 @@ describe('TalkSession: the token route', () => {
 
   it('shows the offline line on any other non-OK status', async () => {
     fetchMock.mockResolvedValue(reply(500, { error: 'server' }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expectOffline();
   });
 
   it('shows the offline line when fetch rejects', async () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expectOffline();
   });
 
   it('shows the offline line when a 200 lacks the url or token', async () => {
     fetchMock.mockResolvedValue(reply(200, { url: 'wss://concierge.test.invalid' }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expectOffline();
     expect(MockRoom.instances).toHaveLength(0);
@@ -146,7 +146,7 @@ describe('TalkSession: the token route', () => {
 
   it('sends the id stored in localStorage, the same one on a second Connect', async () => {
     fetchMock.mockResolvedValue(reply(503, { offline: true }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const stored = localStorage.getItem(VISITOR_ID_KEY);
     expect(isUuidV4(stored)).toBe(true);
@@ -160,7 +160,7 @@ describe('TalkSession: the token route', () => {
     const earlier = '3f2b8c1e-7a4d-4e9b-9c2a-1d5e6f7a8b9c';
     localStorage.setItem(VISITOR_ID_KEY, earlier);
     fetchMock.mockResolvedValue(reply(503, { offline: true }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expect(sentId(0)).toBe(earlier);
   });
@@ -170,7 +170,7 @@ describe('TalkSession: the token route', () => {
       throw new Error('denied');
     });
     fetchMock.mockResolvedValue(reply(503, { offline: true }));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expect(isUuidV4(sentId(0))).toBe(true);
   });
@@ -187,7 +187,7 @@ describe('TalkSession: the token route says busy (429)', () => {
     ['site', talkPage.status.busySite],
   ])('reason %s shows its line and Connect, makes no Room and never retries', async (reason, line) => {
     fetchMock.mockResolvedValue(reply(429, { error: 'busy', reason }));
-    render(<TalkSession />);
+    renderTalk();
     // fireEvent.click doesn't move focus, so this is the case of a click that leaves focus on <body> (Safari): the
     // page hands it to Connect as the session ends.
     expect(document.body).toHaveFocus();
@@ -211,7 +211,7 @@ describe('TalkSession: the token route says busy (429)', () => {
     ['no body', null],
   ])('a 429 with %s reads as offline', async (_, body) => {
     fetchMock.mockResolvedValue(reply(429, body));
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     expectOffline();
     expect(MockRoom.instances).toHaveLength(0);
@@ -220,14 +220,14 @@ describe('TalkSession: the token route says busy (429)', () => {
 
   it('a busy body on any status but 429 reads as offline', async () => {
     fetchMock.mockResolvedValue(reply(503, { error: 'busy', reason: 'site' }));
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     expectOffline();
   });
 
   it('Connect after busy asks again, and a 200 then makes the Room', async () => {
     fetchMock.mockResolvedValueOnce(reply(429, { error: 'busy', reason: 'site' })).mockResolvedValueOnce(OK);
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     expect(status()).toHaveTextContent(talkPage.status.busySite);
     await connectWithFakeTimers();
@@ -243,7 +243,7 @@ describe('TalkSession: the room', () => {
   });
 
   it('registers the three text-stream handlers before connect(), with the url and token from the route', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     expect(MockRoom.instances).toHaveLength(1);
@@ -253,8 +253,8 @@ describe('TalkSession: the room', () => {
     for (const order of room.registerTextStreamHandler.mock.invocationCallOrder) expect(order).toBeLessThan(connectOrder);
   });
 
-  it('on unmount unregisters all three and disconnects once', async () => {
-    const { unmount } = render(<TalkSession />);
+  it('on provider unmount (leaving the chrome) unregisters all three and disconnects once', async () => {
+    const { unmount } = renderTalk();
     await connect();
     const room = lastRoom();
     unmount();
@@ -263,12 +263,8 @@ describe('TalkSession: the room', () => {
     expect(room.textHandlers.size).toBe(0);
   });
 
-  it('under StrictMode, registers each topic once (one Room), and unmount leaves none', async () => {
-    const { unmount } = render(
-      <StrictMode>
-        <TalkSession />
-      </StrictMode>
-    );
+  it('under StrictMode, registers each topic once (one Room), and provider unmount leaves none', async () => {
+    const { unmount } = renderTalk({ strict: true });
     await connect();
     expect(MockRoom.instances).toHaveLength(1);
     const room = lastRoom();
@@ -281,7 +277,7 @@ describe('TalkSession: the room', () => {
 
   it('Leave unregisters, disconnects once and returns to Connect', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await connect(user);
     const room = lastRoom();
     await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
@@ -293,7 +289,7 @@ describe('TalkSession: the room', () => {
 
   it('a rejected connect() shows the offline line and releases the room', async () => {
     MockRoom.setup = (room) => room.connect.mockRejectedValueOnce(new Error('could not establish signal connection'));
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expectOffline();
     const room = lastRoom();
@@ -304,13 +300,13 @@ describe('TalkSession: the room', () => {
 
   it('is live at once when the agent is already in the room', async () => {
     MockRoom.setup = (room) => room.remoteParticipants.set('agent-1', { identity: 'agent-1', kind: ParticipantKind.AGENT });
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expect(status()).toHaveTextContent(talkPage.status.live);
   });
 
   it('a participant that is not an agent does not make it live', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     act(() => {
@@ -320,7 +316,7 @@ describe('TalkSession: the room', () => {
   });
 
   it('when the agent leaves, the call ends, the room is released and the panels stay', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     act(() => {
@@ -341,7 +337,7 @@ describe('TalkSession: the call drops or reconnects', () => {
   });
 
   it('a disconnect from the server while live ends the call, releases the room and keeps the panels', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     act(() => {
@@ -358,7 +354,7 @@ describe('TalkSession: the call drops or reconnects', () => {
   });
 
   it('a disconnect while waiting for the agent reads as offline', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     act(() => {
       lastRoom().emit('disconnected');
@@ -367,7 +363,7 @@ describe('TalkSession: the call drops or reconnects', () => {
   });
 
   it('a full reconnect, which unwinds the agent for a moment, does not end the call', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     act(() => {
@@ -390,7 +386,7 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     const pending = deferred<unknown>();
     fetchMock.mockReturnValue(pending.promise);
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await connect(user);
     await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
     pending.resolve(OK);
@@ -404,7 +400,7 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     const pending = deferred<unknown>();
     fetchMock.mockReturnValue(pending.promise);
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await connect(user);
     await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
     pending.resolve(reply(429, { error: 'busy', reason: 'visitor' }));
@@ -418,7 +414,7 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     const second = deferred<unknown>();
     fetchMock.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await connect(user);
     await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
     await connect(user);
@@ -431,10 +427,30 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     expect(status()).toHaveTextContent(talkPage.status.waiting);
   });
 
-  it('unmount during the token fetch: no Room is ever made', async () => {
+  // D85: TalkSession going away (a client-side navigation off /talk) no longer ends a Connect in flight.
+  it('TalkSession unmounted during the token fetch: the call still comes up, and is live on remount', async () => {
     const pending = deferred<unknown>();
     fetchMock.mockReturnValue(pending.promise);
-    const { unmount } = render(<TalkSession />);
+    const { unmountTalk, remountTalk } = renderTalk();
+    await connect();
+    unmountTalk();
+    pending.resolve(OK);
+    await flush();
+    expect(MockRoom.instances).toHaveLength(1);
+    const room = lastRoom();
+    await act(async () => {
+      addAgent(room, 'agent-1');
+    });
+    await flush();
+    remountTalk();
+    expect(status()).toHaveTextContent(talkPage.status.live);
+    expect(room.disconnect).not.toHaveBeenCalled();
+  });
+
+  it('provider unmount during the token fetch: no Room is ever made', async () => {
+    const pending = deferred<unknown>();
+    fetchMock.mockReturnValue(pending.promise);
+    const { unmount } = renderTalk();
     await connect();
     unmount();
     pending.resolve(OK);
@@ -442,12 +458,12 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     expect(MockRoom.instances).toHaveLength(0);
   });
 
-  it.each(['Leave', 'unmount'])('%s during connect(): released once, and nothing happens when it settles', async (how) => {
+  it.each(['Leave', 'provider unmount'])('%s during connect(): released once, and nothing happens when it settles', async (how) => {
     fetchMock.mockResolvedValue(OK);
     const pending = deferred<void>();
     MockRoom.setup = (room) => room.connect.mockReturnValueOnce(pending.promise);
     const user = userEvent.setup();
-    const { unmount } = render(<TalkSession />);
+    const { unmount } = renderTalk();
     await connect(user);
     const room = lastRoom();
     expect(status()).toHaveTextContent(talkPage.status.connecting);
@@ -474,7 +490,7 @@ describe('TalkSession: waiting for the agent', () => {
 
   it(`goes offline ${AGENT_JOIN_TIMEOUT_MS} ms after connect() resolves with no agent`, async () => {
     expect(AGENT_JOIN_TIMEOUT_MS).toBe(10_000);
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     const room = lastRoom();
     expect(status()).toHaveTextContent(talkPage.status.waiting);
@@ -490,7 +506,7 @@ describe('TalkSession: waiting for the agent', () => {
   });
 
   it('an agent joining at 3 000 ms cancels the timeout and the session is live', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     const room = lastRoom();
     expect(status()).toHaveTextContent(talkPage.status.waiting);
@@ -508,15 +524,11 @@ describe('TalkSession: waiting for the agent', () => {
     expect(room.disconnect).not.toHaveBeenCalled();
   });
 
-  it('under StrictMode, one agent timer and one listener per room event; unmount releases them all', async () => {
+  it('under StrictMode, one agent timer and one listener per room event; provider unmount releases them all', async () => {
     const events = ['participantConnected', 'participantDisconnected', 'reconnected', 'disconnected', 'audioPlaybackChanged'];
     const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
     const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
-    const { unmount } = render(
-      <StrictMode>
-        <TalkSession />
-      </StrictMode>
-    );
+    const { unmount } = renderTalk({ strict: true });
     await connectWithFakeTimers();
     const room = lastRoom();
     expect(MockRoom.instances).toHaveLength(1);
@@ -531,7 +543,7 @@ describe('TalkSession: waiting for the agent', () => {
   });
 
   it('Leave while waiting stops the timer: nothing turns offline later', async () => {
-    render(<TalkSession />);
+    renderTalk();
     await connectWithFakeTimers();
     fireEvent.click(screen.getByRole('button', { name: talkPage.labels.leave }));
     act(() => jest.advanceTimersByTime(20_000));
@@ -546,7 +558,7 @@ describe('TalkSession: the text streams feed the panels', () => {
   });
 
   async function liveRoom() {
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     const room = lastRoom();
     // Async: the agent's arrival asks for the mic, and its answer must render inside act too.
@@ -606,7 +618,7 @@ describe('TalkSession: the text streams feed the panels', () => {
 
   it('a body from an earlier session never reaches the next one', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await connect(user);
     const first = lastRoom();
     const lateHandler = first.textHandlers.get('concierge.memory')!;

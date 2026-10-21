@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import SiteChrome from '@/components/SiteChrome';
+import { conciergeEnv } from '@/lib/concierge/env';
 import { profile } from '@/lib/data';
 
 const geistSans = Geist({
@@ -41,7 +42,9 @@ export default function RootLayout({
     // data-scroll-behavior: Next turns smooth scrolling off during route changes only when this is set
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SiteChrome>{children}</SiteChrome>
+        {/* D46, D85: the env is read here, on the server (prerendered, so at build time; an env change needs a
+            redeploy anyway). Without it the concierge's Connect goes offline with no request, so no 503 is logged. */}
+        <SiteChrome configured={conciergeEnv() !== null}>{children}</SiteChrome>
       </body>
     </html>
   );

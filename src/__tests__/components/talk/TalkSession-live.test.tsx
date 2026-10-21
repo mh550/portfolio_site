@@ -1,6 +1,6 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import TalkSession from '@/components/talk/TalkSession';
+import { renderTalk } from '@/__tests__/helpers/concierge';
 import { MockRoom, ParticipantKind, addAgent, lastRoom, pushText, resetRooms, restart } from '@/__mocks__/livekit-client';
 import { audioRenderer } from '@/__mocks__/livekit-components-react';
 import { talkPage } from '@/lib/data';
@@ -39,7 +39,7 @@ const logItems = () => within(screen.getByRole('log')).queryAllByRole('listitem'
 
 // Connect, then the agent joins: the session is live.
 async function goLive(user: UserEvent = userEvent.setup()) {
-  render(<TalkSession />);
+  renderTalk();
   await user.click(button(labels.connect));
   await flush();
   const room = lastRoom();
@@ -54,7 +54,7 @@ describe('TalkSession live: the microphone', () => {
   // VC5-02 (D65): nothing asks for the microphone until the agent has joined, so an offline Connect never prompts.
   it('asks for the mic only once the agent joins: none after connect() alone, one [true] after addAgent', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await user.click(button(labels.connect));
     await flush();
     const room = lastRoom();
@@ -71,7 +71,7 @@ describe('TalkSession live: the microphone', () => {
 
   it('asks once for an agent already in the room when connect() resolves', async () => {
     MockRoom.setup = (room) => room.remoteParticipants.set('agent-1', { identity: 'agent-1', kind: ParticipantKind.AGENT });
-    render(<TalkSession />);
+    renderTalk();
     await userEvent.setup().click(button(labels.connect));
     await flush();
     expect(status()).toHaveTextContent(copy.live);
@@ -115,7 +115,7 @@ describe('TalkSession live: the microphone', () => {
 
   it('the toggle shows only once the agent has joined (D65), not while waiting', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     await user.click(button(labels.connect));
     await flush();
     expect(status()).toHaveTextContent(copy.waiting);
@@ -178,7 +178,7 @@ describe('TalkSession live: the microphone', () => {
   });
 
   it('the toggle is not shown before Connect', () => {
-    render(<TalkSession />);
+    renderTalk();
     expect(screen.queryByRole('button', { name: labels.micOn })).toBeNull();
     expect(screen.queryByRole('button', { name: labels.micOff })).toBeNull();
   });
@@ -234,7 +234,7 @@ describe('TalkSession live: typing', () => {
 
   it('the box is disabled until the agent is in the room', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     expect(messageBox()).toBeDisabled();
     await user.click(button(labels.connect));
     await flush();
@@ -289,7 +289,7 @@ describe('TalkSession live: Forget me', () => {
 
   it('is only offered while live', async () => {
     const user = userEvent.setup();
-    render(<TalkSession />);
+    renderTalk();
     expect(screen.queryByRole('button', { name: labels.forgetMe })).toBeNull();
     await user.click(button(labels.connect));
     await flush();
@@ -408,7 +408,7 @@ describe('TalkSession live: audio', () => {
   });
 
   it('renders no audio before Connect', () => {
-    render(<TalkSession />);
+    renderTalk();
     expect(screen.queryByTestId('room-audio-renderer')).toBeNull();
   });
 

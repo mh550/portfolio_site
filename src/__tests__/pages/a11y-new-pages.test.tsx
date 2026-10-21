@@ -10,6 +10,7 @@ import ExperiencePage from '@/app/experience/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
+import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { getProjectBySlug } from '@/lib/data';
 
 jest.mock('next/navigation', () => ({ usePathname: () => '/about' }));
@@ -23,7 +24,14 @@ const pages: [string, () => ReactElement][] = [
   ['/card/qr', () => <CardQrPage />],
   ['/evidence', () => <EvidencePage />],
   ['/experience', () => <ExperiencePage />],
-  ['/talk', () => <TalkPage />],
+  [
+    '/talk',
+    () => (
+      <ConciergeProvider configured={false}>
+        <TalkPage />
+      </ConciergeProvider>
+    ),
+  ],
   ['/projects/agent-harness', () => caseStudy('agent-harness')],
   ['/projects/home-media-server', () => caseStudy('home-media-server')],
   ['/projects/hit-list', () => caseStudy('hit-list')],
