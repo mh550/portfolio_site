@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 04:20 · P2-03 · passes
+
+- Changed: added `docs/screenshots/v3/P2-experience-1280.png` (273 KB) and `-390.png` (257 KB) from the dev server on :7835. Filled in the § What Michael will see table in `docs/plans/2026-10-21-P2-experience.md` (one row per capture plus a print row). CLAUDE.md's captures note now mentions P2. No code changed: tests stay at 1168 (86 suites).
+- Verified: `.harness/check.sh` printed `check: lint ok · jest ok · build ok`. smoke.mjs exit 0 (41 PASS). captures.mjs reported scroll 0 at 390. The longest bullet (music server, 211 chars) has its box at x 24→366 and scrollWidth = clientWidth = 342. `print-check.mjs … /experience` printed `PASS print` with linksNotUnderlined 0.
+- Michael: the bullet links are foreground text with an accent underline (50 %), not accent-coloured text. This is the /evidence look, and the plan row says so. If you want the phrases in accent, it's one class in `BulletWithLinks.tsx`.
+- Next (P2-04): the 390 capture shows the fixed VoiceWidget over the Builder Clarity heading and the Next dev "N". Both are artefacts of a full-page dev capture, not layout bugs. The third agent-harness bullet from § 8 is still left out (see P2-02).
+
 ### 2026-10-21 04:05 · P2-02 · passes
 
 - `/experience` now renders: h1 · the two roles (bullets via `BulletWithLinks`) · h2 Projects (name h3 → deep-dive, `github.com/…` repo line → GitHub in a new tab, period, two bullets) · h2 Earlier (one `<p>` per role, title · company · period, no `<ul>`) · h2 Education (six resume coursework items). Projects/Earlier/Education are `section`s labelled by their h2. The page now has local `Bullets`, `Divider` and `PERIOD` helpers, so roles and projects share one bullet list.

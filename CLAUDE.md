@@ -170,7 +170,7 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
   Screenshots go to `$HARNESS_SCRATCH`. A page added by a milestone goes into `.harness/smoke-routes.txt`.
 - Captures: `node .harness/captures.mjs <outDir> <prefix> <path>...` scrolls each page through (so ScrollReveal
   sections show), saves full-page PNGs at 1280 and 390 and prints eyebrow, strip rows, How I work links per page
-  (P1's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
+  (P1's and P2's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.
