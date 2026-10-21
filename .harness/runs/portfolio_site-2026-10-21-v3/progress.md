@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 07:30 · P3-09 · passes
+
+- New `.harness/concierge-check.mjs` (fresh context per scenario, token POSTs fulfilled by `page.route`, next dev's badge hidden) and `.harness/fixtures/memory-v2.json` (the `memoryV2` fixture as JSON, pinned by new `src/__tests__/harness/concierge-check-fixture.test.ts`). Nine captures in `docs/screenshots/v3/` (28–313 KB): `P3-home-callout-{390,1280}`, `P3-projects-open-{1280,390}`, `P3-projects-minimized-1280`, `P3-memory-cached-390`, `P3-closing-1280`, `P3-talk-{1280,390}`. Plan § What Michael will see: one row per capture + the Jest tests that cover the live state (VoiceWidget speaking, MemoryStrip pulse, usher). CLAUDE.md How to verify. Tests 1625 → 1627 (97 suites).
+- Verified: dev server restarted with dummy `LIVEKIT_*` → script exit 0, report 54 OK / 0 FAIL (focus on `concierge-panel-title` after opening and `concierge-pill` after Esc, scrollWidth 390 with the panel open, callout gone on a second load, the 429 line the only console error, no token POST without Connect); `init.sh` restarted the plain server, smoke exit 0; `.harness/check.sh` → `check: lint ok · jest ok · build ok`. I looked at every capture.
+- Seen in the captures: at 390 with a v2 cached body the transcript keeps ~130 px above the 25 vh tab area (P3-06's open question: room enough). The bottom sheet covers the whole page below `lg` (the D94 question still stands).
+- Next (P3-10): review; the 390 sheet's Forget-me hint sat under next dev's badge only in dev (production has none).
+- Questions for Michael: none new (D84, D92, D93, D94, D96 still open).
+
 ### 2026-10-21 07:15 · P3-08 · passes
 
 - Usher (D94): `ConciergeProvider` registers `concierge.navigate` (four topics, all unregistered at teardown) and calls `router.push` only with Guide me on, `isAllowedHref`, from `session.agentIdentity`, not the page already shown, 8 s (`performance.now`) after its last follow and after the visitor's own link click/back-forward, never from `/talk`; then a `who: 'notice'` line "Taking you to <name>". New `lib/concierge/usher.ts` (`usherTargets`, `usherName`, `USHER_INTERVAL_MS`; layout → SiteChrome → provider), `GuideMeSwitch.tsx` (role=switch, `concierge.guide_me`, sr-only hint), Transcript renders notices muted/italic/unattributed, `talkWidget` copy. Tests 1589 → 1625 (96 suites; new `usher.test.tsx`, `helpers/navigation.ts` mocks `next/navigation` in the 11 provider-rendering files).

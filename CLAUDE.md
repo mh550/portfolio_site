@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1625 tests, 96 suites after P3-08)
+npm test             # Jest unit/integration tests (1627 tests, 97 suites after P3-09)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -222,6 +222,10 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Captures: `node .harness/captures.mjs <outDir> <prefix> <path>...` scrolls each page through (so ScrollReveal
   sections show), saves full-page PNGs at 1280 and 390 and prints eyebrow, strip rows, How I work links per page
   (P1's and P2's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
+- Concierge: `node .harness/concierge-check.mjs` (P3's captures: callout, drawer, minimized, cached memory, closing,
+  `/talk`) and `.harness/talk-busy-check.mjs` need `next dev` restarted with dummy `LIVEKIT_*` env (the commands are
+  in the script's header); token POSTs are fulfilled by `page.route`. Rerun `.harness/init.sh` after. The cache
+  fixture `.harness/fixtures/memory-v2.json` is pinned to `memoryV2` by `src/__tests__/harness/`.
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.

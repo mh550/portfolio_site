@@ -549,10 +549,32 @@ jest.fn() }`), and each such file calls `jest.mock('next/navigation', …)` with
 
 ## What Michael will see
 
-Filled by P3-09 (captures in `docs/screenshots/v3/`, each under 400 KB).
+Captures in `docs/screenshots/v3/`, each under 400 KB, made by `.harness/concierge-check.mjs` (P3-09) against
+`next dev` started with dummy LiveKit env (`LIVEKIT_URL=wss://livekit.invalid`, any key and secret), so the site is
+configured and Connect fetches; every token POST is answered by `page.route` (503 offline, or 429 busy/visitor for
+the closing state), so neither the route nor LiveKit is reached. Report: `$HARNESS_SCRATCH/p3/report.txt` (54 OK,
+0 FAIL). Each scenario is a fresh browser context; next dev's own badge is hidden in the captures.
 
 | Capture | Width | What is on it |
 |---|---|---|
+| `P3-home-callout-390.png` | 390 | First visit to `/`: the hero, the "Ask my site" pill at the bottom right and the callout above it ("This site talks. Ask it about my work, by voice or text." with ×) |
+| `P3-home-callout-1280.png` | 1280 | The same at desktop width: hero with the loop strip and logos, callout over the pill |
+| `P3-projects-open-1280.png` | 1280 | `/projects` with the drawer open on the right (420 px, under the Navbar): title, Minimize, Connect, Guide me, empty transcript and message box, the five chips at `–`, the Memory tab ("Nothing remembered yet", Forget me disabled with "Connect to erase what it remembers"); focus on the title |
+| `P3-projects-open-390.png` | 390 | The same as the bottom sheet under the Navbar, full width; no horizontal page scroll (scrollWidth 390) |
+| `P3-projects-minimized-1280.png` | 1280 | After Esc: the drawer gone, the pill back with focus (its accent ring), no callout |
+| `P3-memory-cached-390.png` | 390 | A returning visitor before a call (localStorage: a visitor id and the `memoryV2` fixture under `concierge.memory.<id>`, saved an hour earlier): chips greyed with counts (Profile 3, Episodes 2, Events 5, Knowledge 4, Working 14), the Memory tab's "as of <time>", "Talking to a new visitor · visit 2", About you → Profile; the transcript keeps about 130 px above the 25 vh tab area |
+| `P3-closing-1280.png` | 1280 | Connect from the drawer answered 429 busy/visitor: Leave and "Closing your earlier conversation…" (D92); the only console error is the 429 line |
+| `P3-talk-1280.png` | 1280 | `/talk`, full page: header, intro, Connect, transcript, strip + tabs, Privacy (seven lines); no pill, no panel |
+| `P3-talk-390.png` | 390 | The same at 390, stacked; no horizontal scroll |
+
+Not captured: the live state needs an agent in the room. These Jest tests cover it instead:
+- the agent speaking: `src/__tests__/components/VoiceWidget.test.tsx` ("speaking: each bar moves, only under
+  motion-safe, staggered", "live, speaking: named \"Ask my site: speaking\", with the dot") and
+  `ConciergeProvider.test.tsx` § "ConciergeProvider: agentSpeaking";
+- chips pulsing on a new body: `concierge/MemoryStrip.test.tsx` ("pulses once the chips whose count changed, and
+  only those", "replays the pulse when the same chip changes twice in a row");
+- the usher following a page with Guide me on, and its notice: `concierge/usher.test.tsx` § "the usher
+  (concierge.navigate)".
 
 ## Review
 

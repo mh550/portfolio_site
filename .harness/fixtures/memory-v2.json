@@ -1,0 +1,135 @@
+{
+  "visitor": {
+    "name": null,
+    "visits": 2
+  },
+  "facts": [
+    {
+      "id": "f-role",
+      "slot": "role",
+      "value": "Engineering manager at a robotics startup",
+      "channel": "voice",
+      "source": "said in visit 1",
+      "learned_at": "2026-10-19T21:04:00Z",
+      "confidence": 0.9
+    },
+    {
+      "id": "f-interest",
+      "slot": "interest",
+      "value": "Memory for voice agents",
+      "channel": "voice",
+      "source": "said in visit 1",
+      "learned_at": "2026-10-19T21:05:30Z",
+      "confidence": 0.8
+    },
+    {
+      "id": "f-city",
+      "slot": "city",
+      "value": "Lisbon",
+      "channel": "text",
+      "source": "typed in visit 2",
+      "learned_at": "2026-10-20T08:12:00Z",
+      "confidence": 0.95
+    }
+  ],
+  "summary": "Asked how the concierge keeps memory off the turn path.",
+  "updated_at": "2026-10-20T08:12:05Z",
+  "v": 2,
+  "about_visitor": {
+    "profile": [
+      {
+        "id": "f-role",
+        "slot": "role",
+        "value": "Engineering manager at a robotics startup",
+        "channel": "voice",
+        "source": "said in visit 1",
+        "learned_at": "2026-10-19T21:04:00Z",
+        "confidence": 0.9
+      },
+      {
+        "id": "f-interest",
+        "slot": "interest",
+        "value": "Memory for voice agents",
+        "channel": "voice",
+        "source": "said in visit 1",
+        "learned_at": "2026-10-19T21:05:30Z",
+        "confidence": 0.8
+      },
+      {
+        "id": "f-city",
+        "slot": "city",
+        "value": "Lisbon",
+        "channel": "text",
+        "source": "typed in visit 2",
+        "learned_at": "2026-10-20T08:12:00Z",
+        "confidence": 0.95
+      }
+    ],
+    "episodes": [
+      {
+        "visit": 2,
+        "started_at": "2026-10-20T08:10:00Z",
+        "ended_at": null,
+        "summary": null
+      },
+      {
+        "visit": 1,
+        "started_at": "2026-10-19T21:02:00Z",
+        "ended_at": "2026-10-19T21:09:00Z",
+        "summary": "Asked how the concierge keeps memory off the turn path."
+      }
+    ],
+    "events": [
+      {
+        "ts": "2026-10-20T08:12:05Z",
+        "type": "extraction_ran",
+        "detail": "Read the last two turns for facts."
+      },
+      {
+        "ts": "2026-10-20T08:12:04Z",
+        "type": "fact_added",
+        "detail": "Learned your city."
+      },
+      {
+        "ts": "2026-10-20T08:11:40Z",
+        "type": "gate_rejected",
+        "detail": "Did not keep a guess about your employer."
+      },
+      {
+        "ts": "2026-10-20T08:11:00Z",
+        "type": "summary_refreshed",
+        "detail": "Refreshed the visit summary."
+      },
+      {
+        "ts": "2026-10-20T08:10:30Z",
+        "type": "remember",
+        "detail": "You asked it to remember your interest."
+      }
+    ]
+  },
+  "about_agent": {
+    "knowledge": {
+      "words": 5200,
+      "est_tokens": 7000,
+      "sources_commit": "3f9c2ab71d0e",
+      "sections": [
+        "projects",
+        "experience",
+        "skills",
+        "approach"
+      ]
+    },
+    "instructions_est_tokens": 900,
+    "memory_block_chars": 640,
+    "working": {
+      "items": 14,
+      "est_tokens": 2100,
+      "compacted": true,
+      "compactions": 1
+    },
+    "cache": {
+      "cached_share": 0.75
+    }
+  },
+  "retention_days": 30
+}
