@@ -13,6 +13,46 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 verify P5
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P5-01 | 1 | read plan headings (grep '^## ') | Data, Layout, Math, Render, Interaction, Accessibility and list view, Tests, What Michael will see, Review, Decisions all present | yes |
+| P5-01 | 2 | read plan § Data, Zapier/Pipedream/ICONS lines; skills-data.test.ts | six clusters, nodes table, Zapier kept weight 1, Pipedream no logo; test 'holds all 33 § 8 names', 'drops Ruby, R, ...', 'every featured project ≥2 edges' pass; ICONS has all 9 keys | yes |
+| P5-01 | 3 | read plan § Math; grep d3-force | layoutGraph, viewBoxFor, clampView, zoomAt, panBy, fitCluster, curvePath named; D99 no d3-force with reconsider conditions | yes |
+| P5-01 | 4 | read plan § Interaction/Accessibility | wheel rule, ±, Reset, arrows, drag, chip row, project chips, hover, Esc, reduced motion, #skill-<id> links, list as print view all present | yes |
+| P5-01 | 5 | read plan § Tests and Decisions | test files listed with assertions; D98–D104 allocated (restructure, no d3-force, wheel, node link) in v2 spec | yes |
+| P5-01 | 6 | check.sh + eslint + jest | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-02 | 1 | skills-data.test.ts (verbose); grep skillCategories src | exports clusters/nodes/edges; edge endpoints, logo keys, cluster, unique ids, weights, 33 § 8 names tests pass; skillCategories only in a comment | yes |
+| P5-02 | 2 | grep ICONS scripts/logos.mjs; `node scripts/logos.mjs`; git status; paths.test.ts | all 9 keys present (plus cplusplus etc.); regenerated 25 logos, git status clean; paths.test 'exactly the 25 keys' passes | yes |
+| P5-02 | 3 | graph-math.test.ts (verbose) | deterministic, no overlap at 1280/390, clampView bounds, zoomAt keeps point fixed, fitCluster 4 4 348 308 = cluster ±12, curvePath M…C regex all pass | yes |
+| P5-02 | 4 | npx jest --silent; skills page | no failing suite; /skills renders (smoke PASS) | yes |
+| P5-02 | 5 | check.sh | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-03 | 1 | read SkillGraph.tsx, SkillGraph.test.tsx | svg has role=none with a hidden-span name, not role=img+<title> (deliberate P5-07 review #5/D103 change, recorded); nodes are <a href=#skill-id> with aria-label, logo/dot, label; intra-edge path count test passes; cross edges only on hover/selection. Intent holds, literal wording superseded | yes |
+| P5-03 | 2 | skills.test.tsx; SkillGraph.tsx l.641,483 | List view aria-pressed toggle; every node name in list under cluster h2; list 'hidden print:block', graph print:hidden (tests pass); print-check PASS shows list | yes |
+| P5-03 | 3 | read app/skills/page.tsx; a11y-new-pages.test.tsx | h1 Tech Stack, graph-angle description, Differentiator only in a comment; a11y test passes | yes |
+| P5-03 | 4 | SkillGraph.test 'never tweens the view' with mockReduced true/false | no transition class/style on svg either way; passes | yes |
+| P5-03 | 5 | check.sh + smoke | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-04 | 1 | SkillGraph.tsx l.425-441; tests 'Zoom in/out…', wheel tests | Zoom in/out/Reset view buttons change viewBox; plain wheel unchanged and not prevented; ctrl/focus zooms; pass | yes |
+| P5-04 | 2 | tests 'focusable and described', 'arrow keys pan', 'pointer drag'; skills-check ArrowRight | tabIndex 0 role=group, described by help line; arrows and drag pan; viewBox 0 0 1052 700 → 24 0 1052 700 | yes |
+| P5-04 | 3 | tests 'starts on the first cluster', 'row of cluster chips'; skills-check 390 | narrow view 4 4 348 308, chip row 'flex sm:hidden' (breakpoint is 640 per D102, covers 390); chip click pans, aria-pressed moves | yes |
+| P5-04 | 4 | grep -rl 'lib/graph' src/components; jest components/skills | only SkillGraph.tsx; green | yes |
+| P5-04 | 5 | check.sh + smoke | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-05 | 1 | project chip tests; skills-check chip | chips aria-pressed in order, data-active/dim, chain paths, Open case study, second click and Esc clear; pass | yes |
+| P5-05 | 2 | tests 'hovering or focusing…', 'hover with a project selected keeps' | data-hover cross edges add/remove; selection kept; pass | yes |
+| P5-05 | 3 | skills.test 'selecting Agent Harness…'; grep motion-safe; skills-check | N=9 ≥3 active, link /projects/agent-harness; fade is 'motion-safe:transition-opacity' | yes |
+| P5-05 | 4 | CLAUDE.md /skills row and skills.ts line; plan § Interaction | both describe the graph and chips; plan interaction notes present | yes |
+| P5-05 | 5 | check.sh + smoke | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-06 | 1 | ls/wc docs/screenshots/v3/P5-* | four PNGs exist: 187 KB, 69 KB, 341 KB, 191 KB, all <400 KB; reran skills-check.mjs, regenerated in scratch | yes |
+| P5-06 | 2 | node .harness/skills-check.mjs; plan § What Michael will see | exit 0 'skills-check: ok'; no h-scroll 390; Tab reaches controls then 'Harness engineering'; ArrowRight changes viewBox; N=9; labels inside cluster rects; recorded in plan | yes |
+| P5-06 | 3 | print-check.mjs … /skills; read capture | PASS exit 0, 280 KB; image shows definition list, no svg | yes |
+| P5-06 | 4 | node .harness/smoke.mjs | every route PASS | yes |
+| P5-06 | 5 | check.sh | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+| P5-07 | 1 | git log grep 'after P5-01' (dc29efb); plan § Review | diff base resolvable; 12 review rows with severity, file:line, resolution | yes |
+| P5-07 | 2 | read § Review resolutions; tests 'P5-07 #1/#2'; eslint | 2 Important fixed test-first (named tests pass), Minors fixed or reasoned, simplification pass recorded; eslint clean | yes |
+| P5-07 | 3 | grep docs/review-guide.md, CLAUDE.md, v2 spec | '## P5 (v3)' at l.367; CLAUDE.md matches code (hidden span, print:hidden toolbar, D104); D98–D104 in spec | yes |
+| P5-07 | 4 | check.sh + smoke | all suite: eslint clean, jest 100 suites/1859 tests pass, check.sh green (cached), smoke PASS | yes |
+
 ### 2026-10-21 · P5-07 · passes
 
 - An Opus review of `$HARNESS_SCRATCH/P5.diff` (3850 lines): 0 Critical, 2 Important, 8 Minor, plus the P5-05/06 notes; one row each in the plan § Review. Fixed test-first: a press released outside the graph before the slop no longer pans on hover or swallows the next click (`buttons === 0` drops it); List view rows without a project edge drop the untrue "From my roles" (D104); the toolbar row is `print:hidden`; controls' transitions are `motion-safe:`; the group's name is a `hidden` span, not a root svg `<title>` (no whole-drawing tooltip); help line adds "0 resets". Simplification: `GraphData.edges` dropped, 10 module-internal constants un-exported, `skills.ts`'s test-only edge-helper re-export gone (no graph function was unused). Tests 1856 → 1859.
