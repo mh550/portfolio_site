@@ -13,6 +13,16 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 04:45 · P2-04 · passes
+
+- Review: an Opus reviewer read `$HARNESS_SCRATCH/P2.diff` (1145 lines). It found 0 Critical, 2 Important and 7 Minor. All ten new bullets match § 8 character for character, so every number traces. The table is in the plan's § Review.
+- Fixed test-first (025c040): new-tab links on /experience (the repo lines, any external bullet link) now carry an sr-only "(opens in new tab)", like Footer and /card. Two tests were red before the fix.
+- Simplification (1b251bb): `Role.type` dropped (nothing read it). New `components/textLink.ts` is the one link class for /evidence, /experience and BulletWithLinks. The Projects test now reads the rendered `li`s. The vestigial "Pioneered" test and a duplicate title test are gone. One test added: a missing link span renders as plain text. Tests 1168 → 1167 (86 suites).
+- The other Important finding (the agent harness's third § 8 bullet, "189 features passed in 4 days at ~$3 each", is left out) I re-rated Minor. § 3 says "two bullets each", so it became **D84** *default* and is not a code change. **Michael: add that bullet? And should the project periods use `–` like the roles (they keep § 8's `-` now)?**
+- Docs: the v2 spec has D84, and docs/review-guide.md has `## P2 (v3)` (what to look at, undo). CLAUDE.md now has the textLink, the D84 and new-tab notes and the 1167 count.
+- Verified: `.harness/check.sh` printed `check: lint ok · jest ok · build ok`. smoke.mjs exit 0 (41 PASS). print-check PASS on /experience and /evidence. curl /experience shows the sr-only cue.
+- Next: P2 is done. The D83 and D84 questions stay open for Michael.
+
 ### 2026-10-21 04:20 · P2-03 · passes
 
 - Changed: added `docs/screenshots/v3/P2-experience-1280.png` (273 KB) and `-390.png` (257 KB) from the dev server on :7835. Filled in the § What Michael will see table in `docs/plans/2026-10-21-P2-experience.md` (one row per capture plus a print row). CLAUDE.md's captures note now mentions P2. No code changed: tests stay at 1168 (86 suites).

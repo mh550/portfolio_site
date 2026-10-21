@@ -263,3 +263,29 @@ are cut after P1. Nothing deploys until you merge into `main`.
 **Undo the redirect.** Delete the `redirects()` entry in `next.config.ts` (then `/approach` is a 404), or bring the
 page back with `git revert` of the P1-05 commit: page, test, Navbar link, sitemap and smoke-route entries return
 together.
+
+## P2 (v3)
+
+Same run and branch as P0–P1, plan `docs/plans/2026-10-21-P2-experience.md` (§ What Michael will see by P2-03, § Review
+by P2-04). Decisions D82–D84 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P0–P1.
+
+- Changed (P2-01): `src/lib/data/experience.ts` carries resume v4 (v3 spec § 8) line for line: the MAXX Potential and
+  Builder Clarity bullets (three each; titles, companies and periods unchanged), `resumeProjects` (agent harness,
+  music server, two bullets each, D84) and the six coursework items. A bullet is a string or `{ text, links }`;
+  `components/experience/BulletWithLinks.tsx` turns the four § 3 phrases into links to their deep-dives.
+- Changed (P2-02, D82): `/experience` reads h1 · the two roles · Projects (name → deep-dive, `github.com/…` line →
+  GitHub in a new tab) · Earlier (Tahoma Films and High Cascade, one line each, no bullets) · Education. `/card` is
+  unchanged.
+- Changed (P2-03): captures `docs/screenshots/v3/P2-experience-{1280,390}.png`, print check passes.
+- Changed (P2-04, review): new-tab links announce "(opens in new tab)" to screen readers; `Role.type` is gone;
+  `components/textLink.ts` is the one link class for `/evidence` and `/experience`.
+- Look at (390): `$P/experience`. Each of the four phrases ("contractor estimating app", "agentic bug-fix workflow",
+  "JobTread ↔ GoHighLevel integration platform", "unified per-job communications log") is underlined and opens its
+  case study. Each project name opens its deep-dive, and its repo line opens GitHub in a new tab. Earlier has two plain
+  lines. No sideways scroll. Print preview: links underlined, no nav or footer.
+- Questions: D83 (six `/evidence` items cite lines the resume dropped: keep, relink or drop?), D84 (add the harness's
+  third bullet, "189 features passed in 4 days at ~$3 each"? `–` in the project periods?).
+
+**Undo.** `git revert` the P2 commits (P2-01 … P2-04, newest first). The data, page, component and tests come back
+together; `/experience` returns to the four M2-03 roles. To drop only the Earlier list (D82), delete `earlierRoles`
+and its section.

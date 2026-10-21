@@ -501,3 +501,10 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   Cascade item drops its age range ("Mentored young snowboarders at High Cascade…") so every number on `/evidence`
   is still on the page it links (`claims-on-linked-page`). Reversible: one edit in `competencies.ts`. Question for
   Michael: keep, relink or drop them? (P2-01.)
+- **D84** *default*: the Long-Running Agent Harness keeps two bullets on `/experience`, as the v3 spec § 3 says ("two
+  bullets each"); resume v4's third bullet (§ 8: "Runs remote-first on my home server … 189 features passed in 4
+  days at ~$3 each") stays off the page. The two resume projects keep § 8's straight-hyphen periods
+  (`October 2026 - present`) beside the roles' kept `–` strings. Narrows § 3's "exactly" to per-line for the
+  projects. Reversible: append the line to `resumeProjects[0].bullets` and change the two-bullet checks in
+  `experience-data.test.ts` and `experience.test.tsx`. Question for Michael: add the third bullet, and should the
+  project periods use `–` like the roles? (P2-04 review, finding 1; plan `docs/plans/2026-10-21-P2-experience.md` § Review.)
