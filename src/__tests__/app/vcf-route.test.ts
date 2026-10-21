@@ -23,4 +23,8 @@ describe('/michael-herron.vcf route', () => {
   it('body equals buildVCard(profile)', async () => {
     expect(await GET().text()).toBe(buildVCard(profile));
   });
+
+  it('carries the v3 positioning as the vCard TITLE (D76)', async () => {
+    expect(await GET().text()).toContain('TITLE:Agentic Systems Engineer\r\n');
+  });
 });

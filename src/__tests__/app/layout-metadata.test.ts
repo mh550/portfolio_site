@@ -3,7 +3,7 @@ import { profile } from '@/lib/data';
 
 describe('root metadata', () => {
   it('title is the name and positioning', () => {
-    expect(metadata.title).toBe('Michael Herron — Systems & Process Engineer');
+    expect(metadata.title).toBe('Michael Herron — Agentic Systems Engineer');
   });
 
   it('description is the subline', () => {

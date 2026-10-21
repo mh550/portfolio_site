@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import MethodStrip from '@/components/MethodStrip';
-import { methodSteps } from '@/lib/data';
+import { loopSteps, methodSteps } from '@/lib/data';
 
 describe('MethodStrip', () => {
   it('is a list named "How I work" with one item per step', () => {
@@ -15,13 +15,13 @@ describe('MethodStrip', () => {
   it('shows the five labels in document order', () => {
     render(<MethodStrip />);
     const items = screen.getAllByRole('listitem');
-    const labels = ['Diagnose', 'Decide', 'Build', 'Verify', 'Simplify'];
+    const labels = ['Spec', 'Context', 'Build', 'Verify', 'Learn'];
     items.forEach((item, i) => expect(item).toHaveTextContent(labels[i]));
   });
 
   it("renders each step's line", () => {
     render(<MethodStrip />);
-    for (const step of methodSteps) expect(screen.getByText(step.line)).toBeInTheDocument();
+    for (const step of loopSteps) expect(screen.getByText(step.line)).toBeInTheDocument();
   });
 
   it('puts 4 aria-hidden arrows between the steps', () => {
@@ -32,6 +32,15 @@ describe('MethodStrip', () => {
     expect(screen.getAllByRole('listitem')[4]).not.toHaveTextContent('→');
   });
 
+  it('reads loopSteps, not the case-study methodSteps (D77)', () => {
+    render(<MethodStrip showLines />);
+    // Build and Verify are labels of both; every methodSteps line is gone
+    for (const step of methodSteps.filter((s) => !loopSteps.some((l) => l.label === s.label))) {
+      expect(screen.queryByText(step.label)).toBeNull();
+    }
+    for (const step of methodSteps) expect(screen.queryByText(step.line)).toBeNull();
+  });
+
   it('has no links or buttons', () => {
     render(<MethodStrip />);
     expect(screen.queryByRole('link')).toBeNull();
@@ -40,12 +49,12 @@ describe('MethodStrip', () => {
 
   it('hides the lines below md by default (sr-only)', () => {
     render(<MethodStrip />);
-    for (const step of methodSteps) expect(screen.getByText(step.line)).toHaveClass('sr-only');
+    for (const step of loopSteps) expect(screen.getByText(step.line)).toHaveClass('sr-only');
   });
 
   it('with showLines, shows the lines at every width (D31)', () => {
     render(<MethodStrip showLines />);
-    for (const step of methodSteps) {
+    for (const step of loopSteps) {
       const line = screen.getByText(step.line);
       expect(line).not.toHaveClass('sr-only');
       expect(line.className).not.toMatch(/not-sr-only/);
@@ -69,5 +78,22 @@ describe('MethodStrip', () => {
   it('appends className', () => {
     render(<MethodStrip className="mb-8" />);
     expect(screen.getByRole('list', { name: 'How I work' })).toHaveClass('mb-8');
+  });
+});
+
+describe('MethodStrip examples (D80, /about)', () => {
+  it('renders no links without examples (the hero)', () => {
+    render(<MethodStrip />);
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
+  it('renders one focusable link under the step it belongs to', () => {
+    render(<MethodStrip showLines examples={{ build: { href: '/projects/x#simplify', text: 'An example.' } }} />);
+    const link = screen.getByRole('link', { name: 'An example.' });
+    expect(link).toHaveAttribute('href', '/projects/x#simplify');
+    expect(link.className).toMatch(/\bfocus-visible:outline/);
+    const items = screen.getAllByRole('listitem');
+    expect(within(items[2]).getByRole('link')).toBe(link);
+    expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 });

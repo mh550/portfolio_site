@@ -47,9 +47,9 @@ describe('SkillsPage', () => {
     }
   });
 
-  it('describes the page by capability', () => {
+  it('describes the page by capability, in the agentic-systems angle (P1-06)', () => {
     expect(metadata.description).toBe(
-      'Skills grouped by capability: process and delivery, systems and architecture, building, and operating and verifying.',
+      'The tools and practices behind the agentic systems, integrations and apps I build, grouped by capability.',
     );
     render(<SkillsPage />);
     expect(screen.getByText('Grouped by what I do, with the tools I use for each.')).toBeInTheDocument();

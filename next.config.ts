@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 100],
   },
+  // D79: /approach folded into /about's How I work section (P1-05); permanent → 308
+  async redirects() {
+    return [{ source: '/approach', destination: '/about#how-i-work', permanent: true }];
+  },
 };
 
 export default nextConfig;

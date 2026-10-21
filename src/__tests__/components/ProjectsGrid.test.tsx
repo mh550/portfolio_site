@@ -18,7 +18,7 @@ describe('ProjectsGrid', () => {
     expect(screen.getByRole('button', { name: 'Full-Stack' })).toBeInTheDocument();
   });
 
-  it('offers six filters in order, Systems and Process after AI', () => {
+  it('offers six filters in order, Systems then Process after AI', () => {
     render(<ProjectsGrid />);
     expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
       'All',

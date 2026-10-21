@@ -103,6 +103,7 @@ other. Never renumber. Each entry names the decision it supersedes. VC4's plan:
 - **D60** `/talk` is on the Navbar as "Talk", the fifth of eight links, between Projects and Approach (Michael, VC4
   spec § VC4.2). Supersedes the v2 spec's D44 ("stays off the Navbar") and D49 ("The Navbar stays at seven links");
   D44's other parts (chrome, indexable, in the sitemap) stand. (VC4-01 plan; VC4-02 builds.)
+  Superseded in part by D79 (v3, `docs/specs/2026-10-18-portfolio-v2.md`): seven links, Talk fifth, no Approach.
 - **D61** *default* The voice widget (VC4 spec § VC4.3; details are defaults): `src/components/VoiceWidget.tsx`, a
   `next/link` to `/talk` named "Talk to my voice concierge" (`talkWidget` in `concierge.ts`), a 56 px accent disc
   with an inline `aria-hidden` SVG microphone, `fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40`

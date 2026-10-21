@@ -2,7 +2,7 @@ import { profile } from './profile';
 // Import cycle (projects.ts imports methodSteps): use these only inside functions, never at module load.
 import { resolveProjectLink } from './projects';
 
-export type MethodStepId = 'diagnose' | 'decide' | 'build' | 'verify' | 'simplify';
+type MethodStepId = 'diagnose' | 'decide' | 'build' | 'verify' | 'simplify';
 
 export interface MethodStep {
   id: MethodStepId;
@@ -10,7 +10,7 @@ export interface MethodStep {
   line: string;
 }
 
-// The method every case study follows (docs/notes/brand.md). M2's hero strip and M7's /approach reuse it.
+// The method every case study follows (docs/notes/brand.md): the case-study anchors and /evidence read it (D77).
 export const methodSteps: MethodStep[] = [
   { id: 'diagnose', label: 'Diagnose', line: 'I find where the work actually breaks down before I build anything.' },
   { id: 'decide', label: 'Decide', line: 'I write down what I chose, what I passed on, and why.' },
@@ -19,23 +19,67 @@ export const methodSteps: MethodStep[] = [
   { id: 'simplify', label: 'Simplify', line: 'Once it runs, I cut what nobody needs.' },
 ];
 
-// The About page's "What I do" intro (D13, D32): the subline, the method, the supporting phrase (brand.md).
+export type LoopStepId = 'spec' | 'context' | 'build' | 'verify' | 'learn';
+
+export interface LoopStep {
+  id: LoopStepId;
+  label: string;
+  line: string;
+  /** The principle whose first linkable example is this step's one link on /about (D77). */
+  principle: Principle['id'];
+}
+
+// The loop the harness runs, which is also how I work (v3 spec § 2, D77): the hero strip and /about read it.
+export const loopSteps: LoopStep[] = [
+  {
+    id: 'spec',
+    label: 'Spec',
+    line: 'I write down what done means before anything is built.',
+    principle: 'decisions-explicit',
+  },
+  {
+    id: 'context',
+    label: 'Context',
+    line: 'Every session starts fresh, from state kept on disk, not from memory.',
+    principle: 'automate-bookkeeping',
+  },
+  {
+    id: 'build',
+    label: 'Build',
+    line: 'Test first, one feature at a time, the smallest system that fixes the real problem.',
+    principle: 'simplify-after-use',
+  },
+  {
+    id: 'verify',
+    label: 'Verify',
+    line: 'An independent check, with evidence per step, before anything merges.',
+    principle: 'verify-what-the-human-sees',
+  },
+  {
+    id: 'learn',
+    label: 'Learn',
+    line: 'Every run is measured and written down, and the next plan reads it.',
+    principle: 'fakes-mirror-reality',
+  },
+];
+
+// The About page's "What I do" intro (D13, D32, D77): the subline, the loop, the supporting phrase (brand.md).
 export const aboutIntro: string[] = [
   profile.subline,
-  `I work in five steps: ${methodSteps.map((s) => s.label).join(', ')}.`,
+  `I work the way my harness runs: ${loopSteps.map((s) => s.label).join(', ')}.`,
   'I own delivery from requirements to release.',
 ];
 
-export type ProjectSlug =
+type ProjectSlug =
   | 'agent-harness'
   | 'home-media-server'
   | 'hit-list'
   | 'linear-ai-workflow'
   | 'ghl-jobtread-integration';
 /** The ids a case study renders that an example may link to (`getCaseStudyAnchors`). */
-export type CaseStudyAnchor = MethodStepId | 'decisions' | 'iterations' | 'lessons';
+type CaseStudyAnchor = MethodStepId | 'decisions' | 'iterations' | 'lessons';
 
-export interface PrincipleExample {
+interface PrincipleExample {
   /** Absent only for the D14 example, which has no page to link (D34). */
   projectSlug?: ProjectSlug;
   anchor?: CaseStudyAnchor;
@@ -55,12 +99,9 @@ export interface Principle {
   examples: PrincipleExample[];
 }
 
-// /approach (M7). Copy and sources: docs/plans/2026-10-18-M7-approach-evidence.md § Principles, Approach page.
-export const approachIntro: string[] = [
-  'I work in five steps, at work and at home.',
-  'Most examples below link to the place in a case study where it happened, including the times it went wrong.',
-];
-
+// The principles (M7; /approach page until D79). Since D79 the only page that reads them is /about How I work,
+// through `loopStepExample` (one example per loop step, first sentence); the rest is unrendered. Copy and sources:
+// docs/plans/2026-10-18-M7-approach-evidence.md § Principles.
 export const principles: Principle[] = [
   {
     id: 'diagnose-first',
@@ -199,8 +240,6 @@ export const principles: Principle[] = [
   },
 ];
 
-export const approachClosing = 'This site update was built that way, one verified milestone at a time.';
-
 /** The examples that can link on this branch: an example whose project is missing drops out, and an anchor the
  *  project does not render (no caseStudy, or an empty section) is dropped from its example. */
 export function resolvedExamples(principle: Principle): PrincipleExample[] {
@@ -215,4 +254,15 @@ export function resolvedExamples(principle: Principle): PrincipleExample[] {
 export function exampleHref(example: PrincipleExample): string | undefined {
   if (!example.projectSlug) return undefined;
   return `/projects/${example.projectSlug}${example.anchor ? `#${example.anchor}` : ''}`;
+}
+
+/** A loop step's one link on /about How I work (D80): the first example of its principle that has a page, named by
+ *  that example's first sentence. Throws when there is none, so a data change that breaks it fails the build. */
+export function loopStepExample(step: LoopStep): { href: string; text: string } {
+  const principle = principles.find((p) => p.id === step.principle);
+  for (const example of principle ? resolvedExamples(principle) : []) {
+    const href = exampleHref(example);
+    if (href) return { href, text: example.text.split(/(?<=\.)\s/)[0] };
+  }
+  throw new Error(`loop step ${step.id}: principle ${step.principle} has no example with a page`);
 }

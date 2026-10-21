@@ -6,15 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Michael Herron's personal portfolio site — a bold, expressive multi-page site built with Next.js (App Router), TypeScript, Tailwind CSS, and Framer Motion. Deployed on Vercel.
 
-**Spec:** `docs/specs/2026-10-18-portfolio-v2.md` — read this before implementing any new section or feature.
+**Spec:** `docs/specs/2026-10-21-portfolio-v3.md` is the current spec (v3: agentic-systems positioning, the loop, the
+concierge in the site); read it before implementing any new section or feature. `docs/specs/2026-10-18-portfolio-v2.md`
+stays the record of decisions: v3 defaults are appended to its `## v3 decisions` section (from D75).
 **Plans:** `docs/plans/` — one file per milestone (`<date>-<milestone>-<topic>.md`). Hand-off: `docs/review-guide.md`, `docs/asset-checklist.md`.
 
 ## Routes
 
 | Route | Section |
 |---|---|
-| `/` | Hero / Landing |
-| `/about` | About |
+| `/` | Hero: eyebrow `profile.positioning` ("Agentic Systems Engineer", D76), tagline, subline, the loop strip (`MethodStrip`, `loopSteps` Spec → Learn, D77), twelve FloatingLogos at `xl` (D78); then Recent work (`getTopProjects(3)`) |
+| `/about` | About: `aboutIntro` (the v3 subline + the five loop labels), the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
@@ -22,7 +24,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | Work history & education |
 | `/contact` | Contact |
-| `/approach` | How I work: `MethodStrip showLines` + six `principles` whose examples link via `resolvedExamples` (`approach.ts`) |
+| `/approach` | permanent redirect to /about#how-i-work (D79): 308 from `next.config.ts` `redirects()`, pinned by `src/__tests__/app/approach-redirect.test.ts`; no page, off the Navbar, sitemap and smoke routes |
 | `/evidence` | Noindex, off the Navbar: six `competencies` × 2–4 linked items via `resolvedItems` (`competencies.ts`, D7; rubric stub `docs/notes/maxx-level-4.md`) |
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
 | `/card/qr` | Black-on-white QR to `/card?src=qr` (`npm run qr` regenerates `public/card/qr.*`) |
@@ -37,8 +39,9 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1115 tests, 80 suites after P0-01)
+npm test             # Jest unit/integration tests (1146 tests, 84 suites after P1-08)
 npm run test:watch   # watch mode
+npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
 
 To run a single test file:
@@ -70,21 +73,25 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
 - `experience.ts` — `Role[]` + `Education` object
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
-- `approach.ts` — `methodSteps` (five steps) and the six `principles`; `competencies.ts` — the six `/evidence` competencies
+- `approach.ts` — `methodSteps` (Diagnose → Simplify, the case studies' spine) next to `loopSteps` (Spec → Learn, the
+  hero and /about strip, D77), and the six `principles` (`resolvedExamples`, `loopStepExample` for /about How I work); `competencies.ts` — the six `/evidence` competencies
 - `index.ts` — barrel export
 - `concierge.ts` — `/talk` copy (`talkPage`, `privacyNote`, `latencyLabels`) and the widget's `talkWidget`; `talkPage.intro` is
   `IntroParagraph[]` (a string, or `{ before, link, after }`: "my agent harness" → `/projects/agent-harness`, D62), read through `introText`
 
 ### Components
-- `components/Navbar.tsx` — fixed top nav (Home, About, Skills, Projects, Talk, Approach, Experience, Contact; Talk since VC4, D60) with active link highlighting, mobile hamburger (menu scrolls under `100dvh`) (`"use client"`)
+- `components/Navbar.tsx` — fixed top nav (seven links: Home, About, Skills, Projects, Talk, Experience, Contact; Talk since VC4, D60; Approach gone since D79) with active link highlighting, mobile hamburger (menu scrolls under `100dvh`) (`"use client"`)
 - `components/Footer.tsx` — social links; `pb-24 xl:pb-8` so the links row clears the VoiceWidget (D61)
 - `components/ScrollReveal.tsx` — reusable `whileInView` wrapper (`data-scroll-reveal`, forced visible in print); skips animation when `prefers-reduced-motion` is set
 - `components/hero/HeroSection.tsx` — full-viewport hero with Framer Motion fade-up variants (`"use client"`)
 - `components/hero/NodeGraph.tsx` — animated canvas node/connection graph (`"use client"`); hero, FloatingLogos (hidden below `xl`, D33) and NodeGraph honour reduced motion
+- `components/hero/FloatingLogos.tsx` — the hero's twelve stack marks in four columns outside the text column, read from
+  `components/logos/paths.ts` (generated by `npm run logos`, never edited by hand, D78); `.harness/logos-check.mjs`
+  checks they clear the hero text at 1280. `components/logos/Logo.tsx` renders one mark (`<title>`, or `decorative`); FloatingLogos draws each of its twelve with it
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer + VoiceWidget (not on `/talk`, `talkWidget.href`), none of them on `/card*` (`"use client"`)
 - `components/VoiceWidget.tsx` — the floating 56 px link to `/talk` (`talkWidget` in `concierge.ts`, D61): `fixed right-4`, safe-area bottom, `z-40`, `print:hidden`, a ring that pulses twice only under `motion-safe:`; shown on every chrome page (`/evidence` too) but not on `/talk` or `/card*`
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
-- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, approach, evidence)
+- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, about, evidence)
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
   non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
@@ -94,7 +101,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
-- `components/MethodStrip.tsx` — the five `methodSteps` as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
+- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid (sorted by `order`) using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves
@@ -143,7 +150,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 
 ## Code rules
 - Next.js App Router + TypeScript + Tailwind 4 + framer-motion. No new runtime dependencies without a recorded
-  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency. `livekit-client`,
+  decision (the spec's ground rule 9); `qrcode` is pre-approved as a devDependency, and so is
+  `simple-icons` at exactly 16.9.0 (D78), read only by `scripts/logos.mjs`: no `src` file imports it. `livekit-client`,
   `@livekit/components-react` and `livekit-server-sdk` are approved at exact pins (D41); keep `LIVEKIT_*` server-only.
   `server-only` is approved at `0.0.1` exact (D67): `env.ts` and `rooms.ts` import it, so a Client Component that
   pulls either in fails `next build` (next/jest maps it to an empty mock).
@@ -160,6 +168,9 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Smoke: `node .harness/smoke.mjs` loads every route (static routes, `.harness/smoke-routes.txt`, every
   `/projects/<slug>`) at 1280 and 390 px; fails on HTTP ≥ 400, page/console errors, or horizontal scroll at 390.
   Screenshots go to `$HARNESS_SCRATCH`. A page added by a milestone goes into `.harness/smoke-routes.txt`.
+- Captures: `node .harness/captures.mjs <outDir> <prefix> <path>...` scrolls each page through (so ScrollReveal
+  sections show), saves full-page PNGs at 1280 and 390 and prints eyebrow, strip rows, How I work links per page
+  (P1's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.
@@ -168,7 +179,8 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).
 
 ## Decisions and plans
-- Spec: `docs/specs/2026-10-18-portfolio-v2.md` (settled: D1–D14; new defaults appended there as `D<n> *default*`).
+- Spec: `docs/specs/2026-10-21-portfolio-v3.md` (current). Decisions: `docs/specs/2026-10-18-portfolio-v2.md` (settled:
+  D1–D14; new defaults appended there as `D<n> *default*`, v3's in `## v3 decisions` from D75).
 - Context: `docs/notes/brand.md`, `docs/notes/evidence-*.md`; older groundwork in `docs/notes/SITE_UPDATE_PLAN.md`.
 - Plans: `docs/plans/<date>-<milestone>-<topic>.md`.
 

@@ -2,24 +2,24 @@ import fs from 'fs';
 import path from 'path';
 import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
+import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
-import ApproachPage from '@/app/approach/page';
 import EvidencePage from '@/app/evidence/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
 import { getProjectBySlug } from '@/lib/data';
 
-jest.mock('next/navigation', () => ({ usePathname: () => '/approach' }));
+jest.mock('next/navigation', () => ({ usePathname: () => '/about' }));
 
 // M8-02: the accessibility floor for every page v2 added (web-design-guidelines pass).
 const caseStudy = (slug: string) => <ProjectDetail project={getProjectBySlug(slug)!} />;
 
 const pages: [string, () => ReactElement][] = [
+  ['/about', () => <AboutPage />],
   ['/card', () => <CardPage />],
   ['/card/qr', () => <CardQrPage />],
-  ['/approach', () => <ApproachPage />],
   ['/evidence', () => <EvidencePage />],
   ['/talk', () => <TalkPage />],
   ['/projects/agent-harness', () => caseStudy('agent-harness')],

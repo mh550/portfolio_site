@@ -1,2 +1,12 @@
 - 2026-10-21 02:30 · feature list written: 0/37 passing
 - 2026-10-21 02:34 · P0-01 · claude-sonnet-5-5 · passes=true · 3 min · 1/37 passing
+- 2026-10-21 02:38 · P0 verified and tagged run/portfolio_site-2026-10-21-v3/P0
+- 2026-10-21 02:38 · P0 proposed for merging · https://github.com/mh550/portfolio_site/pull/22
+- 2026-10-21 02:47 · P1-01 · claude-opus-5-5 · passes=true · 9 min · 2/37 passing
+- 2026-10-21 02:53 · P1-02 · claude-opus-5-5 · passes=true · 5 min · 3/37 passing
+- 2026-10-21 03:02 · P1-03 · claude-opus-5-5 · passes=true · 9 min · 4/37 passing
+- 2026-10-21 03:11 · P1-04 · claude-opus-5-5 · passes=true · 8 min · 5/37 passing
+- 2026-10-21 03:19 · P1-05 · claude-opus-5-5 · passes=true · 7 min · 6/37 passing
+- 2026-10-21 03:25 · P1-06 · claude-opus-5-5 · passes=true · 6 min · 7/37 passing
+- 2026-10-21 03:31 · P1-07 · claude-opus-5-5 · passes=true · 5 min · 8/37 passing
+- 2026-10-21 03:42 · P1-08 · claude-opus-5-5 · passes=true · 10 min · 9/37 passing

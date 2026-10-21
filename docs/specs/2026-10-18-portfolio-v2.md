@@ -46,6 +46,7 @@ don't redo it.
 
 - **D1** Headline positioning is **"Systems & Process Engineer"** (Michael, 2026-10-18). It is a positioning line,
   not a job title: Experience entries keep their real titles exactly.
+  Superseded by D76 (v3): the headline is "Agentic Systems Engineer".
 - **D2** One PR per verified milestone, Michael merges (Michael, 2026-10-18). Nothing deploys overnight.
 - **D3** Conference share = a `/card` page + a QR code to it (Michael, 2026-10-18). No print PDF, no wallpaper.
 - **D4** The QR encodes `https://michael-herron.vercel.app/card?src=qr`. The site URL lives once, in
@@ -93,6 +94,7 @@ don't redo it.
 - **D22** *default* `/card` "Selected work" one-liners are each project's `shortDescription`.
 - **D23** *default* The shared method strip is `src/components/MethodStrip.tsx` (reads `methodSteps`), created by
   whichever of M2 (hero) and M7 (`/approach`) runs first; the other reuses it.
+  Superseded in part by D77 (v3): the strip reads `loopSteps`; `methodSteps` stays for the case studies.
 - **D24** *default* Root metadata sets `metadataBase` to `profile.siteUrl` so Open Graph image paths resolve.
 - **D25** *default* `mirrored-google-calendars` keeps `featured: false` (as today) with order 8. Before the case
   studies land, the top three are linear-ai-workflow, ghl-jobtread-integration, paint-estimator.
@@ -119,6 +121,7 @@ don't redo it.
   the five method labels + "I own delivery from requirements to release."), not in `profile.ts`:
   `scripts/make-qr.mjs` imports `profile.ts` under Node's type stripping (D21), which can't resolve an extensionless
   import of `./approach`. (M2-01. Not the media server's own "D32 purge" in D30.)
+  Superseded in part by D77 (v3): the middle sentence names the five loop labels.
 - **D33** *default* The hero's FloatingLogos show from 1280 px (`xl`) up and are hidden below it. Measured at 390,
   768 and 1024 px, they sat behind the eyebrow, h1, tagline, strip labels and step lines; the 40 %-white glyphs drop
   the muted tagline to about 1.5:1 where they cross. The logos are decorative (`aria-hidden`). Repositioning them per
@@ -146,6 +149,7 @@ don't redo it.
   unchanged until Michael types a line. When set it renders as one `<p>` inside the Selected work section, above its
   heading, with an accent left rule (`src/components/card/ConferenceNote.tsx`); whitespace-only counts as empty.
   (S2-01.)
+  Superseded by D75 (v3): the note had been set to "Glad we met!"; D75 sets it back to `''`.
 - **D40** *default* The print stylesheet (Stretch 3) is one `@media print` block in `src/app/globals.css` that
   applies to every page, not only case studies: white page, black text on every element, borders #bbb, `nav` and
   `footer` hidden, `pre` wrapped and unclipped, links underlined with external URLs spelled out after them
@@ -447,3 +451,43 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   `docs/notes/booth-bundle.md` and the `booth-bundle` script are deleted, and `profile.conferenceNote` is `''`, so `/card`
   no longer says "Glad we met!". Supersedes D50 (unlinked booth bundle) and D39 (the card's conference note default).
   Reversible: `git revert` the P0-01 commit. The three booth spec/plan files keep their content under a "Removed" line.
+- **D76** *default*: the positioning line is **"Agentic Systems Engineer"** and the subline "I build the harnesses,
+  memory and verification around AI agents, and the integrations they run on." (v3 spec § 2); the tagline is
+  unchanged. Supersedes D1's headline and brand.md's 2026-10-18 subline (kept there as history). Real job titles
+  still never change. Reversible: two strings in `profile.ts`. (Allocated in P1-01.) *As built (P1-02):* `profile.ts`
+  holds both strings; the hero eyebrow, `<title>`, `/card`, `/card/qr`, the vCard (`TITLE:Agentic Systems Engineer`)
+  and the OG footer read them with no code edit; brand.md § Positioning has a `### v3 (2026-10-21)` subsection.
+- **D77** *default*: the hero strip and `/about`'s How I work read a new `loopSteps` (Spec, Context, Build, Verify,
+  Learn, lines from v3 spec § 2), each with a `principle` whose first linkable example is its one link
+  (spec→decisions-explicit, context→automate-bookkeeping, build→simplify-after-use,
+  verify→verify-what-the-human-sees, learn→fakes-mirror-reality). Supersedes D23's "reads `methodSteps`" and D32's
+  "five method labels" in `aboutIntro`; D31's layout rule stands; `methodSteps` stays for the case studies.
+  (Plan `docs/plans/2026-10-21-P1-angle.md` § Loop strip.) *As built (P1-02):* `approach.ts` exports `LoopStepId`,
+  `LoopStep` and `loopSteps`; `MethodStrip` maps `loopSteps` (hero and, until P1-05, `/approach`); `aboutIntro[1]` is
+  "I work the way my harness runs: Spec, Context, Build, Verify, Learn." built from the labels. `methodSteps` is
+  unchanged; `approachIntro` stayed while `/approach` read it (P1-05 deleted both). The per-step
+  example link (`loopStepExample`, `examples` prop) is P1-04's.
+- **D78** *default*: the hero's twelve logos (Claude Code, LiveKit, Python, TypeScript, Bash, SQLite, PostgreSQL,
+  Docker, Linux, Next.js, n8n, GitHub) come from `src/components/logos/paths.ts`, generated by `scripts/logos.mjs`;
+  `simple-icons` moves to devDependencies at exactly 16.9.0 (like `qrcode`), with no runtime import. D33 stands.
+  (P1-03 builds.) *As built (P1-03):* `npm run logos` writes `paths.ts` (`logoPaths`, `LogoKey`; titles override
+  Claude → Claude Code and GNU Bash → Bash); `Logo.tsx` renders one mark; FloatingLogos reads `logoPaths` in four
+  columns (left 4%/11%, right 11%/4%) and `public/pipedream.svg` is deleted. `.harness/logos-check.mjs` prints
+  `overlaps: 0` at 1280×720/800/900 against the hero text, the navbar and the VoiceWidget.
+- **D79** *default*: `/approach` is a permanent redirect to `/about#how-i-work` (`next.config.ts` `redirects()`, or a
+  `permanentRedirect` stub if the hash is dropped); the Approach page is deleted and the Navbar has seven links:
+  Home, About, Skills, Projects, Talk, Experience, Contact. Supersedes D60's "fifth of eight links, between Projects
+  and Approach" (Talk stays fifth) and the M7 page / M8-02 Navbar entry for `/approach`; D49's seven links are back,
+  with Talk where Approach was. Reversible: remove the
+  redirect, `git revert` P1-05. (*Built in P1-05*: the `next.config.ts` `redirects()` entry; `curl -sI /approach` →
+  308, `location: /about#how-i-work`, hash kept, so no stub; the page, its test, `approachIntro` and `approachClosing` are deleted.)
+- **D80** *default*: `/about` gains a "How I work" section (`#how-i-work`) between the story and Philosophy: the loop
+  strip with lines at every width and one case-study link per step. Extends D13 (About keeps Michael's story); the
+  intro stays three sentences. (*Built in P1-04*: `loopStepExample` in `approach.ts`, `MethodStrip`'s `examples`;
+  the narrative bullets are `docs/notes/about-narrative-bullets.md`.)
+- **D81** *default*: `principles` in `approach.ts` stays whole (six titles, summaries and eighteen examples) after the
+  Approach page is gone, although only the five examples How I work links (`loopStepExample`) render: it is the
+  source those links are picked from, `claims-on-linked-page` still checks every linked example against its page, and the
+  copy is Michael's to cut or reuse. Corrects the v3 spec § 3's reason ("the `/evidence` page and the case studies
+  still read them": neither does). Reversible: trim `Principle` to `{ id, examples }` and drop the unused examples.
+  (P1-08 review; asks Michael's P1-05 question.)

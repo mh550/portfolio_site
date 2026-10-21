@@ -54,8 +54,8 @@ describe('HeroSection', () => {
 
   it('renders the positioning eyebrow from profile', () => {
     render(<HeroSection />);
-    expect(screen.getByText('Systems & Process Engineer')).toBeInTheDocument();
-    expect(profile.positioning).toBe('Systems & Process Engineer');
+    expect(screen.getByText('Agentic Systems Engineer')).toBeInTheDocument();
+    expect(profile.positioning).toBe('Agentic Systems Engineer');
     // The pre-M2 eyebrow is gone
     expect(screen.queryByText(/Integration Engineer/)).toBeNull();
   });
@@ -72,10 +72,10 @@ describe('HeroSection', () => {
     expect(before(tagline, subline)).toBe(true);
   });
 
-  it('renders the five method labels in order, after the subline and before View Projects', () => {
+  it('renders the five loop labels in order, after the subline and before View Projects', () => {
     render(<HeroSection />);
     const strip = screen.getByRole('list', { name: 'How I work' });
-    const labels = ['Diagnose', 'Decide', 'Build', 'Verify', 'Simplify'].map((l) => screen.getByText(l));
+    const labels = ['Spec', 'Context', 'Build', 'Verify', 'Learn'].map((l) => screen.getByText(l));
     for (let i = 1; i < labels.length; i++) expect(before(labels[i - 1], labels[i])).toBe(true);
     expect(before(screen.getByText(profile.subline), strip)).toBe(true);
     expect(before(strip, screen.getByRole('link', { name: /view projects/i }))).toBe(true);

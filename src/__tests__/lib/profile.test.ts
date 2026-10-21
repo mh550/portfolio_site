@@ -4,10 +4,10 @@ describe('profile data', () => {
   it('has the exact contact and positioning facts from brand.md', () => {
     const expected: Profile = {
       name: 'Michael Herron',
-      positioning: 'Systems & Process Engineer',
+      positioning: 'Agentic Systems Engineer',
       tagline: 'I build simple, elegant systems that fit the humans who run them.',
       subline:
-        'I find where work breaks down, design the system that fixes it, then build it, run it, and measure it.',
+        'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
       location: 'Durham, NC',
       email: 'mherron734@gmail.com',
       linkedin: 'https://www.linkedin.com/in/mherron734/',
@@ -21,11 +21,11 @@ describe('profile data', () => {
 
   it.each([
     ['name', 'Michael Herron'],
-    ['positioning', 'Systems & Process Engineer'],
+    ['positioning', 'Agentic Systems Engineer'],
     ['tagline', 'I build simple, elegant systems that fit the humans who run them.'],
     [
       'subline',
-      'I find where work breaks down, design the system that fixes it, then build it, run it, and measure it.',
+      'I build the harnesses, memory and verification around AI agents, and the integrations they run on.',
     ],
     ['location', 'Durham, NC'],
     ['email', 'mherron734@gmail.com'],

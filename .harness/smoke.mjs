@@ -46,4 +46,14 @@ for (const path of [...new Set(paths)]) {
   }
 }
 await browser.close();
+
+// Redirects (no-argument runs only): status 308 and the exact Location (D79: /approach → /about#how-i-work).
+if (!argPaths.length) {
+  for (const [from, to] of [["/approach", "/about#how-i-work"]]) {
+    const res = await fetch(base + from, { redirect: "manual" });
+    const ok = res.status === 308 && res.headers.get("location") === to;
+    if (!ok) failed++;
+    console.log(`${ok ? "PASS" : "FAIL"} ${from} → ${to}${ok ? "" : ` got ${res.status} ${res.headers.get("location")}`}`);
+  }
+}
 process.exit(failed ? 1 : 0);
