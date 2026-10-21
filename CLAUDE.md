@@ -252,6 +252,9 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - Contact: `node .harness/contact-check.mjs [dir]` loads `/contact` at 390×844 and 1280×800, asserts no vertical
   scroll (also prints the Footer's bottom edge), the panel closed and the pill clear of the tiles, and saves the
   viewport captures `P4-contact-{390,1280}.png` (D97).
+- Skills: `node .harness/skills-check.mjs [dir]` (P5-06) loads `/skills` at 1280×800 and 390×844: labels inside their
+  cluster rects, Tab from the h1 to the first node link, ArrowRight pans, the Agent Harness chip's active count, the
+  390 first view and List view, no horizontal scroll; saves `P5-skills-{1280,selected-1280,390,list-390}.png`.
 - Print: `node .harness/print-check.mjs [base] [path] [out.png]` emulates print media (white body, no visible
   nav/footer/canvas, `pre` wrapped, links underlined) and saves a full-page capture; exit 1 on a failure.
 - Look at the 390 px screenshots of every page you changed ("What Michael will see" in the spec).

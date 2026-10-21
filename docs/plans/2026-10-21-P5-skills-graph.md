@@ -500,10 +500,25 @@ Unchanged and still green: `content-guard`, `Logo.test` (extra keys stay apart f
 
 ## What Michael will see
 
-Filled by P5-06 from `.harness/skills-check.mjs`.
+Filled by P5-06 from `.harness/skills-check.mjs` (exit 0, `skills-check: ok`, 0 console errors at either width) on
+the harness dev server (:7835). The captures close the first-visit callout first (the script prints how much of the
+graph it covered); the pill stays, as on every chrome page.
 
 | Capture | What it shows |
 |---|---|
+| `docs/screenshots/v3/P5-skills-1280.png` (182 KB) | The whole drawing (viewBox `0 0 1052 700`): eight project chips in two rows, + / − / Reset and List view, six cluster containers in 3 columns; all 51 labels inside their cluster rect and no two label boxes intersecting |
+| `docs/screenshots/v3/P5-skills-selected-1280.png` (186 KB) | Agent Harness pressed: N = 9 active (Harness engineering, Context engineering, Agent memory, Claude Code, Durable state, Eval gates, Bash, Node.js, Git/GitHub), 42 dimmed, 3 cross paths; "Agent Harness · 9 skills · Open case study" → `/projects/agent-harness` |
+| `docs/screenshots/v3/P5-skills-390.png` (67 KB) | First view `4 4 348 308` = Agentic systems, its chip pressed in the Jump to a group row, the project chip row scrolling above it; scrollWidth 390 |
+| `docs/screenshots/v3/P5-skills-list-390.png` (357 KB) | List view: 51 `dt`s under six headings, graph hidden, scrollWidth 390 |
+
+- Keyboard (1280): Tab from the h1 → the eight project chips → Zoom in → Zoom out → Reset view → List view → the graph
+  → **Harness engineering** (the first node link, focus-visible ring). ArrowRight on the graph: `0 0 1052 700` →
+  `24 0 1052 700`; `0` resets it.
+- Print: `node .harness/print-check.mjs http://localhost:7835 /skills $HARNESS_SCRATCH/print-skills.png` → PASS (white
+  body, nav/footer hidden, every link underlined, all text black); the capture shows the list, not the svg.
+- For P5-07: the List view toggle still prints (a lone outlined button above the list; the zoom row is `print:hidden`,
+  its row isn't). The fixed pill sits over the graph at scroll 0 (64×48 px at 1280, on Tailwind CSS's label; 136×48 px
+  at 390, on Copilot Studio's), and the first-visit callout over it too (184×66 / 256×66 px) until closed or scrolled.
 
 ## Review
 

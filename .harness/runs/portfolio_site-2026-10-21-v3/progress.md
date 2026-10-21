@@ -13,6 +13,12 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P5-06 · passes
+
+- New `.harness/skills-check.mjs` (Chromium, 1280×800 and 390×844; prints how much of the graph the first-visit callout and pill cover, then closes the callout) → `docs/screenshots/v3/P5-skills-{1280,selected-1280,390,list-390}.png` (182/186/67/357 KB). Plan § What Michael will see filled; CLAUDE.md § How to verify gains the Skills line. No src change: tests 1856 → 1856.
+- Verified: `skills-check: ok`, exit 0, 0 console errors: 51 labels inside their cluster rects, none overlapping; Tab from the h1 → 8 project chips → Zoom in/out/Reset view/List view → graph → "Harness engineering"; ArrowRight `0 0 1052 700` → `24 0 1052 700`; Agent Harness N = 9 active, 42 dimmed, 3 cross paths, Open case study → /projects/agent-harness; 390 first view `4 4 348 308` (Agentic systems pressed), scrollWidth 390, List view 51 rows. `print-check.mjs … /skills` PASS, capture shows the list only. `lib/check.sh` green, `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS).
+- For P5-07: the List view toggle still prints (its row isn't `print:hidden`); at scroll 0 the fixed pill covers a label (Tailwind CSS at 1280, Copilot Studio at 390) and the first-visit callout covers 184×66 / 256×66 px of the graph until closed.
+
 ### 2026-10-21 · P5-05 · passes
 
 - `/skills` project chips: `SkillGraph.tsx` gains a "Highlight a project's stack" row above the toolbar (featured projects with an edge, in `order`, short titles, `aria-pressed`; scrolls below `sm`, wraps from it; leaves with the zoom controls in list view). A selection marks `nodesOf` nodes `data-active`, every other node and edge `data-dim` (`opacity-25`, full again on hover/focus, `motion-safe:transition-opacity`), draws the `projectChain`'s cross pairs `data-cross data-active`, shows "<title> · N skills · Open case study" and an `aria-live` line; a second click or Esc (on the section, not from the list view) clears it ("Highlight cleared."); below 640 a project with no whole cell in view fits its first cluster. Page intro + metadata now say "pick a project". CLAUDE.md /skills row, skills.ts and SkillGraph lines; plan § Interaction "Built". Tests 1837 → 1856.
