@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { MemoryBody } from '@/lib/concierge/contract';
 import { talkPage } from '@/lib/data/concierge';
-import { DASH } from '@/components/talk/format';
+import { DASH, dateTime } from '@/components/talk/format';
 
 export type StripKind = 'profile' | 'episodes' | 'events' | 'knowledge' | 'working';
 export type StripCounts = Record<StripKind, number | null>;
@@ -45,7 +45,10 @@ interface Seen {
 // The strip under the message box (D90): one chip per kind, its colour and its count. A chip whose count just
 // changed pulses once, for that body. The previous counts are kept in state, set during render when the body changes
 // (React's previous-props pattern), never in a ref, so StrictMode's double render can't swallow a pulse.
-export default function MemoryStrip({ memory }: { memory: MemoryBody | null }) {
+// `asOf`: the body is the cached one from the last call, saved then (D91): greyed, named with its time, and its arrival
+// pulses nothing; the first live body after it pulses what differs from it.
+export default function MemoryStrip({ memory, asOf = null }: { memory: MemoryBody | null; asOf?: string | null }) {
+  const stale = asOf !== null;
   const [seen, setSeen] = useState<Seen>(() => ({
     memory,
     counts: stripCounts(memory),
@@ -56,7 +59,9 @@ export default function MemoryStrip({ memory }: { memory: MemoryBody | null }) {
   if (memory !== seen.memory) {
     const counts = stripCounts(memory);
     // Only a reported count pulses: a chip going back to the dash (the call ended) stays still.
-    const changed = new Set(KINDS.map((k) => k.kind).filter((k) => counts[k] !== null && counts[k] !== seen.counts[k]));
+    const changed = new Set(
+      stale ? [] : KINDS.map((k) => k.kind).filter((k) => counts[k] !== null && counts[k] !== seen.counts[k])
+    );
     const version = { ...seen.version };
     for (const k of changed) version[k] += 1;
     current = { memory, counts, changed, version };
@@ -64,8 +69,13 @@ export default function MemoryStrip({ memory }: { memory: MemoryBody | null }) {
   }
 
   const { kinds, notReported, strip } = talkPage.memoryView;
+  const savedAt = stale ? dateTime(asOf) : null;
   return (
-    <ul aria-label={strip} className="flex flex-wrap gap-2">
+    <ul
+      aria-label={savedAt ? `${strip}, ${talkPage.memoryView.asOf} ${savedAt}` : strip}
+      data-stale={stale ? 'true' : undefined}
+      className={`flex flex-wrap gap-2 ${stale ? '**:text-[var(--color-muted)] [&_[data-dot]]:opacity-60' : ''}`}
+    >
       {KINDS.map(({ kind, dot }) => {
         const n = current.counts[kind];
         // A dash from a body is "not reported by this agent version"; with no body yet nothing has been reported.

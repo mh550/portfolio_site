@@ -139,10 +139,30 @@ unchanged.
 
 Facts behind it: § How it was built (the agent-harness is the builder; this repo's page half came from a harness run).
 
+## P3 note (2026-10-21): the concierge copy without the slogan
+
+Source: the v3 spec `docs/specs/2026-10-21-portfolio-v3.md` § 4.4 and the P3 plan
+`docs/plans/2026-10-21-P3-concierge-in-site.md` § Copy, built in P3-07 as D93 (`docs/specs/2026-10-18-portfolio-v2.md`
+§ v3 decisions; it supersedes D62's wording, D62's link stands). "Specs in, verified milestones out" leaves the page
+(the harness's slogan, not a fact about this agent), the intro says what the page now shows (the memory, where each
+thing came from, the usher), and the agent repo's "knowledge pack" stays in this file's tables but not on the page.
+None of the new sentences has a digit, so § Sentences with digits gains no row.
+
+| Where | Before | After |
+|---|---|---|
+| `/talk` intro, first paragraph (`talkPage.intro[0]`) | A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits. | A voice agent I designed on LiveKit and built with my agent harness. It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to the work it's talking about. ("my agent harness" still links `/projects/agent-harness`) |
+| `/talk` intro, second paragraph (`talkPage.intro[1]`) | This page shows what it remembers, where it learned each thing, and how long each turn took. Talk or type. | Talk or type. The Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you. |
+| Deep-dive `caseStudy.builtWith` | … My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote … | … My agent harness ran the build sessions: Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent. |
+| Deep-dive decision `VC-A` `chose` | … as one bounded block after the fixed instructions and the knowledge pack, … | … as one bounded block after the fixed instructions and what it knows about my work, … |
+
+Facts behind it: § Memory design "Preload at connect" and "Stable prefix" (the knowledge the agent is given about
+Michael's work is what the agent repo calls its knowledge pack); "can take you to the work" is the usher of the v3
+spec § 7 (`concierge.navigate`, P3-08), "where each thing came from" the profile facts' channel and source (§ 4).
+
 ## Sentences with digits
 
 Every sentence of the drafted `voice-concierge` entry (`docs/plans/2026-10-20-VC3-voice-concierge-deep-dive.md`)
-that contains a digit, verbatim, with its source. VC3-02's test splits each string field of the entry on sentence
+that contains a digit, verbatim, with its source (as of P3-07: its two rewritten sentences carry no digit, see § P3 note). VC3-02's test splits each string field of the entry on sentence
 ends and line breaks and requires each piece with a digit to appear in this file.
 
 | Sentence | Field | Source |

@@ -1,6 +1,7 @@
-import { act, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { renderTalk } from '@/__tests__/helpers/concierge';
+import { BUSY_RETRY_LIMIT_MS, BUSY_RETRY_MS } from '@/components/concierge/ConciergeProvider';
 import { MockRoom, ParticipantKind, addAgent, lastRoom, pushText, resetRooms, restart } from '@/__mocks__/livekit-client';
 import { audioRenderer } from '@/__mocks__/livekit-components-react';
 import { talkPage } from '@/lib/data';
@@ -322,14 +323,15 @@ describe('TalkSession live: Forget me', () => {
     expect(room.localParticipant.performRpc).not.toHaveBeenCalled();
   });
 
-  it('on {ok: true} the memory panel clears and "Forgotten" shows', async () => {
+  it('on {ok: true} the memory panel clears and "Forgotten" replaces it', async () => {
     const { room, user } = await goLive();
     await act(() => pushText(room, 'concierge.memory', memoryJson));
     const panel = screen.getByRole('tabpanel', { name: 'Memory' });
     expect(within(panel).getByText('Lisbon')).toBeInTheDocument();
     await erase(user);
     expect(within(panel).queryByText('Lisbon')).toBeNull();
-    expect(within(panel).getByText(talkPage.empty.memory)).toBeInTheDocument();
+    // "Forgotten" replaces the view (D91): no "Nothing remembered yet" above it.
+    expect(within(panel).queryByText(talkPage.empty.memory)).toBeNull();
     expect(screen.getByText(copy.forgotten)).toBeInTheDocument();
   });
 
@@ -467,7 +469,7 @@ describe('TalkSession live: audio', () => {
 });
 
 describe('TalkSession live: Leave', () => {
-  it('disconnects, returns to idle with the panels cleared and the audio gone', async () => {
+  it('disconnects, returns to idle with the panels cleared (memory greyed, as cached) and the audio gone', async () => {
     const { room, user } = await goLive();
     await act(() => pushText(room, 'concierge.memory', memoryJson));
     await act(() => pushText(room, 'concierge.metrics', metricsFullJson));
@@ -477,10 +479,227 @@ describe('TalkSession live: Leave', () => {
     expect(button(labels.connect)).toBeInTheDocument();
     expect(status()).toHaveTextContent(/^$/);
     expect(logItems()).toHaveLength(0);
-    expect(screen.queryByText('Lisbon')).toBeNull();
+    // The memory stays as the cached body (D91): greyed, "as of" when it came.
+    const stale = screen.getByRole('tabpanel', { name: 'Memory' }).querySelector('[data-stale="true"]') as HTMLElement;
+    expect(within(stale).getByText('Lisbon')).toBeInTheDocument();
+    expect(within(stale).getByText(new RegExp(`^${talkPage.memoryView.asOf} `))).toBeInTheDocument();
     expect(screen.queryByText('Turn 1')).toBeNull();
     expect(screen.queryByTestId('room-audio-renderer')).toBeNull();
     expect(screen.queryByRole('button', { name: labels.micOn })).toBeNull();
     expect(button(labels.forgetMe)).toBeDisabled();
+  });
+});
+
+// D92 (plan § Busy retry): a 429 busy/visitor means this visitor's earlier room is still closing (a reload, a tab just
+// shut). The page says so and asks again every 5 s, one request at a time, for a minute; then the D66 busy line.
+describe('TalkSession: closing the earlier conversation', () => {
+  type Reply = ReturnType<typeof reply>;
+  const BUSY_VISITOR = reply(429, { error: 'busy', reason: 'visitor' });
+  let fetchMock: jest.Mock<(url: string, init: RequestInit) => Promise<Reply>>;
+  const sentIds = () => fetchMock.mock.calls.map(([, init]) => JSON.parse(init.body as string).visitor_id);
+  const closingLine = new RegExp(`^${copy.closing}$`);
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    fetchMock = jest.fn(async () => BUSY_VISITOR);
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // Under fake timers React's scheduler is frozen: click synchronously and flush inside act.
+  async function connectClosing() {
+    renderTalk();
+    fireEvent.click(button(labels.connect));
+    await flush();
+  }
+
+  async function tick(ms: number) {
+    await act(async () => {
+      jest.advanceTimersByTime(ms);
+    });
+    await flush();
+  }
+
+  it('the exact copy and the 5 s / 60 s constants', () => {
+    expect(copy.closing).toBe('Closing your earlier conversation…');
+    expect(BUSY_RETRY_MS).toBe(5_000);
+    expect(BUSY_RETRY_LIMIT_MS).toBe(60_000);
+  });
+
+  it('shows the closing line and Leave, makes no Room, and asks again after 5 s', async () => {
+    await connectClosing();
+    expect(status()).toHaveTextContent(closingLine);
+    expect(button(labels.leave)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: labels.connect })).toBeNull();
+    expect(screen.queryByRole('link', { name: talkPage.deepDiveLabel })).toBeNull();
+    expect(MockRoom.instances).toHaveLength(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await tick(BUSY_RETRY_MS - 1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await tick(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(status()).toHaveTextContent(closingLine);
+    expect(MockRoom.instances).toHaveLength(0);
+  });
+
+  it('never has two requests in flight: the next waits 5 s after the last answer', async () => {
+    await connectClosing();
+    let answer: (r: Reply) => void = () => {};
+    fetchMock.mockImplementationOnce(() => new Promise<Reply>((resolve) => (answer = resolve)));
+    await tick(BUSY_RETRY_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await tick(20_000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await act(async () => answer(BUSY_VISITOR));
+    await flush();
+    await tick(BUSY_RETRY_MS - 1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await tick(1);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('a 200 on a retry continues the same Connect: one Room, the same visitor id, then live', async () => {
+    await connectClosing();
+    await tick(BUSY_RETRY_MS);
+    fetchMock.mockResolvedValue(OK);
+    await tick(BUSY_RETRY_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(new Set(sentIds()).size).toBe(1);
+    expect(MockRoom.instances).toHaveLength(1);
+    expect(lastRoom().connect).toHaveBeenCalledWith('wss://concierge.test.invalid', 'test-token');
+    expect(status()).toHaveTextContent(copy.waiting);
+    await act(async () => {
+      addAgent(lastRoom(), 'agent-1');
+    });
+    await flush();
+    expect(status()).toHaveTextContent(copy.live);
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(status()).toHaveTextContent(copy.live);
+  });
+
+  it('after 60 s of 429s: the busy line, Connect, and no further request', async () => {
+    await connectClosing();
+    for (let t = 0; t < BUSY_RETRY_LIMIT_MS; t += BUSY_RETRY_MS) {
+      expect(status()).toHaveTextContent(closingLine);
+      await tick(BUSY_RETRY_MS);
+    }
+    // the first request plus one every 5 s until the 60th second, which asks nothing
+    expect(fetchMock).toHaveBeenCalledTimes(BUSY_RETRY_LIMIT_MS / BUSY_RETRY_MS);
+    expect(status()).toHaveTextContent(new RegExp(`^${copy.busyVisitor}$`));
+    expect(button(labels.connect)).toHaveFocus();
+    expect(screen.getByRole('link', { name: talkPage.deepDiveLabel })).toBeInTheDocument();
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(BUSY_RETRY_LIMIT_MS / BUSY_RETRY_MS);
+    expect(MockRoom.instances).toHaveLength(0);
+  });
+
+  it('Leave during closing cancels the timer: no further request, back to idle', async () => {
+    await connectClosing();
+    fireEvent.click(button(labels.leave));
+    await flush();
+    expect(button(labels.connect)).toBeInTheDocument();
+    expect(status()).toHaveTextContent(/^$/);
+    await tick(BUSY_RETRY_LIMIT_MS * 2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(MockRoom.instances).toHaveLength(0);
+  });
+
+  it('Leave while a retry is in flight: its 200 makes no Room', async () => {
+    await connectClosing();
+    let answer: (r: Reply) => void = () => {};
+    fetchMock.mockImplementationOnce(() => new Promise<Reply>((resolve) => (answer = resolve)));
+    await tick(BUSY_RETRY_MS);
+    fireEvent.click(button(labels.leave));
+    await flush();
+    await act(async () => answer(OK));
+    await flush();
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(MockRoom.instances).toHaveLength(0);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(button(labels.connect)).toBeInTheDocument();
+  });
+
+  it.each([
+    ['the site filled up meanwhile', reply(429, { error: 'busy', reason: 'site' }), copy.busySite],
+    ['the route went offline', reply(503, { offline: true }), talkPage.offlineMessage],
+  ])('a retry that finds %s stops with that line', async (_, answer, line) => {
+    await connectClosing();
+    fetchMock.mockResolvedValue(answer);
+    await tick(BUSY_RETRY_MS);
+    expect(status()).toHaveTextContent(new RegExp(`^${line}$`));
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(MockRoom.instances).toHaveLength(0);
+  });
+
+  it('pagehide during closing stops the retries, and a bfcache restore comes back idle', async () => {
+    await connectClosing();
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(status()).toHaveTextContent(closingLine);
+    act(() => {
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    });
+    await flush();
+    expect(status()).toHaveTextContent(/^$/);
+    expect(button(labels.connect)).toBeInTheDocument();
+  });
+
+  it('the provider unmounting during closing (leaving for /card) stops the retries', async () => {
+    renderTalk().unmount();
+    fetchMock.mockClear();
+    const { unmount } = renderTalk();
+    fireEvent.click(button(labels.connect));
+    await flush();
+    unmount();
+    await tick(BUSY_RETRY_LIMIT_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('Leave then Connect during closing: one cadence, from the new Connect only', async () => {
+    await connectClosing();
+    await tick(3_000);
+    fireEvent.click(button(labels.leave));
+    await flush();
+    fireEvent.click(button(labels.connect));
+    await flush();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(status()).toHaveTextContent(closingLine);
+    await tick(2_000); // the first Connect's retry would have fired here
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await tick(3_000);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('Leave aborts a retry request in flight', async () => {
+    await connectClosing();
+    let signal: AbortSignal | null | undefined;
+    fetchMock.mockImplementationOnce((_url, init) => {
+      signal = init.signal;
+      return new Promise<Reply>(() => {});
+    });
+    await tick(BUSY_RETRY_MS);
+    expect(signal?.aborted).toBe(false);
+    fireEvent.click(button(labels.leave));
+    await flush();
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it('a double click on Connect, which turns into Leave while closing, does not leave', async () => {
+    renderTalk();
+    fireEvent.click(button(labels.connect), { detail: 1 });
+    await flush();
+    fireEvent.click(button(labels.leave), { detail: 2 });
+    await flush();
+    expect(status()).toHaveTextContent(closingLine);
+    await tick(BUSY_RETRY_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

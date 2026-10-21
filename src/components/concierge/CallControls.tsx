@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type KeyboardEvent, type MouseEvent } from 'react';
 import { talkPage } from '@/lib/data/concierge';
-import { inRoom } from '@/components/talk/sessionReducer';
+import { isActive } from '@/components/talk/sessionReducer';
 import { useConcierge } from './ConciergeProvider';
 import { primary, quiet } from './buttons';
 import { statusLine } from './status';
@@ -12,7 +12,8 @@ import { statusLine } from './status';
 export default function CallControls() {
   const { state, connect, leave, toggleMic, startAudio } = useConcierge();
   const { phase, micOn, audioBlocked } = state;
-  const inSession = inRoom(phase);
+  // While the earlier conversation closes (D92) there is no Room yet, but Leave stops the retries.
+  const inSession = isActive(phase);
   // Connect and Leave are one button, so focus stays on it as the phase changes.
   const primaryRef = useRef<HTMLButtonElement>(null);
   const wasInSession = useRef(false);

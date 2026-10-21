@@ -376,3 +376,45 @@ describe('MemoryView: robustness', () => {
     expect(within(kind(view.kinds.profile)).getAllByRole('listitem')).toHaveLength(3);
   });
 });
+
+// P3-07 (D91, plan § Cache): before a call the tab shows the cached body, greyed, with "as of" when it was saved.
+describe('MemoryView: the cached body', () => {
+  const SAVED_AT = '2026-10-20T09:30:00.000Z';
+
+  it('asOf marks the body stale (muted) and says when it was saved', () => {
+    renderView({ asOf: SAVED_AT });
+    const stale = document.querySelector('[data-stale="true"]') as HTMLElement;
+    expect(stale).not.toBeNull();
+    expect(screen.getByText(`${view.asOf} ${local(SAVED_AT)}`)).toBeInTheDocument();
+    expect(within(stale).getByText('Lisbon')).toBeInTheDocument();
+    expect(stale.className).toContain('**:text-[var(--color-muted)]');
+    // Forget me is not part of the stale body: it stays as it is.
+    expect(within(stale).queryByRole('button', { name: labels.forgetMe })).toBeNull();
+  });
+
+  it('a rejected event keeps its red in the greyed view: the colour is what marks it for sighted readers', () => {
+    renderView({ asOf: SAVED_AT });
+    const stale = document.querySelector('[data-stale="true"]') as HTMLElement;
+    expect(stale.className).toContain('[&_[data-rejected]_span]:text-[var(--color-mem-event-rejected)]');
+    expect(stale.querySelectorAll('[data-rejected]')).toHaveLength(1);
+    expect(stale.querySelector('[data-rejected]')).toHaveAttribute('data-type', 'gate_rejected');
+  });
+
+  it('without asOf the body is current: no data-stale, no "as of"', () => {
+    renderView();
+    expect(document.querySelector('[data-stale]')).toBeNull();
+    expect(screen.queryByText(new RegExp(`^${view.asOf} `))).toBeNull();
+  });
+
+  it('an unreadable savedAt drops the line but keeps the body greyed', () => {
+    renderView({ asOf: 'not a date' });
+    expect(document.querySelector('[data-stale="true"]')).not.toBeNull();
+    expect(screen.queryByText(new RegExp(`^${view.asOf}`))).toBeNull();
+  });
+
+  it('once forgotten, the view shows only "Forgotten": no body, no empty line', () => {
+    renderView({ memory: null, forget: 'done', forgetLine: talkPage.status.forgotten });
+    expect(screen.queryByText(talkPage.empty.memory)).toBeNull();
+    expect(screen.getByText(talkPage.status.forgotten)).toBeInTheDocument();
+  });
+});

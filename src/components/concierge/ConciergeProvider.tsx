@@ -4,7 +4,15 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import dynamic from 'next/dynamic';
 import type { Participant, RemoteParticipant, Room, TextStreamHandler, TextStreamReader } from 'livekit-client';
 import { isForgotten, parseMemory, parseMetrics, RPC_FORGET_ME, TOPIC } from '@/lib/concierge/contract';
-import { browserStorage, getOrCreateVisitorId } from '@/lib/concierge/visitorId';
+import {
+  clearMemory,
+  loadMemory,
+  memoryCacheKey,
+  memoryExpired,
+  saveMemory,
+  type CachedMemory,
+} from '@/lib/concierge/memoryCache';
+import { browserStorage, getOrCreateVisitorId, readVisitorId, VISITOR_ID_KEY } from '@/lib/concierge/visitorId';
 import {
   initialSession,
   sessionReducer,
@@ -24,6 +32,10 @@ const FORGET_TIMEOUT_MS = 10_000;
 // The agent counts as speaking until it has been out of the speakers list this long: a pause between words doesn't
 // flip the pill's name (a screen reader re-reads a focused button's name each time it changes) or stop the bars.
 export const AGENT_QUIET_MS = 500;
+// D92 (plan § Busy retry): a 429 busy/visitor means this visitor's earlier room is still closing (the agent leaves an
+// empty room within about 20 s). Ask again this often, one request at a time, until this long after the first 429.
+export const BUSY_RETRY_MS = 5_000;
+export const BUSY_RETRY_LIMIT_MS = 60_000;
 const TOKEN_ROUTE = '/api/concierge/token';
 const STREAM_TOPICS = [TOPIC.memory, TOPIC.metrics, TOPIC.transcription];
 // Attribute names on lk.transcription streams (@livekit/components-core's ParticipantAgentAttributes).
@@ -62,6 +74,10 @@ interface Session {
   micWanted: boolean; // what the last mic press asked for, ahead of the answer
   micSeq: number; // only the newest setMicrophoneEnabled call's answer is shown
   forgetting: boolean; // a Forget me RPC is out: the one guard against a second
+  forgotten: boolean; // Forget me went through: the agent's last, empty memory body is neither shown nor cached
+  visitorId: string | null; // the id the token request sent: the memory cache's key
+  requests: AbortController; // aborts a token request still out when the session ends
+  wake: (() => void) | undefined; // ends the closing wait early, at teardown, so connect() settles
 }
 
 // Idempotent. Listeners come off before disconnect(), so our own disconnect doesn't read as the call dropping.
@@ -70,6 +86,8 @@ function teardown(session: Session) {
   session.alive = false;
   clearTimeout(session.timer);
   clearTimeout(session.quietTimer);
+  session.requests.abort();
+  session.wake?.();
   const room = session.room;
   session.room = null;
   if (!room) return;
@@ -82,11 +100,15 @@ type Credentials = { kind: 'ok'; url: string; token: string } | { kind: 'busy'; 
 
 const isBusyReason = (value: unknown): value is BusyReason => value === 'visitor' || value === 'site';
 
+// This visitor's earlier room is still there: wait it out (D92). A busy site is not retried (D66).
+const isClosing = (credentials: Credentials | null) => credentials?.kind === 'busy' && credentials.reason === 'visitor';
+
 // The route answers 503 {offline: true} without LiveKit configured and 429 {error: 'busy', reason} when this address
 // or the whole site is at its room limit (D66). Any other failure, a 429 with another body included, reads as offline.
-async function fetchCredentials(visitorId: string): Promise<Credentials | null> {
+async function fetchCredentials(visitorId: string, signal: AbortSignal): Promise<Credentials | null> {
   try {
     const res = await fetch(TOKEN_ROUTE, {
+      signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visitor_id: visitorId }),
@@ -102,12 +124,13 @@ async function fetchCredentials(visitorId: string): Promise<Credentials | null> 
   }
 }
 
-// A §4 body: read whole, parsed, and dropped without a sound if it is malformed or the stream fails.
-function readBody<T>(reader: TextStreamReader, parse: (text: string) => T | null, use: (body: T) => void) {
+// A §4 body: read whole, parsed, and dropped without a sound if it is malformed or the stream fails. `use` also gets
+// the text as sent: the memory cache keeps that, not the parsed object (D91).
+function readBody<T>(reader: TextStreamReader, parse: (text: string) => T | null, use: (body: T, text: string) => void) {
   reader.readAll().then(
     (text) => {
       const body = parse(text);
-      if (body) use(body);
+      if (body) use(body, text);
     },
     () => {}
   );
@@ -147,6 +170,9 @@ export interface ConciergeValue extends ConciergeActions {
   // Connects so far: MessageBox is keyed on it, so each session starts with an empty box.
   sessionCount: number;
   configured: boolean;
+  // The last memory body this browser's visitor id received (D91): read after mount, replaced by each live body,
+  // gone after Forget me. The views show it greyed while the session has none.
+  cachedMemory: CachedMemory | null;
 }
 
 const ConciergeContext = createContext<ConciergeValue | null>(null);
@@ -171,6 +197,7 @@ export default function ConciergeProvider({ configured, children }: { configured
   const [panel, setPanel] = useState<PanelState>('closed');
   const [calloutSeen, setCalloutSeen] = useState(true);
   const [agentSpeaking, setAgentSpeaking] = useState(false);
+  const [cachedMemory, setCachedMemory] = useState<CachedMemory | null>(null);
   // Opening the panel counts as having seen the callout (D88).
   const panelActions = useMemo(() => {
     const dismissCallout = () => {
@@ -191,6 +218,27 @@ export default function ConciergeProvider({ configured, children }: { configured
   // After mount, never during render: localStorage doesn't exist on the server.
   useEffect(() => {
     if (!readCalloutSeen()) setCalloutSeen(false);
+  }, []);
+
+  // The cache is read only for an id this browser already has: reading never makes one (D45). A copy past its
+  // retention is removed (D96). Another tab saving or clearing it (Forget me there) is followed here.
+  useEffect(() => {
+    const read = () => {
+      const storage = browserStorage();
+      const visitorId = readVisitorId(storage);
+      const cached = visitorId ? loadMemory(storage, visitorId) : null;
+      if (visitorId && cached && memoryExpired(cached, Date.now())) {
+        clearMemory(storage, visitorId);
+        return setCachedMemory(null);
+      }
+      setCachedMemory(cached);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key === VISITOR_ID_KEY || event.key.startsWith(memoryCacheKey(''))) read();
+    };
+    read();
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   // The actions only touch the session ref and stable setters, so they are made once (per `configured`) and a
@@ -241,6 +289,10 @@ export default function ConciergeProvider({ configured, children }: { configured
         micWanted: false,
         micSeq: 0,
         forgetting: false,
+        forgotten: false,
+        visitorId: null,
+        requests: new AbortController(),
+        wake: undefined,
       };
       sessionRef.current = session;
       setSessionCount((n) => n + 1);
@@ -261,10 +313,31 @@ export default function ConciergeProvider({ configured, children }: { configured
       // failed connect(), and once loaded RoomAudio's next/dynamic can't fail later.
       const livekit = Promise.all([import('livekit-client'), import('@/components/talk/RoomAudio')]);
       livekit.catch(() => {});
-      const credentials = await fetchCredentials(getOrCreateVisitorId(browserStorage()));
+      const visitorId = getOrCreateVisitorId(browserStorage());
+      session.visitorId = visitorId;
+      let credentials = await fetchCredentials(visitorId, session.requests.signal);
       if (!session.alive) return;
+      // D92: this visitor's earlier room is closing. Ask again BUSY_RETRY_MS after each answer, so never two requests
+      // at once, until a token or BUSY_RETRY_LIMIT_MS after this first 429. Leave, pagehide or unmount clear the
+      // timer (teardown), and this Connect goes no further.
+      if (isClosing(credentials)) {
+        send({ type: 'closing' });
+        const deadline = Date.now() + BUSY_RETRY_LIMIT_MS;
+        while (isClosing(credentials)) {
+          await new Promise<void>((resolve) => {
+            session.wake = resolve;
+            session.timer = setTimeout(resolve, BUSY_RETRY_MS);
+          });
+          session.wake = undefined;
+          if (!session.alive || Date.now() >= deadline) break;
+          credentials = await fetchCredentials(visitorId, session.requests.signal);
+          if (!session.alive) return;
+        }
+        if (!session.alive) return;
+        if (credentials?.kind === 'ok') send({ type: 'closed' });
+      }
       if (!credentials) return goOffline();
-      // No Room yet, so nothing to disconnect; no timer and no second request: the visitor presses Connect again.
+      // No Room yet, so nothing to disconnect; no timer and no further request: the visitor presses Connect again.
       if (credentials.kind === 'busy') {
         release(session);
         return dispatch({ type: 'busy', reason: credentials.reason });
@@ -284,8 +357,16 @@ export default function ConciergeProvider({ configured, children }: { configured
       setRoom(room);
 
       // All three handlers before connect(): the agent sends memory as soon as it joins (spec §4).
+      // Each body is shown and kept as this visitor's cached memory (D91), until Forget me has gone through: the
+      // agent's last, empty body after it is neither, so "Forgotten" stays and the cache stays empty.
       room.registerTextStreamHandler(TOPIC.memory, (reader) =>
-        readBody(reader, parseMemory, (body) => send({ type: 'memory', body }))
+        readBody(reader, parseMemory, (body, text) => {
+          if (!session.alive || session.forgotten) return;
+          dispatch({ type: 'memory', body });
+          const savedAt = new Date().toISOString();
+          saveMemory(browserStorage(), visitorId, text, savedAt);
+          setCachedMemory({ body, savedAt });
+        })
       );
       room.registerTextStreamHandler(TOPIC.metrics, (reader) =>
         readBody(reader, parseMetrics, (body) => send({ type: 'metrics', body }))
@@ -458,6 +539,12 @@ export default function ConciergeProvider({ configured, children }: { configured
         // a timeout or an error from the agent: the visitor can try again
       }
       session.forgetting = false;
+      // Erased on the server, so erased here too, whatever the visitor did meanwhile.
+      if (ok) {
+        session.forgotten = true;
+        if (session.visitorId) clearMemory(browserStorage(), session.visitorId);
+        setCachedMemory(null);
+      }
       if (sessionRef.current === session) dispatch({ type: ok ? 'forgotten' : 'forgetFailed' });
     }
 
@@ -501,8 +588,19 @@ export default function ConciergeProvider({ configured, children }: { configured
   }, [leave]);
 
   const value = useMemo<ConciergeValue>(
-    () => ({ state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, ...actions, ...panelActions }),
-    [state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, actions, panelActions]
+    () => ({
+      state,
+      room,
+      sessionCount,
+      configured,
+      panel,
+      calloutSeen,
+      agentSpeaking,
+      cachedMemory,
+      ...actions,
+      ...panelActions,
+    }),
+    [state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, cachedMemory, actions, panelActions]
   );
 
   return (

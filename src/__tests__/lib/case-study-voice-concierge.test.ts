@@ -82,8 +82,16 @@ describe('voice-concierge entry', () => {
   // D62: the harness ran the build sessions; no claim of hand-written code.
   it('says the agent harness ran the build sessions', () => {
     expect(cs!.builtWith).toBe(
-      "The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent.",
+      "The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions: Claude Code agents wrote this page's code overnight in one run, and a second run is writing the agent.",
     );
+  });
+
+  // D93 (plan § Copy): neither the harness's slogan nor the agent repo's "pack" is on the page.
+  it('has neither the harness slogan nor "pack" anywhere in the entry', () => {
+    const text = strings(project).join(' ');
+    expect(text).not.toMatch(/specs in/i);
+    expect(text).not.toMatch(/\bpack\b/i);
+    expect(text).toContain('as one bounded block after the fixed instructions and what it knows about my work,');
   });
 
   it('says plainly that no latency numbers are measured and that 1.8 only maps onto 2.0', () => {

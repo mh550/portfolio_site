@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1496 tests, 95 suites after P3-06)
+npm test             # Jest unit/integration tests (1589 tests, 95 suites after P3-07)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -105,13 +105,17 @@ Single source of truth for all page content — no content is hardcoded in compo
   (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
   `TalkSession` (`"use client"`) is only the `/talk` view over `useConcierge()`: `CallControls`, the transcript with
   `MessageBox` (keyed on `sessionCount`), then `MemoryStrip` + `PanelTabs` (beside it from lg); `sessionReducer.ts` the
-  phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
+  phases (a 429 `busy`/`site` is its own phase with the reason's line and no retry, D66; `busy`/`visitor` is `closing`, D92) (Jest mocks: see Testing)
 - `components/concierge/` — `ConciergeProvider.tsx` (`"use client"`, D85) owns the one call above the pages: the
   reducer, the session ref, the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`; also in
   state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the actions (connect, leave,
   toggleMic, startAudio, sendMessage over lk.chat, forgetMe RPC), `pagehide` teardown and a bfcache `pageshow` reset;
   `useConcierge()` throws outside it; it also holds `panel` (`openPanel`, `minimizePanel`), `agentSpeaking` (from
-  `RoomEvent.ActiveSpeakersChanged`, D87) and `calloutSeen` (`dismissCallout`; read after mount, D88). `Callout.tsx`
+  `RoomEvent.ActiveSpeakersChanged`, D87), `calloutSeen` (`dismissCallout`; read after mount, D88) and
+  `cachedMemory` (D91: the last memory body for this browser's visitor id, read after mount, saved on each live body,
+  cleared by Forget me; `status.ts` `shownMemory` shows it greyed with "as of" before a call). A 429 busy/visitor is
+  the `closing` phase (D92): one token POST every `BUSY_RETRY_MS` (5 s) for `BUSY_RETRY_LIMIT_MS` (60 s), then busy;
+  Leave cancels (`isActive(phase)`: Leave while closing). `Callout.tsx`
   (D88): the first-visit `role="note"` above the pill, `talkWidget.callout` and Close, until Close, Esc, opening the
   panel or Connect sets `concierge.callout_seen`; shown only at `scrollY 0` with the Footer out of sight. `ConciergePanel.tsx`
   (D86): the non-modal drawer (`role="dialog" aria-modal="false"`, 420 px right at `lg`, a bottom sheet under the
@@ -131,7 +135,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw; contract v2
   (v3 spec § 7, D95): `parseMemory` reads the optional v2 keys, left off a v1 body's result; `parseNavigate` for
   `concierge.navigate`, 1 KiB cap; `isAllowedHref(href, slugs)`, the usher's exact-match allowlist), the memory cache
-  (`memoryCache.ts`: `saveMemory`/`loadMemory`/`clearMemory`, the raw body per visitor id, re-parsed on load, D91), latency stats (`latency.ts`), the visitor id (`visitorId.ts`; `readVisitorId` never writes) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
+  (`memoryCache.ts`: `saveMemory`/`loadMemory`/`clearMemory`, the raw body per visitor id, re-parsed on load, D91; `memoryExpired`, gone after `retention_days`, D96), latency stats (`latency.ts`), the visitor id (`visitorId.ts`; `readVisitorId` never writes) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

@@ -58,7 +58,7 @@ describe('TalkPage', () => {
     const link = screen.getByRole('link', { name: 'my agent harness' });
     expect(link).toHaveAttribute('href', '/projects/agent-harness');
     expect(link.closest('p')).toHaveTextContent(
-      'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
+      "A voice agent I designed on LiveKit and built with my agent harness. It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to the work it's talking about.",
     );
     const classes = link.className.split(/\s+/);
     expect(classes).toContain('underline');

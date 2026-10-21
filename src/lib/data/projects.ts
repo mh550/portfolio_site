@@ -812,7 +812,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
           id: 'VC-A',
           title: 'Preload the memory at connect',
           chose:
-            'loading the visitor\'s facts and last visit summary while the room connects, as one bounded block after the fixed instructions and the knowledge pack,',
+            'loading the visitor\'s facts and last visit summary while the room connects, as one bounded block after the fixed instructions and what it knows about my work,',
           over: 'looking memories up during each turn',
           because:
             'the memory is small enough to load whole, so no turn waits on a lookup, and the start of the prompt stays the same for the whole call, which keeps it cacheable.',
@@ -876,7 +876,7 @@ async function findOrCreateContact(ghlContact, jobtread) {
         { label: 'The agent harness that built it', href: '/projects/agent-harness', kind: 'doc' },
       ],
       builtWith:
-        'The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions, specs in and verified milestones out: Claude Code agents wrote this page\'s code overnight in one run, and a second run is writing the agent.',
+        'The spec and the design are mine: the agent, its memory and the contract between it and this page. My agent harness ran the build sessions: Claude Code agents wrote this page\'s code overnight in one run, and a second run is writing the agent.',
     },
   },
   {

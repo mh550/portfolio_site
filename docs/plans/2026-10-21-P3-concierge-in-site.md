@@ -389,7 +389,10 @@ MemoryView's Profile chips; `MemoryPanel.test.tsx` becomes `MemoryView.test.tsx`
 
 ## Cache
 
-P3-02 builds the module (built: `src/lib/concierge/memoryCache.ts`), P3-07 wires it.
+P3-02 builds the module (built: `src/lib/concierge/memoryCache.ts`), P3-07 wires it. *Wired in P3-07* as below:
+the provider's `cachedMemory`, `status.ts` `shownMemory(state, cachedMemory)` for the strip and the tab, the greyed
+view with `data-stale` (every line `--color-muted` through Tailwind's `**:` variant, dots at 60 %), and a cached body
+never pulses the strip; once forgotten the tab shows only the "Forgotten" line (D91 *As built*).
 
 - **Key per visitor id:** `concierge.memory.<visitor_id>`, the id lower-cased by the key builder (`isUuidV4`
   accepts either case, and the token route lower-cases it too, D43), in `localStorage`.
@@ -416,7 +419,10 @@ P3-02 builds the module (built: `src/lib/concierge/memoryCache.ts`), P3-07 wires
 
 ## Busy retry
 
-P3-07. Today (D66) a 429 `busy` ends the Connect with a status line and no retry. With § 7's 20 s departure rule, a
+P3-07. *Built in P3-07*, with one difference from the table: a token on a retry dispatches a new `closed`
+(closing → connecting) before the Room is made, so `connected` and `agentJoined` stay as they were (accepted from
+`connecting`/`waiting` only); the retry is a loop in `connect()` waiting on the session's `timer` (D92 *As built*).
+Today (D66) a 429 `busy` ends the Connect with a status line and no retry. With § 7's 20 s departure rule, a
 visitor whose earlier room is still closing (a reload, a second tab just closed) gets `reason: 'visitor'` for up to
 about 30 s; the page waits it out.
 
@@ -559,6 +565,15 @@ Filled by P3-10 (one row per finding).
 | P3-06-8 | Minor | `PanelTabs.tsx` compact | at 390 × 844 a v2 body pushes the transcript to its minimum | fixed: 25 vh below lg (P3-09 captures a v2 body to confirm) |
 | P3-06-9 | Minor | `MemoryView.tsx` episodes | every open episode read "in progress" | fixed test-first: only the newest |
 | P3-06-10 | Minor | tests | no StrictMode strip test, no drawer outline with a v2 body | fixed: both added |
+| P3-07-1 | Important | `ConciergeProvider.tsx` cache, `privacyNote` | the browser copy never expired, outlived the server's deletion, and the privacy note didn't mention it | fixed test-first (D96): `memoryExpired` drops a copy past `retention_days`; a seventh privacy line; a local clear control before a call asked of Michael |
+| P3-07-2 | Minor | `limits.ts` bucket, `closing` | `reason: 'visitor'` is per address, so a neighbour on shared Wi-Fi sees the closing line | kept; asked of Michael in D92 *As built* |
+| P3-07-3 | Minor | `fetchCredentials` | a token request in flight was never aborted (Leave → Connect could put two out) | fixed test-first: `AbortController` per session, aborted in teardown |
+| P3-07-4 | Minor | retry wait | `connect()` never settled after teardown during the wait | fixed test-first: `session.wake` ends the wait in teardown |
+| P3-07-5 | Minor | `MemoryView.tsx` stale | the greyed view erased a rejected event's red | fixed test-first: rejected rows keep `--color-mem-event-rejected` |
+| P3-07-6 | Minor | `MemoryStrip.tsx` | stale counts weren't announced as old | fixed test-first: the list's name ends ", as of <time>" (`asOf` prop) |
+| P3-07-7 | Minor | provider cache | another tab's Forget me left this tab showing the erased copy | fixed test-first: `storage` event reloads it |
+| P3-07-8 | Minor | `CLAUDE.md` | a `TESTCOUNT` placeholder | fixed |
+| P3-07-9 | Minor | tests | unmount, Leave → Connect, double click and bfcache during closing unpinned; the rejected-body test thin | fixed: tests added (they passed first: pins, not fixes) |
 
 ## Decisions
 

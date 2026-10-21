@@ -6,7 +6,7 @@ import { focusRing } from '@/components/focusRing';
 import LatencyPanel from '@/components/talk/LatencyPanel';
 import type { SessionState } from '@/components/talk/sessionReducer';
 import MemoryView from './MemoryView';
-import { forgetLine } from './status';
+import { forgetLine, type shownMemory } from './status';
 
 const TABS = ['memory', 'latency', 'privacy'] as const;
 type Tab = (typeof TABS)[number];
@@ -17,10 +17,13 @@ type Tab = (typeof TABS)[number];
 // transcript keeps most of the sheet.
 export default function PanelTabs({
   state,
+  shown = { memory: state.memory, asOf: null },
   onForget,
   compact = false,
 }: {
   state: SessionState;
+  // What the Memory tab shows: the session's body, or the cached one with its time (status.ts shownMemory, D91).
+  shown?: ReturnType<typeof shownMemory>;
   onForget: () => void;
   compact?: boolean;
 }) {
@@ -47,7 +50,8 @@ export default function PanelTabs({
   const content: Record<Tab, ReactNode> = {
     memory: (
       <MemoryView
-        memory={state.memory}
+        memory={shown.memory}
+        asOf={shown.asOf}
         live={state.phase === 'live'}
         forget={state.forget}
         forgetLine={forgetLine(state)}

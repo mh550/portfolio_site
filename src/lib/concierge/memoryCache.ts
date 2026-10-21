@@ -49,6 +49,17 @@ export function loadMemory(storage: MemoryStorage | undefined, visitorId: string
   return parsed ? { body: parsed, savedAt } : null;
 }
 
+// The server deletes a visitor's memory retention_days after their last visit (30 when a v1 body doesn't say); the
+// browser's copy goes no later (D96). An unreadable time counts as expired.
+const DEFAULT_RETENTION_DAYS = 30;
+const DAY_MS = 86_400_000;
+
+export function memoryExpired({ body, savedAt }: CachedMemory, now: number): boolean {
+  const saved = Date.parse(savedAt);
+  if (Number.isNaN(saved)) return true;
+  return now - saved > (body.retention_days ?? DEFAULT_RETENTION_DAYS) * DAY_MS;
+}
+
 export function clearMemory(storage: MemoryStorage | undefined, visitorId: string): void {
   if (!isUuidV4(visitorId)) return;
   try {

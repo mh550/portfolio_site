@@ -9,6 +9,7 @@ import { useConcierge } from './ConciergeProvider';
 import DeepDiveLink from './DeepDiveLink';
 import MemoryStrip from './MemoryStrip';
 import PanelTabs from './PanelTabs';
+import { shownMemory } from './status';
 import { quiet } from './buttons';
 
 const TITLE_ID = 'concierge-panel-title';
@@ -20,7 +21,7 @@ const MEMORY_ID = 'concierge-panel-memory';
 // scroll lock: the page stays usable while the call goes on. In the DOM only while open; Minimize and Esc close it
 // and leave the call alone, and the widget takes focus back (VoiceWidget).
 export default function ConciergePanel() {
-  const { state, sessionCount, sendMessage, forgetMe, panel, minimizePanel } = useConcierge();
+  const { state, cachedMemory, sessionCount, sendMessage, forgetMe, panel, minimizePanel } = useConcierge();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const open = panel === 'open';
 
@@ -29,6 +30,7 @@ export default function ConciergePanel() {
   }, [open]);
 
   if (!open) return null;
+  const shown = shownMemory(state, cachedMemory);
 
   // A control that handles Esc itself (a confirm step) calls preventDefault, and the panel stays; so does an Esc that
   // ends an IME composition in the message box.
@@ -76,8 +78,8 @@ export default function ConciergePanel() {
         <h2 id={MEMORY_ID} className="sr-only">
           {talkPage.memoryView.heading}
         </h2>
-        <MemoryStrip memory={state.memory} />
-        <PanelTabs state={state} onForget={() => void forgetMe()} compact />
+        <MemoryStrip memory={shown.memory} asOf={shown.asOf} />
+        <PanelTabs state={state} shown={shown} onForget={() => void forgetMe()} compact />
       </section>
     </section>
   );

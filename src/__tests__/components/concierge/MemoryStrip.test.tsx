@@ -4,12 +4,15 @@ import MemoryStrip, { stripCounts } from '@/components/concierge/MemoryStrip';
 import { memoryBody, memoryV2, memoryV2NoAgent } from '@/__tests__/fixtures/concierge';
 import type { MemoryBody } from '@/lib/concierge/contract';
 import { talkPage } from '@/lib/data/concierge';
+import { LEARNED_AT_FORMAT } from '@/components/talk/format';
 
 // P3-06, D90: the strip under the message box (plan docs/plans/2026-10-21-P3-concierge-in-site.md § Memory view).
 const { kinds, notReported } = talkPage.memoryView;
 const PULSE = 'motion-safe:animate-pulse';
 
-const chips = () => within(screen.getByRole('list', { name: talkPage.memoryView.strip })).getAllByRole('listitem');
+// The name gains ", as of <time>" for a cached body (D91).
+const chips = () =>
+  within(screen.getByRole('list', { name: new RegExp(`^${talkPage.memoryView.strip}`) })).getAllByRole('listitem');
 const chip = (label: string) => chips().find((li) => li.textContent!.startsWith(label))!;
 const count = (label: string) => chip(label).querySelector('[data-count]')!.textContent;
 const pulsing = () => chips().filter((li) => li.className.includes(PULSE)).map((li) => li.getAttribute('data-kind'));
@@ -175,5 +178,32 @@ describe('MemoryStrip', () => {
       </StrictMode>,
     );
     expect(pulsing()).toEqual(['episodes', 'events', 'knowledge', 'working']);
+  });
+});
+
+// P3-07 (D91): the cached body before a call counts too, greyed, and never pulses; the first live body pulses only
+// the chips that differ from it.
+describe('MemoryStrip: a cached body', () => {
+  const SAVED_AT = '2026-10-20T09:30:00.000Z';
+  const when = new Intl.DateTimeFormat(undefined, LEARNED_AT_FORMAT).format(new Date(SAVED_AT));
+
+  it('asOf marks the strip stale, names its time, and does not pulse when the cached body arrives', () => {
+    const { rerender } = render(<MemoryStrip memory={null} />);
+    rerender(<MemoryStrip memory={memoryV2} asOf={SAVED_AT} />);
+    const list = screen.getByRole('list', { name: `${talkPage.memoryView.strip}, ${talkPage.memoryView.asOf} ${when}` });
+    expect(list).toHaveAttribute('data-stale', 'true');
+    expect(count(kinds.profile)).toBe('3');
+    expect(pulsing()).toEqual([]);
+  });
+
+  it('a live body after the cached one pulses only what changed, and the strip is current again', () => {
+    const { rerender } = render(<MemoryStrip memory={memoryV2} asOf={SAVED_AT} />);
+    const more: MemoryBody = {
+      ...memoryV2,
+      about_visitor: { ...memoryV2.about_visitor!, events: memoryV2.about_visitor!.events!.slice(0, 2) },
+    };
+    rerender(<MemoryStrip memory={more} />);
+    expect(screen.getByRole('list', { name: talkPage.memoryView.strip })).not.toHaveAttribute('data-stale');
+    expect(pulsing()).toEqual(['events']);
   });
 });

@@ -595,17 +595,39 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   `src/lib/concierge/memoryCache.ts` exports `memoryCacheKey`, `saveMemory(storage, visitorId, bodyText, savedAt)`,
   `loadMemory` → `{ body, savedAt } | null` and `clearMemory`; an id that isn't a UUID v4 reads and writes nothing;
   `visitorId.ts` exports `readVisitorId(storage)` (never writes). Nothing calls them yet (P3-07 wires them).
+  *As built (P3-07):* `ConciergeProvider` reads the cache once after mount (only for an id `readVisitorId` finds) and
+  exposes `cachedMemory`; each parsed live body is saved with the time it arrived under the id the token request
+  sent; Forget me's `{ok: true}` clears it, and the agent's last, empty body after it is neither shown nor saved.
+  `status.ts` `shownMemory(state, cachedMemory)` picks what the strip and the Memory tab show: the session's body,
+  else the cached one with `asOf`, else nothing once forgotten. The cached view has `data-stale="true"`, every line
+  in `--color-muted` (`**:` variant) and dots at 60 %, under "as of <date, time>" (`LEARNED_AT_FORMAT`); the strip is
+  greyed alike and a cached body never pulses its chips (the first live body pulses what differs from it). Once
+  forgotten the tab shows only the "Forgotten" line (no "Nothing remembered yet" above it).
 - **D92** *default*: a 429 `busy`/`visitor` enters a `closing` phase ("Closing your earlier conversation…") and
   re-POSTs the token route every 5 s, one request in flight, for up to 60 s, then shows the v1 `busyVisitor` line;
   Leave cancels. Supersedes D66 for `reason: 'visitor'` only; D66 stands for `site` and offline, and D71's line is
   the final line. Reversible: dispatch `busy` on the first 429 again. (Plan § Busy retry; P3-07 builds.)
+  *As built (P3-07):* `BUSY_RETRY_MS` and `BUSY_RETRY_LIMIT_MS` in `ConciergeProvider.tsx`; the retry is a loop
+  inside the same `connect()` (one visitor id, the LiveKit import already under way), each wait on the session's
+  `timer`, which teardown clears, so Leave, `pagehide` and unmount stop it; the deadline is checked when a wait ends
+  (12 POSTs at most: the first at 0 s, then 5 s … 55 s). A token on a retry dispatches `closed` (closing →
+  connecting) before the Room is made, so the rest of the connect runs from `connecting` as it always did (the
+  plan's table had `connected`/`agentJoined` accepted from `closing`; they aren't needed). `isActive(phase)`
+  (`inRoom` or `closing`) makes the one button read Leave while closing. Review: teardown aborts a token request
+  still out (`AbortController` on the session) and ends the wait at once, so `connect()` settles. Question for
+  Michael: `reason: 'visitor'` is the address bucket, not the visitor id, so on shared Wi-Fi a neighbour's call shows
+  B "Closing your earlier conversation…" for a minute, then the "another tab" line; have the route compare the room's
+  `visitor_id` and say `'self'`, or soften the copy ("Waiting for an earlier conversation on this network…")?
 - **D93** *default*: `talkPage.intro` becomes "A voice agent I designed on LiveKit and built with my agent harness.
   It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to
   the work it's talking about." ("my agent harness" still links `/projects/agent-harness`) and "Talk or type. The
   Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you."; the
   deep-dive `builtWith` drops "specs in and verified milestones out", and "knowledge pack" leaves the page.
   Supersedes D62's copy; D62's `IntroParagraph` shape and link stand. Question for Michael: keep the second
-  paragraph, or cut the intro to the first? Reversible: three strings. (Plan § Copy; P3-07 builds.)
+  paragraph, or cut the intro to the first? Reversible: three strings. (Plan § Copy; P3-07 builds.) *As built
+  (P3-07):* both intro paragraphs as above, the deep-dive `builtWith` and decision VC-A's "knowledge pack" → "what it
+  knows about my work"; `docs/notes/evidence-voice-concierge.md` § P3 note has the before/after (no sentence with a
+  digit).
 - **D94** *default*: the usher follows `concierge.navigate` only while the panel's Guide me switch is on (default
   on, `localStorage` `concierge.guide_me`), only to `isAllowedHref` targets ('/', '/about', '/skills',
   '/experience', '/contact', '/projects/<known slug>', exact match; the slugs and short titles come from
@@ -622,3 +644,12 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   `Episode`, `MemoryEvent`, `AboutVisitor`, `AboutAgent` and `NavigateBody` types, `parseNavigate` and
   `isAllowedHref`; a list in `about_visitor` that isn't an array is `null`, a `knowledge.sections` that isn't one
   is `[]`; episodes keep the first 5 good entries and events the first 12.
+- **D96** *default* (P3-07 review): the browser's copy of the memory (D91) lives no longer than the server's: it is
+  dropped and removed on load once `retention_days` (30 when a v1 body doesn't say) have passed since it was saved, or
+  when its time is unreadable (`memoryExpired` in `memoryCache.ts`); another tab saving or clearing it (Forget me
+  there) updates this one through the `storage` event; the privacy note gains a seventh line, after the id line:
+  "This browser keeps a copy of what it last showed you, so the Memory tab has something before you connect. It goes
+  when the server's copy does, or when Forget me runs." Supersedes nothing; extends D91 and spec W2's privacy list.
+  Question for Michael: on a shared browser the copy shows before Connect and only a live call can erase it (Forget
+  me is disabled until then, D90); add a local "Clear this browser's copy" control beside the disabled Forget me,
+  or drop the cache before a call entirely? Reversible: delete the line and the `memoryExpired` call.

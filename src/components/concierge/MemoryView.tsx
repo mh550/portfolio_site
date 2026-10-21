@@ -8,10 +8,15 @@ import { DASH, count, dateTime, day, percent } from '@/components/talk/format';
 // The Memory tab (D90, plan docs/plans/2026-10-21-P3-concierge-in-site.md § Memory view): what the concierge remembers
 // as the agent last sent it on `concierge.memory`. About you (Profile, Episodes, Events) and About the agent
 // (Knowledge, Working, Cache) from a v2 body; a v1 body has only the profile and the summary, and says so. Forget me is
-// always at the foot: live, its confirm step; otherwise disabled, with the hint.
+// always at the foot: live, its confirm step; otherwise disabled, with the hint. Before a call it shows the body the
+// site cached from the last one (D91), greyed, with "as of" its time; once Forget me has gone through, only that line.
 
 const view = talkPage.memoryView;
 const EVENTS_SHOWN = 12;
+// A cached body: every line in the muted grey (still 4.5:1), the kind dots dimmed; a rejected event keeps its red,
+// which is what marks it for sighted readers ("Not kept:" is sr-only).
+const STALE =
+  '**:text-[var(--color-muted)] [&_[data-dot]]:opacity-60 [&_[data-rejected]_span]:text-[var(--color-mem-event-rejected)]';
 
 const Dot = ({ colour }: { colour: string }) => (
   <span aria-hidden="true" data-dot className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${colour}`} />
@@ -144,7 +149,8 @@ function EventRow({ event }: { event: MemoryEvent }) {
   const rejected = event.type === 'gate_rejected';
   const at = dateTime(event.ts);
   return (
-    <li data-type={event.type} title={at ?? undefined} className="flex gap-2 text-white/90">
+    // data-rejected, not the type: Tailwind reads `_` in an arbitrary variant as a space.
+    <li data-type={event.type} data-rejected={rejected ? '' : undefined} title={at ?? undefined} className="flex gap-2 text-white/90">
       <Dot colour={rejected ? 'bg-[var(--color-mem-event-rejected)]' : 'bg-[var(--color-mem-event)]'} />
       {rejected && <span className="sr-only">{`${view.rejected} `}</span>}
       <span className={`min-w-0 break-words ${rejected ? 'text-[var(--color-mem-event-rejected)]' : ''}`}>
@@ -252,12 +258,15 @@ function AboutTheAgent({ id, agent }: { id: string; agent: AboutAgent | null }) 
 
 export default function MemoryView({
   memory,
+  asOf = null,
   live,
   forget,
   forgetLine,
   onForget,
 }: {
   memory: MemoryBody | null;
+  // When `memory` is the cached body: the time it was saved (status.ts shownMemory). Null for a live one.
+  asOf?: string | null;
   live: boolean;
   forget: ForgetStatus;
   forgetLine: string;
@@ -265,19 +274,29 @@ export default function MemoryView({
 }) {
   const id = useId();
   const hintId = `${id}-forget-hint`;
+  const body = memory ? (
+    <>
+      <p className="break-words text-white/90">
+        {`${talkPage.memory.talkingTo} ${memory.visitor.name || talkPage.empty.newVisitor} · ${talkPage.memory.visit} ${memory.visitor.visits}`}
+      </p>
+      <AboutYou id={id} memory={memory} />
+      <AboutTheAgent id={id} agent={memory.about_agent ?? null} />
+      {memory.retention_days ? <Muted>{view.retention(memory.retention_days)}</Muted> : null}
+    </>
+  ) : forget === 'done' ? null : (
+    // Forgotten: the line at the foot says so, and nothing above it contradicts it.
+    <Muted>{talkPage.empty.memory}</Muted>
+  );
+  const savedAt = memory && asOf !== null ? dateTime(asOf) : null;
   return (
     <div className="space-y-6 text-sm">
-      {memory ? (
-        <>
-          <p className="break-words text-white/90">
-            {`${talkPage.memory.talkingTo} ${memory.visitor.name || talkPage.empty.newVisitor} · ${talkPage.memory.visit} ${memory.visitor.visits}`}
-          </p>
-          <AboutYou id={id} memory={memory} />
-          <AboutTheAgent id={id} agent={memory.about_agent ?? null} />
-          {memory.retention_days ? <Muted>{view.retention(memory.retention_days)}</Muted> : null}
-        </>
+      {memory && asOf !== null ? (
+        <div data-stale="true" className={`space-y-6 ${STALE}`}>
+          {savedAt && <p>{`${view.asOf} ${savedAt}`}</p>}
+          {body}
+        </div>
       ) : (
-        <Muted>{talkPage.empty.memory}</Muted>
+        body
       )}
       <div className="space-y-2 border-t border-white/10 pt-4">
         {live ? (

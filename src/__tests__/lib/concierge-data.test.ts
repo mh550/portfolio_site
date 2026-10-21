@@ -9,13 +9,26 @@ describe('talkPage', () => {
   // D62: the harness framing, no hand-written-code claim and no number.
   it('opens the intro with the harness wording, linking the agent-harness case study', () => {
     expect(introText(talkPage.intro[0])).toBe(
-      'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
+      "A voice agent I designed on LiveKit and built with my agent harness. It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to the work it's talking about.",
     );
     expect(talkPage.intro[0]).toMatchObject({ link: { label: 'my agent harness', href: '/projects/agent-harness' } });
     for (const p of talkPage.intro) {
       expect(introText(p)).not.toMatch(/\d/);
       expect(introText(p)).not.toMatch(/Claude Code agents writing/);
     }
+  });
+
+  // D93 (plan § Copy): the second paragraph names the tabs and the button in the page's own words.
+  it('the second paragraph points at the Latency tab and Forget me on the Memory tab', () => {
+    expect(talkPage.intro[1]).toBe(
+      'Talk or type. The Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you.',
+    );
+  });
+
+  it('drops the harness slogan and "pack" from every concierge string', () => {
+    const all = JSON.stringify([talkPage, talkWidget, privacyNote, latencyLabels]);
+    expect(all).not.toMatch(/specs in/i);
+    expect(all).not.toMatch(/\bpack\b/i);
   });
 
   it('has a title, an intro and the button labels', () => {
@@ -54,9 +67,12 @@ describe('talkPage', () => {
 });
 
 describe('privacyNote', () => {
-  it('has six entries, in the order spec W2 lists them', () => {
-    expect(privacyNote).toHaveLength(6);
-    const [what, where, howLong, id, forget, livekit] = privacyNote;
+  it('has seven entries, in the order spec W2 lists them, with the browser copy after the id (D96)', () => {
+    expect(privacyNote).toHaveLength(7);
+    const [what, where, howLong, id, browserCopy, forget, livekit] = privacyNote;
+    expect(browserCopy).toBe(
+      "This browser keeps a copy of what it last showed you, so the Memory tab has something before you connect. It goes when the server's copy does, or when Forget me runs.",
+    );
     expect(what).toMatch(/facts/);
     expect(what).toMatch(/summary/);
     expect(what).toMatch(/transcript/);

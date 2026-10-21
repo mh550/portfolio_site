@@ -188,16 +188,14 @@ describe('TalkSession: the token route', () => {
   });
 });
 
-// D66: a 429 {error:'busy'} says why Connect was refused and leaves the retry to the visitor.
+// D66: a 429 {error:'busy', reason:'site'} says why Connect was refused and leaves the retry to the visitor. A 429
+// for this visitor waits out the earlier room (D92): TalkSession-live.test.tsx, "closing".
 describe('TalkSession: the token route says busy (429)', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
 
-  it.each([
-    ['visitor', talkPage.status.busyVisitor],
-    ['site', talkPage.status.busySite],
-  ])('reason %s shows its line and Connect, makes no Room and never retries', async (reason, line) => {
+  it.each([['site', talkPage.status.busySite]])('reason %s shows its line and Connect, makes no Room and never retries', async (reason, line) => {
     fetchMock.mockResolvedValue(reply(429, { error: 'busy', reason }));
     renderTalk();
     // fireEvent.click doesn't move focus, so this is the case of a click that leaves focus on <body> (Safari): the

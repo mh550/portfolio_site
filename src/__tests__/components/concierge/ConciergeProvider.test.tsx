@@ -1,5 +1,6 @@
 import { StrictMode, useEffect } from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import ConciergeProvider, {
   AGENT_JOIN_TIMEOUT_MS,
   useConcierge,
@@ -13,11 +14,18 @@ import {
   removeParticipant,
   resetRooms,
   restart,
+  pushText,
   setSpeakers,
 } from '@/__mocks__/livekit-client';
 import { AGENT_QUIET_MS } from '@/components/concierge/ConciergeProvider';
 import { talkPage } from '@/lib/data/concierge';
 import { renderTalk } from '@/__tests__/helpers/concierge';
+import TalkSession from '@/components/talk/TalkSession';
+import { dateTime } from '@/components/talk/format';
+import { parseMemory } from '@/lib/concierge/contract';
+import { memoryCacheKey, saveMemory } from '@/lib/concierge/memoryCache';
+import { VISITOR_ID_KEY } from '@/lib/concierge/visitorId';
+import { emptyMemoryJson, memoryJson, memoryV2Json } from '@/__tests__/fixtures/concierge';
 
 // P3-03, D85: the provider owns the one Room above the pages, so a call outlives the view that started it.
 
@@ -432,5 +440,203 @@ describe('ConciergeProvider: the callout', () => {
     renderProbe();
     act(() => ctx.dismissCallout());
     expect(ctx.calloutSeen).toBe(true);
+  });
+});
+
+// P3-07 (D91, plan § Cache): the last memory body per visitor id, shown greyed with "as of" before a call.
+describe('ConciergeProvider: the memory cache', () => {
+  const ID = '0b6f1d2e-3c4a-4b5d-8e6f-7a8b9c0d1e2f';
+  const OTHER = '11111111-2222-4333-8444-555555555555';
+  // An hour ago, so the copy is inside its 30 days whenever the suite runs.
+  const SAVED_AT = new Date(Date.now() - 3_600_000).toISOString();
+  const seed = (visitorId: string | null, cachedFor = ID, body = memoryV2Json) => {
+    if (visitorId) localStorage.setItem(VISITOR_ID_KEY, visitorId);
+    saveMemory(localStorage, cachedFor, body, SAVED_AT);
+  };
+  const memoryTab = () => screen.getByRole('tabpanel', { name: talkPage.headings.memory });
+  const stale = () => memoryTab().querySelector('[data-stale="true"]');
+  const asOf = () => `${talkPage.memoryView.asOf} ${dateTime(SAVED_AT)}`;
+
+  it('loads the cached body for the stored visitor id after mount', () => {
+    seed(ID);
+    renderProbe();
+    expect(ctx.cachedMemory).toEqual({ body: parseMemory(memoryV2Json), savedAt: SAVED_AT });
+  });
+
+  it('nothing is read in the first render, so the server HTML has no cached memory', () => {
+    seed(ID);
+    const html = renderToString(
+      <ConciergeProvider configured>
+        <TalkSession />
+      </ConciergeProvider>
+    );
+    expect(html).not.toContain('data-stale');
+    expect(html).not.toContain('Lisbon');
+  });
+
+  it('before a call the Memory tab shows the cached body greyed, with "as of" its time', () => {
+    seed(ID);
+    renderTalk();
+    expect(stale()).not.toBeNull();
+    expect(within(memoryTab()).getByText(asOf())).toBeInTheDocument();
+    expect(within(stale() as HTMLElement).getByText('Lisbon')).toBeInTheDocument();
+    // The strip counts the cached body too, greyed alike.
+    expect(screen.getByRole('list', { name: `${talkPage.memoryView.strip}, ${asOf()}` })).toHaveAttribute('data-stale', 'true');
+  });
+
+  it('another visitor id loads nothing', () => {
+    seed(OTHER, ID);
+    renderProbe();
+    expect(ctx.cachedMemory).toBeNull();
+  });
+
+  it('no visitor id: no cache read and no id written (D45)', () => {
+    seed(null, ID);
+    const getItem = jest.spyOn(Storage.prototype, 'getItem');
+    renderProbe();
+    expect(ctx.cachedMemory).toBeNull();
+    expect(getItem.mock.calls.map(([key]) => key)).not.toContain(memoryCacheKey(ID));
+    expect(localStorage.getItem(VISITOR_ID_KEY)).toBeNull();
+  });
+
+  it('a storage that throws loads nothing, with no error', () => {
+    seed(ID);
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    renderProbe();
+    expect(ctx.cachedMemory).toBeNull();
+  });
+
+  it('a live body replaces it: saved under the id the token request sent, and shown fresh', async () => {
+    seed(ID);
+    renderTalk();
+    fireEvent.click(screen.getByRole('button', { name: talkPage.labels.connect }));
+    await flush();
+    const room = lastRoom();
+    await act(async () => {
+      addAgent(room, 'agent-1');
+    });
+    expect(stale()).not.toBeNull();
+    await act(() => pushText(room, 'concierge.memory', memoryJson));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).visitor_id).toBe(ID);
+    expect(stale()).toBeNull();
+    expect(within(memoryTab()).queryByText(asOf())).toBeNull();
+    const stored = JSON.parse(localStorage.getItem(memoryCacheKey(ID)) ?? 'null');
+    expect(stored).toMatchObject({ v: 1, body: memoryJson });
+    expect(Date.parse(stored.savedAt)).not.toBeNaN();
+    expect(stored.savedAt).not.toBe(SAVED_AT);
+  });
+
+  it('after Leave the body just received is the cached one, greyed', async () => {
+    renderProbe();
+    const room = await goLive();
+    await act(() => pushText(room, 'concierge.memory', memoryJson));
+    expect(ctx.cachedMemory?.body).toEqual(parseMemory(memoryJson));
+    act(() => ctx.leave());
+    expect(ctx.state.memory).toBeNull();
+    expect(ctx.cachedMemory?.body).toEqual(parseMemory(memoryJson));
+  });
+
+  it('a body the parser rejects is neither shown nor cached', async () => {
+    seed(ID);
+    renderProbe();
+    const room = await goLive();
+    await act(() => pushText(room, 'concierge.memory', '{"visitor":1}'));
+    expect(ctx.cachedMemory?.savedAt).toBe(SAVED_AT);
+    expect(ctx.state.memory).toBeNull();
+    expect(JSON.parse(localStorage.getItem(memoryCacheKey(ID))!).savedAt).toBe(SAVED_AT);
+  });
+
+  // D96: the browser's copy goes when the server's does.
+  it('a copy older than its retention is not shown and is removed', () => {
+    localStorage.setItem(VISITOR_ID_KEY, ID);
+    saveMemory(localStorage, ID, memoryV2Json, new Date(Date.now() - 31 * 86_400_000).toISOString());
+    renderProbe();
+    expect(ctx.cachedMemory).toBeNull();
+    expect(localStorage.getItem(memoryCacheKey(ID))).toBeNull();
+  });
+
+  it('another tab saving or clearing the copy updates this one (storage event)', () => {
+    seed(ID);
+    renderProbe();
+    expect(ctx.cachedMemory).not.toBeNull();
+    const fire = (key: string | null) =>
+      act(() => {
+        window.dispatchEvent(new StorageEvent('storage', { key }));
+      });
+    localStorage.removeItem(memoryCacheKey(ID));
+    fire(memoryCacheKey(ID));
+    expect(ctx.cachedMemory).toBeNull();
+    saveMemory(localStorage, ID, memoryJson, SAVED_AT);
+    fire('unrelated.key');
+    expect(ctx.cachedMemory).toBeNull();
+    fire(memoryCacheKey(ID));
+    expect(ctx.cachedMemory?.body).toEqual(parseMemory(memoryJson));
+    localStorage.clear();
+    fire(null);
+    expect(ctx.cachedMemory).toBeNull();
+  });
+
+  it('removes its storage listener on unmount', () => {
+    const add = jest.spyOn(window, 'addEventListener');
+    const remove = jest.spyOn(window, 'removeEventListener');
+    const { unmount } = renderProbe();
+    const handler = add.mock.calls.find(([type]) => type === 'storage')?.[1];
+    expect(handler).toBeDefined();
+    unmount();
+    expect(remove).toHaveBeenCalledWith('storage', handler);
+  });
+
+  it('Forget me clears the cache, "Forgotten" replaces the view, and the final empty body is not kept', async () => {
+    seed(ID);
+    renderTalk();
+    fireEvent.click(screen.getByRole('button', { name: talkPage.labels.connect }));
+    await flush();
+    const room = lastRoom();
+    await act(async () => {
+      addAgent(room, 'agent-1');
+    });
+    await flush();
+    await act(() => pushText(room, 'concierge.memory', memoryJson));
+    fireEvent.click(screen.getByRole('button', { name: talkPage.labels.forgetMe }));
+    fireEvent.click(screen.getByRole('button', { name: talkPage.labels.erase }));
+    await flush();
+    expect(localStorage.getItem(memoryCacheKey(ID))).toBeNull();
+    expect(within(memoryTab()).queryByText('Lisbon')).toBeNull();
+    expect(within(memoryTab()).queryByText(talkPage.empty.memory)).toBeNull();
+    expect(within(memoryTab()).getByText(talkPage.status.forgotten)).toBeInTheDocument();
+    // The agent's last word before it ends the call (spec § 4): an empty body, not cached, not shown.
+    await act(() => pushText(room, 'concierge.memory', emptyMemoryJson));
+    await act(async () => {
+      room.emit(RoomEvent.Disconnected);
+    });
+    expect(localStorage.getItem(memoryCacheKey(ID))).toBeNull();
+    expect(stale()).toBeNull();
+    expect(within(memoryTab()).getByText(talkPage.status.forgotten)).toBeInTheDocument();
+    expect(within(memoryTab()).queryByText(talkPage.empty.memory)).toBeNull();
+  });
+});
+
+// Review (P3-07): Leave during the closing wait settles connect(), so nothing awaiting it hangs.
+describe('ConciergeProvider: closing', () => {
+  it('connect() settles when Leave ends the wait', async () => {
+    jest.useFakeTimers();
+    try {
+      fetchMock.mockResolvedValue(reply(429, { error: 'busy', reason: 'visitor' }));
+      renderProbe();
+      let settled = false;
+      act(() => {
+        void ctx.connect().then(() => (settled = true));
+      });
+      await flush();
+      expect(phase()).toBe('closing');
+      act(() => ctx.leave());
+      await flush();
+      expect(settled).toBe(true);
+      expect(phase()).toBe('idle');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

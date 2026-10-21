@@ -1,5 +1,12 @@
 import { parseMemory } from '@/lib/concierge/contract';
-import { clearMemory, loadMemory, memoryCacheKey, saveMemory, type MemoryStorage } from '@/lib/concierge/memoryCache';
+import {
+  clearMemory,
+  loadMemory,
+  memoryCacheKey,
+  memoryExpired,
+  saveMemory,
+  type MemoryStorage,
+} from '@/lib/concierge/memoryCache';
 import { memoryBody, memoryJson, memoryV2, memoryV2Json } from '../fixtures/concierge';
 
 // The memory cache (plan docs/plans/2026-10-21-P3-concierge-in-site.md § Cache, D91): the last concierge.memory
@@ -146,5 +153,30 @@ describe('on window.localStorage', () => {
     expect(loadMemory(window.localStorage, ID)?.body).toEqual(memoryBody);
     clearMemory(window.localStorage, ID);
     expect(window.localStorage.length).toBe(0);
+  });
+});
+
+// P3-07 review (D96): the browser's copy lives no longer than the server's: retention_days after it was saved (30 for a
+// v1 body, which doesn't say), and an unreadable time counts as expired.
+describe('memoryExpired', () => {
+  const DAY = 86_400_000;
+  const saved = Date.parse(AT);
+  const v1 = { body: parseMemory(memoryJson)!, savedAt: AT };
+  const v2 = (days: number | null) => ({ body: { ...memoryV2, retention_days: days }, savedAt: AT });
+
+  it('a v1 body keeps 30 days', () => {
+    expect(memoryExpired(v1, saved + 30 * DAY)).toBe(false);
+    expect(memoryExpired(v1, saved + 30 * DAY + 1)).toBe(true);
+  });
+
+  it("a v2 body keeps its own retention_days", () => {
+    expect(memoryExpired(v2(7), saved + 7 * DAY)).toBe(false);
+    expect(memoryExpired(v2(7), saved + 7 * DAY + 1)).toBe(true);
+    expect(memoryExpired(v2(null), saved + 30 * DAY + 1)).toBe(true);
+  });
+
+  it('an unreadable savedAt is expired; a savedAt in the future is not', () => {
+    expect(memoryExpired({ ...v1, savedAt: 'not a date' }, saved)).toBe(true);
+    expect(memoryExpired(v1, saved - DAY)).toBe(false);
   });
 });

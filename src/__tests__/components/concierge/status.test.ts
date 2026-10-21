@@ -17,6 +17,7 @@ describe('statusLine', () => {
     ['offline', { phase: 'offline' }, talkPage.offlineMessage],
     ['busy, this visitor', { phase: 'busy', busyReason: 'visitor' }, status.busyVisitor],
     ['busy, the site', { phase: 'busy', busyReason: 'site' }, status.busySite],
+    ['closing the earlier conversation (D92)', { phase: 'closing' }, 'Closing your earlier conversation…'],
   ])('%s', (_name, patch, line) => {
     expect(statusLine(at(patch))).toBe(line);
   });
