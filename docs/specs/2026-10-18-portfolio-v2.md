@@ -508,3 +508,66 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   projects. Reversible: append the line to `resumeProjects[0].bullets` and change the two-bullet checks in
   `experience-data.test.ts` and `experience.test.tsx`. Question for Michael: add the third bullet, and should the
   project periods use `–` like the roles? (P2-04 review, finding 1; plan `docs/plans/2026-10-21-P2-experience.md` § Review.)
+- **D85** *default*: a `ConciergeProvider` (`src/components/concierge/ConciergeProvider.tsx`, client) mounted by
+  `SiteChrome` on every chrome page owns the one Room, so a call survives client-side navigation; `/talk`'s
+  `TalkSession` reads it through `useConcierge()`. `configured` comes from `src/app/layout.tsx` (`conciergeEnv() !==
+  null`, a Server Component) as a prop through `SiteChrome`, so no client file imports `env.ts`; `pagehide`
+  disconnects and a bfcache `pageshow` resets to idle. Supersedes D46's "the `/talk` page passes `configured` to
+  TalkSession" (the env check stands); D45 (Room and visitor id made in the Connect handler, now the provider's)
+  and D44 (chrome, indexable, sitemap) stand. Reversible: `git revert` P3-03. (P3-01 plan
+  `docs/plans/2026-10-21-P3-concierge-in-site.md` § Ownership; P3-03 builds.)
+- **D86** *default*: the concierge panel is a non-modal drawer (`role="dialog" aria-modal="false"`, labelled by its
+  title): 420 px on the right at ≥ 1024 px, a full-height bottom sheet under the Navbar below that, `z-[45]`
+  (Navbar `z-50`, pill `z-40`), rendered only while open, no focus trap, no `inert`, no scroll lock; Esc and
+  Minimize close it without ending the call; never on `/talk` or `/card*`. Supersedes nothing (new). Reversible:
+  drop `ConciergePanel` from `SiteChrome`. (Plan § Panel; P3-04 builds.)
+- **D87** *default*: the widget is the "Ask my site" pill: a `<button aria-expanded>` that toggles the panel, a
+  three-bar sound glyph that moves only while the agent speaks (`motion-safe:`), a live dot and the accessible
+  names "Ask my site: listening" / "Ask my site: speaking" during a call, collapsed to the glyph at ≤ 390 px once
+  scrolled; the twice-pulsing ring goes, and the Footer keeps `pb-24` at every width (the pill is wider). Supersedes
+  D61's mic disc linking to `/talk`, its ring and `xl:pb-8`; D61's placement (`fixed right-4`, safe-area bottom,
+  `z-40`, `print:hidden`, not on `/talk` or `/card*`, kept on `/evidence`) stands. Reversible: `git revert` P3-05's
+  widget commit. (Plan § Widget; P3-04 and P3-05 build.)
+- **D88** *default*: a first-visit callout next to the pill, "This site talks. Ask it about my work, by voice or
+  text.", with a Close button; `localStorage` key `concierge.callout_seen` (try/catch), set by Close or by opening
+  the panel; rendered after mount only, entrance under `motion-safe:` only, never on `/card*`. Supersedes nothing.
+  Reversible: drop `Callout` from `SiteChrome`. (Plan § Callout; P3-05 builds.)
+- **D89** *default*: the Navbar has six links: Home, About, Skills, Projects, Experience, Contact. `/talk` stays in
+  the sitemap and the smoke routes and is reached from `/card`, the deep-dive and the panel's call. Supersedes D60
+  (Talk on the Navbar) and D79's "seven links"; the v3 spec § 4.1's "seven links" counted Approach, gone since P1.
+  Reversible: one entry in `Navbar.tsx`. (Plan § Widget; P3-05 builds.)
+- **D90** *default*: the memory view shows six kinds (Profile, Episodes, Events, Knowledge, Working, Cache) in About
+  you / About the agent, coloured by new `globals.css` tokens `--color-mem-profile` `#00d4ff`, `--color-mem-episode`
+  `#fbbf24`, `--color-mem-event` `#4ade80`, `--color-mem-event-rejected` `#f87171`, `--color-mem-knowledge`
+  `#a78bfa`, `--color-mem-working` `#f472b6` (each ≥ 6.17:1 on every dark surface; Cache uses `--color-muted`); the
+  strip counts Knowledge as sections and Working as items; a v1 body shows Profile and the summary and "not
+  reported by this agent version" for the rest; Forget me is always in the Memory tab, disabled with "Connect to
+  erase what it remembers" before a call. `MemoryPanel` is replaced by `MemoryView`. Supersedes VC2's separate
+  "What it remembers" panel. Reversible: `git revert` P3-06. (Plan § Memory view; P3-06 builds.)
+- **D91** *default*: the last `concierge.memory` body is cached in `localStorage` under `concierge.memory.<visitor_id>`
+  as `{ v: 1, savedAt, body: <the raw JSON text> }` and re-parsed with `parseMemory` on load; `readVisitorId` reads
+  the id without creating one, so D45's "no id stored before Connect" holds; Forget me clears it. Supersedes
+  nothing. Reversible: stop calling `saveMemory`. (Plan § Cache; P3-02 and P3-07 build.)
+- **D92** *default*: a 429 `busy`/`visitor` enters a `closing` phase ("Closing your earlier conversation…") and
+  re-POSTs the token route every 5 s, one request in flight, for up to 60 s, then shows the v1 `busyVisitor` line;
+  Leave cancels. Supersedes D66 for `reason: 'visitor'` only; D66 stands for `site` and offline, and D71's line is
+  the final line. Reversible: dispatch `busy` on the first 429 again. (Plan § Busy retry; P3-07 builds.)
+- **D93** *default*: `talkPage.intro` becomes "A voice agent I designed on LiveKit and built with my agent harness.
+  It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to
+  the work it's talking about." ("my agent harness" still links `/projects/agent-harness`) and "Talk or type. The
+  Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you."; the
+  deep-dive `builtWith` drops "specs in and verified milestones out", and "knowledge pack" leaves the page.
+  Supersedes D62's copy; D62's `IntroParagraph` shape and link stand. Question for Michael: keep the second
+  paragraph, or cut the intro to the first? Reversible: three strings. (Plan § Copy; P3-07 builds.)
+- **D94** *default*: the usher follows `concierge.navigate` only while the panel's Guide me switch is on (default
+  on, `localStorage` `concierge.guide_me`), only to `isAllowedHref` targets ('/', '/about', '/skills',
+  '/experience', '/contact', '/projects/<known slug>', exact match; the slugs and short titles come from
+  `layout.tsx` as a prop, so `projects.ts` stays out of the client bundle), at most once per 8 s, never while on `/talk`,
+  with the transcript notice "Taking you to <name>". Supersedes nothing (new). Reversible: unregister the topic.
+  (Plan § Usher; P3-02 and P3-08 build.)
+- **D95** *default*: contract v2 parsing: every v2 field is optional and never a reason to reject a body; a v1 body
+  parses to exactly today's object (the v2 keys left off); a malformed entry inside a v2 list is dropped on its own
+  (v1's `facts` rule, which rejects the body, stands); `concierge.navigate` bodies over 1 KiB are dropped;
+  `concierge.get_memory` is named (`RPC_GET_MEMORY`) but not called in P3, since the agent pushes memory at
+  session start and the cache covers the time before a call. Extends the 2026-10-19 contract § 4 (its 15 KiB cap
+  stands). Reversible: the parser's v2 branch is one function. (Plan § Contract v2; P3-02 builds.)

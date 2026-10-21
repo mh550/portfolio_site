@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P3-01 · passes
+
+- New `docs/plans/2026-10-21-P3-concierge-in-site.md`, all 14 sections: Ownership (the `ConciergeProvider` context table, what moves out of TalkSession.tsx function by function, `configured` from layout.tsx as a prop, `pagehide`/bfcache, StrictMode), Contract v2 (a parse table for every § 7 field; v1 bodies parse unchanged with no v2 keys), Panel/Widget/Callout (ASCII layouts at 1024+ and 390, focus order, z-[45]), Memory view (six `--color-mem-*` tokens, every one ≥ 6.17:1 on all three surfaces), Cache, Busy retry (`closing` transition table), Usher, Copy before/after, Tests per feature. D85–D95 are recorded in the v2 spec § v3 decisions; the next free number is D96. No code changed: 1167 tests, 86 suites, before and after.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke 0 FAIL; a grep for every item the steps name. An Opus review of the plan against P3-01…P3-08 found 16 issues (1 Critical, 7 Important), all fixed in the plan.
+- Next session (P3-02): the existing 'contract constants' test pins `TOPIC` with `toEqual`. Add `navigate` there; it is the only existing contract case that changes. `readVisitorId` must not write.
+- For P3-03 on: once P3-08 adds `useRouter`, every provider render needs `next/navigation` mocked (plan § Tests). `calloutSeen` lives in the provider, so the callout stays hidden after Minimize. Project slugs and titles reach the provider as `usherTargets` from layout.tsx, so `projects.ts` stays out of the client bundle.
+- Question for Michael (D93): keep the new second intro paragraph ("Talk or type. The Latency tab shows…, and Forget me on the Memory tab erases…"), or cut the intro to the spec's first paragraph?
+- Proposed change: none. P3-04's "`h-dvh` or `max-h-dvh`" is met by `top-16 … max-h-dvh`, so the sheet starts under the z-50 Navbar.
+
 ### 2026-10-21 verify · verify P2
 
 | Feature | Step | What you ran or read | What you saw | Holds |
