@@ -6,6 +6,7 @@ import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
 import EvidencePage from '@/app/evidence/page';
+import ExperiencePage from '@/app/experience/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
@@ -21,6 +22,7 @@ const pages: [string, () => ReactElement][] = [
   ['/card', () => <CardPage />],
   ['/card/qr', () => <CardQrPage />],
   ['/evidence', () => <EvidencePage />],
+  ['/experience', () => <ExperiencePage />],
   ['/talk', () => <TalkPage />],
   ['/projects/agent-harness', () => caseStudy('agent-harness')],
   ['/projects/home-media-server', () => caseStudy('home-media-server')],

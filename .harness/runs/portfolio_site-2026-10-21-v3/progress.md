@@ -13,6 +13,64 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 verify · verify P2
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P2-01 | 1 | `grep '^## ' docs/plans/2026-10-21-P2-experience.md`; read Decisions | Data, Links, Layout, Tests, What Michael will see, Review, Decisions present; D82 Earlier list (reversible) | yes |
+| P2-01 | 2 | Read experience.ts; python check that every ≥40-char string in it occurs in spec § 8 | Bullet type exact; 6 role + 4 project bullets all found in spec; titles/periods/repos/hrefs as stated; earlierRoles no bullets; 6 coursework | yes |
+| P2-01 | 3 | Read bullet links in experience.ts; experience-data.test 'are exactly the four links of the § 3 table' | Four links with exactly the stated hrefs; test asserts the table | yes |
+| P2-01 | 4 | Read experience-data.test.ts (11 tests: verbatim, link once, slug resolves, public repos, titles) | Assertions match the step; all pass | yes |
+| P2-01 | 5 | Read BulletWithLinks.test.tsx (plain, internal, external, mid-sentence, missing span) | Covers all four required cases; passes | yes |
+| P2-01 | 6 | `npx jest --testPathPatterns 'experience|BulletWithLinks|content-guard|a11y-new|card'` | 10 suites, 135 tests pass (content-guard, experience page included) | yes |
+| P2-01 | 7 | Ran lib/check.sh; `npx eslint` | check green (cached for this tree); eslint exit 0 | yes |
+| P2-02 | 1 | Read experience/page.tsx and experience.test.tsx 'orders the h2s', links, Earlier, coursework tests | Order h1, roles, Projects, Earlier, Education; tests assert hrefs, deep-dive/repo links, no list in Earlier, six coursework; pass | yes |
+| P2-02 | 2 | Read a11y-new-pages.test.tsx line 25; ran it | /experience included; passes; page uses sectioned h2/h3 with no skipped levels | yes |
+| P2-02 | 3 | `git diff --stat <after P1-08>..HEAD -- src/app/card src/__tests__/pages/card.test.tsx` | empty: /card untouched; card tests pass | yes |
+| P2-02 | 4 | grep CLAUDE.md for experience.ts and /experience rows | Names Bullet, resumeProjects, earlierRoles; Routes row says 'roles with linked bullets, resume projects, Earlier, education' | yes |
+| P2-02 | 5 | lib/check.sh; `node .harness/smoke.mjs` | check green; smoke 0 FAIL, all routes PASS incl. /experience at 1280 and 390 | yes |
+| P2-03 | 1 | `ls -l docs/screenshots/v3/P2-*` | 1280: 279741 B, 390: 263128 B, both under 400 KB | yes |
+| P2-03 | 2 | Read plan § What Michael will see; own Playwright at 390 on dev server | Plan lists links/Projects/Earlier/coursework; measured max li right edge 366 ≤ 390, 0 overflowing li, page scrollWidth 390, 4 links underlined with the right hrefs | yes |
+| P2-03 | 3 | `node .harness/print-check.mjs http://localhost:7835 /experience …/print-experience.png` | PASS print, exit 0, linksNotUnderlined 0, nav/footer hidden | yes |
+| P2-03 | 4 | lib/check.sh; smoke | green; smoke all PASS | yes |
+| P2-04 | 1 | Read plan § Review table; git log since P1-08 | 9 findings each with severity, file:line, resolution; digit claims traced to § 8 (my own check found all bullets in the spec) | yes |
+| P2-04 | 2 | `git log --oneline` 025c040 (Important #2 fix), tests named in plan | Important fix in its own commit with tests; Minors fixed or reasoned; finding 1 recorded as D84 | yes |
+| P2-04 | 3 | Read Role in experience.ts; `npx eslint` | Role.type gone, textLink shared; eslint clean | yes |
+| P2-04 | 4 | Read docs/review-guide.md '## P2 (v3)', CLAUDE.md, spec D82–D84 | Section present with look-at and merge notes; CLAUDE.md matches code; D82–D84 in v2 spec | yes |
+| P2-04 | 5 | lib/check.sh; smoke | green; smoke all PASS | yes |
+
+### 2026-10-21 04:45 · P2-04 · passes
+
+- Review: an Opus reviewer read `$HARNESS_SCRATCH/P2.diff` (1145 lines). It found 0 Critical, 2 Important and 7 Minor. All ten new bullets match § 8 character for character, so every number traces. The table is in the plan's § Review.
+- Fixed test-first (025c040): new-tab links on /experience (the repo lines, any external bullet link) now carry an sr-only "(opens in new tab)", like Footer and /card. Two tests were red before the fix.
+- Simplification (1b251bb): `Role.type` dropped (nothing read it). New `components/textLink.ts` is the one link class for /evidence, /experience and BulletWithLinks. The Projects test now reads the rendered `li`s. The vestigial "Pioneered" test and a duplicate title test are gone. One test added: a missing link span renders as plain text. Tests 1168 → 1167 (86 suites).
+- The other Important finding (the agent harness's third § 8 bullet, "189 features passed in 4 days at ~$3 each", is left out) I re-rated Minor. § 3 says "two bullets each", so it became **D84** *default* and is not a code change. **Michael: add that bullet? And should the project periods use `–` like the roles (they keep § 8's `-` now)?**
+- Docs: the v2 spec has D84, and docs/review-guide.md has `## P2 (v3)` (what to look at, undo). CLAUDE.md now has the textLink, the D84 and new-tab notes and the 1167 count.
+- Verified: `.harness/check.sh` printed `check: lint ok · jest ok · build ok`. smoke.mjs exit 0 (41 PASS). print-check PASS on /experience and /evidence. curl /experience shows the sr-only cue.
+- Next: P2 is done. The D83 and D84 questions stay open for Michael.
+
+### 2026-10-21 04:20 · P2-03 · passes
+
+- Changed: added `docs/screenshots/v3/P2-experience-1280.png` (273 KB) and `-390.png` (257 KB) from the dev server on :7835. Filled in the § What Michael will see table in `docs/plans/2026-10-21-P2-experience.md` (one row per capture plus a print row). CLAUDE.md's captures note now mentions P2. No code changed: tests stay at 1168 (86 suites).
+- Verified: `.harness/check.sh` printed `check: lint ok · jest ok · build ok`. smoke.mjs exit 0 (41 PASS). captures.mjs reported scroll 0 at 390. The longest bullet (music server, 211 chars) has its box at x 24→366 and scrollWidth = clientWidth = 342. `print-check.mjs … /experience` printed `PASS print` with linksNotUnderlined 0.
+- Michael: the bullet links are foreground text with an accent underline (50 %), not accent-coloured text. This is the /evidence look, and the plan row says so. If you want the phrases in accent, it's one class in `BulletWithLinks.tsx`.
+- Next (P2-04): the 390 capture shows the fixed VoiceWidget over the Builder Clarity heading and the Next dev "N". Both are artefacts of a full-page dev capture, not layout bugs. The third agent-harness bullet from § 8 is still left out (see P2-02).
+
+### 2026-10-21 04:05 · P2-02 · passes
+
+- `/experience` now renders: h1 · the two roles (bullets via `BulletWithLinks`) · h2 Projects (name h3 → deep-dive, `github.com/…` repo line → GitHub in a new tab, period, two bullets) · h2 Earlier (one `<p>` per role, title · company · period, no `<ul>`) · h2 Education (six resume coursework items). Projects/Earlier/Education are `section`s labelled by their h2. The page now has local `Bullets`, `Divider` and `PERIOD` helpers, so roles and projects share one bullet list.
+- Tests: 1160 → 1168 (86 suites). `experience.test.tsx` covers the h2 order, the four bullet links, the deep-dive and repo links (via `within` the Projects section), Earlier with no `ul`, and the coursework. `a11y-new-pages.test.tsx` now includes `/experience`.
+- Verified: `.harness/check.sh` printed `lint ok · jest ok · build ok`. smoke.mjs exit 0, every route PASS. I looked at captures.mjs full-page shots at 1280 and 390: no scroll, links underlined. Nothing under src/app/card or card.test.tsx changed. CLAUDE.md: Routes row and Data Layer line updated, test count 1168.
+- Next (P2-03): the captures go to docs/screenshots/v3 (`node .harness/captures.mjs docs/screenshots/v3 P2 /experience` gives `P2-experience-*.png`, ~270 KB each). Resume § 8 has a third agent-harness bullet (189 features, ~$3 each) that P2-01 left out because the feature says two bullets each. P2-04 could ask Michael about it.
+
+### 2026-10-21 · P2-01 · passes
+
+- `experience.ts` now carries resume v4 (§ 8) word for word. `Bullet` (string or `{ text, links }`) and `bulletText`; `roles` holds only MAXX and Builder Clarity, three bullets each, with the four § 3 links. New: `resumeProjects` (agent harness, music server: href, repo, period, two bullets each) and `earlierRoles` (Tahoma, High Cascade: no bullets, D82). Coursework is the six resume items. New `components/experience/BulletWithLinks.tsx` (Server Component); `/experience` renders the bullets through it. Plan: `docs/plans/2026-10-21-P2-experience.md`.
+- Tests: 1146 → 1160 (84 → 86 suites). New `experience-data.test.ts` (holds the § 8 strings) and `BulletWithLinks.test.tsx`. Updated `experience.test.tsx` and `data.test.ts` (2 roles). `claims-on-linked-page` now reads the projects and earlier roles too.
+- Verified: `.harness/check.sh` printed `lint ok · jest ok · build ok`; smoke.mjs passed every route; curl /experience showed the four links with the right hrefs.
+- Next session (P2-02): the page doesn't render `resumeProjects` or `earlierRoles` yet, so Tahoma and High Cascade are missing from /experience until then. `Role.type` is still unused (P2-04 decides). The M2-03 High Cascade age-range test is gone along with that bullet.
+- D83 *default*: six /evidence items cite /experience lines that the resume dropped (Capability Patterns, migrations ×2, de facto PM, Agile/Scrum, mentoring). They keep their link. The mentoring item lost "12–18" so the claims check holds. **Michael: keep, relink or drop these six?** D82: is the Earlier list OK?
+
 ### 2026-10-21 verify · verify P1
 
 Re-ran check.sh (green), full jest (84 suites, 1146 tests), smoke.mjs (all PASS), logos-check, print-check, captures.mjs; read the code and tests named below. All 8 features hold.

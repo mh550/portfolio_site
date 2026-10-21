@@ -22,7 +22,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
 | `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
-| `/experience` | Work history & education |
+| `/experience` | roles with linked bullets, resume projects, Earlier, education: resume v4 (v3 spec § 8) through `BulletWithLinks`; a project's name links its deep-dive, its repo line GitHub (new-tab links carry an sr-only "(opens in new tab)"); Earlier is one line per role, no bullets (D82) |
 | `/contact` | Contact |
 | `/approach` | permanent redirect to /about#how-i-work (D79): 308 from `next.config.ts` `redirects()`, pinned by `src/__tests__/app/approach-redirect.test.ts`; no page, off the Navbar, sitemap and smoke routes |
 | `/evidence` | Noindex, off the Navbar: six `competencies` × 2–4 linked items via `resolvedItems` (`competencies.ts`, D7; rubric stub `docs/notes/maxx-level-4.md`) |
@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1146 tests, 84 suites after P1-08)
+npm test             # Jest unit/integration tests (1167 tests, 86 suites after P2-04)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -71,7 +71,7 @@ The dev server must be running first (`npm run dev`). The `.playwright/cli.confi
 Single source of truth for all page content — no content is hardcoded in components:
 - `projects.ts` — `Project[]` with slug, title, categories, techStack, detail sections; `getProjectBySlug()`, `getProjectsByCategory()`
 - `skills.ts` — `SkillCategory[]`; four capability groups (process, systems, build, operate); `process` (Process & delivery) is `featured: true` (D20)
-- `experience.ts` — `Role[]` + `Education` object
+- `experience.ts` — resume v4 line for line: `Bullet` (a string, or `{ text, links }` spans; `bulletText`), `roles` (MAXX, Builder Clarity), `resumeProjects` (two bullets each, D84), `earlierRoles` (D82) and `education`
 - `profile.ts` — `profile`: name, positioning, contact and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (Diagnose → Simplify, the case studies' spine) next to `loopSteps` (Spec → Learn, the
   hero and /about strip, D77), and the six `principles` (`resolvedExamples`, `loopStepExample` for /about How I work); `competencies.ts` — the six `/evidence` competencies
@@ -91,7 +91,7 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `components/SiteChrome.tsx` — Navbar + skip link + `#content` wrapper + Footer + VoiceWidget (not on `/talk`, `talkWidget.href`), none of them on `/card*` (`"use client"`)
 - `components/VoiceWidget.tsx` — the floating 56 px link to `/talk` (`talkWidget` in `concierge.ts`, D61): `fixed right-4`, safe-area bottom, `z-40`, `print:hidden`, a ring that pulses twice only under `motion-safe:`; shown on every chrome page (`/evidence` too) but not on `/talk` or `/card*`
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
-- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, about, evidence)
+- `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, about, evidence); `components/textLink.ts` — the underlined in-text link look built on it (`/evidence`, `/experience`, `BulletWithLinks`)
 - `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
   (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
   non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
@@ -170,7 +170,7 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
   Screenshots go to `$HARNESS_SCRATCH`. A page added by a milestone goes into `.harness/smoke-routes.txt`.
 - Captures: `node .harness/captures.mjs <outDir> <prefix> <path>...` scrolls each page through (so ScrollReveal
   sections show), saves full-page PNGs at 1280 and 390 and prints eyebrow, strip rows, How I work links per page
-  (P1's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
+  (P1's and P2's are in `docs/screenshots/v3/`; shrink one over 400 KB with PIL `quantize`).
 - `case-study-agent-harness.test.ts` compares the page's code excerpt with `lib/driver.sh` in the agent-harness checkout
   (`AGENT_HARNESS_DIR`, default `/home/mh550/projects/agent-harness`; skipped when absent): editing those lines there
   turns this suite red until the excerpt is re-copied.
