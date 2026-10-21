@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import FloatingLogos from '@/components/hero/FloatingLogos';
+import { logoPaths } from '@/components/logos/paths';
 
 let mockReduced = false;
 const mockAnimate: unknown[] = [];
@@ -25,14 +26,32 @@ beforeEach(() => {
 });
 
 describe('FloatingLogos', () => {
-  it('renders all skill logos', () => {
-    render(<FloatingLogos />);
-    const labels = ['TypeScript', 'React', 'Supabase', 'Vercel', 'n8n', 'Zapier', 'Claude', 'Pipedream', 'Linear'];
-    for (const label of labels) {
-      // Either an SVG with aria-label or a div with the monogram text
-      const el = screen.queryByRole('img', { name: label }) ?? screen.queryByText('PD');
-      expect(el ?? screen.queryByTitle(label)).toBeTruthy();
+  // The twelve marks of the stack (D78), from components/logos/paths.ts
+  const LABELS = [
+    'Claude Code', 'LiveKit', 'Python', 'TypeScript', 'Bash', 'SQLite',
+    'PostgreSQL', 'Docker', 'Linux', 'Next.js', 'n8n', 'GitHub',
+  ];
+
+  it('renders exactly the twelve stack logos', () => {
+    const { container } = render(<FloatingLogos />);
+    for (const label of LABELS) {
+      expect(screen.getByRole('img', { name: label, hidden: true })).toBeInTheDocument();
     }
+    expect(container.querySelectorAll('svg')).toHaveLength(12);
+  });
+
+  it('drops the old marks', () => {
+    render(<FloatingLogos />);
+    for (const label of ['Zapier', 'Supabase', 'Linear', 'Pipedream', 'React', 'Vercel', 'Claude']) {
+      expect(screen.queryByRole('img', { name: label, hidden: true })).toBeNull();
+    }
+  });
+
+  it('draws every mark from the generated paths on a 24×24 box', () => {
+    const { container } = render(<FloatingLogos />);
+    const ds = [...container.querySelectorAll('path')].map((p) => p.getAttribute('d'));
+    expect(ds.sort()).toEqual(Object.values(logoPaths).map((l) => l.path).sort());
+    for (const svg of container.querySelectorAll('svg')) expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
   });
 
   it('is aria-hidden so screen readers skip it', () => {
@@ -55,7 +74,7 @@ describe('FloatingLogos', () => {
 
   it('floats every logo when motion is allowed', () => {
     render(<FloatingLogos />);
-    expect(mockAnimate.filter(Boolean)).toHaveLength(9);
+    expect(mockAnimate.filter(Boolean)).toHaveLength(12);
   });
 
   it('keeps the logos still with reduced motion', () => {
@@ -66,14 +85,14 @@ describe('FloatingLogos', () => {
 
   it('grows a logo on hover only when motion is allowed', () => {
     render(<FloatingLogos />);
-    expect(mockHover).toHaveLength(9);
+    expect(mockHover).toHaveLength(12);
     for (const h of mockHover) expect(h).toMatchObject({ scale: 1.5 });
   });
 
   it('only recolours a hovered logo with reduced motion (no scale)', () => {
     mockReduced = true;
     render(<FloatingLogos />);
-    expect(mockHover).toHaveLength(9);
+    expect(mockHover).toHaveLength(12);
     for (const h of mockHover) {
       expect(h).toMatchObject({ color: '#00d4ff' });
       expect(h).not.toHaveProperty('scale');

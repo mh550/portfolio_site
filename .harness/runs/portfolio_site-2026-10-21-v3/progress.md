@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 06:30 · P1-03 · passes
+
+`scripts/logos.mjs` (`npm run logos`) writes `src/components/logos/paths.ts` (`logoPaths`, 12 keys, `LogoKey`; header: simple-icons 16.9.0, CC0, brand guidelines apply); `Logo.tsx` (title or `decorative`); `FloatingLogos` reads `logoPaths` in four columns outside the text column (plan § Logos); `pipedreamPath` and `public/pipedream.svg` gone; `simple-icons` moved to devDependencies at exactly 16.9.0. New `.harness/logos-check.mjs`. Tests: paths.test, Logo.test (new), FloatingLogos.test (12 names, none of the dropped six): 1122 → 1141 tests, 80 → 82 suites. CLAUDE.md Commands/Components/Code rules, D78 marked as built in the spec and plan.
+Content guard: siPostgresql's path contains `1.582.553.9942` (compact SVG for 1.582 .553 .9942), which matched the US phone pattern. Fixed the content, not the guard: the generator adds separating spaces only in paths that trip the pattern (same 976 tokens, checked by tokenizing both) and throws if a path still trips it. Only postgresql is respaced.
+Verified: tests red first; `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `npm run logos` twice → `git diff` on src/components/logos clean; `npm ls simple-icons` 16.9.0; `grep "from 'simple-icons'" src` empty; `node .harness/logos-check.mjs` → logos: 12, overlaps: 0 at 1280×720/800/900 (hero text, navbar, VoiceWidget); smoke exit 0, 42 PASS; 1280 home screenshot looked at. Opus review of the diff: no findings.
+Next session (P1-04): next free decision **D81**. No new questions.
+Proposed change (repeat of P1-01's): step 3's "path starting with 'M'" is tested as `/^[Mm]/` (siClaude starts with `m`).
+
 ### 2026-10-21 05:45 · P1-02 · passes
 
 `profile.ts`: positioning "Agentic Systems Engineer", v3 subline (tagline unchanged). `approach.ts`: `LoopStepId`, `LoopStep`, `loopSteps` (five rows verbatim from v3 spec § 2, principles per plan); `aboutIntro[1]` = "I work the way my harness runs: Spec, Context, Build, Verify, Learn."; `methodSteps` untouched. `MethodStrip` maps `loopSteps`. Tests updated/added in profile, vcard, vcf-route, layout-metadata, card, HeroSection, MethodStrip, home, about, approach (lib + page's strip loop now reads `loopSteps`): 1111 → 1122 tests, 80 suites. brand.md § Positioning has a `### v3` subsection (10-18 kept as history); D76/D77 marked as built in the v2 spec and plan; CLAUDE.md MethodStrip line.
