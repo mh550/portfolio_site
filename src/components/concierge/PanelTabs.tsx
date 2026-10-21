@@ -70,7 +70,7 @@ export default function PanelTabs({
 
   return (
     <div>
-      <div role="tablist" aria-label={talkPage.memoryView.tabs} className="flex gap-1 border-b border-white/10">
+      <div role="tablist" aria-label={talkPage.memoryView.heading} className="flex gap-1 border-b border-white/10">
         {TABS.map((tab) => {
           const on = tab === selected;
           return (

@@ -53,7 +53,7 @@ const classesOf = (el: Element) => (el.getAttribute('class') ?? '').split(/\s+/)
 
 function open() {
   fireEvent.click(widget());
-  return screen.getByRole('dialog', { name: talkWidget.panelTitle });
+  return screen.getByRole('dialog', { name: talkWidget.label });
 }
 
 describe('ConciergePanel', () => {
@@ -68,7 +68,7 @@ describe('ConciergePanel', () => {
     const panel = open();
     expect(panel).toHaveAttribute('aria-modal', 'false');
     expect(panel).toHaveAttribute('id', 'concierge-panel');
-    const title = screen.getByRole('heading', { level: 2, name: talkWidget.panelTitle });
+    const title = screen.getByRole('heading', { level: 2, name: talkWidget.label });
     expect(panel).toHaveAttribute('aria-labelledby', title.id);
     expect(title).toHaveAttribute('tabindex', '-1');
   });
@@ -77,7 +77,7 @@ describe('ConciergePanel', () => {
     renderChrome();
     const panel = open();
     const order = [
-      screen.getByRole('heading', { name: talkWidget.panelTitle }),
+      screen.getByRole('heading', { name: talkWidget.label }),
       screen.getByRole('button', { name: 'Minimize' }),
       screen.getByRole('button', { name: talkPage.labels.connect }),
       screen.getByRole('switch', { name: talkWidget.guideMe }),
@@ -129,7 +129,7 @@ describe('ConciergePanel', () => {
   it('opening moves focus to the header title', () => {
     renderChrome();
     open();
-    expect(screen.getByRole('heading', { name: talkWidget.panelTitle })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: talkWidget.label })).toHaveFocus();
   });
 
   it('Minimize closes it and hands focus back to the widget', () => {
@@ -247,7 +247,7 @@ describe('ConciergePanel', () => {
         <p>projects</p>
       </SiteChrome>
     );
-    expect(screen.getByRole('dialog', { name: talkWidget.panelTitle })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: talkWidget.label })).toBeInTheDocument();
   });
 
   it('offline: shows the status line and the deep-dive link', async () => {

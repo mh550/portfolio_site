@@ -56,7 +56,7 @@ export default function ConciergePanel() {
             tabIndex={-1}
             className="font-mono text-sm uppercase tracking-widest text-[var(--color-accent)] outline-none"
           >
-            {talkWidget.panelTitle}
+            {talkWidget.label}
           </h2>
           <button
             type="button"

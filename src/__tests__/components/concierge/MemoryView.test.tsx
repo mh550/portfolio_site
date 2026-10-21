@@ -3,7 +3,7 @@ import MemoryView from '@/components/concierge/MemoryView';
 import { LEARNED_AT_FORMAT } from '@/components/talk/format';
 import { emptyMemory, memoryBody, memoryV2, memoryV2NoAgent } from '@/__tests__/fixtures/concierge';
 import type { MemoryBody, MemoryEvent } from '@/lib/concierge/contract';
-import { talkPage } from '@/lib/data/concierge';
+import { latencyLabels, talkPage } from '@/lib/data/concierge';
 
 // P3-06, D90: the Memory tab (plan docs/plans/2026-10-21-P3-concierge-in-site.md § Memory view). Replaces VC2's
 // MemoryPanel: About you (Profile, Episodes, Events) and About the agent (Knowledge, Working, Cache), from a v2 body,
@@ -247,7 +247,7 @@ describe('MemoryView: About the agent, from a v2 body', () => {
 
   it('Cache: the cached share as a percentage', () => {
     renderView();
-    expect(within(kind(view.kinds.cache)).getByText(view.cachedShare).nextElementSibling).toHaveTextContent('75%');
+    expect(within(kind(view.kinds.cache)).getByText(latencyLabels.cachedShare).nextElementSibling).toHaveTextContent('75%');
   });
 
   it('null numbers render a dash; a null Knowledge or Working object reads "not reported…"', () => {
@@ -262,7 +262,7 @@ describe('MemoryView: About the agent, from a v2 body', () => {
     expect(within(kind(view.kinds.knowledge)).getByText(view.notReported)).toBeInTheDocument();
     const w = within(kind(view.kinds.working));
     for (const label of Object.values(view.working)) expect(w.getByText(label).nextElementSibling).toHaveTextContent(/^–$/);
-    expect(within(kind(view.kinds.cache)).getByText(view.cachedShare).nextElementSibling).toHaveTextContent(/^–$/);
+    expect(within(kind(view.kinds.cache)).getByText(latencyLabels.cachedShare).nextElementSibling).toHaveTextContent(/^–$/);
   });
 
   it('a v2 body without about_agent reads one line for the whole section', () => {

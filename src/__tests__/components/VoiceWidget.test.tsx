@@ -33,7 +33,6 @@ describe('VoiceWidget', () => {
       speaking: 'Ask my site: speaking',
       callout: 'This site talks. Ask it about my work, by voice or text.',
       close: 'Close',
-      panelTitle: 'Ask my site',
       minimize: 'Minimize',
       guideMe: 'Guide me',
       guideMeHint: 'Lets the concierge open the pages it talks about',

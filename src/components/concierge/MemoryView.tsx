@@ -248,7 +248,7 @@ function AboutTheAgent({ id, agent }: { id: string; agent: AboutAgent | null }) 
             )}
           </Kind>
           <Kind id={`${id}-cache`} name={view.kinds.cache} colour="bg-[var(--color-muted)]">
-            <Facts rows={[[view.cachedShare, percent(cache?.cached_share ?? null)]]} />
+            <Facts rows={[[latencyLabels.cachedShare, percent(cache?.cached_share ?? null)]]} />
           </Kind>
         </>
       )}

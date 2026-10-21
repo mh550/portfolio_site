@@ -70,10 +70,9 @@ export const talkPage = {
   },
   // The Memory tab and the strip (D90, plan § Memory view): the v2 body's six kinds of memory in two sections.
   memoryView: {
-    // The strip and the tabs' section: a visually hidden h2, so heading navigation reaches them
+    // The strip and the tabs' section: a visually hidden h2, so heading navigation reaches them; also the tablist's name
     heading: 'Memory, latency and privacy',
     strip: 'What it remembers, by kind',
-    tabs: 'Memory, latency and privacy',
     aboutYou: 'About you',
     aboutAgent: 'About the agent',
     kinds: {
@@ -94,7 +93,6 @@ export const talkPage = {
     retention: (days: number) => `Kept ${days} days after your last visit`,
     knowledge: { words: 'Words', estTokens: 'Est. tokens', sections: 'Sections', source: 'Source' },
     working: { items: 'Items', estTokens: 'Est. tokens', compacted: 'Compacted', compactions: 'Compactions' },
-    cachedShare: 'Prompt tokens from cache',
   },
   speakers: { visitor: 'You', agent: 'Concierge' },
 };
@@ -129,7 +127,7 @@ export const latencyLabels = {
 };
 
 // The "Ask my site" pill on every chrome page but /talk (D87, VoiceWidget): `label` is its visible text and, idle, its
-// accessible name; while a call is live the name says whether the agent is listening or speaking. It opens the
+// accessible name, and the panel's title; while a call is live the name says whether the agent is listening or speaking. It opens the
 // concierge panel (D86); `href` is the page SiteChrome leaves both off. `callout` is the first-visit bubble (D88).
 // `guideMe` is the panel's switch for the usher (D94); its transcript notice is `notice` and the destination's name: a
 // page's from `pageNames`, a project's short title.
@@ -139,7 +137,6 @@ export const talkWidget = {
   speaking: 'Ask my site: speaking',
   callout: 'This site talks. Ask it about my work, by voice or text.',
   close: 'Close',
-  panelTitle: 'Ask my site',
   minimize: 'Minimize',
   guideMe: 'Guide me',
   guideMeHint: 'Lets the concierge open the pages it talks about',
