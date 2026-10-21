@@ -34,10 +34,11 @@ describe('MethodStrip', () => {
 
   it('reads loopSteps, not the case-study methodSteps (D77)', () => {
     render(<MethodStrip showLines />);
+    // Build and Verify are labels of both; every methodSteps line is gone
     for (const step of methodSteps.filter((s) => !loopSteps.some((l) => l.label === s.label))) {
       expect(screen.queryByText(step.label)).toBeNull();
-      expect(screen.queryByText(step.line)).toBeNull();
     }
+    for (const step of methodSteps) expect(screen.queryByText(step.line)).toBeNull();
   });
 
   it('has no links or buttons', () => {
