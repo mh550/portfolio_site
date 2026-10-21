@@ -13,6 +13,60 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 verify · verify P1
+
+Re-ran check.sh (green), full jest (84 suites, 1146 tests), smoke.mjs (all PASS), logos-check, print-check, captures.mjs; read the code and tests named below. All 8 features hold.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P1-01 | 1 | step 1 check | ls plan + grep '^## ': Positioning, Loop strip, Logos, About, Approach fold, Site-wide strings, Tests, What Michael will see, Review, Decisions all present; Positioning table lists brand.md/HeroSection etc. | yes |
+| P1-01 | 2 | step 2 check | Plan § Loop strip (lines 29-92) has LoopStep type, 5 rows; they match spec §2 table lines 50-54 verbatim (grep); mapping matches approach.ts | yes |
+| P1-01 | 3 | step 3 check | Plan § Logos (93-179) read: 12 marks, generator, devDependency, Logo, positions; logos-check overlaps 0 | yes |
+| P1-01 | 4 | step 4 check | Plan § Approach fold: names next.config redirects(), stub fallback, file list; built version = redirects (curl 308) | yes |
+| P1-01 | 5 | step 5 check | v2 spec D75-D81 present, each with Superseded lines on D1/D23/D32/D39 | yes |
+| P1-01 | 6 | step 6 check | check.sh green (cached, same code tree) + full `npx jest --silent`: 84 suites, 1146 tests pass; smoke all PASS | yes |
+| P1-02 | 1 | step 1 check | profile.ts:19,21 strings exact; vcard.ts TITLE from positioning; the listed jest files + case-study/approach/MethodStrip/home/about suites: 17 suites 153 tests pass; vcf-route.test asserts 'TITLE:Agentic Systems Engineer' | yes |
+| P1-02 | 2 | step 2 check | approach.ts loopSteps ids/labels/lines/principles read vs spec §2 (match); methodSteps unchanged; case-study-anchors + components/case-study green | yes |
+| P1-02 | 3 | step 3 check | home.test.tsx:17-22 asserts Spec..Learn and no /Diagnose/; MethodStrip/HeroSection tests pass; grep approachIntro in src: none | yes |
+| P1-02 | 4 | step 4 check | aboutIntro in approach.ts = subline + labels joined; about.test.tsx:64-71 asserts subline and labels in order; approach.test.ts:45-72 five ids unique, principle exists | yes |
+| P1-02 | 5 | step 5 check | v2 spec D76, D77 present (lines 454, 460); plan § Decisions present | yes |
+| P1-02 | 6 | step 6 check | check.sh green (cached) and smoke.mjs all PASS incl. every route | yes |
+| P1-03 | 1 | step 1 check | ran `node scripts/logos.mjs` twice: 'git status --porcelain src/components/logos' empty; header names 16.9.0, CC0, brand guidelines; 12 keys verified; package.json scripts.logos present | yes |
+| P1-03 | 2 | step 2 check | package.json devDependencies simple-icons 16.9.0, not in dependencies; grep from 'simple-icons' in src empty; npm ls shows 16.9.0 | yes |
+| P1-03 | 3 | step 3 check | Logo.tsx viewBox 0 0 24 24, <title> or aria-hidden; paths.test.ts, Logo.test.tsx pass (3+2 tests, both modes) | yes |
+| P1-03 | 4 | step 4 check | FloatingLogos renders 12 via Logo (rendered home HTML has the 12 titles; test asserts names by accessible name, none of Zapier/Supabase/Linear/Pipedream/React/Vercel, hidden xl:, reduced motion); no pipedreamPath. Names come from svg <title> not aria-label (equivalent accessible name) | yes |
+| P1-03 | 5 | step 5 check | `node .harness/logos-check.mjs` printed 12 boxes, logos: 12, overlaps: 0; smoke passes | yes |
+| P1-03 | 6 | step 6 check | CLAUDE.md lines 44, 89, 154 cover npm run logos, paths.ts, simple-icons devDependency D78 | yes |
+| P1-03 | 7 | step 7 check | check.sh green (cached); 84 jest suites pass | yes |
+| P1-04 | 1 | step 1 check | curl /about: section#how-i-work aria-labelledby, h2 'How I work' between story and Philosophy, 5 /projects/ links; about.test.tsx:97-139 asserts section, 5 items/links, resolveProjectLink | yes |
+| P1-04 | 2 | step 2 check | intro = aboutIntro (captures.mjs intro text); about.test.tsx:84 Philosophy 'I build and connect things'; old-angle guard test passes | yes |
+| P1-04 | 3 | step 3 check | bullets file: 14 top-level bullets, 0 non-bullet prose lines, order Duke/Builder Clarity/MAXX/harness+concierge/next, all end with (source), 2 '(failure story)', no phone number | yes |
+| P1-04 | 4 | step 4 check | jest content-guard, about, a11y-new-pages, claims-on-linked-page: 4 suites 115 tests pass | yes |
+| P1-04 | 5 | step 5 check | check.sh green (cached) and smoke.mjs all PASS | yes |
+| P1-05 | 1 | step 1 check | curl -sI /approach: HTTP/1.1 308, location: /about#how-i-work | yes |
+| P1-05 | 2 | step 2 check | src/app/approach and approach.test.tsx absent (ls); approach-redirect.test.ts asserts source/destination/permanent true; passes | yes |
+| P1-05 | 3 | step 3 check | Navbar.tsx 7 links in order, grep -c "'/approach'" = 0; Navbar.test.tsx:22,51 pin the list (desktop + mobile menu) | yes |
+| P1-05 | 4 | step 4 check | grep /approach in sitemap.ts, smoke-routes.txt, a11y test, competencies-links: none (sitemap-robots test is src/__tests__/app/); approach.ts keeps principles/resolvedExamples/exampleHref; approachClosing absent | yes |
+| P1-05 | 5 | step 5 check | CLAUDE.md rows /approach, /about (How I work), MethodStrip two users present; review-guide.md '## P0–P1 (v3)' at line 222 | yes |
+| P1-05 | 6 | step 6 check | check.sh green (cached), smoke PASS incl. '/approach → /about#how-i-work' | yes |
+| P1-06 | 1 | step 1 check | grep old-angle phrases in src public: no hits (rc=1); grep 'Agentic Systems Engineer' profile.ts: one line (19) | yes |
+| P1-06 | 2 | step 2 check | layout-metadata.test.ts:6 pins title; plan § Site-wide strings table lists before/after per page; skills/projects descriptions rewritten | yes |
+| P1-06 | 3 | step 3 check | card.test.tsx:14, card-qr.test.tsx:25, vcf-route.test.ts:28 assert new string; live /michael-herron.vcf has TITLE:Agentic Systems Engineer; /card has no 'Glad we met'; opengraph-image.test.ts passes | yes |
+| P1-06 | 4 | step 4 check | brand.md § Positioning has '### v3 (2026-10-21)' with strings + loop, 10-18 text kept as history | yes |
+| P1-06 | 5 | step 5 check | git diff --stat of the snapshots dir since P0-01: empty (no hunks to explain; plan § Tests says so); full jest 84/84 suites green | yes |
+| P1-06 | 6 | step 6 check | CLAUDE.md rows / and /about, Data Layer loopSteps next to methodSteps, MethodStrip loopSteps, spec line names 2026-10-21 spec: all read | yes |
+| P1-06 | 7 | step 7 check | check.sh green (cached) | yes |
+| P1-07 | 1 | step 1 check | six PNGs exist in docs/screenshots/v3/ all < 400 KB (max 363 KB), taken by captures.mjs | yes |
+| P1-07 | 2 | step 2 check | plan § What Michael will see: table of 6 captures + /approach + print rows, with eyebrow, strip, logos overlaps 0, about links; my own captures.mjs run: eyebrow AGENTIC SYSTEMS ENGINEER, strip 1 row@1280 / 2 rows@390, 5 About hrefs identical, gladWeMet false | yes |
+| P1-07 | 3 | step 3 check | curl -sI /approach location /about#how-i-work, row in table; print-check.mjs /about exit 0 (PASS print) | yes |
+| P1-07 | 4 | step 4 check | smoke.mjs all PASS (no horizontal scroll at 390 on /, /about, /card) | yes |
+| P1-07 | 5 | step 5 check | check.sh green (cached) | yes |
+| P1-08 | 1 | step 1 check | plan § Review: 12 rows with severity, file:line, resolution; cites P1.diff and P0-01.diff files | yes |
+| P1-08 | 2 | step 2 check | No Critical/Important; git log shows 4 'P1-08 review #n' commits for fixes (#1,#3,#7,#9), Minor others fixed or reasoned (rows 2,10-12) | yes |
+| P1-08 | 3 | step 3 check | Simplification pass paragraph in plan; `npx eslint .` prints nothing | yes |
+| P1-08 | 4 | step 4 check | CLAUDE.md, review-guide § P0–P1 (v3), asset-checklist exist; v2 spec § v3 decisions holds D75-D81 consecutively | yes |
+| P1-08 | 5 | step 5 check | check.sh green (cached) + smoke all PASS | yes |
+
 ### 2026-10-21 09:40 · P1-08 · passes
 
 Opus review of `P1.diff` (after P0-01..HEAD, 2866 lines) + `P0-01.diff` (2588) from scratch: **0 Critical, 0 Important**, 7 Minor, 5 Nit, all in the plan's § Review table. Fixed test-first in their own commits: #1 FloatingLogos now draws with `Logo` (it had no user; new test red first), #3 the old-angle guard also catches the 10-18 subline (red first on about.test:78, now built from parts), #9 MethodStrip test asserts every `methodSteps` line absent, #7 booth lines out of `.gitignore`. Docs: "Superseded by D7x (v3)" lines on D1/D23/D32/D39 (v2 spec) and D60 (VC page spec); D77/D79 built notes record the deletions; review guide § P0–P1 has P0-01…P1-08 bullets and D75–D81; CLAUDE.md count and Logo line. Simplification: four types in approach.ts no longer exported (nothing imports them); no duplicated strings. **D81** *default*: `principles` stays whole as data (corrects the v3 spec's reason: /evidence and the case studies don't read it). Tests 1145 → 1146, 84 suites.
