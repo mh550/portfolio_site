@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 08:10 · P3-10 · passes
+
+- Opus review of `P3.diff` (from 'HARNESS: after P2-04', 11 129 lines): 0 Critical, 1 Important, 5 Minor. Important fixed test-first in its own commit `81bb8d6`: `new lk.Room({ disconnectOnPageLeave: false })` (LiveKit's own `beforeunload` listener ended a live call on a `mailto:` click; the mock now mimics it). Minor: retry deadline on `performance.now()` (`b46fef4`, test-first); 4 kept with reasons (plan § Review P3-10-2…6). A Sonnet docs-vs-code pass found one stale `panelTitle` in D87, fixed.
+- Simplification: `TalkSession.tsx` 471 → 42 → 29 lines; new `concierge/MemorySection.tsx` shared by drawer and `/talk`; duplicated copy (`panelTitle`, `memoryView.tabs`, `memoryView.cachedShare`) and dead `memory.fact.channel/source/confidence` removed; Forget me looks in `buttons.ts`; every reducer action is dispatched (none dead). Tests 1627 → 1629 (97 suites).
+- Docs: `docs/review-guide.md` § P3 (v3) (morning check on a preview: pill → drawer → name → Guide me follow → Forget me; look-at; undo), VC2 plan "As of P3" note, D85/D92 *As built (P3-10)*, CLAUDE.md.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS); new tests failed first (`beforeunload` disconnected; phase stayed `closing` with the clock set back).
+- Questions for Michael: no view shows a fact's `confidence` since MemoryPanel went (P3-06): fine? D84, D92 (now also the second-tab case), D93, D94, D96 still open.
+- Proposed change (carried): `HeroSection` (`'use client'`) imports the `@/lib/data` barrel, so `/` ships projects.ts; import `@/lib/data/<file>`.
+
 ### 2026-10-21 07:30 · P3-09 · passes
 
 - New `.harness/concierge-check.mjs` (fresh context per scenario, token POSTs fulfilled by `page.route`, next dev's badge hidden) and `.harness/fixtures/memory-v2.json` (the `memoryV2` fixture as JSON, pinned by new `src/__tests__/harness/concierge-check-fixture.test.ts`). Nine captures in `docs/screenshots/v3/` (28–313 KB): `P3-home-callout-{390,1280}`, `P3-projects-open-{1280,390}`, `P3-projects-minimized-1280`, `P3-memory-cached-390`, `P3-closing-1280`, `P3-talk-{1280,390}`. Plan § What Michael will see: one row per capture + the Jest tests that cover the live state (VoiceWidget speaking, MemoryStrip pulse, usher). CLAUDE.md How to verify. Tests 1625 → 1627 (97 suites).
