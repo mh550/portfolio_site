@@ -150,7 +150,7 @@
       "after": [
         "P1-06"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P1-08",

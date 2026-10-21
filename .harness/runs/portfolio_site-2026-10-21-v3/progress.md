@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 08:50 · P1-07 · passes
+
+Six P1 captures in `docs/screenshots/v3/` (home/about/card × 1280/390, 97–354 KB; three quantized from 476/528/514 KB), taken with the new `.harness/captures.mjs` (scrolls each page through so ScrollReveal sections show, prints eyebrow, strip rows, How I work links, "Glad we met", scroll). Plan § What Michael will see filled: one row per capture + `/approach` and print rows + an observation. `print-check.mjs` failed on /about with `nonBlackText: 1`: the `<source>` in the video has no computed style (colour `""`); the check now skips empty colours (never run on /about before). CLAUDE.md How to verify names captures.mjs. Tests 1145 / 84 suites, unchanged.
+Verified: hero strip at 390 on **2** rows (`ol` 342 × 56), 1 row at 1280; eyebrow `AGENTIC SYSTEMS ENGINEER`; five How I work links/hrefs printed; card `Agentic Systems Engineer`, no "Glad we met"; `logos-check` → logos: 12, overlaps: 0; `curl -sI /approach` → 308, `location: /about#how-i-work`; print-check /about exit 0 (capture looked at); smoke exit 0, 41 PASS; `.harness/check.sh` → `check: lint ok · jest ok · build ok`. All six captures looked at.
+Next session (P1-08): next free decision **D81**. Full-page captures put the fixed VoiceWidget and the Next dev "N" over a line of the /about story at 390 (capture artifact, noted in the plan).
+Proposed change for P1-08/P6: /about's Philosophy still reads "I find where processes break down, then architect automations and integrations to fix them", the pre-v3 angle; the old-angle guard doesn't catch that wording.
+
 ### 2026-10-21 08:20 · P1-06 · passes
 
 `/skills` and `/projects` metadata descriptions rewritten for the agentic angle (plan § Site-wide strings; every other page's description was read and holds or follows `profile`). The grep's last hit was a ProjectsGrid test title, renamed. New `lib/positioning-strings.test.ts` (old-angle phrases on no non-binary file in src/public, spacing/hyphen/`&amp;` variants) and `pages/projects.test.tsx`; OG test pins the alt with the new positioning; card-qr asserts the literal. brand.md heading is now `### v3 (2026-10-21)`. CLAUDE.md: spec line names the v3 spec, `/` and `/about` rows, approach.ts line, count. Plan § Tests: rows added, snapshot row says unchanged. Tests 1140 → 1145, 82 → 84 suites.

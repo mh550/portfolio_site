@@ -32,7 +32,8 @@ const r = await page.evaluate(() => {
       whiteSpace: css(p).whiteSpace, maxHeight: css(p).maxHeight, clipped: p.scrollWidth > p.clientWidth,
     })),
     linksNotUnderlined: [...document.querySelectorAll("main a")].filter(a => !css(a).textDecorationLine.includes("underline")).length,
-    nonBlackText: new Set([...document.querySelectorAll("main *")].map(e => css(e).color).filter(c => c !== "rgb(0, 0, 0)")).size,
+    // "" = no computed style: a <source> inside <video> (/about) is never rendered, so it has no colour to check
+    nonBlackText: new Set([...document.querySelectorAll("main *")].map(e => css(e).color).filter(c => c && c !== "rgb(0, 0, 0)")).size,
   };
 });
 await page.screenshot({ path: out, fullPage: true });
