@@ -3,7 +3,7 @@
   "project": "portfolio_site",
   "branch": "harness/portfolio_site-2026-10-21-v3",
   "started": "2026-10-21T06:09:39.000Z",
-  "ended_at": "2026-10-21T14:49:41.000Z",
+  "ended_at": "2026-10-21T14:50:05.000Z",
   "end_reason": "done",
   "continuations": 0,
   "features": {
@@ -68,7 +68,7 @@
     "end": 6
   },
   "cost": {
-    "total": 128.6,
+    "total": 128.76,
     "per_passing_feature": 3.48,
     "by_role": {
       "init": 7.63,
@@ -77,18 +77,19 @@
       "plan": 10.8,
       "check": 5.61,
       "review": 18.08,
-      "docs": 15.46
+      "docs": 15.46,
+      "retro": 0.17
     },
     "by_model": {
       "claude-fable-5-1": 7.63,
-      "claude-sonnet-5-5": 3.21,
+      "claude-sonnet-5-5": 3.38,
       "claude-opus-5-5": 117.75
     },
     "manager": 0
   },
   "time": {
     "wall_h": 8.67,
-    "sessions_h": 8.51,
+    "sessions_h": 8.52,
     "driver_h": 0.16,
     "by_role_h": {
       "init": 0.34,
@@ -97,12 +98,13 @@
       "plan": 0.64,
       "check": 0.47,
       "review": 1.09,
-      "docs": 0.85
+      "docs": 0.85,
+      "retro": 0.01
     }
   },
   "sessions": {
-    "total": 45,
-    "real": 45,
+    "total": 46,
+    "real": 46,
     "environmental": 0
   },
   "guards": {
