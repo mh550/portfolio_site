@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 10:50 · P6-02 · passes
+
+- New `docs/design/2026-10-21-design-directions.html` (docs only; tests 1859 → 1859). Three directions, each with the home hero and the Recent work cards drawn at 1280 and 390 in real copy, a 7–8 token palette with a computed contrast table (memory colours checked on each surface), free fonts with licence sources (IBM Plex; Press Start 2P + Atkinson Hyperlegible; Barlow/Barlow Condensed + Space Mono + DSEG7, all OFL), motion rules, and the concierge panel drawn per direction (tmux pane; CRT bezel; rack module with the Latency tab as VU meters). Then best practices, a comparison table, and **recommendation 1, the terminal**, with a token-only first pass (colours, Plex via next/font, radii incl. bare `--radius`, the hard-coded cyan in NodeGraph/FloatingLogos/OG image/themeColor and their pins).
+- Built by `$HARNESS_SCRATCH/p602/build.py` from `template.html` (bitmap and seven-segment SVG, swatches, contrast tables; it fails on any pair under 4.5/3 and curls every URL: 18 × 200 in the trailing comment). The frontend-design skill was used.
+- Verified: `p602/p6-02-check.mjs` at 1280 and 390, normal and reduced motion: 0 console errors, 0 external requests, scrollWidth 390/390; `rm-check.mjs`: scanlines 5 shown → 0 under reduce, cursor animation none; `grep -c '<script\|<link \|<img\|url(\|@font-face'` → 0; every screen looked at as a PNG.
+- Opus review: 7 Important + 11 Minor, all fixed (vignette removed so the reduced-motion claim and the 5 % texture rule hold; red/blue ratios restated; ProjectCard order change said plainly; token pass gained `--radius`, hard-coded colours, Plex weights; phone text ≥ 15 px; four of the latency rows drawn and why; usher notice now a real target; knobs flagged as a departure from § 11).
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: terminal (1) as recommended, or do you want the cartridge (2) or the desk (3)? If 1, the next step is the token-only PR described at the end of the file (a new D for the fonts).
+
 ### 2026-10-21 10:15 · P6-01 · passes
 
 - New `docs/design/2026-10-21-projects-showcase-options.html` (docs only; tests 1859 → 1859). Three options for `/projects`, each drawn at 1280 × 800 and 390 × 844 in the site tokens with real titles, metrics and iteration texts: (A) one graph for projects and stack, Agent Harness selected with its 9 `skills.ts` edges and a side panel / bottom sheet; (B) case-file grid, company tab, a cover standing in for each project's `architectureDiagram`, `metrics[0]` band, today's category chips; (C) a dated log of the 17 `caseStudy.iterations`. Each has a 10-second read, cost (fields reused, new components), 3–5 references and risks; then a comparison table, **recommendation B** (fastest read for hiring managers, cheapest, covers from 9 existing diagrams), and what A shares with the P5 graph (data, `lib/graph`, selection model, List view; D99's d3-force caveat).

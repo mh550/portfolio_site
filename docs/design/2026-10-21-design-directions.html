@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three retro directions for the site: terminal, cartridge, mixing desk</title>
+<style>
+/* ---------- The document: the same light review board as the showcase options, so the dark screens read as screens ---------- */
+:root {
+  --board: #e4e6ec;
+  --sheet: #f3f4f7;
+  --ink: #15161d;
+  --ink-2: #474a59;
+  --rule: #b8bbc7;
+  --note: #1c4fc4;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Charter, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--board); color: var(--ink); font: 17px/1.55 var(--sans); }
+.doc { max-width: 1180px; margin: 0 auto; padding: 56px 32px 80px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0; }
+h1 { font-size: 2.6rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.9rem; margin-top: 4.5rem; }
+h3 { font-size: 1.15rem; margin-top: 2rem; font-family: var(--sans); font-weight: 650; }
+p, ul, ol { margin: 0.7rem 0 0; }
+ul, ol { padding-left: 1.25rem; }
+li + li { margin-top: 0.3rem; }
+a { color: var(--note); text-underline-offset: 2px; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--note); outline-offset: 2px; border-radius: 2px; }
+code { font: 0.86em var(--mono); background: var(--sheet); padding: 0.05em 0.3em; border-radius: 3px; overflow-wrap: anywhere; }
+.lede { font-size: 1.15rem; color: var(--ink-2); margin-top: 1rem; }
+.byline { color: var(--ink-2); font-size: 0.95rem; margin-top: 0.6rem; }
+.option-head { display: flex; gap: 1rem; align-items: baseline; margin-top: 5rem; border-top: 2px solid var(--ink); padding-top: 1.2rem; }
+.option-head .letter { font: 600 3.2rem/1 var(--serif); color: var(--note); }
+.option-head h2 { margin: 0; }
+.idea { font-size: 1.1rem; margin-top: 0.4rem; color: var(--ink-2); max-width: 68ch; }
+figure { margin: 2rem 0 0; }
+figcaption { font-size: 0.9rem; color: var(--ink-2); margin-top: 0.6rem; max-width: 68ch; }
+.pair { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 3rem; align-items: start; margin-top: 2.5rem; }
+.pair.wide { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); }
+.pair figure { margin: 0; }
+.notes h3:first-child { margin-top: 0; }
+.plan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 2.5rem; margin-top: 1.5rem; }
+.plan h3 { margin-top: 1rem; }
+.swatches { list-style: none; padding: 0; font-size: 0.93rem; }
+.swatches li { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.sw { width: 1.4rem; height: 1.4rem; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); flex: none; }
+.verdict { background: var(--sheet); border-left: 4px solid var(--note); padding: 1.2rem 1.4rem; margin-top: 1.5rem; max-width: 72ch; }
+.verdict p:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin-top: 1.2rem; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.93rem; background: var(--sheet); }
+table.compare { min-width: 760px; }
+th, td { text-align: left; vertical-align: top; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 650; }
+thead th { border-bottom: 2px solid var(--ink); }
+.pairswatch { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 3px; font-weight: 700; }
+.specimen { margin-top: 0.8rem; padding: 1rem 1.2rem; border-radius: 6px; }
+.specimen p { margin: 0.3rem 0 0; }
+.specimen p:first-child { margin-top: 0; }
+footer.doc-foot { margin-top: 5rem; border-top: 1px solid var(--rule); padding-top: 1.2rem; font-size: 0.9rem; color: var(--ink-2); }
+footer.doc-foot pre { font: 0.82rem/1.5 var(--mono); background: var(--sheet); padding: 0.8rem 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .pair, .pair.wide, .plan { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .doc { padding: 32px 16px 56px; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.55rem; }
+  .option-head .letter { font-size: 2.4rem; }
+}
+
+/* ---------- The screens: drawn at design size, scaled with container units (1 design px = var(--d)) ---------- */
+.screen { position: relative; overflow: hidden; container-type: inline-size; border-radius: 8px; box-shadow: 0 18px 40px -18px rgba(21, 22, 29, 0.55); }
+.w1280 { aspect-ratio: 1280 / 800; --d: calc(100cqw / 1280); }
+.w1280c { aspect-ratio: 1280 / 560; --d: calc(100cqw / 1280); }
+.w390 { aspect-ratio: 390 / 844; width: min(390px, 100%); --d: calc(100cqw / 390); }
+.w390c { aspect-ratio: 390 / 700; width: min(390px, 100%); --d: calc(100cqw / 390); }
+.w420 { aspect-ratio: 420 / 760; width: min(420px, 100%); --d: calc(100cqw / 420); }
+.screen * { box-sizing: border-box; }
+.screen p, .screen h1, .screen h2, .screen h3, .screen ul, .screen ol { margin: 0; padding: 0; list-style: none; }
+.screen li + li { margin-top: 0; }
+.abs { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); }
+.abs[style*="--h"] { height: calc(var(--d) * var(--h)); }
+.f { font-size: calc(var(--d) * var(--fs, 14)); }
+.mt2 { margin-top: calc(var(--d) * 2) !important; } .mt4 { margin-top: calc(var(--d) * 4) !important; }
+.mt8 { margin-top: calc(var(--d) * 8) !important; } .mt12 { margin-top: calc(var(--d) * 12) !important; }
+.mt16 { margin-top: calc(var(--d) * 16) !important; } .mt20 { margin-top: calc(var(--d) * 20) !important; }
+.mt24 { margin-top: calc(var(--d) * 24) !important; } .mt32 { margin-top: calc(var(--d) * 32) !important; }
+.b { font-weight: 700; }
+.nw { white-space: nowrap; }
+.pix, .seg { display: block; }
+.tag-ill { position: absolute; right: calc(var(--d) * 8); bottom: calc(var(--d) * 6); font: 600 calc(var(--d) * 10)/1.2 var(--sans); background: #ffffff; color: #15161d; padding: calc(var(--d) * 2) calc(var(--d) * 6); border-radius: calc(var(--d) * 3); z-index: 5; }
+.tag-ill.top { bottom: auto; top: calc(var(--d) * 6); }
+
+/* ---------- Direction 1: terminal ---------- */
+.tty { background: #0b0e0a; color: #d3e6cc; font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+.tty .mono, .tty .h1, .tty .win-title, .tty .nav, .tty .boot, .tty .key, .tty .man-h, .tty .man-k { font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
+.tty .nav { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--d) * 40); background: #141a13; border-bottom: 1px solid #2c3a29; display: flex; align-items: center; justify-content: space-between; padding: 0 calc(var(--d) * 88); font-size: calc(var(--d) * 13); color: #8a9a84; }
+.tty.w390 .nav { padding: 0 calc(var(--d) * 14); height: calc(var(--d) * 44); }
+.tty .nav .links { text-transform: lowercase; display: flex; gap: calc(var(--d) * 22); }
+.tty .nav .on { background: #7ee36f; color: #0b0e0a; padding: 0 calc(var(--d) * 6); }
+.tty .host { color: #7ee36f; font-weight: 600; }
+.tty .menu { color: #d3e6cc; font-size: calc(var(--d) * 13); }
+.tty .win { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); height: calc(var(--d) * var(--h)); background: #0b0e0a; border: 1px solid #2c3a29; }
+.tty .win-title { height: calc(var(--d) * 28); background: #141a13; border-bottom: 1px solid #2c3a29; display: flex; align-items: center; justify-content: center; position: relative; color: #8a9a84; font-size: calc(var(--d) * 12); }
+.tty .win-title .ctl { position: absolute; right: calc(var(--d) * 10); top: 0; bottom: 0; display: flex; align-items: center; gap: calc(var(--d) * 12); }
+.tty .win-body { padding: calc(var(--d) * 24) calc(var(--d) * 32); }
+.tty.w390 .win-body { padding: calc(var(--d) * 16) calc(var(--d) * 14); }
+.tty .prompt { color: #8a9a84; }
+.tty .prompt .u { color: #7ee36f; }
+.tty .prompt .c { color: #d3e6cc; }
+.tty .cmt { color: #ffb627; }
+.tty .h1 { color: #7ee36f; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+.tty .boot li { display: grid; grid-template-columns: calc(var(--d) * 74) calc(var(--d) * 84) 1fr; line-height: 1.7; }
+.tty.w390 .boot li { grid-template-columns: calc(var(--d) * 64) 1fr; }
+.tty .ok { color: #7ee36f; white-space: pre; }
+.tty .ok b { color: #d3e6cc; font-weight: 400; }
+.tty .dim { color: #8a9a84; }
+.tty .key { display: inline-flex; align-items: center; justify-content: center; height: calc(var(--d) * 38); padding: 0 calc(var(--d) * 16); border: 1px solid #7ee36f; color: #7ee36f; white-space: nowrap; }
+.tty .key.on { background: #7ee36f; color: #0b0e0a; font-weight: 600; }
+.tty .cursor { display: inline-block; width: 0.6em; height: 1.1em; background: #ffb627; vertical-align: -0.2em; animation: tty-blink 1.1s steps(1) infinite; }
+@keyframes tty-blink { 50% { opacity: 0; } }
+.tty .ask { position: absolute; display: flex; align-items: center; gap: calc(var(--d) * 8); padding: 0 calc(var(--d) * 14); height: calc(var(--d) * 44); background: #141a13; border: 1px solid #7ee36f; color: #7ee36f; font: 600 calc(var(--d) * 13) "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+.bars { display: inline-flex; gap: calc(var(--d) * 2); align-items: flex-end; height: calc(var(--d) * 12); }
+.bars i { display: block; width: calc(var(--d) * 3); background: currentColor; }
+.bars i:nth-child(1) { height: 50%; } .bars i:nth-child(2) { height: 100%; } .bars i:nth-child(3) { height: 70%; }
+.tty .man { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); height: calc(var(--d) * var(--h)); background: #141a13; border: 1px solid #2c3a29; padding: calc(var(--d) * 16) calc(var(--d) * 18); }
+.tty .man-h { display: flex; justify-content: space-between; color: #8a9a84; font-size: calc(var(--d) * 11); }
+.tty .man-k { color: #d3e6cc; font-weight: 600; font-size: calc(var(--d) * 12); margin-top: calc(var(--d) * 12); }
+.tty .man-v { padding-left: calc(var(--d) * 18); margin-top: calc(var(--d) * 3); }
+.tty .man h3 { color: #7ee36f; font: 600 calc(var(--d) * 16)/1.3 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+.tty .stack { white-space: pre-wrap; }
+.tty .big { color: #ffb627; font: 700 calc(var(--d) * 30)/1 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+
+/* the tmux pane: the concierge panel */
+.tty .pane { position: absolute; inset: 0; background: #0b0e0a; border-left: 2px solid #7ee36f; display: flex; flex-direction: column; font-size: calc(var(--d) * 13); }
+.tty .pane-top { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--d) * 12) calc(var(--d) * 14); background: #141a13; border-bottom: 1px solid #2c3a29; }
+.tty .pane-sec { padding: calc(var(--d) * 12) calc(var(--d) * 14); border-bottom: 1px solid #2c3a29; }
+.tty .log p { line-height: 1.55; }
+.tty .who-a { color: #7ee36f; }
+.tty .who-v { color: #ffb627; }
+.tty .notice { color: #8a9a84; font-style: italic; }
+.tty .status-bar { display: flex; flex-wrap: wrap; gap: calc(var(--d) * 4) calc(var(--d) * 12); padding: calc(var(--d) * 8) calc(var(--d) * 14); background: #141a13; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: calc(var(--d) * 12); }
+.tty .tabs { display: flex; gap: calc(var(--d) * 14); padding: calc(var(--d) * 8) calc(var(--d) * 14); border-top: 1px solid #2c3a29; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: calc(var(--d) * 12); color: #8a9a84; }
+.tty .tabs .on { color: #0b0e0a; background: #7ee36f; padding: 0 calc(var(--d) * 6); }
+.tty .slot { display: inline-block; border: 1px solid #00d4ff; color: #00d4ff; padding: 0 calc(var(--d) * 6); margin: calc(var(--d) * 3) calc(var(--d) * 4) 0 0; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: calc(var(--d) * 11.5); }
+
+/* ---------- Direction 2: cartridge (vintage console and CRT) ---------- */
+.crt { background: #0f0d1c; color: #f3efe1; font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+.crt .scan { position: absolute; inset: 0; pointer-events: none; z-index: 4; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.14) 0, rgba(0, 0, 0, 0.14) 1px, transparent 1px, transparent 3px); opacity: 0.35; }
+.crt .nav { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--d) * 60); display: flex; align-items: center; justify-content: space-between; padding: 0 calc(var(--d) * 88); font-size: calc(var(--d) * 15); color: #a9a3c7; }
+.crt.w390 .nav { padding: 0 calc(var(--d) * 16); height: calc(var(--d) * 52); }
+.crt .nav .links { display: flex; gap: calc(var(--d) * 26); }
+.crt .nav .on { color: #f6c945; font-weight: 700; }
+.crt .nav .on::before { content: "▶"; margin-right: calc(var(--d) * 6); }
+.crt .eyebrow { color: #f6c945; font-weight: 700; }
+.crt .haze { color: #a9a3c7; }
+.crt .stages { display: flex; gap: calc(var(--d) * 10); align-items: stretch; }
+.crt .stage { flex: 1; background: #1d1a33; border-radius: calc(var(--d) * 4); overflow: hidden; }
+.crt .stage .band { height: calc(var(--d) * 10); }
+.crt .stage .in { padding: calc(var(--d) * 10) calc(var(--d) * 12) calc(var(--d) * 12); }
+.crt .stage b { display: block; font-size: calc(var(--d) * 16); }
+.crt .stage span { display: block; color: #a9a3c7; font-size: calc(var(--d) * 12.5); line-height: 1.35; margin-top: calc(var(--d) * 4); }
+.crt .chunk { display: inline-flex; align-items: center; justify-content: center; height: calc(var(--d) * 46); padding: 0 calc(var(--d) * 22); font-weight: 700; font-size: calc(var(--d) * 15); border-radius: calc(var(--d) * 4); white-space: nowrap; }
+.crt .chunk.on { background: #f6c945; color: #16131f; box-shadow: 0 calc(var(--d) * 5) 0 #8a6d12; }
+.crt .chunk.off { border: calc(var(--d) * 2) solid #f3efe1; color: #f3efe1; box-shadow: 0 calc(var(--d) * 5) 0 #3a3560; }
+.crt .ask { position: absolute; display: flex; align-items: center; gap: calc(var(--d) * 8); padding: 0 calc(var(--d) * 16); height: calc(var(--d) * 46); background: #f6c945; color: #16131f; font-weight: 700; font-size: calc(var(--d) * 14); border-radius: calc(var(--d) * 4); box-shadow: 0 calc(var(--d) * 4) 0 #8a6d12; z-index: 2; }
+.crt .burger { width: calc(var(--d) * 22); height: calc(var(--d) * 14); border-top: calc(var(--d) * 3) solid #f3efe1; border-bottom: calc(var(--d) * 3) solid #f3efe1; position: relative; }
+.crt .burger::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; margin-top: calc(var(--d) * -1.5); border-top: calc(var(--d) * 3) solid #f3efe1; }
+/* the cartridge */
+.cart { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); height: calc(var(--d) * var(--h)); background: #2a2646; clip-path: polygon(0 calc(var(--d) * 14), calc(var(--d) * 14) 0, calc(100% - calc(var(--d) * 14)) 0, 100% calc(var(--d) * 14), 100% 100%, 0 100%); padding: calc(var(--d) * 22) calc(var(--d) * 18) calc(var(--d) * 26); }
+.cart::after { content: ""; position: absolute; left: calc(var(--d) * 18); right: calc(var(--d) * 18); bottom: calc(var(--d) * 8); height: calc(var(--d) * 10); background: repeating-linear-gradient(90deg, #1d1a33 0, #1d1a33 calc(var(--d) * 4), transparent calc(var(--d) * 4), transparent calc(var(--d) * 8)); }
+.cart .label { background: #f3efe1; color: #16131f; border-radius: calc(var(--d) * 3); overflow: hidden; height: 100%; display: flex; flex-direction: column; }
+.cart .label .top { padding: calc(var(--d) * 12) calc(var(--d) * 14); display: flex; justify-content: space-between; align-items: center; gap: calc(var(--d) * 8); }
+.cart .label .body { padding: calc(var(--d) * 12) calc(var(--d) * 14); flex: 1; display: flex; flex-direction: column; }
+.cart h3 { font-size: calc(var(--d) * 16); line-height: 1.3; font-weight: 700; }
+.cart .desc { font-size: calc(var(--d) * 13); line-height: 1.45; margin-top: calc(var(--d) * 8); }
+.cart .score { display: flex; align-items: center; gap: calc(var(--d) * 10); margin-top: auto; padding-top: calc(var(--d) * 10); border-top: calc(var(--d) * 2) solid #16131f; }
+.cart .co { font-size: calc(var(--d) * 12); font-weight: 700; }
+/* the CRT bezel: the concierge panel */
+.bezel { position: absolute; inset: 0; background: #2a2646; padding: calc(var(--d) * 18) calc(var(--d) * 18) calc(var(--d) * 64); }
+.bezel .glass { position: relative; height: 100%; background: #0f0d1c; border-radius: calc(var(--d) * 26) / calc(var(--d) * 20); overflow: hidden; box-shadow: inset 0 0 calc(var(--d) * 24) rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; font-size: calc(var(--d) * 13.5); }
+.bezel .row { padding: calc(var(--d) * 12) calc(var(--d) * 18); }
+.bezel .foot { position: absolute; left: calc(var(--d) * 18); right: calc(var(--d) * 18); bottom: calc(var(--d) * 14); height: calc(var(--d) * 36); display: flex; align-items: center; justify-content: space-between; color: #f3efe1; font-size: calc(var(--d) * 13); }
+.bezel .led { display: inline-block; width: calc(var(--d) * 8); height: calc(var(--d) * 8); background: #e5483d; margin-right: calc(var(--d) * 8); }
+.crt .hud { display: flex; flex-wrap: wrap; gap: calc(var(--d) * 6) calc(var(--d) * 14); }
+.crt .hud span { display: inline-flex; align-items: center; gap: calc(var(--d) * 6); font-size: calc(var(--d) * 12.5); }
+.crt .hud i { display: inline-block; width: calc(var(--d) * 10); height: calc(var(--d) * 10); }
+.crt .ctabs { display: flex; gap: calc(var(--d) * 8); }
+.crt .ctabs span { padding: calc(var(--d) * 5) calc(var(--d) * 12); border-radius: calc(var(--d) * 3); background: #1d1a33; color: #a9a3c7; font-size: calc(var(--d) * 12.5); }
+.crt .ctabs .on { background: #f6c945; color: #16131f; font-weight: 700; }
+.crt .slot { display: inline-block; border: calc(var(--d) * 2) solid #00d4ff; color: #00d4ff; padding: 0 calc(var(--d) * 6); margin: calc(var(--d) * 4) calc(var(--d) * 4) 0 0; font-size: calc(var(--d) * 12); }
+
+/* ---------- Direction 3: mixing desk (analog hardware) ---------- */
+.desk { background: #1b1a18; color: #efe6d2; font-family: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+.desk .cond { font-family: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", "Fira Sans Compressed", system-ui, sans-serif; font-stretch: condensed; }
+.desk .mono, .desk .silk, .desk .nav { font-family: "Space Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
+.desk .silk { color: #aba190; }
+.desk .lc { text-transform: lowercase; }
+.desk .nav, .desk .step b, .desk .keys span, .desk .chan span { text-transform: lowercase; }
+.desk .brushed { background-color: #292723; background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 3px), linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.05)); }
+.desk .nav { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--d) * 52); display: flex; align-items: center; justify-content: space-between; padding: 0 calc(var(--d) * 88); font-size: calc(var(--d) * 13); color: #aba190; border-bottom: 1px solid #000; }
+.desk.w390 .nav { padding: 0 calc(var(--d) * 16); }
+.desk .nav .links { display: flex; gap: calc(var(--d) * 24); align-items: center; }
+.desk .nav .on { color: #efe6d2; }
+.desk .ledi { display: inline-block; width: calc(var(--d) * 7); height: calc(var(--d) * 7); border-radius: 50%; background: #3a3732; vertical-align: middle; margin-right: calc(var(--d) * 6); }
+.desk .ledi.lit { background: #ff8a2a; box-shadow: 0 0 calc(var(--d) * 6) rgba(255, 138, 42, 0.7); }
+.desk .ledi.g { background: #86e08f; box-shadow: 0 0 calc(var(--d) * 6) rgba(134, 224, 143, 0.6); }
+.desk .plate { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); height: calc(var(--d) * var(--h)); border-radius: calc(var(--d) * 6); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 calc(var(--d) * 2) 0 #000; }
+.desk .screw { position: absolute; width: calc(var(--d) * 10); height: calc(var(--d) * 10); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #6b665c, #2e2c28); }
+.desk .screw::after { content: ""; position: absolute; left: 20%; right: 20%; top: 45%; height: 10%; background: #1b1a18; transform: rotate(35deg); }
+.desk .s1 { left: calc(var(--d) * 10); top: calc(var(--d) * 10); } .desk .s2 { right: calc(var(--d) * 10); top: calc(var(--d) * 10); }
+.desk .s3 { left: calc(var(--d) * 10); bottom: calc(var(--d) * 10); } .desk .s4 { right: calc(var(--d) * 10); bottom: calc(var(--d) * 10); }
+.desk .h1 { font-weight: 600; line-height: 0.95; letter-spacing: -0.005em; }
+.desk .seq { display: flex; gap: calc(var(--d) * 14); }
+.desk .step { flex: 1; }
+.desk .step .keycap { height: calc(var(--d) * 46); border-radius: calc(var(--d) * 4); background: #3a3732; box-shadow: inset 0 calc(var(--d) * -3) 0 rgba(0, 0, 0, 0.35), 0 calc(var(--d) * 2) 0 #000; display: flex; align-items: center; justify-content: center; }
+.desk .step .keycap .ledi { margin: 0; width: calc(var(--d) * 9); height: calc(var(--d) * 9); }
+.desk .step b { display: block; font: 700 calc(var(--d) * 13) "Space Mono", ui-monospace, Menlo, monospace; margin-top: calc(var(--d) * 8); color: #efe6d2; }
+.desk .step span { display: block; color: #aba190; font-size: calc(var(--d) * 12.5); line-height: 1.35; margin-top: calc(var(--d) * 3); }
+.desk .hw { display: inline-flex; align-items: center; justify-content: center; height: calc(var(--d) * 46); padding: 0 calc(var(--d) * 20); border-radius: calc(var(--d) * 4); font-weight: 600; font-size: calc(var(--d) * 15); white-space: nowrap; }
+.desk .hw.on { background: #ff8a2a; color: #1b1a18; box-shadow: inset 0 calc(var(--d) * -3) 0 rgba(0, 0, 0, 0.25), 0 calc(var(--d) * 2) 0 #000; }
+.desk .hw.off { background: #efe6d2; color: #1b1a18; box-shadow: inset 0 calc(var(--d) * -3) 0 rgba(0, 0, 0, 0.18), 0 calc(var(--d) * 2) 0 #000; }
+.desk .ask { position: absolute; display: flex; align-items: center; gap: calc(var(--d) * 8); padding: 0 calc(var(--d) * 14); height: calc(var(--d) * 46); border-radius: calc(var(--d) * 6); color: #efe6d2; font-weight: 600; font-size: calc(var(--d) * 14); border: 1px solid #000; }
+.desk .readout { background: #1b1a18; border-radius: calc(var(--d) * 3); padding: calc(var(--d) * 8) calc(var(--d) * 10); box-shadow: inset 0 calc(var(--d) * 2) calc(var(--d) * 4) rgba(0, 0, 0, 0.6); display: inline-flex; }
+.desk .card h3 { font-weight: 600; line-height: 1.15; }
+.desk .tagline { display: flex; flex-wrap: wrap; gap: calc(var(--d) * 4) calc(var(--d) * 10); }
+.desk .burger { width: calc(var(--d) * 22); height: calc(var(--d) * 14); border-top: calc(var(--d) * 2) solid #efe6d2; border-bottom: calc(var(--d) * 2) solid #efe6d2; position: relative; }
+.desk .burger::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; margin-top: calc(var(--d) * -1); border-top: calc(var(--d) * 2) solid #efe6d2; }
+/* the rack module: the concierge panel, latency as VU meters */
+.desk .rack { position: absolute; inset: 0; border-radius: 0; padding: calc(var(--d) * 22) calc(var(--d) * 22); display: flex; flex-direction: column; gap: calc(var(--d) * 12); font-size: calc(var(--d) * 13); }
+.desk .well { background: #1b1a18; border-radius: calc(var(--d) * 4); box-shadow: inset 0 calc(var(--d) * 2) calc(var(--d) * 4) rgba(0, 0, 0, 0.6); padding: calc(var(--d) * 10) calc(var(--d) * 12); }
+.desk .chan { display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--d) * 4); text-align: center; }
+.desk .chan i { display: block; width: calc(var(--d) * 10); height: calc(var(--d) * 10); border-radius: 50%; margin: 0 auto calc(var(--d) * 4); }
+.desk .chan span { font: calc(var(--d) * 10.5)/1.3 "Space Mono", ui-monospace, Menlo, monospace; display: block; }
+.desk .keys { display: flex; gap: calc(var(--d) * 8); }
+.desk .keys span { flex: 1; text-align: center; padding: calc(var(--d) * 6) 0; border-radius: calc(var(--d) * 3); background: #3a3732; color: #efe6d2; font: calc(var(--d) * 11.5) "Space Mono", ui-monospace, Menlo, monospace; box-shadow: 0 calc(var(--d) * 2) 0 #000; }
+.desk .keys .on { background: #ff8a2a; color: #1b1a18; font-weight: 700; }
+.desk .vus { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--d) * 10); }
+.desk .vu { background: #efe6d2; color: #1b1a18; border-radius: calc(var(--d) * 4); padding: calc(var(--d) * 6) calc(var(--d) * 8) calc(var(--d) * 8); box-shadow: inset 0 0 0 calc(var(--d) * 3) #1b1a18; }
+.desk .vu svg { display: block; width: 100%; height: auto; }
+.desk .vu p { font-size: calc(var(--d) * 11); line-height: 1.25; text-align: center; }
+.desk .toggle { display: inline-flex; align-items: center; gap: calc(var(--d) * 6); }
+.desk .toggle i { display: inline-block; width: calc(var(--d) * 12); height: calc(var(--d) * 22); border-radius: calc(var(--d) * 6); background: #3a3732; position: relative; }
+.desk .toggle i::after { content: ""; position: absolute; left: calc(var(--d) * 2); right: calc(var(--d) * 2); top: calc(var(--d) * 2); height: calc(var(--d) * 9); border-radius: 50%; background: #d8d0bd; }
+
+/* ---------- Reduced motion: every screen holds still (the cursor stops; scanlines go, as the direction says) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .tty .cursor { animation: none; }
+  .crt .scan { display: none; }
+}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<h1>Three retro directions for the site</h1>
+<p class="lede">Michael finds the site bland and wants colour and character: retro and overt, not minimalist, from Linux, old video games and analog gear. Here are three directions, each drawn on the real home hero and a real project card at 1280 and 390 px, with its palette and contrast checks, type, motion rules, and what happens to the concierge panel and its memory colours.</p>
+<p class="byline">P6-02 of the v3 run, 2026-10-21. A recommendation, not a build: nothing here changes the site (the v3 spec, § 1 anti-goals and § 11). Each direction is one motif, carried by the type and the palette first.</p>
+
+<section aria-labelledby="read">
+  <h2 id="read">How to read this</h2>
+  <ul class="prose">
+    <li>The content in the screens is the site's own copy: <code>profile.ts</code> (eyebrow, tagline, subline), <code>approach.ts</code> (the loop's five steps and their lines), <code>projects.ts</code> (titles, descriptions, metrics, stacks) and <code>concierge.ts</code> (the panel's labels). A white "illustrative" tag marks content made up for the picture: transcript lines, memory counts, meter needles. The costume's chrome is invented and carries no facts: prompts, <code>whoami</code>, man-page headers, window titles, <code>[ menu ]</code>.</li>
+    <li>Fonts are named in the CSS with a system fallback and never fetched, so a screen shows the fallback unless the font is installed. The pixel headline in direction 2 and the readout digits in direction 3 are drawn as inline SVG so they look right anyway.</li>
+    <li>Every contrast ratio below is computed from the hex values with the WCAG 2 relative-luminance formula, by the script that built this page. Body text needs 4.5 : 1; large text 3 : 1.</li>
+    <li>The six memory colours (v3 spec § 5, now in <code>globals.css</code>) stay the same hex in every direction; each direction's table checks them on its own surface.</li>
+  </ul>
+</section>
+
+<!-- =========================================================== DIRECTION 1 =========================================================== -->
+<section aria-labelledby="d1">
+  <div class="option-head"><span class="letter" aria-hidden="true">1</span><h2 id="d1">Terminal: the site as a tty session</h2></div>
+  <p class="idea">The harness is a Bash driver in tmux, so the site becomes the machine it runs on. The hero is a shell window: <code>whoami</code> prints the name, and the loop prints as a boot log, one <code>[ OK ]</code> per step. Case studies read like man pages. Two phosphors, green and amber, on near-black.</p>
+
+  <div class="plan">
+    <div>
+      <h3>Palette</h3>
+      <ul class="swatches"><li><span class="sw" style="background:#0b0e0a"></span><code>--tty-black</code> <code>#0b0e0a</code> page background</li><li><span class="sw" style="background:#141a13"></span><code>--tty-pane</code> <code>#141a13</code> window and card surface</li><li><span class="sw" style="background:#d3e6cc"></span><code>--tty-text</code> <code>#d3e6cc</code> body text</li><li><span class="sw" style="background:#7ee36f"></span><code>--tty-green</code> <code>#7ee36f</code> accent: prompt, headings, links, focus</li><li><span class="sw" style="background:#ffb627"></span><code>--tty-amber</code> <code>#ffb627</code> the cursor, comments, a second voice</li><li><span class="sw" style="background:#8a9a84"></span><code>--tty-dim</code> <code>#8a9a84</code> muted text</li><li><span class="sw" style="background:#ff6b5e"></span><code>--tty-red</code> <code>#ff6b5e</code> errors, a failed step</li><li><span class="sw" style="background:#2c3a29"></span><code>--tty-rule</code> <code>#2c3a29</code> window borders (decorative, not text)</li></ul>
+    </div>
+    <div>
+      <h3>Type</h3>
+      <p>IBM Plex Mono for the name, headings, prompts and labels; IBM Plex Sans for anything longer than a line (tagline, descriptions, case-study prose). Mono display, proportional reading.</p>
+      <h3>Layout</h3>
+      <p>Left-aligned, like a terminal. One window per page, with Linux window chrome (title centred, controls on the right). Square corners everywhere; borders are 1 px rules.</p>
+      <h3>The one motif</h3>
+      <p>The shell: prompts, the boot log, man-page headers. No CRT glow, no scanlines, no matrix rain.</p>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen tty w1280" role="img" aria-label="Direction 1 at 1280 px: a top bar with michael@durham and the six links, Home inverted in green. Below, one shell window titled michael@durham: ~. Inside: the prompt runs whoami; an amber comment line reads Agentic Systems Engineer; Michael Herron in large green monospace; the tagline and subline; then cat how-i-work prints five OK lines, Spec, Context, Build, Verify, Learn, each with its line; two keys, View projects filled green and About me outlined; a prompt with an amber block cursor. An Ask my site key sits bottom right.">
+      <div class="nav"><span class="host">michael@durham</span><span class="links"><span class="on">Home</span><span>About</span><span>Skills</span><span>Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="win" style="--x:88;--y:72;--w:1104;--h:600">
+        <div class="win-title">michael@durham: ~<span class="ctl"><span>_</span><span>□</span><span>×</span></span></div>
+        <div class="win-body">
+          <p class="mono prompt f" style="--fs:15"><span class="u">michael@durham</span>:~$ <span class="c">whoami</span></p>
+          <p class="mono cmt f mt8" style="--fs:15"># Agentic Systems Engineer</p>
+          <p class="h1 f mt12" style="--fs:84">Michael Herron</p>
+          <p class="f mt16" style="--fs:23">I build simple, elegant systems that fit the humans who run them.</p>
+          <p class="f dim mt8" style="--fs:16">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+          <p class="mono prompt f mt24" style="--fs:14"><span class="u">michael@durham</span>:~$ <span class="c">cat how-i-work</span></p>
+          <ol class="boot mono f mt4" style="--fs:14">
+            <li><span class="ok">[  <b>OK</b>  ]</span><span>Spec</span><span class="dim">I write down what done means before anything is built.</span></li>
+            <li><span class="ok">[  <b>OK</b>  ]</span><span>Context</span><span class="dim">Every session starts fresh, from state kept on disk, not from memory.</span></li>
+            <li><span class="ok">[  <b>OK</b>  ]</span><span>Build</span><span class="dim">Test first, one feature at a time, the smallest system that fixes the real problem.</span></li>
+            <li><span class="ok">[  <b>OK</b>  ]</span><span>Verify</span><span class="dim">An independent check, with evidence per step, before anything merges.</span></li>
+            <li><span class="ok">[  <b>OK</b>  ]</span><span>Learn</span><span class="dim">Every run is measured and written down, and the next plan reads it.</span></li>
+          </ol>
+          <p class="mt24" style="display:flex;gap:calc(var(--d)*14)"><span class="key on f" style="--fs:14">View projects</span><span class="key f" style="--fs:14">About me</span></p>
+          <p class="mono prompt f mt20" style="--fs:15"><span class="u">michael@durham</span>:~$ <span class="cursor"></span></p>
+        </div>
+      </div>
+      <div class="ask" style="left:calc(var(--d)*1104);top:calc(var(--d)*740)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</div>
+    </div>
+    <figcaption>1280 × 800, the home hero. The boot log is <code>MethodStrip</code> in costume: still an <code>ol</code> of the five <code>loopSteps</code>, the <code>[ OK ]</code> drawn by CSS. The twelve floating logos go: the shell is the picture.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen tty w390" role="img" aria-label="Direction 1 at 390 px: a top bar with michael@durham and a menu key; the shell window fills the width. whoami, the amber eyebrow comment, Michael Herron in green on two lines, tagline, subline, cat how-i-work with five OK lines showing labels only, View projects and About me as full-width keys, the prompt with its cursor; Ask my site at the bottom right.">
+        <div class="nav"><span class="host f" style="--fs:13">michael@durham</span><span class="menu mono">[ menu ]</span></div>
+        <div class="win" style="--x:10;--y:56;--w:370;--h:680">
+          <div class="win-title">michael@durham: ~<span class="ctl"><span>×</span></span></div>
+          <div class="win-body">
+            <p class="mono prompt f" style="--fs:13"><span class="u">michael@durham</span>:~$ <span class="c">whoami</span></p>
+            <p class="mono cmt f mt8" style="--fs:13"># Agentic Systems Engineer</p>
+            <p class="h1 f mt12" style="--fs:48">Michael<br>Herron</p>
+            <p class="f mt16" style="--fs:18">I build simple, elegant systems that fit the humans who run them.</p>
+            <p class="f dim mt8" style="--fs:15">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+            <p class="mono prompt f mt20" style="--fs:13"><span class="u">michael@durham</span>:~$ <span class="c">cat how-i-work</span></p>
+            <ol class="boot mono f mt4" style="--fs:13">
+              <li><span class="ok">[ <b>OK</b> ]</span><span>Spec</span></li>
+              <li><span class="ok">[ <b>OK</b> ]</span><span>Context</span></li>
+              <li><span class="ok">[ <b>OK</b> ]</span><span>Build</span></li>
+              <li><span class="ok">[ <b>OK</b> ]</span><span>Verify</span></li>
+              <li><span class="ok">[ <b>OK</b> ]</span><span>Learn</span></li>
+            </ol>
+            <p class="key on f mt20" style="--fs:14;display:flex;width:100%">View projects</p>
+            <p class="key f mt8" style="--fs:14;display:flex;width:100%">About me</p>
+            <p class="mono prompt f mt16" style="--fs:13"><span class="u">michael@durham</span>:~$ <span class="cursor"></span></p>
+          </div>
+        </div>
+        <div class="ask" style="left:calc(var(--d)*236);top:calc(var(--d)*786)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</div>
+      </div>
+      <figcaption>390 × 844. The step lines stay screen-reader only below md (D31), as today.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>Someone who lives in a terminal and runs a process: the name, the angle, and five steps that each say OK. It reads as engineering before a word of prose.</p>
+      <h3>Where it can go wrong</h3>
+      <ul>
+        <li>Green on black is the hacker cliché. The amber second voice, Plex Sans for prose and the absence of glow keep it a workstation, not a film prop.</li>
+        <li>Monospace prose tires the eye; the rule is mono for one-liners only.</li>
+        <li>The accent green (<code>#7ee36f</code>) sits near the memory event green (<code>#4ade80</code>). The strip always names each chip, so colour is never the only cue; if they still read as one, the event chip keeps its colour and the accent moves toward the amber.</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen tty w1280c" role="img" aria-label="Direction 1 at 1280 px, Recent work: a prompt line ls -t ~/work, the heading Recent work, and three man-page cards. Agent Harness: header AGENT-HARNESS(1) and Personal · open source; NAME with the title in green; DESCRIPTION; RESULT 55 in amber, features passing in one day; STACK. Voice Concierge: NAME, DESCRIPTION, STACK, no result. GoHighLevel to JobTread Integration: header with Builder Clarity, RESULT 2 days to about 6 hrs, client onboarding time.">
+      <div class="abs" style="--x:88;--y:40;--w:900">
+        <p class="mono prompt f" style="--fs:14"><span class="u">michael@durham</span>:~$ <span class="c">ls -t ~/work</span></p>
+        <p class="mono f mt8 b" style="--fs:30;color:#d3e6cc">Recent work</p>
+      </div>
+      <article class="man" style="--x:88;--y:132;--w:352;--h:388">
+        <p class="man-h"><span>AGENT-HARNESS(1)</span><span>Personal · open source</span></p>
+        <p class="man-k">NAME</p>
+        <h3 class="man-v">Agent Harness: overnight software delivery with verification gates</h3>
+        <p class="man-k">DESCRIPTION</p>
+        <p class="man-v f" style="--fs:13">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+        <p class="man-k">RESULT</p>
+        <p class="man-v" style="display:flex;align-items:baseline;gap:calc(var(--d)*10)"><span class="big">55</span><span class="dim f" style="--fs:12.5">features passing in one day</span></p>
+        <p class="man-k">STACK</p>
+        <p class="man-v mono dim stack f" style="--fs:11.5">Bash  Node.js  Git  tmux  jq  GitHub CLI  Claude Code</p>
+      </article>
+      <article class="man" style="--x:464;--y:132;--w:352;--h:388">
+        <p class="man-h"><span>VOICE-CONCIERGE(1)</span><span>Personal · open source</span></p>
+        <p class="man-k">NAME</p>
+        <h3 class="man-v">Voice Concierge: a voice agent that remembers returning visitors</h3>
+        <p class="man-k">DESCRIPTION</p>
+        <p class="man-v f" style="--fs:13">A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.</p>
+        <p class="man-k">STACK</p>
+        <p class="man-v mono dim stack f" style="--fs:11.5">Python  LiveKit Agents  LiveKit Inference  Anthropic API  SQLite  Next.js  TypeScript  Claude Code</p>
+      </article>
+      <article class="man" style="--x:840;--y:132;--w:352;--h:388">
+        <p class="man-h"><span>GHL-JOBTREAD(1)</span><span>Builder Clarity</span></p>
+        <p class="man-k">NAME</p>
+        <h3 class="man-v">GoHighLevel ↔ JobTread Integration</h3>
+        <p class="man-k">DESCRIPTION</p>
+        <p class="man-v f" style="--fs:13">Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.</p>
+        <p class="man-k">RESULT</p>
+        <p class="man-v" style="display:flex;align-items:baseline;gap:calc(var(--d)*10);flex-wrap:wrap"><span class="big" style="font-size:calc(var(--d)*24)">2 days → ~6 hrs</span><span class="dim f" style="--fs:12.5">client onboarding time</span></p>
+        <p class="man-k">STACK</p>
+        <p class="man-v mono dim stack f" style="--fs:11.5">Pipedream  Supabase  JavaScript  OAuth  REST APIs  Webhooks</p>
+      </article>
+    </div>
+    <figcaption>1280, the first three cards of Recent work (<code>getTopProjects(3)</code>). <code>ProjectCard</code> keeps its fields but not its order: today the metric band leads and the card ends with Deep dive and GitHub links; here the metric moves under the description as RESULT, and the links (left out of the drawing) stay at the foot. Today a card with no metric shows its first category in the band; here it has no RESULT section instead (the concierge, until it is measured). <code>(1)</code> is the man-page section for user commands: a motif, not a number.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen tty w390c" role="img" aria-label="Direction 1 at 390 px: Recent work, one man-page card per row: Agent Harness with NAME, DESCRIPTION, RESULT 55 features passing in one day and STACK; the next card's header shows below.">
+        <div class="abs" style="--x:16;--y:24;--w:358">
+          <p class="mono prompt f" style="--fs:13"><span class="u">michael@durham</span>:~$ <span class="c">ls -t ~/work</span></p>
+          <p class="mono f mt8 b" style="--fs:26;color:#d3e6cc">Recent work</p>
+        </div>
+        <article class="man" style="--x:16;--y:110;--w:358;--h:470">
+          <p class="man-h"><span>AGENT-HARNESS(1)</span><span>Personal · open source</span></p>
+          <p class="man-k">NAME</p>
+          <h3 class="man-v">Agent Harness: overnight software delivery with verification gates</h3>
+          <p class="man-k">DESCRIPTION</p>
+          <p class="man-v f" style="--fs:15">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+          <p class="man-k">RESULT</p>
+          <p class="man-v" style="display:flex;align-items:baseline;gap:calc(var(--d)*10)"><span class="big">55</span><span class="dim f" style="--fs:13">features passing in one day</span></p>
+          <p class="man-k">STACK</p>
+          <p class="man-v mono dim stack f" style="--fs:12">Bash  Node.js  Git  tmux  jq  GitHub CLI  Claude Code</p>
+        </article>
+        <article class="man" style="--x:16;--y:600;--w:358;--h:120">
+          <p class="man-h"><span>VOICE-CONCIERGE(1)</span><span>Personal · open source</span></p>
+          <p class="man-k">NAME</p>
+        </article>
+      </div>
+      <figcaption>390 × 700, the card at full width.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>Type pairing</h3>
+      <div class="specimen" style="background:#0b0e0a;color:#d3e6cc">
+        <p style="font:700 1.6rem/1.1 'IBM Plex Mono', ui-monospace, Menlo, monospace;color:#7ee36f">Michael Herron</p>
+        <p style="font:1rem/1.5 'IBM Plex Sans', system-ui, sans-serif">I build simple, elegant systems that fit the humans who run them.</p>
+      </div>
+      <ul>
+        <li><strong>IBM Plex Mono</strong> (display, labels, code) and <strong>IBM Plex Sans</strong> (prose): SIL Open Font License 1.1, from <a href="https://github.com/IBM/plex">github.com/IBM/plex</a> (its LICENSE.txt), also served by Google Fonts (<a href="https://github.com/google/fonts/tree/main/ofl/ibmplexmono">google/fonts ofl/ibmplexmono</a>).</li>
+        <li>Sizes by job at 1280: name 84, section heading 30, lead 23, body and prompts 15–16, labels 14, small 11–13 px; at 390: 48, 26, 18, 15, 13. Line height 1.45 for prose, 1.7 for the boot log, 1.0 for the name.</li>
+      </ul>
+      <h3>Motion rules</h3>
+      <ul>
+        <li><strong>Moves:</strong> the amber block cursor blinks after the last prompt; on the first load of a session the boot log prints its five lines once, top to bottom, in under a second; a key press inverts the key for as long as it is held.</li>
+        <li><strong>Feedback only:</strong> the active nav item and a hovered key invert (green ground, black text); no hover lift, no glow.</li>
+        <li><strong>Reduced motion:</strong> the cursor is a still block; the boot log is printed whole, at once. Nothing types, nothing blinks.</li>
+        <li><strong>Never:</strong> scrolling text, falling characters, flicker.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Palette and contrast</h3>
+  <div class="table-wrap"><table class="contrast"><thead><tr><th>Sample</th><th>Text on background</th><th>Ratio</th><th>Used for, needs</th><th>AA</th></tr></thead><tbody><tr><td><span class="pairswatch" style="background:#0b0e0a;color:#d3e6cc">Aa</span></td><td><code>--tty-text</code> on <code>--tty-black</code></td><td>14.76 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#d3e6cc">Aa</span></td><td><code>--tty-text</code> on <code>--tty-pane</code></td><td>13.45 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#0b0e0a;color:#7ee36f">Aa</span></td><td><code>--tty-green</code> on <code>--tty-black</code></td><td>12.12 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#7ee36f">Aa</span></td><td><code>--tty-green</code> on <code>--tty-pane</code></td><td>11.04 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#ffb627">Aa</span></td><td><code>--tty-amber</code> on <code>--tty-pane</code></td><td>10.09 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#0b0e0a;color:#8a9a84">Aa</span></td><td><code>--tty-dim</code> on <code>--tty-black</code></td><td>6.51 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#8a9a84">Aa</span></td><td><code>--tty-dim</code> on <code>--tty-pane</code></td><td>5.93 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#ff6b5e">Aa</span></td><td><code>--tty-red</code> on <code>--tty-pane</code></td><td>6.33 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#7ee36f;color:#0b0e0a">Aa</span></td><td><code>--tty-black</code> on <code>--tty-green</code></td><td>12.12 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#ffb627;color:#0b0e0a">Aa</span></td><td><code>--tty-black</code> on <code>--tty-amber</code></td><td>11.07 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#00d4ff">Aa</span></td><td><code>--mem-profile</code> on <code>--tty-pane</code></td><td>9.99 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#fbbf24">Aa</span></td><td><code>--mem-episode</code> on <code>--tty-pane</code></td><td>10.60 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#4ade80">Aa</span></td><td><code>--mem-event</code> on <code>--tty-pane</code></td><td>10.15 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#f87171">Aa</span></td><td><code>--mem-event-rejected</code> on <code>--tty-pane</code></td><td>6.40 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#a78bfa">Aa</span></td><td><code>--mem-knowledge</code> on <code>--tty-pane</code></td><td>6.50 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#141a13;color:#f472b6">Aa</span></td><td><code>--mem-working</code> on <code>--tty-pane</code></td><td>6.68 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr></tbody></table></div>
+
+  <div class="pair wide">
+    <figure>
+      <div class="screen tty w420" role="img" aria-label="Direction 1, the concierge panel as a tmux pane at 420 px: a top line with Ask my site, Guide me off and Minimize; Leave and Mute microphone keys and the status Connected. Say hello, or type below.; a transcript with Concierge and You lines and a muted notice Taking you to Agent Harness; a message line; the memory strip as a tmux status bar with five coloured counts; the tabs memory, latency, privacy with memory selected; About you with cyan profile slots.">
+        <div class="pane">
+          <div class="pane-top mono"><span class="b" style="color:#7ee36f">Ask my site</span><span class="dim">[ ] Guide me   [ _ ]</span></div>
+          <div class="pane-sec"><p style="display:flex;gap:calc(var(--d)*8)"><span class="key on f" style="--fs:12.5;height:calc(var(--d)*32)">Leave</span><span class="key f" style="--fs:12.5;height:calc(var(--d)*32)">Mute microphone</span></p><p class="dim mt8">Connected. Say hello, or type below.</p></div>
+          <div class="pane-sec log mono" style="flex:1;font-size:calc(var(--d)*12.5)">
+            <p><span class="who-a">Concierge&gt;</span> Hi. Ask me about Michael's work, by voice or text.</p>
+            <p class="mt8"><span class="who-v">You&gt;</span> What does the harness do overnight?</p>
+            <p class="mt8"><span class="who-a">Concierge&gt;</span> It runs one fresh session per feature and merges only what a second session verified.</p>
+            <p class="mt8 notice">Taking you to Agent Harness</p>
+            <p class="mt16"><span class="who-v">You&gt;</span> <span class="cursor"></span></p>
+          </div>
+          <div class="status-bar"><span style="color:#00d4ff">Profile 3</span><span style="color:#fbbf24">Episodes 2</span><span style="color:#4ade80">Events 7</span><span style="color:#a78bfa">Knowledge 4</span><span style="color:#f472b6">Working 9</span></div>
+          <div class="tabs"><span class="on">memory</span><span>latency</span><span>privacy</span></div>
+          <div class="pane-sec" style="border-bottom:0"><p class="mono b" style="font-size:calc(var(--d)*12)">About you</p><p><span class="slot">role: recruiter</span><span class="slot">asked about: agent harness</span></p><p class="mono b mt12" style="font-size:calc(var(--d)*12)">About the agent</p><p class="dim mono" style="font-size:calc(var(--d)*11.5)">Knowledge · Working · Cache below</p></div>
+        </div>
+        <span class="tag-ill" style="bottom:auto;top:calc(var(--d)*300)">illustrative transcript, counts and slots</span>
+      </div>
+      <figcaption>420 × 760, the drawer at <code>lg</code> (D86). Same parts, same order; tmux's status bar is the memory strip.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>The concierge panel and the memory colours</h3>
+      <ul>
+        <li>The drawer becomes a tmux pane split off the right of the window: a 2 px green rule on its left edge instead of a shadow, square corners, the same mono top line. Below <code>lg</code> the bottom sheet is a horizontal split, the rule on top.</li>
+        <li>The transcript is a session log: <code>Concierge&gt;</code> in green, <code>You&gt;</code> in amber, the usher's "Taking you to …" notice in muted italics (D94). The message box is the last prompt, with the same cursor.</li>
+        <li>The memory strip is tmux's status bar. The six memory colours are already terminal colours (cyan, yellow, green, red, magenta and a violet that stands in for ANSI blue: close to the eight ANSI colours), so they stay exactly as they are and read like <code>ls --color</code>. All six pass on <code>--tty-pane</code> (table above).</li>
+        <li>The tabs are tmux's window list; the selected one inverts. Latency stays the current table (<code>LatencyPanel</code>), set in Plex Mono with its digits tabular.</li>
+        <li><code>/talk</code> is the same pane at full width: the window, with the pane as its whole body.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================== DIRECTION 2 =========================================================== -->
+<section aria-labelledby="d2">
+  <div class="option-head"><span class="letter" aria-hidden="true">2</span><h2 id="d2">Cartridge: a vintage console on a CRT</h2></div>
+  <p class="idea">A home console from the late cartridge era. The name is set in chunky pixel type with a red drop shadow, the loop is a row of stage tiles with cartridge-label colour bands, and every project card is a cartridge with a light label. The selection cursor is the menu's <code>▶</code>. Scanlines sit over the screen at low opacity and go away under reduced motion; the concierge lives inside a CRT bezel.</p>
+
+  <div class="plan">
+    <div>
+      <h3>Palette</h3>
+      <ul class="swatches"><li><span class="sw" style="background:#0f0d1c"></span><code>--crt-void</code> <code>#0f0d1c</code> page background</li><li><span class="sw" style="background:#1d1a33"></span><code>--crt-glass</code> <code>#1d1a33</code> surfaces, the cartridge body</li><li><span class="sw" style="background:#f3efe1"></span><code>--crt-phosphor</code> <code>#f3efe1</code> body text, the cartridge label</li><li><span class="sw" style="background:#a9a3c7"></span><code>--crt-haze</code> <code>#a9a3c7</code> muted text</li><li><span class="sw" style="background:#f6c945"></span><code>--cart-yellow</code> <code>#f6c945</code> accent: links, focus, the menu cursor</li><li><span class="sw" style="background:#e5483d"></span><code>--cart-red</code> <code>#e5483d</code> label block, the headline shadow</li><li><span class="sw" style="background:#4f86f0"></span><code>--cart-blue</code> <code>#4f86f0</code> label block</li><li><span class="sw" style="background:#16131f"></span><code>--cart-ink</code> <code>#16131f</code> text on label blocks</li></ul>
+    </div>
+    <div>
+      <h3>Type</h3>
+      <p>Press Start 2P for headings only (the name, a section heading, a cartridge's short title); Atkinson Hyperlegible for everything else. Pixel type for a few words, the most legible face available for the rest.</p>
+      <h3>Layout</h3>
+      <p>Left-aligned hero, then a full-width row; blocks with small radii (4 px) and hard, offset shadows that collapse when pressed, like a console's rubber buttons.</p>
+      <h3>The one motif</h3>
+      <p>The cartridge label: colour bands, a light label, a short title in pixels. The CRT is the frame, not the content.</p>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen crt w1280" role="img" aria-label="Direction 2 at 1280 px: a top bar with the name mark and links, Home in yellow with a play-arrow cursor. Left-aligned: Agentic Systems Engineer in yellow, MICHAEL HERRON in cream pixel letters with a red shadow, the tagline and the subline in lilac grey. A row of five stage tiles with coloured top bands, red, yellow, blue, red, yellow, each with a step name and its line. Two chunky buttons: View projects in yellow, About me outlined. Faint scanlines cover the screen. Ask my site in yellow at the bottom right.">
+      <div class="nav"><span class="b" style="color:#f3efe1">Michael Herron</span><span class="links"><span class="on">Home</span><span>About</span><span>Skills</span><span>Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="abs" style="--x:88;--y:118;--w:1104">
+        <p class="eyebrow f" style="--fs:17">Agentic Systems Engineer</p>
+        <div class="mt20"><svg class="pix" viewBox="0 0 83 8" aria-hidden="true" style="width:calc(var(--d)*830);height:calc(var(--d)*80)"><path fill="#e5483d" d="M0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM7 1h3.06v1.06h-3.06zM13 1h3.06v1.06h-3.06zM18 1h1.06v1.06h-1.06zM22 1h1.06v1.06h-1.06zM25 1h3.06v1.06h-3.06zM30 1h5.06v1.06h-5.06zM36 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h5.06v1.06h-5.06zM60 1h4.06v1.06h-4.06zM66 1h4.06v1.06h-4.06zM73 1h3.06v1.06h-3.06zM78 1h1.06v1.06h-1.06zM82 1h1.06v1.06h-1.06zM0 2h2.06v1.06h-2.06zM3 2h2.06v1.06h-2.06zM8 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM64 2h1.06v1.06h-1.06zM66 2h1.06v1.06h-1.06zM70 2h1.06v1.06h-1.06zM72 2h1.06v1.06h-1.06zM76 2h1.06v1.06h-1.06zM78 2h2.06v1.06h-2.06zM82 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM2 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM8 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h1.06v1.06h-1.06zM22 3h1.06v1.06h-1.06zM24 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM30 3h1.06v1.06h-1.06zM36 3h1.06v1.06h-1.06zM48 3h1.06v1.06h-1.06zM52 3h1.06v1.06h-1.06zM54 3h1.06v1.06h-1.06zM60 3h1.06v1.06h-1.06zM64 3h1.06v1.06h-1.06zM66 3h1.06v1.06h-1.06zM70 3h1.06v1.06h-1.06zM72 3h1.06v1.06h-1.06zM76 3h1.06v1.06h-1.06zM78 3h1.06v1.06h-1.06zM80 3h1.06v1.06h-1.06zM82 3h1.06v1.06h-1.06zM0 4h1.06v1.06h-1.06zM2 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM8 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h5.06v1.06h-5.06zM24 4h5.06v1.06h-5.06zM30 4h4.06v1.06h-4.06zM36 4h1.06v1.06h-1.06zM48 4h5.06v1.06h-5.06zM54 4h4.06v1.06h-4.06zM60 4h4.06v1.06h-4.06zM66 4h4.06v1.06h-4.06zM72 4h1.06v1.06h-1.06zM76 4h1.06v1.06h-1.06zM78 4h1.06v1.06h-1.06zM81 4h2.06v1.06h-2.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM8 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM62 5h1.06v1.06h-1.06zM66 5h1.06v1.06h-1.06zM68 5h1.06v1.06h-1.06zM72 5h1.06v1.06h-1.06zM76 5h1.06v1.06h-1.06zM78 5h1.06v1.06h-1.06zM82 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM8 6h1.06v1.06h-1.06zM12 6h1.06v1.06h-1.06zM16 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM30 6h1.06v1.06h-1.06zM36 6h1.06v1.06h-1.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h1.06v1.06h-1.06zM60 6h1.06v1.06h-1.06zM63 6h1.06v1.06h-1.06zM66 6h1.06v1.06h-1.06zM69 6h1.06v1.06h-1.06zM72 6h1.06v1.06h-1.06zM76 6h1.06v1.06h-1.06zM78 6h1.06v1.06h-1.06zM82 6h1.06v1.06h-1.06zM0 7h1.06v1.06h-1.06zM4 7h1.06v1.06h-1.06zM7 7h3.06v1.06h-3.06zM13 7h3.06v1.06h-3.06zM18 7h1.06v1.06h-1.06zM22 7h1.06v1.06h-1.06zM24 7h1.06v1.06h-1.06zM28 7h1.06v1.06h-1.06zM30 7h5.06v1.06h-5.06zM36 7h5.06v1.06h-5.06zM48 7h1.06v1.06h-1.06zM52 7h1.06v1.06h-1.06zM54 7h5.06v1.06h-5.06zM60 7h1.06v1.06h-1.06zM64 7h1.06v1.06h-1.06zM66 7h1.06v1.06h-1.06zM70 7h1.06v1.06h-1.06zM73 7h3.06v1.06h-3.06zM78 7h1.06v1.06h-1.06zM82 7h1.06v1.06h-1.06z"/><path fill="#f3efe1" d="M0 0h1.06v1.06h-1.06zM4 0h1.06v1.06h-1.06zM7 0h3.06v1.06h-3.06zM13 0h3.06v1.06h-3.06zM18 0h1.06v1.06h-1.06zM22 0h1.06v1.06h-1.06zM25 0h3.06v1.06h-3.06zM30 0h5.06v1.06h-5.06zM36 0h1.06v1.06h-1.06zM48 0h1.06v1.06h-1.06zM52 0h1.06v1.06h-1.06zM54 0h5.06v1.06h-5.06zM60 0h4.06v1.06h-4.06zM66 0h4.06v1.06h-4.06zM73 0h3.06v1.06h-3.06zM78 0h1.06v1.06h-1.06zM82 0h1.06v1.06h-1.06zM0 1h2.06v1.06h-2.06zM3 1h2.06v1.06h-2.06zM8 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM16 1h1.06v1.06h-1.06zM18 1h1.06v1.06h-1.06zM22 1h1.06v1.06h-1.06zM24 1h1.06v1.06h-1.06zM28 1h1.06v1.06h-1.06zM30 1h1.06v1.06h-1.06zM36 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h1.06v1.06h-1.06zM60 1h1.06v1.06h-1.06zM64 1h1.06v1.06h-1.06zM66 1h1.06v1.06h-1.06zM70 1h1.06v1.06h-1.06zM72 1h1.06v1.06h-1.06zM76 1h1.06v1.06h-1.06zM78 1h2.06v1.06h-2.06zM82 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM2 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM8 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM64 2h1.06v1.06h-1.06zM66 2h1.06v1.06h-1.06zM70 2h1.06v1.06h-1.06zM72 2h1.06v1.06h-1.06zM76 2h1.06v1.06h-1.06zM78 2h1.06v1.06h-1.06zM80 2h1.06v1.06h-1.06zM82 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM2 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM8 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h5.06v1.06h-5.06zM24 3h5.06v1.06h-5.06zM30 3h4.06v1.06h-4.06zM36 3h1.06v1.06h-1.06zM48 3h5.06v1.06h-5.06zM54 3h4.06v1.06h-4.06zM60 3h4.06v1.06h-4.06zM66 3h4.06v1.06h-4.06zM72 3h1.06v1.06h-1.06zM76 3h1.06v1.06h-1.06zM78 3h1.06v1.06h-1.06zM81 3h2.06v1.06h-2.06zM0 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM8 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM22 4h1.06v1.06h-1.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM30 4h1.06v1.06h-1.06zM36 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM52 4h1.06v1.06h-1.06zM54 4h1.06v1.06h-1.06zM60 4h1.06v1.06h-1.06zM62 4h1.06v1.06h-1.06zM66 4h1.06v1.06h-1.06zM68 4h1.06v1.06h-1.06zM72 4h1.06v1.06h-1.06zM76 4h1.06v1.06h-1.06zM78 4h1.06v1.06h-1.06zM82 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM8 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM16 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM63 5h1.06v1.06h-1.06zM66 5h1.06v1.06h-1.06zM69 5h1.06v1.06h-1.06zM72 5h1.06v1.06h-1.06zM76 5h1.06v1.06h-1.06zM78 5h1.06v1.06h-1.06zM82 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM7 6h3.06v1.06h-3.06zM13 6h3.06v1.06h-3.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM30 6h5.06v1.06h-5.06zM36 6h5.06v1.06h-5.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h5.06v1.06h-5.06zM60 6h1.06v1.06h-1.06zM64 6h1.06v1.06h-1.06zM66 6h1.06v1.06h-1.06zM70 6h1.06v1.06h-1.06zM73 6h3.06v1.06h-3.06zM78 6h1.06v1.06h-1.06zM82 6h1.06v1.06h-1.06z"/></svg></div>
+        <p class="f mt24" style="--fs:25;max-width:calc(var(--d)*820)">I build simple, elegant systems that fit the humans who run them.</p>
+        <p class="f haze mt8" style="--fs:17;max-width:calc(var(--d)*760)">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+        <ol class="stages mt32">
+          <li class="stage"><div class="band" style="background:#e5483d"></div><div class="in"><b>Spec</b><span>I write down what done means before anything is built.</span></div></li>
+          <li class="stage"><div class="band" style="background:#f6c945"></div><div class="in"><b>Context</b><span>Every session starts fresh, from state kept on disk, not from memory.</span></div></li>
+          <li class="stage"><div class="band" style="background:#4f86f0"></div><div class="in"><b>Build</b><span>Test first, one feature at a time, the smallest system that fixes the real problem.</span></div></li>
+          <li class="stage"><div class="band" style="background:#e5483d"></div><div class="in"><b>Verify</b><span>An independent check, with evidence per step, before anything merges.</span></div></li>
+          <li class="stage"><div class="band" style="background:#f6c945"></div><div class="in"><b>Learn</b><span>Every run is measured and written down, and the next plan reads it.</span></div></li>
+        </ol>
+        <p class="mt32" style="display:flex;gap:calc(var(--d)*16)"><span class="chunk on">View projects</span><span class="chunk off">About me</span></p>
+      </div>
+      <div class="ask" style="left:calc(var(--d)*1100);top:calc(var(--d)*736)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</div>
+      <div class="scan"></div>
+    </div>
+    <figcaption>1280 × 800, the home hero. The name is the one pixel element on the screen. The stage tiles are <code>MethodStrip</code>'s <code>ol</code>; the band colours repeat in a fixed order and carry no meaning, so nothing depends on telling them apart.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen crt w390" role="img" aria-label="Direction 2 at 390 px: the name mark and a menu button; the eyebrow; MICHAEL and HERRON in pixel letters on two lines with a red shadow; tagline and subline; five stage tiles as labels only, wrapping onto two rows; View projects and About me stacked; scanlines; Ask my site bottom right.">
+        <div class="nav"><span class="b f" style="--fs:15">Michael Herron</span><span class="burger" aria-hidden="true"></span></div>
+        <div class="abs" style="--x:16;--y:84;--w:358">
+          <p class="eyebrow f" style="--fs:14">Agentic Systems Engineer</p>
+          <div class="mt16"><svg class="pix" viewBox="0 0 41 8" aria-hidden="true" style="width:calc(var(--d)*287);height:calc(var(--d)*56)"><path fill="#e5483d" d="M0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM7 1h3.06v1.06h-3.06zM13 1h3.06v1.06h-3.06zM18 1h1.06v1.06h-1.06zM22 1h1.06v1.06h-1.06zM25 1h3.06v1.06h-3.06zM30 1h5.06v1.06h-5.06zM36 1h1.06v1.06h-1.06zM0 2h2.06v1.06h-2.06zM3 2h2.06v1.06h-2.06zM8 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM2 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM8 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h1.06v1.06h-1.06zM22 3h1.06v1.06h-1.06zM24 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM30 3h1.06v1.06h-1.06zM36 3h1.06v1.06h-1.06zM0 4h1.06v1.06h-1.06zM2 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM8 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h5.06v1.06h-5.06zM24 4h5.06v1.06h-5.06zM30 4h4.06v1.06h-4.06zM36 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM8 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM8 6h1.06v1.06h-1.06zM12 6h1.06v1.06h-1.06zM16 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM30 6h1.06v1.06h-1.06zM36 6h1.06v1.06h-1.06zM0 7h1.06v1.06h-1.06zM4 7h1.06v1.06h-1.06zM7 7h3.06v1.06h-3.06zM13 7h3.06v1.06h-3.06zM18 7h1.06v1.06h-1.06zM22 7h1.06v1.06h-1.06zM24 7h1.06v1.06h-1.06zM28 7h1.06v1.06h-1.06zM30 7h5.06v1.06h-5.06zM36 7h5.06v1.06h-5.06z"/><path fill="#f3efe1" d="M0 0h1.06v1.06h-1.06zM4 0h1.06v1.06h-1.06zM7 0h3.06v1.06h-3.06zM13 0h3.06v1.06h-3.06zM18 0h1.06v1.06h-1.06zM22 0h1.06v1.06h-1.06zM25 0h3.06v1.06h-3.06zM30 0h5.06v1.06h-5.06zM36 0h1.06v1.06h-1.06zM0 1h2.06v1.06h-2.06zM3 1h2.06v1.06h-2.06zM8 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM16 1h1.06v1.06h-1.06zM18 1h1.06v1.06h-1.06zM22 1h1.06v1.06h-1.06zM24 1h1.06v1.06h-1.06zM28 1h1.06v1.06h-1.06zM30 1h1.06v1.06h-1.06zM36 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM2 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM8 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM2 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM8 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h5.06v1.06h-5.06zM24 3h5.06v1.06h-5.06zM30 3h4.06v1.06h-4.06zM36 3h1.06v1.06h-1.06zM0 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM8 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM22 4h1.06v1.06h-1.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM30 4h1.06v1.06h-1.06zM36 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM8 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM16 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM7 6h3.06v1.06h-3.06zM13 6h3.06v1.06h-3.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM30 6h5.06v1.06h-5.06zM36 6h5.06v1.06h-5.06z"/></svg></div>
+          <div class="mt8"><svg class="pix" viewBox="0 0 35 8" aria-hidden="true" style="width:calc(var(--d)*245);height:calc(var(--d)*56)"><path fill="#e5483d" d="M0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h5.06v1.06h-5.06zM12 1h4.06v1.06h-4.06zM18 1h4.06v1.06h-4.06zM25 1h3.06v1.06h-3.06zM30 1h1.06v1.06h-1.06zM34 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h2.06v1.06h-2.06zM34 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM6 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM16 3h1.06v1.06h-1.06zM18 3h1.06v1.06h-1.06zM22 3h1.06v1.06h-1.06zM24 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM30 3h1.06v1.06h-1.06zM32 3h1.06v1.06h-1.06zM34 3h1.06v1.06h-1.06zM0 4h5.06v1.06h-5.06zM6 4h4.06v1.06h-4.06zM12 4h4.06v1.06h-4.06zM18 4h4.06v1.06h-4.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM30 4h1.06v1.06h-1.06zM33 4h2.06v1.06h-2.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM14 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM20 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM34 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM6 6h1.06v1.06h-1.06zM12 6h1.06v1.06h-1.06zM15 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM21 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM30 6h1.06v1.06h-1.06zM34 6h1.06v1.06h-1.06zM0 7h1.06v1.06h-1.06zM4 7h1.06v1.06h-1.06zM6 7h5.06v1.06h-5.06zM12 7h1.06v1.06h-1.06zM16 7h1.06v1.06h-1.06zM18 7h1.06v1.06h-1.06zM22 7h1.06v1.06h-1.06zM25 7h3.06v1.06h-3.06zM30 7h1.06v1.06h-1.06zM34 7h1.06v1.06h-1.06z"/><path fill="#f3efe1" d="M0 0h1.06v1.06h-1.06zM4 0h1.06v1.06h-1.06zM6 0h5.06v1.06h-5.06zM12 0h4.06v1.06h-4.06zM18 0h4.06v1.06h-4.06zM25 0h3.06v1.06h-3.06zM30 0h1.06v1.06h-1.06zM34 0h1.06v1.06h-1.06zM0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM16 1h1.06v1.06h-1.06zM18 1h1.06v1.06h-1.06zM22 1h1.06v1.06h-1.06zM24 1h1.06v1.06h-1.06zM28 1h1.06v1.06h-1.06zM30 1h2.06v1.06h-2.06zM34 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM30 2h1.06v1.06h-1.06zM32 2h1.06v1.06h-1.06zM34 2h1.06v1.06h-1.06zM0 3h5.06v1.06h-5.06zM6 3h4.06v1.06h-4.06zM12 3h4.06v1.06h-4.06zM18 3h4.06v1.06h-4.06zM24 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM30 3h1.06v1.06h-1.06zM33 3h2.06v1.06h-2.06zM0 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM6 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM14 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM20 4h1.06v1.06h-1.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM30 4h1.06v1.06h-1.06zM34 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM15 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM21 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM30 5h1.06v1.06h-1.06zM34 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM6 6h5.06v1.06h-5.06zM12 6h1.06v1.06h-1.06zM16 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM25 6h3.06v1.06h-3.06zM30 6h1.06v1.06h-1.06zM34 6h1.06v1.06h-1.06z"/></svg></div>
+          <p class="f mt20" style="--fs:19">I build simple, elegant systems that fit the humans who run them.</p>
+          <p class="f haze mt8" style="--fs:15">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+          <ol class="stages mt24" style="flex-wrap:wrap">
+            <li class="stage" style="flex:1 0 30%"><div class="band" style="background:#e5483d"></div><div class="in"><b>Spec</b></div></li>
+            <li class="stage" style="flex:1 0 30%"><div class="band" style="background:#f6c945"></div><div class="in"><b>Context</b></div></li>
+            <li class="stage" style="flex:1 0 30%"><div class="band" style="background:#4f86f0"></div><div class="in"><b>Build</b></div></li>
+            <li class="stage" style="flex:1 0 40%"><div class="band" style="background:#e5483d"></div><div class="in"><b>Verify</b></div></li>
+            <li class="stage" style="flex:1 0 40%"><div class="band" style="background:#f6c945"></div><div class="in"><b>Learn</b></div></li>
+          </ol>
+          <p class="chunk on mt32" style="display:flex">View projects</p>
+          <p class="chunk off mt16" style="display:flex">About me</p>
+        </div>
+        <div class="ask" style="left:calc(var(--d)*232);top:calc(var(--d)*780)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</div>
+        <div class="scan"></div>
+      </div>
+      <figcaption>390 × 844. At this width the name breaks onto two lines at a cell of 7 px, the smallest that still reads as pixels.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>The most personality of the three: a person who built this for fun and still kept it readable. The angle and the loop are as visible as in direction 1; "engineering" reads second, "play" first.</p>
+      <h3>Where it can go wrong</h3>
+      <ul>
+        <li>Pixel type is unreadable in a paragraph and wide in a heading: Press Start 2P is roughly as wide as it is tall, so the Agent Harness title (66 characters) would run to about four lines in a 316 px card at 16 px. It is used for short words only; the full title stays in Atkinson.</li>
+        <li>Scanlines dim the page. Here they darken one row in three by 4.9 % and cost little contrast (the faintest body pair, <code>--crt-haze</code> on <code>--crt-void</code>, is 7.30 : 1 in a darkened row against 7.99 : 1 flat), but they must never get stronger over the concierge's transcript.</li>
+        <li>It risks reading as a game rather than as work, the opposite of what the spec's 10-second test asks for (v3 spec § 11) for the readers <code>brand.md</code> puts first.</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen crt w1280c" role="img" aria-label="Direction 2 at 1280 px, Recent work: a pixel heading RECENT WORK and three cartridges, each a dark shell with a notched top and grip ridges and a cream label. Agent Harness: a red band with AGENT HARNESS in pixels and Personal · open source; the full title, the description, and 55 in large pixel digits with features passing in one day. Voice Concierge: a blue band; title and description, no score. GoHighLevel to JobTread: a yellow band; the score 2 days to about 6 hrs, client onboarding time.">
+      <div class="abs" style="--x:88;--y:44;--w:900"><svg class="pix" viewBox="0 0 65 8" aria-hidden="true" style="width:calc(var(--d)*325);height:calc(var(--d)*40)"><path fill="#e5483d" d="M0 1h4.06v1.06h-4.06zM6 1h5.06v1.06h-5.06zM13 1h3.06v1.06h-3.06zM18 1h5.06v1.06h-5.06zM24 1h1.06v1.06h-1.06zM28 1h1.06v1.06h-1.06zM30 1h5.06v1.06h-5.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM49 1h3.06v1.06h-3.06zM54 1h4.06v1.06h-4.06zM60 1h1.06v1.06h-1.06zM64 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM24 2h2.06v1.06h-2.06zM28 2h1.06v1.06h-1.06zM32 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM63 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM6 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h1.06v1.06h-1.06zM24 3h1.06v1.06h-1.06zM26 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM32 3h1.06v1.06h-1.06zM42 3h1.06v1.06h-1.06zM46 3h1.06v1.06h-1.06zM48 3h1.06v1.06h-1.06zM52 3h1.06v1.06h-1.06zM54 3h1.06v1.06h-1.06zM58 3h1.06v1.06h-1.06zM60 3h1.06v1.06h-1.06zM62 3h1.06v1.06h-1.06zM0 4h4.06v1.06h-4.06zM6 4h4.06v1.06h-4.06zM12 4h1.06v1.06h-1.06zM18 4h4.06v1.06h-4.06zM24 4h1.06v1.06h-1.06zM27 4h2.06v1.06h-2.06zM32 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM44 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM52 4h1.06v1.06h-1.06zM54 4h4.06v1.06h-4.06zM60 4h2.06v1.06h-2.06zM0 5h1.06v1.06h-1.06zM2 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM32 5h1.06v1.06h-1.06zM42 5h1.06v1.06h-1.06zM44 5h1.06v1.06h-1.06zM46 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM56 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM62 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM3 6h1.06v1.06h-1.06zM6 6h1.06v1.06h-1.06zM12 6h1.06v1.06h-1.06zM16 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM32 6h1.06v1.06h-1.06zM42 6h2.06v1.06h-2.06zM45 6h2.06v1.06h-2.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h1.06v1.06h-1.06zM57 6h1.06v1.06h-1.06zM60 6h1.06v1.06h-1.06zM63 6h1.06v1.06h-1.06zM0 7h1.06v1.06h-1.06zM4 7h1.06v1.06h-1.06zM6 7h5.06v1.06h-5.06zM13 7h3.06v1.06h-3.06zM18 7h5.06v1.06h-5.06zM24 7h1.06v1.06h-1.06zM28 7h1.06v1.06h-1.06zM32 7h1.06v1.06h-1.06zM42 7h1.06v1.06h-1.06zM46 7h1.06v1.06h-1.06zM49 7h3.06v1.06h-3.06zM54 7h1.06v1.06h-1.06zM58 7h1.06v1.06h-1.06zM60 7h1.06v1.06h-1.06zM64 7h1.06v1.06h-1.06z"/><path fill="#f3efe1" d="M0 0h4.06v1.06h-4.06zM6 0h5.06v1.06h-5.06zM13 0h3.06v1.06h-3.06zM18 0h5.06v1.06h-5.06zM24 0h1.06v1.06h-1.06zM28 0h1.06v1.06h-1.06zM30 0h5.06v1.06h-5.06zM42 0h1.06v1.06h-1.06zM46 0h1.06v1.06h-1.06zM49 0h3.06v1.06h-3.06zM54 0h4.06v1.06h-4.06zM60 0h1.06v1.06h-1.06zM64 0h1.06v1.06h-1.06zM0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM16 1h1.06v1.06h-1.06zM18 1h1.06v1.06h-1.06zM24 1h2.06v1.06h-2.06zM28 1h1.06v1.06h-1.06zM32 1h1.06v1.06h-1.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h1.06v1.06h-1.06zM58 1h1.06v1.06h-1.06zM60 1h1.06v1.06h-1.06zM63 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM26 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM32 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM62 2h1.06v1.06h-1.06zM0 3h4.06v1.06h-4.06zM6 3h4.06v1.06h-4.06zM12 3h1.06v1.06h-1.06zM18 3h4.06v1.06h-4.06zM24 3h1.06v1.06h-1.06zM27 3h2.06v1.06h-2.06zM32 3h1.06v1.06h-1.06zM42 3h1.06v1.06h-1.06zM44 3h1.06v1.06h-1.06zM46 3h1.06v1.06h-1.06zM48 3h1.06v1.06h-1.06zM52 3h1.06v1.06h-1.06zM54 3h4.06v1.06h-4.06zM60 3h2.06v1.06h-2.06zM0 4h1.06v1.06h-1.06zM2 4h1.06v1.06h-1.06zM6 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM32 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM44 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM52 4h1.06v1.06h-1.06zM54 4h1.06v1.06h-1.06zM56 4h1.06v1.06h-1.06zM60 4h1.06v1.06h-1.06zM62 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM3 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM16 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM32 5h1.06v1.06h-1.06zM42 5h2.06v1.06h-2.06zM45 5h2.06v1.06h-2.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM57 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM63 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM6 6h5.06v1.06h-5.06zM13 6h3.06v1.06h-3.06zM18 6h5.06v1.06h-5.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM32 6h1.06v1.06h-1.06zM42 6h1.06v1.06h-1.06zM46 6h1.06v1.06h-1.06zM49 6h3.06v1.06h-3.06zM54 6h1.06v1.06h-1.06zM58 6h1.06v1.06h-1.06zM60 6h1.06v1.06h-1.06zM64 6h1.06v1.06h-1.06z"/></svg></div>
+      <article class="cart" style="--x:88;--y:110;--w:352;--h:420">
+        <div class="label">
+          <div class="top" style="background:#e5483d"><svg class="pix" viewBox="0 0 77 7" aria-hidden="true" style="width:calc(var(--d)*200.2);height:calc(var(--d)*18.2)"><path fill="#16131f" d="M1 0h3.06v1.06h-3.06zM7 0h3.06v1.06h-3.06zM12 0h5.06v1.06h-5.06zM18 0h1.06v1.06h-1.06zM22 0h1.06v1.06h-1.06zM24 0h5.06v1.06h-5.06zM36 0h1.06v1.06h-1.06zM40 0h1.06v1.06h-1.06zM43 0h3.06v1.06h-3.06zM48 0h4.06v1.06h-4.06zM54 0h1.06v1.06h-1.06zM58 0h1.06v1.06h-1.06zM60 0h5.06v1.06h-5.06zM67 0h4.06v1.06h-4.06zM73 0h4.06v1.06h-4.06zM0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM10 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM18 1h2.06v1.06h-2.06zM22 1h1.06v1.06h-1.06zM26 1h1.06v1.06h-1.06zM36 1h1.06v1.06h-1.06zM40 1h1.06v1.06h-1.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h2.06v1.06h-2.06zM58 1h1.06v1.06h-1.06zM60 1h1.06v1.06h-1.06zM66 1h1.06v1.06h-1.06zM72 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM20 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM26 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM40 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM56 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM66 2h1.06v1.06h-1.06zM72 2h1.06v1.06h-1.06zM0 3h5.06v1.06h-5.06zM6 3h1.06v1.06h-1.06zM8 3h3.06v1.06h-3.06zM12 3h4.06v1.06h-4.06zM18 3h1.06v1.06h-1.06zM21 3h2.06v1.06h-2.06zM26 3h1.06v1.06h-1.06zM36 3h5.06v1.06h-5.06zM42 3h5.06v1.06h-5.06zM48 3h4.06v1.06h-4.06zM54 3h1.06v1.06h-1.06zM57 3h2.06v1.06h-2.06zM60 3h4.06v1.06h-4.06zM67 3h3.06v1.06h-3.06zM73 3h3.06v1.06h-3.06zM0 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM6 4h1.06v1.06h-1.06zM10 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM22 4h1.06v1.06h-1.06zM26 4h1.06v1.06h-1.06zM36 4h1.06v1.06h-1.06zM40 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM50 4h1.06v1.06h-1.06zM54 4h1.06v1.06h-1.06zM58 4h1.06v1.06h-1.06zM60 4h1.06v1.06h-1.06zM70 4h1.06v1.06h-1.06zM76 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM10 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM26 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM40 5h1.06v1.06h-1.06zM42 5h1.06v1.06h-1.06zM46 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM51 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM58 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM70 5h1.06v1.06h-1.06zM76 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM7 6h4.06v1.06h-4.06zM12 6h5.06v1.06h-5.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM26 6h1.06v1.06h-1.06zM36 6h1.06v1.06h-1.06zM40 6h1.06v1.06h-1.06zM42 6h1.06v1.06h-1.06zM46 6h1.06v1.06h-1.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h1.06v1.06h-1.06zM58 6h1.06v1.06h-1.06zM60 6h5.06v1.06h-5.06zM66 6h4.06v1.06h-4.06zM72 6h4.06v1.06h-4.06z"/></svg></div>
+          <div class="body">
+            <p class="co">Personal · open source</p>
+            <h3 class="mt4">Agent Harness: overnight software delivery with verification gates</h3>
+            <p class="desc">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+            <p class="score"><svg class="pix" viewBox="0 0 11 7" aria-hidden="true" style="width:calc(var(--d)*55);height:calc(var(--d)*35)"><path fill="#16131f" d="M0 0h5.06v1.06h-5.06zM6 0h5.06v1.06h-5.06zM0 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM0 2h4.06v1.06h-4.06zM6 2h4.06v1.06h-4.06zM4 3h1.06v1.06h-1.06zM10 3h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM10 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM10 5h1.06v1.06h-1.06zM1 6h3.06v1.06h-3.06zM7 6h3.06v1.06h-3.06z"/></svg><span class="f b" style="--fs:13">features passing in one day</span></p>
+          </div>
+        </div>
+      </article>
+      <article class="cart" style="--x:464;--y:110;--w:352;--h:420">
+        <div class="label">
+          <div class="top" style="background:#4f86f0"><span class="b f" style="--fs:14">Voice Concierge</span></div>
+          <div class="body">
+            <p class="co">Personal · open source</p>
+            <h3 class="mt4">Voice Concierge: a voice agent that remembers returning visitors</h3>
+            <p class="desc">A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.</p>
+          </div>
+        </div>
+      </article>
+      <article class="cart" style="--x:840;--y:110;--w:352;--h:420">
+        <div class="label">
+          <div class="top" style="background:#f6c945"><span class="b f" style="--fs:14">GoHighLevel ↔ JobTread</span></div>
+          <div class="body">
+            <p class="co">Builder Clarity</p>
+            <h3 class="mt4">GoHighLevel ↔ JobTread Integration</h3>
+            <p class="desc">Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.</p>
+            <p class="score" style="flex-wrap:wrap;gap:calc(var(--d)*4) calc(var(--d)*10)"><span class="b f nw" style="--fs:20">2 days → ~6 hrs</span><span class="f b" style="--fs:13">client onboarding time</span></p>
+          </div>
+        </div>
+      </article>
+      <div class="scan"></div>
+    </div>
+    <figcaption>1280, Recent work. The links at the foot of today's card (Deep dive, GitHub) stay under the label and are left out of the drawing, as is the stack, which moves to the case study in this direction. The pixel short title appears only where it fits in one line (Agent Harness); the others keep their band and an Atkinson short title, so the page never depends on the pixel face for meaning. The metric is the cartridge's high score; a project without one has no score line.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen crt w390c" role="img" aria-label="Direction 2 at 390 px: RECENT WORK in pixels, the Agent Harness cartridge at full width with its red band, title, description and 55 features passing in one day; the next cartridge's notched top shows below.">
+        <div class="abs" style="--x:16;--y:32;--w:358"><svg class="pix" viewBox="0 0 65 8" aria-hidden="true" style="width:calc(var(--d)*260);height:calc(var(--d)*32)"><path fill="#e5483d" d="M0 1h4.06v1.06h-4.06zM6 1h5.06v1.06h-5.06zM13 1h3.06v1.06h-3.06zM18 1h5.06v1.06h-5.06zM24 1h1.06v1.06h-1.06zM28 1h1.06v1.06h-1.06zM30 1h5.06v1.06h-5.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM49 1h3.06v1.06h-3.06zM54 1h4.06v1.06h-4.06zM60 1h1.06v1.06h-1.06zM64 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM16 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM24 2h2.06v1.06h-2.06zM28 2h1.06v1.06h-1.06zM32 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM63 2h1.06v1.06h-1.06zM0 3h1.06v1.06h-1.06zM4 3h1.06v1.06h-1.06zM6 3h1.06v1.06h-1.06zM12 3h1.06v1.06h-1.06zM18 3h1.06v1.06h-1.06zM24 3h1.06v1.06h-1.06zM26 3h1.06v1.06h-1.06zM28 3h1.06v1.06h-1.06zM32 3h1.06v1.06h-1.06zM42 3h1.06v1.06h-1.06zM46 3h1.06v1.06h-1.06zM48 3h1.06v1.06h-1.06zM52 3h1.06v1.06h-1.06zM54 3h1.06v1.06h-1.06zM58 3h1.06v1.06h-1.06zM60 3h1.06v1.06h-1.06zM62 3h1.06v1.06h-1.06zM0 4h4.06v1.06h-4.06zM6 4h4.06v1.06h-4.06zM12 4h1.06v1.06h-1.06zM18 4h4.06v1.06h-4.06zM24 4h1.06v1.06h-1.06zM27 4h2.06v1.06h-2.06zM32 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM44 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM52 4h1.06v1.06h-1.06zM54 4h4.06v1.06h-4.06zM60 4h2.06v1.06h-2.06zM0 5h1.06v1.06h-1.06zM2 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM32 5h1.06v1.06h-1.06zM42 5h1.06v1.06h-1.06zM44 5h1.06v1.06h-1.06zM46 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM56 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM62 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM3 6h1.06v1.06h-1.06zM6 6h1.06v1.06h-1.06zM12 6h1.06v1.06h-1.06zM16 6h1.06v1.06h-1.06zM18 6h1.06v1.06h-1.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM32 6h1.06v1.06h-1.06zM42 6h2.06v1.06h-2.06zM45 6h2.06v1.06h-2.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h1.06v1.06h-1.06zM57 6h1.06v1.06h-1.06zM60 6h1.06v1.06h-1.06zM63 6h1.06v1.06h-1.06zM0 7h1.06v1.06h-1.06zM4 7h1.06v1.06h-1.06zM6 7h5.06v1.06h-5.06zM13 7h3.06v1.06h-3.06zM18 7h5.06v1.06h-5.06zM24 7h1.06v1.06h-1.06zM28 7h1.06v1.06h-1.06zM32 7h1.06v1.06h-1.06zM42 7h1.06v1.06h-1.06zM46 7h1.06v1.06h-1.06zM49 7h3.06v1.06h-3.06zM54 7h1.06v1.06h-1.06zM58 7h1.06v1.06h-1.06zM60 7h1.06v1.06h-1.06zM64 7h1.06v1.06h-1.06z"/><path fill="#f3efe1" d="M0 0h4.06v1.06h-4.06zM6 0h5.06v1.06h-5.06zM13 0h3.06v1.06h-3.06zM18 0h5.06v1.06h-5.06zM24 0h1.06v1.06h-1.06zM28 0h1.06v1.06h-1.06zM30 0h5.06v1.06h-5.06zM42 0h1.06v1.06h-1.06zM46 0h1.06v1.06h-1.06zM49 0h3.06v1.06h-3.06zM54 0h4.06v1.06h-4.06zM60 0h1.06v1.06h-1.06zM64 0h1.06v1.06h-1.06zM0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM16 1h1.06v1.06h-1.06zM18 1h1.06v1.06h-1.06zM24 1h2.06v1.06h-2.06zM28 1h1.06v1.06h-1.06zM32 1h1.06v1.06h-1.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h1.06v1.06h-1.06zM58 1h1.06v1.06h-1.06zM60 1h1.06v1.06h-1.06zM63 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM24 2h1.06v1.06h-1.06zM26 2h1.06v1.06h-1.06zM28 2h1.06v1.06h-1.06zM32 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM62 2h1.06v1.06h-1.06zM0 3h4.06v1.06h-4.06zM6 3h4.06v1.06h-4.06zM12 3h1.06v1.06h-1.06zM18 3h4.06v1.06h-4.06zM24 3h1.06v1.06h-1.06zM27 3h2.06v1.06h-2.06zM32 3h1.06v1.06h-1.06zM42 3h1.06v1.06h-1.06zM44 3h1.06v1.06h-1.06zM46 3h1.06v1.06h-1.06zM48 3h1.06v1.06h-1.06zM52 3h1.06v1.06h-1.06zM54 3h4.06v1.06h-4.06zM60 3h2.06v1.06h-2.06zM0 4h1.06v1.06h-1.06zM2 4h1.06v1.06h-1.06zM6 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM24 4h1.06v1.06h-1.06zM28 4h1.06v1.06h-1.06zM32 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM44 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM52 4h1.06v1.06h-1.06zM54 4h1.06v1.06h-1.06zM56 4h1.06v1.06h-1.06zM60 4h1.06v1.06h-1.06zM62 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM3 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM16 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM24 5h1.06v1.06h-1.06zM28 5h1.06v1.06h-1.06zM32 5h1.06v1.06h-1.06zM42 5h2.06v1.06h-2.06zM45 5h2.06v1.06h-2.06zM48 5h1.06v1.06h-1.06zM52 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM57 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM63 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM6 6h5.06v1.06h-5.06zM13 6h3.06v1.06h-3.06zM18 6h5.06v1.06h-5.06zM24 6h1.06v1.06h-1.06zM28 6h1.06v1.06h-1.06zM32 6h1.06v1.06h-1.06zM42 6h1.06v1.06h-1.06zM46 6h1.06v1.06h-1.06zM49 6h3.06v1.06h-3.06zM54 6h1.06v1.06h-1.06zM58 6h1.06v1.06h-1.06zM60 6h1.06v1.06h-1.06zM64 6h1.06v1.06h-1.06z"/></svg></div>
+        <article class="cart" style="--x:16;--y:90;--w:358;--h:470">
+          <div class="label">
+            <div class="top" style="background:#e5483d"><svg class="pix" viewBox="0 0 77 7" aria-hidden="true" style="width:calc(var(--d)*200.2);height:calc(var(--d)*18.2)"><path fill="#16131f" d="M1 0h3.06v1.06h-3.06zM7 0h3.06v1.06h-3.06zM12 0h5.06v1.06h-5.06zM18 0h1.06v1.06h-1.06zM22 0h1.06v1.06h-1.06zM24 0h5.06v1.06h-5.06zM36 0h1.06v1.06h-1.06zM40 0h1.06v1.06h-1.06zM43 0h3.06v1.06h-3.06zM48 0h4.06v1.06h-4.06zM54 0h1.06v1.06h-1.06zM58 0h1.06v1.06h-1.06zM60 0h5.06v1.06h-5.06zM67 0h4.06v1.06h-4.06zM73 0h4.06v1.06h-4.06zM0 1h1.06v1.06h-1.06zM4 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM10 1h1.06v1.06h-1.06zM12 1h1.06v1.06h-1.06zM18 1h2.06v1.06h-2.06zM22 1h1.06v1.06h-1.06zM26 1h1.06v1.06h-1.06zM36 1h1.06v1.06h-1.06zM40 1h1.06v1.06h-1.06zM42 1h1.06v1.06h-1.06zM46 1h1.06v1.06h-1.06zM48 1h1.06v1.06h-1.06zM52 1h1.06v1.06h-1.06zM54 1h2.06v1.06h-2.06zM58 1h1.06v1.06h-1.06zM60 1h1.06v1.06h-1.06zM66 1h1.06v1.06h-1.06zM72 1h1.06v1.06h-1.06zM0 2h1.06v1.06h-1.06zM4 2h1.06v1.06h-1.06zM6 2h1.06v1.06h-1.06zM12 2h1.06v1.06h-1.06zM18 2h1.06v1.06h-1.06zM20 2h1.06v1.06h-1.06zM22 2h1.06v1.06h-1.06zM26 2h1.06v1.06h-1.06zM36 2h1.06v1.06h-1.06zM40 2h1.06v1.06h-1.06zM42 2h1.06v1.06h-1.06zM46 2h1.06v1.06h-1.06zM48 2h1.06v1.06h-1.06zM52 2h1.06v1.06h-1.06zM54 2h1.06v1.06h-1.06zM56 2h1.06v1.06h-1.06zM58 2h1.06v1.06h-1.06zM60 2h1.06v1.06h-1.06zM66 2h1.06v1.06h-1.06zM72 2h1.06v1.06h-1.06zM0 3h5.06v1.06h-5.06zM6 3h1.06v1.06h-1.06zM8 3h3.06v1.06h-3.06zM12 3h4.06v1.06h-4.06zM18 3h1.06v1.06h-1.06zM21 3h2.06v1.06h-2.06zM26 3h1.06v1.06h-1.06zM36 3h5.06v1.06h-5.06zM42 3h5.06v1.06h-5.06zM48 3h4.06v1.06h-4.06zM54 3h1.06v1.06h-1.06zM57 3h2.06v1.06h-2.06zM60 3h4.06v1.06h-4.06zM67 3h3.06v1.06h-3.06zM73 3h3.06v1.06h-3.06zM0 4h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM6 4h1.06v1.06h-1.06zM10 4h1.06v1.06h-1.06zM12 4h1.06v1.06h-1.06zM18 4h1.06v1.06h-1.06zM22 4h1.06v1.06h-1.06zM26 4h1.06v1.06h-1.06zM36 4h1.06v1.06h-1.06zM40 4h1.06v1.06h-1.06zM42 4h1.06v1.06h-1.06zM46 4h1.06v1.06h-1.06zM48 4h1.06v1.06h-1.06zM50 4h1.06v1.06h-1.06zM54 4h1.06v1.06h-1.06zM58 4h1.06v1.06h-1.06zM60 4h1.06v1.06h-1.06zM70 4h1.06v1.06h-1.06zM76 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM10 5h1.06v1.06h-1.06zM12 5h1.06v1.06h-1.06zM18 5h1.06v1.06h-1.06zM22 5h1.06v1.06h-1.06zM26 5h1.06v1.06h-1.06zM36 5h1.06v1.06h-1.06zM40 5h1.06v1.06h-1.06zM42 5h1.06v1.06h-1.06zM46 5h1.06v1.06h-1.06zM48 5h1.06v1.06h-1.06zM51 5h1.06v1.06h-1.06zM54 5h1.06v1.06h-1.06zM58 5h1.06v1.06h-1.06zM60 5h1.06v1.06h-1.06zM70 5h1.06v1.06h-1.06zM76 5h1.06v1.06h-1.06zM0 6h1.06v1.06h-1.06zM4 6h1.06v1.06h-1.06zM7 6h4.06v1.06h-4.06zM12 6h5.06v1.06h-5.06zM18 6h1.06v1.06h-1.06zM22 6h1.06v1.06h-1.06zM26 6h1.06v1.06h-1.06zM36 6h1.06v1.06h-1.06zM40 6h1.06v1.06h-1.06zM42 6h1.06v1.06h-1.06zM46 6h1.06v1.06h-1.06zM48 6h1.06v1.06h-1.06zM52 6h1.06v1.06h-1.06zM54 6h1.06v1.06h-1.06zM58 6h1.06v1.06h-1.06zM60 6h5.06v1.06h-5.06zM66 6h4.06v1.06h-4.06zM72 6h4.06v1.06h-4.06z"/></svg></div>
+            <div class="body">
+              <p class="co">Personal · open source</p>
+              <h3 class="mt4" style="font-size:calc(var(--d)*17)">Agent Harness: overnight software delivery with verification gates</h3>
+              <p class="desc" style="font-size:calc(var(--d)*15)">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+              <p class="score"><svg class="pix" viewBox="0 0 11 7" aria-hidden="true" style="width:calc(var(--d)*55);height:calc(var(--d)*35)"><path fill="#16131f" d="M0 0h5.06v1.06h-5.06zM6 0h5.06v1.06h-5.06zM0 1h1.06v1.06h-1.06zM6 1h1.06v1.06h-1.06zM0 2h4.06v1.06h-4.06zM6 2h4.06v1.06h-4.06zM4 3h1.06v1.06h-1.06zM10 3h1.06v1.06h-1.06zM4 4h1.06v1.06h-1.06zM10 4h1.06v1.06h-1.06zM0 5h1.06v1.06h-1.06zM4 5h1.06v1.06h-1.06zM6 5h1.06v1.06h-1.06zM10 5h1.06v1.06h-1.06zM1 6h3.06v1.06h-3.06zM7 6h3.06v1.06h-3.06z"/></svg><span class="f b" style="--fs:13.5">features passing in one day</span></p>
+            </div>
+          </div>
+        </article>
+        <article class="cart" style="--x:16;--y:584;--w:358;--h:140"><div class="label"><div class="top" style="background:#4f86f0"><span class="b f" style="--fs:14">Voice Concierge</span></div></div></article>
+        <div class="scan"></div>
+      </div>
+      <figcaption>390 × 700.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>Type pairing</h3>
+      <div class="specimen" style="background:#0f0d1c;color:#f3efe1">
+        <p style="font:1rem/1.5 'Press Start 2P', ui-monospace, monospace;color:#f6c945">Recent work</p>
+        <p style="font:1rem/1.5 'Atkinson Hyperlegible', system-ui, sans-serif">I build simple, elegant systems that fit the humans who run them.</p>
+      </div>
+      <ul>
+        <li><strong>Press Start 2P</strong> (CodeMan38) for headings only: SIL Open Font License, per its Google Fonts metadata (<a href="https://github.com/google/fonts/tree/main/ofl/pressstart2p">google/fonts ofl/pressstart2p</a>, <a href="https://fonts.google.com/specimen/Press+Start+2P">specimen</a>). Set at sizes where each of its pixels is a whole number of screen pixels (16, 24, 32 px), never below 16, never in a sentence. The pixel words in the screens are a stand-in drawn by this page's build script from its own 5 × 7 bitmap, so they show without the font.</li>
+        <li><strong>Atkinson Hyperlegible</strong> (Braille Institute) for everything else: SIL Open Font License (<a href="https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegible">google/fonts ofl/atkinsonhyperlegible</a>). Drawn for low-vision readers, which is the right partner for a novelty display face.</li>
+        <li>Sizes by job: the pixel name 70 px tall at 1280 and 49 at 390 (a 10 and a 7 px cell); Atkinson at 25 (lead), 17 (body), 16 (tile names), 13 (labels) at 1280; 19, 15 and 15 at 390.</li>
+      </ul>
+      <h3>Motion rules</h3>
+      <ul>
+        <li><strong>Moves:</strong> once per session, the screen powers on: a bright horizontal line opens to the full page in about a quarter second. Buttons drop onto their shadow while pressed. The <code>▶</code> cursor jumps to the hovered or focused nav item.</li>
+        <li><strong>Feedback only:</strong> a chip that changed in the memory strip blinks its colour block once, as today's pulse does.</li>
+        <li><strong>Reduced motion:</strong> no power-on; the scanlines are off (this page does it: try it with the setting on); the cursor moves without travel; buttons change colour instead of moving.</li>
+        <li><strong>Never:</strong> flicker, rolling bars, screen shake. A flicker is the CRT effect people expect and the one that can trigger seizures (WCAG 2.3.1).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Palette and contrast</h3>
+  <div class="table-wrap"><table class="contrast"><thead><tr><th>Sample</th><th>Text on background</th><th>Ratio</th><th>Used for, needs</th><th>AA</th></tr></thead><tbody><tr><td><span class="pairswatch" style="background:#0f0d1c;color:#f3efe1">Aa</span></td><td><code>--crt-phosphor</code> on <code>--crt-void</code></td><td>16.67 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#f3efe1">Aa</span></td><td><code>--crt-phosphor</code> on <code>--crt-glass</code></td><td>14.62 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#0f0d1c;color:#a9a3c7">Aa</span></td><td><code>--crt-haze</code> on <code>--crt-void</code></td><td>7.99 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#a9a3c7">Aa</span></td><td><code>--crt-haze</code> on <code>--crt-glass</code></td><td>7.01 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#0f0d1c;color:#f6c945">Aa</span></td><td><code>--cart-yellow</code> on <code>--crt-void</code></td><td>12.20 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#f6c945">Aa</span></td><td><code>--cart-yellow</code> on <code>--crt-glass</code></td><td>10.71 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#f3efe1;color:#16131f">Aa</span></td><td><code>--cart-ink</code> on <code>--crt-phosphor</code></td><td>15.91 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#f6c945;color:#16131f">Aa</span></td><td><code>--cart-ink</code> on <code>--cart-yellow</code></td><td>11.65 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#e5483d;color:#16131f">Aa</span></td><td><code>--cart-ink</code> on <code>--cart-red</code></td><td>4.64 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#4f86f0;color:#16131f">Aa</span></td><td><code>--cart-ink</code> on <code>--cart-blue</code></td><td>5.23 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#00d4ff">Aa</span></td><td><code>--mem-profile</code> on <code>--crt-glass</code></td><td>9.51 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#fbbf24">Aa</span></td><td><code>--mem-episode</code> on <code>--crt-glass</code></td><td>10.08 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#4ade80">Aa</span></td><td><code>--mem-event</code> on <code>--crt-glass</code></td><td>9.66 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#f87171">Aa</span></td><td><code>--mem-event-rejected</code> on <code>--crt-glass</code></td><td>6.08 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#a78bfa">Aa</span></td><td><code>--mem-knowledge</code> on <code>--crt-glass</code></td><td>6.18 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1d1a33;color:#f472b6">Aa</span></td><td><code>--mem-working</code> on <code>--crt-glass</code></td><td>6.35 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr></tbody></table></div>
+  <p class="prose">Red and blue are label colours: on <code>--crt-void</code> they would pass as text (4.87 : 1 and 5.48 : 1), but red fails on <code>--crt-glass</code> (4.27 : 1), so they stay grounds with the dark ink on them, never the other way round. The headline's red is a shadow under cream pixels, not a text colour.</p>
+
+  <div class="pair wide">
+    <figure>
+      <div class="screen crt w420" role="img" aria-label="Direction 2, the concierge panel inside a CRT bezel at 420 px: a purple plastic bezel around a rounded dark screen with scanlines. On the screen: Ask my site with Guide me and Minimize; Leave and Mute microphone buttons; the status line; a transcript with Concierge and You lines and a muted notice; a message line; the memory strip as five coloured blocks with names and counts; tabs Memory, Latency, Privacy with Memory selected; About you with cyan profile slots. Below the screen, on the bezel, a red power light and the words Ask my site.">
+        <div class="bezel">
+          <div class="glass">
+            <div class="row" style="display:flex;justify-content:space-between;align-items:center"><span class="b eyebrow f" style="--fs:15">Ask my site</span><span class="haze f" style="--fs:12.5">Guide me ○ · Minimize</span></div>
+            <div class="row" style="padding-top:0"><p style="display:flex;gap:calc(var(--d)*10)"><span class="chunk on f" style="--fs:13;height:calc(var(--d)*34)">Leave</span><span class="chunk off f" style="--fs:13;height:calc(var(--d)*34)">Mute microphone</span></p><p class="haze mt12">Connected. Say hello, or type below.</p></div>
+            <div class="row" style="flex:1;border-top:1px solid #2a2646">
+              <p><b style="color:#f6c945">Concierge</b> Hi. Ask me about Michael's work, by voice or text.</p>
+              <p class="mt8"><b>You</b> What does the harness do overnight?</p>
+              <p class="mt8"><b style="color:#f6c945">Concierge</b> It runs one fresh session per feature and merges only what a second session verified.</p>
+              <p class="mt8 haze"><i>Taking you to Agent Harness</i></p>
+            </div>
+            <div class="row" style="border-top:1px solid #2a2646"><p class="hud"><span><i style="background:#00d4ff"></i>Profile 3</span><span><i style="background:#fbbf24"></i>Episodes 2</span><span><i style="background:#4ade80"></i>Events 7</span><span><i style="background:#a78bfa"></i>Knowledge 4</span><span><i style="background:#f472b6"></i>Working 9</span></p></div>
+            <div class="row" style="padding-top:0"><p class="ctabs"><span class="on">Memory</span><span>Latency</span><span>Privacy</span></p><p class="mt12 b f" style="--fs:13">About you</p><p><span class="slot">role: recruiter</span><span class="slot">asked about: agent harness</span></p></div>
+            <div class="scan"></div>
+          </div>
+          <div class="foot"><span><span class="led"></span>Ask my site</span></div>
+        </div>
+        <span class="tag-ill top">illustrative transcript, counts and slots</span>
+      </div>
+      <figcaption>420 × 760: the drawer as a small CRT. The bezel is decoration around the same panel; the panel's content keeps the page's type.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>The concierge panel and the memory colours</h3>
+      <ul>
+        <li>The drawer is a portable TV: a plastic bezel (<code>#2a2646</code>, decorative) around a rounded screen. The bezel's foot carries a power light, lit while a call is live, in the same red as the pill's live dot (D87) rather than the events green. Below <code>lg</code> the bottom sheet keeps the bezel on its top edge only, so the screen gets the height.</li>
+        <li>Scanlines cover the panel at the same low opacity as the page and turn off with reduced motion. The transcript is the one place they could hurt: if a capture at 390 shows them softening text, they go off inside the panel and stay on the bezel.</li>
+        <li>The memory strip is a game's inventory row: one solid square of each kind's colour, then the name and count. Squares instead of tinted chips keep the six colours at full strength on <code>--crt-glass</code>, where all six pass (table above).</li>
+        <li>The tabs are chunky buttons; the selected one takes the yellow. The Latency tab is the current table in Atkinson with tabular figures.</li>
+        <li><code>/talk</code> shows the same TV at full size, centred, the way a console menu fills the screen.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================== DIRECTION 3 =========================================================== -->
+<section aria-labelledby="d3">
+  <div class="option-head"><span class="letter" aria-hidden="true">3</span><h2 id="d3">Mixing desk: analog hardware</h2></div>
+  <p class="idea">A piece of studio gear: brushed faceplates with screws, lowercase labels silkscreened in mono, keys that light, a seven-segment readout for a project's number. The loop is a five-step sequencer, the thing a drum machine uses to run a loop; the concierge is a rack module whose Latency tab is a row of VU meters. Warm orange and cream on charcoal.</p>
+
+  <div class="plan">
+    <div>
+      <h3>Palette</h3>
+      <ul class="swatches"><li><span class="sw" style="background:#1b1a18"></span><code>--desk-charcoal</code> <code>#1b1a18</code> page background, meter windows</li><li><span class="sw" style="background:#292723"></span><code>--desk-panel</code> <code>#292723</code> faceplates and cards</li><li><span class="sw" style="background:#efe6d2"></span><code>--desk-cream</code> <code>#efe6d2</code> body text, meter faces</li><li><span class="sw" style="background:#aba190"></span><code>--desk-silk</code> <code>#aba190</code> muted text, silkscreen labels</li><li><span class="sw" style="background:#ff8a2a"></span><code>--desk-orange</code> <code>#ff8a2a</code> accent: links, focus, lit keys, readouts</li><li><span class="sw" style="background:#86e08f"></span><code>--desk-led-green</code> <code>#86e08f</code> signal present</li><li><span class="sw" style="background:#ff6a55"></span><code>--desk-led-red</code> <code>#ff6a55</code> over budget, the meter red zone</li></ul>
+    </div>
+    <div>
+      <h3>Type</h3>
+      <p>Barlow Condensed for the name and headings, Barlow for prose, Space Mono for the silkscreen labels; DSEG7 for the readout digits only.</p>
+      <h3>Layout</h3>
+      <p>Faceplates on a charcoal rack: one plate per section, screws in the corners, a 6 px radius. Content left-aligned to the plate's inner margin.</p>
+      <h3>The one motif</h3>
+      <p>The lit key and the LED: state shown by light. Knobs appear nowhere on the page, because nothing on it turns: a deliberate departure from the v3 spec § 11, which names knobs as a motif.</p>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen desk w1280" role="img" aria-label="Direction 3 at 1280 px: a dark top bar with lowercase mono links, home lit by an orange LED. A large brushed faceplate with four screws: the silkscreen label agentic systems engineer, Michael Herron in big condensed cream type, the tagline and the subline. Below, a five-step sequencer: five dark keys, each with an orange LED lit, labelled spec, context, build, verify, learn, each with its line. Two hardware keys: View projects in orange, About me in cream. Ask my site, a small plate with an LED, bottom right.">
+      <div class="nav"><span class="mono" style="color:#efe6d2">Michael Herron</span><span class="links"><span class="on"><span class="ledi lit"></span>Home</span><span>About</span><span>Skills</span><span>Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="plate brushed" style="--x:88;--y:84;--w:1104;--h:580">
+        <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+        <div class="abs" style="--x:48;--y:44;--w:1008">
+          <p class="silk lc f" style="--fs:14">Agentic Systems Engineer</p>
+          <p class="cond h1 f mt12" style="--fs:110">Michael Herron</p>
+          <p class="f mt16" style="--fs:25">I build simple, elegant systems that fit the humans who run them.</p>
+          <p class="f silk mt8" style="--fs:17;font-family:inherit">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+          <ol class="seq mt32">
+            <li class="step"><div class="keycap"><span class="ledi lit"></span></div><b>Spec</b><span>I write down what done means before anything is built.</span></li>
+            <li class="step"><div class="keycap"><span class="ledi lit"></span></div><b>Context</b><span>Every session starts fresh, from state kept on disk, not from memory.</span></li>
+            <li class="step"><div class="keycap"><span class="ledi lit"></span></div><b>Build</b><span>Test first, one feature at a time, the smallest system that fixes the real problem.</span></li>
+            <li class="step"><div class="keycap"><span class="ledi lit"></span></div><b>Verify</b><span>An independent check, with evidence per step, before anything merges.</span></li>
+            <li class="step"><div class="keycap"><span class="ledi lit"></span></div><b>Learn</b><span>Every run is measured and written down, and the next plan reads it.</span></li>
+          </ol>
+          <p class="mt32" style="display:flex;gap:calc(var(--d)*14)"><span class="hw on">View projects</span><span class="hw off">About me</span></p>
+        </div>
+      </div>
+      <div class="ask brushed" style="left:calc(var(--d)*1100);top:calc(var(--d)*740)"><span class="ledi g" style="margin:0"></span>Ask my site</div>
+    </div>
+    <figcaption>1280 × 800, the home hero. The sequencer is <code>MethodStrip</code>: five keys in an <code>ol</code>, each LED lit once the step has played. The labels are lowercase because hardware silkscreen often is; the name and copy keep their case.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen desk w390" role="img" aria-label="Direction 3 at 390 px: the top bar with michael herron and a menu button; one brushed faceplate with screws: the label, Michael Herron in condensed type on two lines, tagline, subline; the five sequencer keys in one row with their labels below; View projects and About me as full-width keys. Ask my site bottom right.">
+        <div class="nav"><span class="mono f" style="--fs:13;color:#efe6d2">Michael Herron</span><span class="burger" aria-hidden="true"></span></div>
+        <div class="plate brushed" style="--x:10;--y:64;--w:370;--h:640">
+          <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+          <div class="abs" style="--x:20;--y:34;--w:330">
+            <p class="silk lc f" style="--fs:12.5">Agentic Systems Engineer</p>
+            <p class="cond h1 f mt8" style="--fs:72">Michael<br>Herron</p>
+            <p class="f mt16" style="--fs:19">I build simple, elegant systems that fit the humans who run them.</p>
+            <p class="f silk mt8" style="--fs:15;font-family:inherit">I build the harnesses, memory and verification around AI agents, and the integrations they run on.</p>
+            <ol class="seq mt24" style="gap:calc(var(--d)*7)">
+              <li class="step"><div class="keycap" style="height:calc(var(--d)*40)"><span class="ledi lit"></span></div><b style="font-size:calc(var(--d)*10.5)">Spec</b></li>
+              <li class="step"><div class="keycap" style="height:calc(var(--d)*40)"><span class="ledi lit"></span></div><b style="font-size:calc(var(--d)*10.5)">Context</b></li>
+              <li class="step"><div class="keycap" style="height:calc(var(--d)*40)"><span class="ledi lit"></span></div><b style="font-size:calc(var(--d)*10.5)">Build</b></li>
+              <li class="step"><div class="keycap" style="height:calc(var(--d)*40)"><span class="ledi lit"></span></div><b style="font-size:calc(var(--d)*10.5)">Verify</b></li>
+              <li class="step"><div class="keycap" style="height:calc(var(--d)*40)"><span class="ledi lit"></span></div><b style="font-size:calc(var(--d)*10.5)">Learn</b></li>
+            </ol>
+            <p class="hw on mt32" style="display:flex">View projects</p>
+            <p class="hw off mt12" style="display:flex">About me</p>
+          </div>
+        </div>
+        <div class="ask brushed" style="left:calc(var(--d)*238);top:calc(var(--d)*782)"><span class="ledi g" style="margin:0"></span>Ask my site</div>
+      </div>
+      <figcaption>390 × 844. Five keys still fit in one row at 390; their labels drop to 10.5 px, the smallest size in this direction, mono and bold.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>Craft and warmth: something made with care, by someone who likes tools. The loop as a sequencer says "a process that repeats" without a word. The agentic angle reads from the copy, not from the look.</p>
+      <h3>Where it can go wrong</h3>
+      <ul>
+        <li>Skeuomorphism ages fast and costs the most: screws, brushed metal and keycaps are component work, not tokens, and a half-done version looks like a theme.</li>
+        <li>The texture can muddy text. The brushing is 3 % white on a 3 px period, under the 5 % ceiling below; any more and the silk labels lose their margin.</li>
+        <li>It says "music" (Michael's DJ crate project fits it) more than "agents", so it pulls the angle sideways.</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <div class="screen desk w1280c" role="img" aria-label="Direction 3 at 1280 px, Recent work: a condensed heading and three brushed modules with screws. Agent Harness: the label personal · open source, the title, the description, a black readout window with 55 in orange seven-segment digits and features passing in one day, and the stack as a mono line. Voice Concierge: no readout. GoHighLevel to JobTread: a readout reading 2 days to about 6 hrs, client onboarding time.">
+      <div class="abs" style="--x:88;--y:36;--w:900"><p class="cond f b" style="--fs:40">Recent work</p></div>
+      <article class="plate brushed card" style="--x:88;--y:110;--w:352;--h:410">
+        <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+        <div class="abs" style="--x:24;--y:28;--w:304">
+          <p class="silk lc f" style="--fs:11.5">Personal · open source</p>
+          <h3 class="cond f mt8" style="--fs:24">Agent Harness: overnight software delivery with verification gates</h3>
+          <p class="f mt8" style="--fs:13.5;color:#efe6d2">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+          <p class="mt16" style="display:flex;gap:calc(var(--d)*12);align-items:center"><span class="readout"><svg class="seg" viewBox="0 0 30 24" aria-hidden="true" style="width:calc(var(--d)*42.5);height:calc(var(--d)*34)"><rect x="3" y="1" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="11" y="3" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="11" y="13" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="3" y="21" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="1" y="13" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="1" y="3" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="3" y="11" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="19" y="1" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="27" y="3" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="27" y="13" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="19" y="21" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="17" y="13" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="17" y="3" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="19" y="11" width="8" height="2" rx="1" fill="#ff8a2a"/></svg></span><span class="silk f" style="--fs:12">features passing in one day</span></p>
+          <p class="silk lc f mt16" style="--fs:11">Bash · Node.js · Git · tmux · jq · GitHub CLI · Claude Code</p>
+        </div>
+      </article>
+      <article class="plate brushed card" style="--x:464;--y:110;--w:352;--h:410">
+        <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+        <div class="abs" style="--x:24;--y:28;--w:304">
+          <p class="silk lc f" style="--fs:11.5">Personal · open source</p>
+          <h3 class="cond f mt8" style="--fs:24">Voice Concierge: a voice agent that remembers returning visitors</h3>
+          <p class="f mt8" style="--fs:13.5;color:#efe6d2">A LiveKit voice agent for this site, designed to remember you between visits, show you what it remembers, and forget you on request.</p>
+          <p class="silk lc f mt16" style="--fs:11">Python · LiveKit Agents · LiveKit Inference · Anthropic API · SQLite · Next.js · TypeScript · Claude Code</p>
+        </div>
+      </article>
+      <article class="plate brushed card" style="--x:840;--y:110;--w:352;--h:410">
+        <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+        <div class="abs" style="--x:24;--y:28;--w:304">
+          <p class="silk lc f" style="--fs:11.5">Builder Clarity</p>
+          <h3 class="cond f mt8" style="--fs:24">GoHighLevel ↔ JobTread Integration</h3>
+          <p class="f mt8" style="--fs:13.5;color:#efe6d2">Multi-tenant, bidirectional integration between GoHighLevel CRM and JobTread project management — purpose-built for contractors.</p>
+          <p class="mt16" style="display:flex;gap:calc(var(--d)*12);align-items:center;flex-wrap:wrap"><span class="readout mono b f" style="--fs:20;color:#ff8a2a">2 days → ~6 hrs</span><span class="silk f" style="--fs:12">client onboarding time</span></p>
+          <p class="silk lc f mt16" style="--fs:11">Pipedream · Supabase · JavaScript · OAuth · REST APIs · Webhooks</p>
+        </div>
+      </article>
+    </div>
+    <figcaption>1280, Recent work. The readout shows <code>metrics[0].value</code>: seven-segment digits when the value is a plain number (55), the mono face when it has words (2 days → ~6 hrs). A project with no metric has no readout, where today's card shows its first category. The Deep dive and GitHub links stay at the foot, left out of the drawing. Lowercase labels are a CSS <code>text-transform</code>; the data keeps its case.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen desk w390c" role="img" aria-label="Direction 3 at 390 px: Recent work, the Agent Harness module at full width with its readout 55 and the stack; the next module's top edge with its screws below.">
+        <div class="abs" style="--x:16;--y:24;--w:358"><p class="cond f b" style="--fs:34">Recent work</p></div>
+        <article class="plate brushed card" style="--x:16;--y:86;--w:358;--h:420">
+          <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+          <div class="abs" style="--x:22;--y:28;--w:314">
+            <p class="silk lc f" style="--fs:12">Personal · open source</p>
+            <h3 class="cond f mt8" style="--fs:26">Agent Harness: overnight software delivery with verification gates</h3>
+            <p class="f mt8" style="--fs:15;color:#efe6d2">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+            <p class="mt16" style="display:flex;gap:calc(var(--d)*12);align-items:center"><span class="readout"><svg class="seg" viewBox="0 0 30 24" aria-hidden="true" style="width:calc(var(--d)*42.5);height:calc(var(--d)*34)"><rect x="3" y="1" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="11" y="3" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="11" y="13" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="3" y="21" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="1" y="13" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="1" y="3" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="3" y="11" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="19" y="1" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="27" y="3" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="27" y="13" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="19" y="21" width="8" height="2" rx="1" fill="#ff8a2a"/><rect x="17" y="13" width="2" height="8" rx="1" fill="#3a2a1c"/><rect x="17" y="3" width="2" height="8" rx="1" fill="#ff8a2a"/><rect x="19" y="11" width="8" height="2" rx="1" fill="#ff8a2a"/></svg></span><span class="silk f" style="--fs:13">features passing in one day</span></p>
+            <p class="silk lc f mt16" style="--fs:12">Bash · Node.js · Git · tmux · jq · GitHub CLI · Claude Code</p>
+          </div>
+        </article>
+        <article class="plate brushed card" style="--x:16;--y:530;--w:358;--h:190"><span class="screw s1"></span><span class="screw s2"></span></article>
+      </div>
+      <figcaption>390 × 700.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>Type pairing</h3>
+      <div class="specimen" style="background:#292723;color:#efe6d2">
+        <p style="font:600 1.8rem/1 'Barlow Condensed', 'Arial Narrow', sans-serif;font-stretch:condensed">Michael Herron</p>
+        <p style="font:0.85rem 'Space Mono', ui-monospace, monospace;color:#aba190">Agentic Systems Engineer</p>
+        <p style="font:1rem/1.5 'Barlow', system-ui, sans-serif">I build simple, elegant systems that fit the humans who run them.</p>
+      </div>
+      <ul>
+        <li><strong>Barlow Condensed</strong> and <strong>Barlow</strong> (Jeremy Tribby): SIL Open Font License (<a href="https://github.com/google/fonts/tree/main/ofl/barlowcondensed">google/fonts ofl/barlowcondensed</a>, <a href="https://github.com/google/fonts/tree/main/ofl/barlow">ofl/barlow</a>). A grotesk drawn after highway and rail signage, close to the faces printed on gear.</li>
+        <li><strong>Space Mono</strong> (Colophon Foundry) for labels: SIL Open Font License (<a href="https://github.com/google/fonts/tree/main/ofl/spacemono">google/fonts ofl/spacemono</a>).</li>
+        <li><strong>DSEG7</strong> for readout digits only: SIL Open Font License 1.1, per its README (<a href="https://github.com/keshikan/DSEG">github.com/keshikan/DSEG</a>). Never for a value with words in it; those use Space Mono in the same window.</li>
+        <li>Sizes by job at 1280: name 110, section heading 40, lead 25, card title 24, body 17 and 13.5, labels 11–14 px; at 390: 72, 34, 26, 19, 15, labels 10.5–13.</li>
+      </ul>
+      <h3>Motion rules</h3>
+      <ul>
+        <li><strong>Moves:</strong> on first load the sequencer plays once: one LED after another, left to right, then all five stay lit (a loop that ran). A key goes down 2 px while pressed. The VU needles move to each new turn's value with a meter's ballistics (a short rise, a slower fall).</li>
+        <li><strong>Feedback only:</strong> a memory channel's LED flashes once when its count changes; the pill's LED glows while the agent speaks (today's sound bars).</li>
+        <li><strong>Reduced motion:</strong> the sequencer shows all five lit; needles jump to their value; LEDs change state without a flash.</li>
+        <li><strong>Never:</strong> a needle that idles or wobbles without a new value; spinning knobs.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Palette and contrast</h3>
+  <div class="table-wrap"><table class="contrast"><thead><tr><th>Sample</th><th>Text on background</th><th>Ratio</th><th>Used for, needs</th><th>AA</th></tr></thead><tbody><tr><td><span class="pairswatch" style="background:#1b1a18;color:#efe6d2">Aa</span></td><td><code>--desk-cream</code> on <code>--desk-charcoal</code></td><td>14.01 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#efe6d2">Aa</span></td><td><code>--desk-cream</code> on <code>--desk-panel</code></td><td>12.01 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1b1a18;color:#aba190">Aa</span></td><td><code>--desk-silk</code> on <code>--desk-charcoal</code></td><td>6.82 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#aba190">Aa</span></td><td><code>--desk-silk</code> on <code>--desk-panel</code></td><td>5.84 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#ff8a2a">Aa</span></td><td><code>--desk-orange</code> on <code>--desk-panel</code></td><td>6.33 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#1b1a18;color:#ff8a2a">Aa</span></td><td><code>--desk-orange</code> on <code>--desk-charcoal</code></td><td>7.39 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#ff8a2a;color:#1b1a18">Aa</span></td><td><code>--desk-charcoal</code> on <code>--desk-orange</code></td><td>7.39 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#efe6d2;color:#1b1a18">Aa</span></td><td><code>--desk-charcoal</code> on <code>--desk-cream</code></td><td>14.01 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#86e08f">Aa</span></td><td><code>--desk-led-green</code> on <code>--desk-panel</code></td><td>9.28 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#ff6a55">Aa</span></td><td><code>--desk-led-red</code> on <code>--desk-panel</code></td><td>5.28 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#00d4ff">Aa</span></td><td><code>--mem-profile</code> on <code>--desk-panel</code></td><td>8.42 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#fbbf24">Aa</span></td><td><code>--mem-episode</code> on <code>--desk-panel</code></td><td>8.93 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#4ade80">Aa</span></td><td><code>--mem-event</code> on <code>--desk-panel</code></td><td>8.55 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#f87171">Aa</span></td><td><code>--mem-event-rejected</code> on <code>--desk-panel</code></td><td>5.39 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#a78bfa">Aa</span></td><td><code>--mem-knowledge</code> on <code>--desk-panel</code></td><td>5.48 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr><tr><td><span class="pairswatch" style="background:#292723;color:#f472b6">Aa</span></td><td><code>--mem-working</code> on <code>--desk-panel</code></td><td>5.63 : 1</td><td>body text, ≥ 4.5</td><td>passes</td></tr></tbody></table></div>
+  <p class="prose">The brushed texture lightens <code>--desk-panel</code> by 3 % in one column in three and darkens it by up to 5 % toward the foot of the plate (a darker ground only raises the ratio of light text); the ratios above use the flat panel. At its lightest point (<code>#2f2d2a</code>) the silk labels, the faintest token used for paragraphs, are still 5.38 : 1, and no text token falls below 4.87 : 1. Cream key faces carry charcoal text, the same pair as the meter faces.</p>
+
+  <div class="pair wide">
+    <figure>
+      <div class="screen desk w420" role="img" aria-label="Direction 3, the concierge panel as a rack module at 420 px: a brushed plate with screws; Ask my site in condensed type, a Guide me toggle switch and a Minimize key; Leave and Mute microphone keys; the status line; a recessed window with the transcript; five memory channels as coloured LEDs with names and counts; three keys memory, latency, privacy with latency lit; four VU meters with cream faces and needles: Whole turn, Speech to text, First token from the model, First audio from speech.">
+        <div class="rack brushed">
+          <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+          <p style="display:flex;justify-content:space-between;align-items:center;padding:0 calc(var(--d)*8)"><span class="cond b f" style="--fs:24">Ask my site</span><span class="silk lc f" style="--fs:11.5;display:flex;gap:calc(var(--d)*12);align-items:center"><span class="toggle"><i></i>guide me</span><span>minimize</span></span></p>
+          <p style="display:flex;gap:calc(var(--d)*8)"><span class="hw on f" style="--fs:13;height:calc(var(--d)*34)">Leave</span><span class="hw off f" style="--fs:13;height:calc(var(--d)*34)">Mute microphone</span></p>
+          <p class="silk">Connected. Say hello, or type below.</p>
+          <div class="well" style="flex:1">
+            <p><b style="color:#ff8a2a">Concierge</b> Hi. Ask me about Michael's work, by voice or text.</p>
+            <p class="mt8"><b>You</b> What does the harness do overnight?</p>
+            <p class="mt8 silk"><i>Taking you to Agent Harness</i></p>
+          </div>
+          <div class="chan">
+            <span><i style="background:#00d4ff"></i><span style="color:#00d4ff">profile 3</span></span>
+            <span><i style="background:#fbbf24"></i><span style="color:#fbbf24">episodes 2</span></span>
+            <span><i style="background:#4ade80"></i><span style="color:#4ade80">events 7</span></span>
+            <span><i style="background:#a78bfa"></i><span style="color:#a78bfa">knowledge 4</span></span>
+            <span><i style="background:#f472b6"></i><span style="color:#f472b6">working 9</span></span>
+          </div>
+          <p class="keys"><span>memory</span><span class="on">latency</span><span>privacy</span></p>
+          <div class="vus">
+            <div class="vu"><svg viewBox="0 0 120 58" aria-hidden="true"><path d="M14 52 A50 50 0 0 1 106 52" fill="none" stroke="#1b1a18" stroke-width="1.5"/><path d="M88 22 A50 50 0 0 1 106 52" fill="none" stroke="#c4321f" stroke-width="5"/><g stroke="#1b1a18" stroke-width="1.2"><path d="M14 52 l5 -2"/><path d="M24 30 l4 3"/><path d="M42 14 l2 4"/><path d="M60 8 v5"/><path d="M78 14 l-2 4"/><path d="M96 30 l-4 3"/></g><path d="M60 56 L44 18" stroke="#1b1a18" stroke-width="2"/><circle cx="60" cy="56" r="4" fill="#1b1a18"/></svg><p>Whole turn</p></div>
+            <div class="vu"><svg viewBox="0 0 120 58" aria-hidden="true"><path d="M14 52 A50 50 0 0 1 106 52" fill="none" stroke="#1b1a18" stroke-width="1.5"/><path d="M88 22 A50 50 0 0 1 106 52" fill="none" stroke="#c4321f" stroke-width="5"/><g stroke="#1b1a18" stroke-width="1.2"><path d="M14 52 l5 -2"/><path d="M24 30 l4 3"/><path d="M42 14 l2 4"/><path d="M60 8 v5"/><path d="M78 14 l-2 4"/><path d="M96 30 l-4 3"/></g><path d="M60 56 L30 26" stroke="#1b1a18" stroke-width="2"/><circle cx="60" cy="56" r="4" fill="#1b1a18"/></svg><p>Speech to text</p></div>
+            <div class="vu"><svg viewBox="0 0 120 58" aria-hidden="true"><path d="M14 52 A50 50 0 0 1 106 52" fill="none" stroke="#1b1a18" stroke-width="1.5"/><path d="M88 22 A50 50 0 0 1 106 52" fill="none" stroke="#c4321f" stroke-width="5"/><g stroke="#1b1a18" stroke-width="1.2"><path d="M14 52 l5 -2"/><path d="M24 30 l4 3"/><path d="M42 14 l2 4"/><path d="M60 8 v5"/><path d="M78 14 l-2 4"/><path d="M96 30 l-4 3"/></g><path d="M60 56 L86 22" stroke="#1b1a18" stroke-width="2"/><circle cx="60" cy="56" r="4" fill="#1b1a18"/></svg><p>First token from the model</p></div>
+            <div class="vu"><svg viewBox="0 0 120 58" aria-hidden="true"><path d="M14 52 A50 50 0 0 1 106 52" fill="none" stroke="#1b1a18" stroke-width="1.5"/><path d="M88 22 A50 50 0 0 1 106 52" fill="none" stroke="#c4321f" stroke-width="5"/><g stroke="#1b1a18" stroke-width="1.2"><path d="M14 52 l5 -2"/><path d="M24 30 l4 3"/><path d="M42 14 l2 4"/><path d="M60 8 v5"/><path d="M78 14 l-2 4"/><path d="M96 30 l-4 3"/></g><path d="M60 56 L58 10" stroke="#1b1a18" stroke-width="2"/><circle cx="60" cy="56" r="4" fill="#1b1a18"/></svg><p>First audio from speech</p></div>
+          </div>
+        </div>
+        <span class="tag-ill top" style="top:calc(var(--d)*386);right:calc(var(--d)*30)">illustrative transcript, counts and needles: no latency is measured yet</span>
+      </div>
+      <figcaption>420 × 760: the drawer as a rack module, the Latency tab selected. The meter labels are <code>latencyLabels</code> from <code>concierge.ts</code>.</figcaption>
+    </figure>
+    <div class="notes">
+      <h3>The concierge panel and the memory colours</h3>
+      <ul>
+        <li>The drawer is a rack module: a brushed plate with four screws, the transcript in a recessed well, Guide me as a real toggle switch (D94), Minimize and the tabs as keys. Below <code>lg</code> the bottom sheet is the same module turned on its side, its screws on the top edge.</li>
+        <li><strong>The Latency tab is a bank of VU meters.</strong> One meter per timing step of a turn in today's <code>LatencyPanel</code> (whole turn, end of turn detected, speech to text, first token, first audio, memory on the turn path); the drawing shows four of them. Its other rows (prompt tokens from cache, memory preload, background extraction, history compacted) are a share, one-off timings or a yes/no, so they stay as text under the meters. The needle is this turn's milliseconds against a budget per step; the red arc is over budget; the median would be a thin orange peak-hold needle (not drawn here). The budgets come from measured p95s, so until <code>docs/notes/voice-concierge-todo.md</code> is done the meters have no budget and the tab stays the table.</li>
+        <li>The meters are pictures of a number, so the number stays: each meter's value and median would sit under it as text (not drawn here, since nothing is measured), and the table remains the screen-reader and print version, as the /skills List view is for its graph.</li>
+        <li>The memory strip is a row of five channels, each an LED in its kind's colour with its name and count under it. On real desks LEDs come in every colour, so the cyan, violet and magenta sit fine next to the orange. All six pass on <code>--desk-panel</code> (table above), with the smallest margin of the three directions.</li>
+        <li><code>/talk</code> is the module at full width with the meters along the top, like a meter bridge over a console.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================== BEST PRACTICES =========================================================== -->
+<section aria-labelledby="practices">
+  <h2 id="practices">Best practices for a site with character</h2>
+  <p class="prose">Character comes from a few strong decisions held everywhere, not from adding effects. These rules apply to whichever direction ships.</p>
+  <ul class="prose">
+    <li><strong>One motif per page.</strong> Pick the shell, the cartridge or the faceplate, and let it carry the page. A page with a boot log, a CRT bezel and a VU meter has three motifs and no identity. The concierge panel may carry its own variant of the same motif; it never brings a second one.</li>
+    <li><strong>Legibility first.</strong> The display face is for a few words; everything a hiring manager reads is in a face built for reading, at 15 px or more on the phone, never below the size of today's body text by more than a pixel. A motif that costs a reader a sentence has to go.</li>
+    <li><strong>Motion as feedback, not decoration.</strong> Things move when someone does something (a key goes down, the cursor jumps to the focused item, a memory count changes) or once, on arrival (the boot log, the power-on, the sequencer). Nothing loops on its own except a cursor, and that stops under reduced motion.</li>
+    <li><strong>A real type scale.</strong> A short, fixed list of sizes, each with one job (name, section heading, lead, body, label, small), used the same way on every page; each direction lists its own. When the pass is built, pick them from a modular ratio (about 1.25 at 1280, 1.2 at 390) rather than by eye. Character type needs more discipline than a neutral face, not less.</li>
+    <li><strong>Textures at low opacity.</strong> Scanlines, brushing and grain change a pixel by 5 % or less (direction 2's scanlines darken one row in three by 4.9 %; direction 3's brushing lightens one column in three by 3 %) and never push a text pair under its threshold. Check the ratio at the darkest and the lightest point of the texture, as the notes under directions 2 and 3 do.</li>
+    <li><strong>Honour reduced motion and AA.</strong> Every animation has a still state under <code>prefers-reduced-motion</code>; no effect flashes more than three times a second (WCAG 2.3.1); body text passes 4.5 : 1 and large text 3 : 1 on every surface it sits on, memory colours included (checked per direction above).</li>
+    <li><strong>The data stays the source.</strong> A costume changes how <code>projects.ts</code> and <code>approach.ts</code> look, never what they say: terminal chrome around real copy is fine, invented output is not (no made-up logs or command results presented as real), no invented scores, no fake screenshots (<code>brand.md</code>). Where a mockup needed a number it did not have, it says "illustrative".</li>
+  </ul>
+  <p class="prose">References: <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">WCAG 2.2, Understanding contrast (minimum)</a>, <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html">non-text contrast</a> (for borders, LEDs and focus rings, 3 : 1), <a href="https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html">three flashes or below</a>, and MDN on <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion"><code>prefers-reduced-motion</code></a>. For how far a CRT costume can go (and why the site should stop well short), <a href="https://github.com/Swordfish90/cool-retro-term">cool-retro-term</a>; for hardware as a design language, <a href="https://teenage.engineering">teenage.engineering</a>.</p>
+</section>
+
+<!-- =========================================================== COMPARISON =========================================================== -->
+<section aria-labelledby="compare">
+  <h2 id="compare">The three side by side</h2>
+  <div class="table-wrap">
+    <table class="compare">
+      <thead><tr><th></th><th>1 Terminal</th><th>2 Cartridge</th><th>3 Mixing desk</th></tr></thead>
+      <tbody>
+        <tr><th>Tells the agentic story</th><td>Directly: the harness is a shell program; the loop as a boot log, case studies as man pages</td><td>Sideways: the loop as stages; play before engineering</td><td>Sideways: the loop as a sequencer; reads as music gear</td></tr>
+        <tr><th>How overt</th><td>Clearly retro, workstation-sober</td><td>The loudest</td><td>Loud in texture, warm in colour</td></tr>
+        <tr><th>Reading comfort</th><td>High: Plex Sans for prose, mono only for one-liners</td><td>High for prose (Atkinson); pixel headings cost width and must stay short</td><td>High: Barlow for prose; condensed headings scan fast</td></tr>
+        <tr><th>Token-only pass gets you</th><td>Most of it: palette, two fonts, square radii already look like a terminal</td><td>Some: palette and Atkinson; the pixel face and the cartridges need components</td><td>Little: without plates, keys and meters it is a warm dark theme</td></tr>
+        <tr><th>Component work after</th><td>Window chrome, boot-log <code>MethodStrip</code>, man-page <code>ProjectCard</code>, the pane panel</td><td>Pixel headline, cartridge card, stage tiles, bezel, scanline layer</td><td>Faceplate, keys and LEDs, readout, rack module, VU meters (new SVG and ballistics)</td></tr>
+        <tr><th>Concierge panel</th><td>A tmux pane; strip as the status bar</td><td>A small CRT; strip as an inventory row</td><td>A rack module; Latency as VU meters, once measured</td></tr>
+        <tr><th>Memory colours</th><td>Already close to the ANSI colours; unchanged</td><td>Unchanged, as solid squares</td><td>Unchanged, as LEDs; smallest contrast margin</td></tr>
+        <tr><th>Reduced motion</th><td>Cursor still, log printed whole</td><td>Scanlines off, no power-on</td><td>All LEDs lit, needles jump</td></tr>
+        <tr><th>Main risk</th><td>Green-on-black cliché</td><td>Reads as a game, not as work</td><td>Costly skeuomorphism; pulls toward music</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- =========================================================== RECOMMENDATION =========================================================== -->
+<section aria-labelledby="recommend">
+  <h2 id="recommend">Recommendation: 1, the terminal</h2>
+  <div class="verdict">
+    <p><strong>Ship direction 1.</strong> It is the only one whose costume is the subject: the site's headline is agentic systems, the flagship project is a Bash driver that runs agents in tmux overnight, and the loop really is a sequence of checks that pass or fail. A boot log of Spec, Context, Build, Verify, Learn says what the site is about before anyone reads it. It is also the most legible of the three and the cheapest: most of it arrives as tokens, the memory colours need no change, and the site already ships a monospace face.</p>
+    <p><strong>Why not 2:</strong> it has the most character and the weakest first ten seconds for a hiring manager; the pixel face constrains every heading. A cartridge could still appear once, as the art for the DJ crate or HitList project page, where play fits.</p>
+    <p><strong>Why not 3:</strong> its best idea, the latency panel as VU meters, depends on measured budgets that do not exist yet, and the rest is the most component work for the least story. Keep the meter idea for <code>/talk</code> after the concierge is measured.</p>
+  </div>
+
+  <h3>How it ships: a token-only pass first</h3>
+  <p class="prose">One PR that changes only <code>src/app/globals.css</code> and the font loading in <code>src/app/layout.tsx</code>; no component changes, so no test that pins markup moves (only the token test and the colour pins in step 1), and the diff is easy to review on the preview URL.</p>
+  <ol class="prose">
+    <li><strong>Colours</strong> in the <code>@theme inline</code> block: <code>--color-background</code> → <code>#0b0e0a</code>, <code>--color-surface</code> → <code>#141a13</code>, <code>--color-surface-alt</code> → <code>#1c2519</code> (body text on it 12.02 : 1), <code>--color-foreground</code> → <code>#d3e6cc</code>, <code>--color-muted</code> → <code>#8a9a84</code>, <code>--color-accent</code> → <code>#7ee36f</code> (with <code>--color-accent-dim</code> → <code>#5fc052</code>, the primary button's hover fill, black text on it 8.46 : 1, and <code>--color-accent-glow</code> → the accent at 15 %), and a new <code>--color-accent-2</code> <code>#ffb627</code> for the amber. The six <code>--color-mem-*</code> stay. <code>design-tokens.test.ts</code> checks them against today's surface and background and pins those two hex values (<code>#12121a</code>, <code>#0a0a0f</code>), so the pass moves its pins to the new surfaces and adds the foreground, muted and accent pairs from direction 1's contrast table. Colours written outside the theme keep today's cyan and near-black until changed by hand: <code>NodeGraph.tsx</code> (the hero's canvas), <code>FloatingLogos.tsx</code> (its hover colour, pinned by <code>FloatingLogos.test.tsx</code>), the Open Graph image (<code>opengraph-image.tsx</code>) and <code>themeColor</code> in <code>layout.tsx</code> (pinned by <code>layout-metadata.test.ts</code>); the pass changes them, and those pins, in the same PR, or the hero keeps a cyan graph on a green page.</li>
+    <li><strong>Type</strong>: swap <code>Geist</code> and <code>Geist_Mono</code> for <code>IBM_Plex_Sans</code> and <code>IBM_Plex_Mono</code> from <code>next/font/google</code> (Plex Mono is not a variable font, so it needs its <code>weight</code> list: 400, 600 and 700 here), which downloads the files at build time and serves them from the site, so no visitor's browser fetches Google (<a href="https://nextjs.org/docs/app/getting-started/fonts">Next.js fonts</a>). No new npm dependency, but a new <code>D&lt;n&gt;</code> all the same, since it changes every page. The hero name stays in the sans face until the component work, so this PR touches no component.</li>
+    <li><strong>Radii</strong>: Tailwind 4 reads <code>--radius-*</code> from the theme (<a href="https://tailwindcss.com/docs/theme">Tailwind theme variables</a>), so setting <code>--radius-sm</code> through <code>--radius-2xl</code> to 0–2 px squares every card at once; bare <code>rounded</code> (the hero's two buttons, the decision-log tags) reads the older <code>--radius</code>, so that one is set to 0 too; <code>rounded-full</code> stays round for the pill and the chips.</li>
+    <li><strong>Check</strong>: the suite, the smoke run, the contrast test, and a capture of every page at 390 and 1280 (<code>node .harness/captures.mjs</code>) for Michael to compare against <code>docs/screenshots/v3/</code>.</li>
+  </ol>
+  <p class="prose">Then component work, one PR each, in order of how much each one says: the hero's boot log (<code>MethodStrip</code>'s costume, with the reduced-motion still state); the man-page <code>ProjectCard</code>; the shell window around page content; the concierge as a tmux pane. Each ships with its 390 capture.</p>
+</section>
+
+<footer class="doc-foot">
+  <h2 style="font-size:1.3rem;margin-top:0">Sources</h2>
+  <ul>
+    <li><code>src/lib/data/profile.ts</code>: name, positioning (the eyebrow), tagline, subline. <code>src/lib/data/approach.ts</code>: the five <code>loopSteps</code> and their lines.</li>
+    <li><code>src/lib/data/projects.ts</code>: the three Recent work projects (<code>getTopProjects(3)</code>, order per D59), their titles, companies, short descriptions, tech stacks and first metrics (55 features passing in one day; 2 days → ~6 hrs client onboarding time); Voice Concierge has no metrics until measured (<code>docs/notes/voice-concierge-todo.md</code>).</li>
+    <li><code>src/lib/data/concierge.ts</code>: Ask my site, Guide me, Minimize, Leave, Mute microphone, the live status line, the usher notice, the memory kinds, the tab names and the four <code>latencyLabels</code> on the meters.</li>
+    <li><code>src/app/globals.css</code>: today's tokens and the six memory colours (D90; v3 spec § 5). <code>src/components/hero/HeroSection.tsx</code>: the hero's order of elements. D31 (step lines screen-reader only below md), D86 (the drawer, 420 px at <code>lg</code>), D87 (the pill), D94 (the usher and Guide me) in <code>docs/specs/2026-10-18-portfolio-v2.md</code>.</li>
+    <li><code>docs/notes/brand.md</code>: the readers in order, no fake screenshots or stock images, AA and reduced motion. The v3 spec § 11: the three directions, what each must show, the token-only first pass.</li>
+    <li>Font licences: each font's licence file or Google Fonts metadata, linked where the font is named. Contrast ratios: computed by this page's build script from the hex values (WCAG 2 relative luminance, <code>(L1 + 0.05) / (L2 + 0.05)</code>), thresholds from <a href="https://www.w3.org/TR/WCAG22/">WCAG 2.2</a>.</li>
+    <li>Design sizes: the 1280 × 800 and 390 × 844 viewports of <code>.harness/contact-check.mjs</code> and <code>.harness/skills-check.mjs</code>; the 420 px drawer from D86. Type sizes, opacities and periods are this document's own choices, stated where they are used. Memory counts, transcript lines, profile slots and meter needles are illustrative and tagged as such on the screens.</li>
+  </ul>
+  <h2 style="font-size:1.3rem">How this file was checked</h2>
+  <p>Self-contained: inline CSS and inline SVG only, no scripts, no external stylesheets, fonts or images; every font is named with system fallbacks and never fetched. Rendered in headless Chromium at 1280 and 390 px wide, once with <code>prefers-reduced-motion: reduce</code>, with a one-off Playwright run: 0 console errors, 0 page errors, 0 requests outside the file, and <code>scrollWidth</code> no wider than the viewport. Every URL was fetched with <code>curl -sIL -o /dev/null -w '%{http_code}'</code>; the codes are in the comment at the end of this file.</p>
+  <pre>python3 build.py template.html docs/design/2026-10-21-design-directions.html   # fills the bitmap words, readout digits, swatches and contrast tables; fails on any pair under its threshold
+node p6-02-check.mjs docs/design/2026-10-21-design-directions.html            # 1280 and 390: console and page errors, outside requests, scrollWidth; full-page PNGs
+# both scripts live in the run's scratch directory, /tmp/harness/portfolio_site/portfolio_site-2026-10-21-v3/p602/</pre>
+</footer>
+
+</main>
+<!-- URL check, 2026-10-21: curl -sIL -o /dev/null -w '%{http_code}' <url> (no user agent; codes after redirects)
+  200 https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+  200 https://fonts.google.com/specimen/Press+Start+2P
+  200 https://github.com/IBM/plex
+  200 https://github.com/Swordfish90/cool-retro-term
+  200 https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegible
+  200 https://github.com/google/fonts/tree/main/ofl/barlow
+  200 https://github.com/google/fonts/tree/main/ofl/barlowcondensed
+  200 https://github.com/google/fonts/tree/main/ofl/ibmplexmono
+  200 https://github.com/google/fonts/tree/main/ofl/pressstart2p
+  200 https://github.com/google/fonts/tree/main/ofl/spacemono
+  200 https://github.com/keshikan/DSEG
+  200 https://nextjs.org/docs/app/getting-started/fonts
+  200 https://tailwindcss.com/docs/theme
+  200 https://teenage.engineering
+  200 https://www.w3.org/TR/WCAG22/
+  200 https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+  200 https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+  200 https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html
+-->
+</body>
+</html>
