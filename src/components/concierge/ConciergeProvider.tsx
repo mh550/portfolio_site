@@ -404,14 +404,14 @@ export default function ConciergeProvider({
       // timer (teardown), and this Connect goes no further.
       if (isClosing(credentials)) {
         send({ type: 'closing' });
-        const deadline = Date.now() + BUSY_RETRY_LIMIT_MS;
+        const deadline = performance.now() + BUSY_RETRY_LIMIT_MS; // monotonic: a clock set back must not extend it
         while (isClosing(credentials)) {
           await new Promise<void>((resolve) => {
             session.wake = resolve;
             session.timer = setTimeout(resolve, BUSY_RETRY_MS);
           });
           session.wake = undefined;
-          if (!session.alive || Date.now() >= deadline) break;
+          if (!session.alive || performance.now() >= deadline) break;
           credentials = await fetchCredentials(visitorId, session.requests.signal);
           if (!session.alive) return;
         }

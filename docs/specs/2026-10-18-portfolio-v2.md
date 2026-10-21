@@ -548,7 +548,7 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   D61's mic disc linking to `/talk`, its ring and `xl:pb-8`; D61's placement (`fixed right-4`, safe-area bottom,
   `z-40`, `print:hidden`, not on `/talk` or `/card*`, kept on `/evidence`) stands. Reversible: `git revert` P3-05's
   widget commit. (Plan § Widget; P3-04 and P3-05 build.) *As built (P3-05):* `talkWidget` is `{ label, listening,
-  speaking, callout, close, panelTitle, minimize, href }` (`liveLabel` gone). The live states key on `phase ===
+  speaking, callout, close, minimize, href }` (`liveLabel` gone; P3-10 dropped `panelTitle`: the panel's title is `label`; D94 adds the usher's keys). The live states key on `phase ===
   'live'` (connecting and waiting show the idle pill; the open panel's status line covers them); the dot is red with
   a background ring, inset on the collapsed circle. The provider's `agentSpeaking` turns on at once and off 500 ms
   (`AGENT_QUIET_MS`) after the agent leaves the speakers list, so a pause between words doesn't flip the focused

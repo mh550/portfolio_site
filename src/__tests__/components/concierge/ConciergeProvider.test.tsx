@@ -655,4 +655,30 @@ describe('ConciergeProvider: closing', () => {
       jest.useRealTimers();
     }
   });
+
+  // P3-10 review: the 60 s runs on the monotonic clock, like the usher's 8 s: a wall clock set back an hour mid-wait
+  // must not mean an hour of POSTs.
+  it('the retries stop after 60 s even when the wall clock is set back', async () => {
+    jest.useFakeTimers();
+    try {
+      fetchMock.mockResolvedValue(reply(429, { error: 'busy', reason: 'visitor' }));
+      renderProbe();
+      act(() => {
+        void ctx.connect();
+      });
+      await flush();
+      expect(phase()).toBe('closing');
+      jest.setSystemTime(Date.now() - 60 * 60 * 1000);
+      for (let i = 0; i < 13; i++) {
+        await act(async () => {
+          jest.advanceTimersByTime(5000);
+        });
+        await flush();
+      }
+      expect(phase()).toBe('busy');
+      expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(13);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
