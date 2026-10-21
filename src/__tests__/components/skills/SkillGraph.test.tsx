@@ -55,10 +55,12 @@ afterEach(() => {
 });
 
 describe('SkillGraph: the drawing (P5-03)', () => {
-  it('is one group named by the svg <title>, which counts the data; the svg itself is role="none" (D103)', () => {
+  it('is one group named by a hidden line (aria-labelledby reads it; nothing reads it twice), which counts the data; the svg itself is role="none" (D103)', () => {
     const { container } = renderGraph();
-    const title = svg(container).querySelector('title')!;
-    expect(title).toHaveAttribute('id', 'skill-graph-title');
+    const title = document.getElementById('skill-graph-title')!;
+    expect(title).toHaveAttribute('hidden');
+    // not the svg's own <title>, which every gap in the drawing would show as a tooltip (P5-07 #5)
+    expect(svg(container).querySelector(':scope > title')).toBeNull();
     expect(title.textContent).toBe(
       `Tech stack: ${nodes.length} skills in ${clusters.length} groups. The list view has the same data as text.`,
     );
@@ -181,6 +183,19 @@ describe('SkillGraph: the drawing (P5-03)', () => {
     renderGraph();
     expect(graph()).toHaveClass('print:hidden');
     expect(list()).toHaveClass('hidden', 'print:block');
+  });
+
+  it('prints no control: the List view toggle is print:hidden with its row (P5-07)', () => {
+    renderGraph();
+    expect(listToggle().closest('.print\\:hidden')).not.toBeNull();
+  });
+
+  it('every control changes colour only under motion-safe: (P5-07)', () => {
+    renderGraph();
+    for (const button of screen.getAllByRole('button')) {
+      const classes = (button.getAttribute('class') ?? '').split(/\s+/);
+      expect(classes.filter((c) => /transition/.test(c) && !c.startsWith('motion-safe:'))).toEqual([]);
+    }
   });
 });
 
@@ -379,7 +394,7 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
     expect(graph()).toHaveAttribute('tabindex', '0');
     expect(graph()).toHaveClass('focus-visible:outline-2');
     const help = document.getElementById(graph().getAttribute('aria-describedby')!)!;
-    expect(help).toHaveTextContent(/^Arrow keys pan, plus and minus zoom/);
+    expect(help).toHaveTextContent('Arrow keys pan, plus and minus zoom, 0 resets. Drag to move.');
     expect(help).toHaveClass('print:hidden');
   });
 
@@ -439,16 +454,16 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
     const scale = v.w / 1052;
 
     fireEvent.pointerDown(graph(), { pointerId: 7, button: 0, clientX: 500, clientY: 300 });
-    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 540, clientY: 330 });
+    fireEvent.pointerMove(graph(), { pointerId: 7, buttons: 1, clientX: 540, clientY: 330 });
     expect(capture).toHaveBeenCalledWith(7);
     expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, -40 * scale, -30 * scale, wideBounds)));
-    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 460, clientY: 280 });
+    fireEvent.pointerMove(graph(), { pointerId: 7, buttons: 1, clientX: 460, clientY: 280 });
     expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, 40 * scale, 20 * scale, wideBounds)));
     fireEvent.pointerUp(graph(), { pointerId: 7, clientX: 460, clientY: 280 });
 
     // released: moving again changes nothing
     const after = svg(container).getAttribute('viewBox');
-    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(graph(), { pointerId: 7, buttons: 1, clientX: 100, clientY: 100 });
     expect(svg(container)).toHaveAttribute('viewBox', after);
   });
 
@@ -459,7 +474,7 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
       fireEvent.click(button('Zoom in'));
       sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
       fireEvent.pointerDown(graph(), { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
-      fireEvent.pointerMove(graph(), { pointerId: 1, clientX: 160, clientY: 100 });
+      fireEvent.pointerMove(graph(), { pointerId: 1, buttons: 1, clientX: 160, clientY: 100 });
       fireEvent.pointerUp(graph(), { pointerId: 1, clientX: 160, clientY: 100 });
       act(() => jest.runOnlyPendingTimers());
       fireEvent.click(container.querySelector('a[data-node="python"]')!);
@@ -469,12 +484,28 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
     }
   });
 
+  it('a press released outside before the slop is forgotten: a plain hover never pans, the next click follows (P5-07 #1)', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+    const before = svg(container).getAttribute('viewBox');
+    fireEvent.pointerDown(graph(), { pointerId: 1, button: 0, buttons: 1, clientX: 100, clientY: 100 });
+    // released outside the graph (no pointerup here), then back over it with no button held
+    fireEvent.pointerMove(graph(), { pointerId: 1, buttons: 0, clientX: 160, clientY: 100 });
+    expect(svg(container)).toHaveAttribute('viewBox', before);
+    const a = container.querySelector('a[data-node="python"]')!;
+    fireEvent.pointerDown(a, { pointerId: 1, button: 0, buttons: 1, clientX: 160, clientY: 100 });
+    fireEvent.pointerUp(a, { pointerId: 1, button: 0, clientX: 160, clientY: 100 });
+    fireEvent.click(a);
+    expect(listToggle()).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('a move under 4 px is not a drag: the view stays and a click still opens the row', () => {
     const { container } = renderGraph();
     sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
     const a = container.querySelector('a[data-node="python"]')!;
     fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
-    fireEvent.pointerMove(a, { pointerId: 1, clientX: 102, clientY: 102 });
+    fireEvent.pointerMove(a, { pointerId: 1, buttons: 1, clientX: 102, clientY: 102 });
     fireEvent.pointerUp(a, { pointerId: 1, clientX: 102, clientY: 102 });
     expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
     fireEvent.click(a);
@@ -487,7 +518,7 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
     sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
     const a = container.querySelector('a[data-node="python"]')!;
     fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
-    fireEvent.pointerMove(a, { pointerId: 1, clientX: 140, clientY: 100 });
+    fireEvent.pointerMove(a, { pointerId: 1, buttons: 1, clientX: 140, clientY: 100 });
     fireEvent.pointerUp(a, { pointerId: 1, clientX: 140, clientY: 100 });
     expect(fireEvent.click(a)).toBe(false);
     expect(listToggle()).toHaveAttribute('aria-pressed', 'false');
@@ -507,18 +538,18 @@ describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
     for (const end of [fireEvent.pointerCancel, fireEvent.lostPointerCapture]) {
       fireEvent.pointerDown(graph(), { pointerId: 2, button: 0, clientX: 100, clientY: 100 });
       end(graph(), { pointerId: 2 });
-      fireEvent.pointerMove(graph(), { pointerId: 2, clientX: 200, clientY: 200 });
+      fireEvent.pointerMove(graph(), { pointerId: 2, buttons: 1, clientX: 200, clientY: 200 });
       expect(svg(container)).toHaveAttribute('viewBox', v);
     }
     fireEvent.pointerDown(graph(), { pointerId: 3, button: 2, clientX: 100, clientY: 100 });
-    fireEvent.pointerMove(graph(), { pointerId: 3, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(graph(), { pointerId: 3, buttons: 1, clientX: 200, clientY: 200 });
     expect(svg(container)).toHaveAttribute('viewBox', v);
   });
 
   it('without a size (jsdom) a drag skips the pan: never a NaN viewBox', () => {
     const { container } = renderGraph();
     fireEvent.pointerDown(graph(), { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
-    fireEvent.pointerMove(graph(), { pointerId: 1, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(graph(), { pointerId: 1, buttons: 1, clientX: 200, clientY: 200 });
     fireEvent.pointerUp(graph(), { pointerId: 1, clientX: 200, clientY: 200 });
     expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
   });
@@ -642,7 +673,7 @@ describe('SkillGraph: below 640 px (P5-04, D102)', () => {
     fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 200, clientY: 300 });
     fireEvent.focus(a); // the browser focuses a pressed link
     expect(viewOf(container)).toEqual(v);
-    fireEvent.pointerMove(a, { pointerId: 1, clientX: 160, clientY: 300 });
+    fireEvent.pointerMove(a, { pointerId: 1, buttons: 1, clientX: 160, clientY: 300 });
     fireEvent.pointerUp(a, { pointerId: 1, clientX: 160, clientY: 300 });
     expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, 40 * (v.w / 358), 0, narrowBounds)));
   });
@@ -699,7 +730,7 @@ describe('SkillGraph: the list view (P5-03, D101)', () => {
     }
   });
 
-  it('describes a row as weight word · since · Used in (project links) or From my roles', () => {
+  it('describes a row as weight word · since · Used in (project links), or nothing more with no project (P5-07 #2)', () => {
     renderGraph();
     const dd = (id: string) => document.getElementById(`skill-${id}`)!.nextElementSibling as HTMLElement;
 
@@ -714,7 +745,7 @@ describe('SkillGraph: the list view (P5-03, D101)', () => {
       expect(text.startsWith(word[n.weight])).toBe(true);
       expect(text.includes(`since ${n.since}`)).toBe(Boolean(n.since));
       const used = edges.filter((e) => e.from === n.id && e.to.startsWith('project:'));
-      if (used.length === 0) expect(text).toMatch(/· From my roles$/);
+      if (used.length === 0) expect(text).toBe(n.since ? `${word[n.weight]} · since ${n.since}` : word[n.weight]);
       else expect(within(dd(n.id)).getAllByRole('link')).toHaveLength(used.length);
     }
   });

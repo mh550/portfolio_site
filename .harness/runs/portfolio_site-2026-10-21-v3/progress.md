@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P5-07 · passes
+
+- An Opus review of `$HARNESS_SCRATCH/P5.diff` (3850 lines): 0 Critical, 2 Important, 8 Minor, plus the P5-05/06 notes; one row each in the plan § Review. Fixed test-first: a press released outside the graph before the slop no longer pans on hover or swallows the next click (`buttons === 0` drops it); List view rows without a project edge drop the untrue "From my roles" (D104); the toolbar row is `print:hidden`; controls' transitions are `motion-safe:`; the group's name is a `hidden` span, not a root svg `<title>` (no whole-drawing tooltip); help line adds "0 resets". Simplification: `GraphData.edges` dropped, 10 module-internal constants un-exported, `skills.ts`'s test-only edge-helper re-export gone (no graph function was unused). Tests 1856 → 1859.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`, `lib/check.sh` green, `npx eslint .` clean, smoke exit 0 (41 PASS). A Sonnet run in Chromium on :7835: `skills-check: ok` (N = 9, 390 first view `4 4 348 308`, 0 console errors), print-check PASS with no button visible under print media; the review's plausible Tab-scroll finding is not a defect (390: Tab Copilot Studio → TypeScript, scrollY 390 → 390, view re-centred, node inside the container). Captures refreshed in `docs/screenshots/v3/P5-skills-*.png` (all < 400 KB).
+- Docs: `docs/review-guide.md` gains `## P5 (v3)`; CLAUDE.md (SkillGraph line, test count) and D104 in the v2 spec.
+- Left with reasons (plan § Review): the pre-hydration wide drawing at 390, the double focus ring, a node's name and tooltip being the same text, no skip link (List view is the shortcut), the pill over one label at scroll 0.
+- Questions for Michael: (D104) should a project-less row name its source ("Coursework", "This site", "Home server")? D98's two (MongoDB off? the 15 core nodes) still stand.
+
 ### 2026-10-21 · P5-06 · passes
 
 - New `.harness/skills-check.mjs` (Chromium, 1280×800 and 390×844; prints how much of the graph the first-visit callout and pill cover, then closes the callout) → `docs/screenshots/v3/P5-skills-{1280,selected-1280,390,list-390}.png` (182/186/67/357 KB). Plan § What Michael will see filled; CLAUDE.md § How to verify gains the Skills line. No src change: tests 1856 → 1856.

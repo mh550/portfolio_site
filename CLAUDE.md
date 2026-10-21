@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1856 tests, 100 suites after P5-05)
+npm test             # Jest unit/integration tests (1859 tests, 100 suites after P5-07)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -163,7 +163,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   hover or focus, fades `motion-safe:` only; the `projectChain`'s cross pairs drawn `data-active`; an `aria-live`
   line; Esc on the section clears it; below 640 a project with no node in view moves the view to its first cluster); takes
   `projects` as `GraphProject` (short titles) built in `app/skills/page.tsx`, and imports only types from `@/lib/data` (the
-  edge helpers `projectSlug`/`projectsOf`/`nodesOf` live in `lib/graph/edges.ts`, re-exported by `skills.ts`), so its bundle carries no data module
+  edge helpers `projectSlug`/`projectsOf`/`nodesOf` live in `lib/graph/edges.ts`), so its bundle carries no data module; the graph's name is a `hidden` span (`#skill-graph-title`), not an svg `<title>`; the toolbar row is `print:hidden`; a row with no project edge shows only weight and since (D104)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

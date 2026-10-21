@@ -16,11 +16,11 @@ export const PAN_STEP = 0.1;
 /** CSS px a pointer moves before it counts as a drag */
 export const DRAG_SLOP = 4;
 /** The narrowest view, in drawing units */
-export const MIN_VIEW_W = 160;
+const MIN_VIEW_W = 160;
 /** How far past the drawing a view may show */
-export const VIEW_PAD = 24;
+const VIEW_PAD = 24;
 /** The margin around a cluster that fitCluster shows */
-export const FIT_PAD = 12;
+const FIT_PAD = 12;
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 const positive = (n: number) => Number.isFinite(n) && n > 0;

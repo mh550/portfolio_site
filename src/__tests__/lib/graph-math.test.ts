@@ -115,7 +115,7 @@ describe('layoutGraph', () => {
   it('skips a node whose cluster is missing', () => {
     const stray: SkillNode = { id: 'stray', name: 'Stray', cluster: 'web', weight: 1 };
     const only: Cluster[] = clusters.filter((c) => c.id !== 'web');
-    const layout = layoutGraph({ clusters: only, nodes: [...nodes, stray], edges: [] }, 1280);
+    const layout = layoutGraph({ clusters: only, nodes: [...nodes, stray] }, 1280);
     expect(layout.nodes.stray).toBeUndefined();
     expect(layout.clusters).toHaveLength(5);
   });

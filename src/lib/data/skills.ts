@@ -178,6 +178,3 @@ export const edges: SkillEdge[] = [
     ids.map((from): SkillEdge => ({ from, to: `project:${slug}` })),
   ),
 ];
-
-// The edge helpers live with the graph math (data-free), so SkillGraph's bundle doesn't carry these arrays twice
-export { projectSlug, projectsOf, nodesOf } from '@/lib/graph/edges';

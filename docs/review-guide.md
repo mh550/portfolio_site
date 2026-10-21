@@ -363,3 +363,33 @@ by P4-03). Decision D97 is in `docs/specs/2026-10-18-portfolio-v2.md` § v3 deci
 **Undo.** `git revert` the P4 commits newest first (P4-03, P4-02, P4-01, and the WIP commit between P4-01 and its
 harness commit); the old contact page, its copy and test come back together. To keep the layout but drop the authored
 LinkedIn glyph, replace its path in `extra.ts`.
+
+## P5 (v3)
+
+Same run and branch, plan `docs/plans/2026-10-21-P5-skills-graph.md` (§ What Michael will see by P5-06, § Review by
+P5-07). Decisions D98–D104 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P4 (P5 touches
+only `/skills`, `skills.ts`, `src/lib/graph/`, `components/skills/`, the logos and their script).
+
+- Changed (P5-02, D98): `src/lib/data/skills.ts` is a graph: six clusters, 51 nodes (weight 1–3, optional logo and
+  since), node ↔ node edges and node → project edges; `skillCategories` and the featured "Differentiator" block are
+  gone. Ruby, R, Rails, Flask, MongoDB, PowerShell and WSL are off; Zapier stays at weight 1. `npm run logos` adds 13
+  marks (25 in `paths.ts`).
+- Changed (P5-03 to P5-05, D99–D103): `/skills` draws the stack as an svg (hand layout, no d3-force): 3 columns from
+  1024 px, 2 below; below 640 it starts on Agentic systems with a "Jump to a group" chip row. Pan and zoom by drag,
+  arrows, + / − / 0 and the buttons; the wheel zooms only with focus in the graph or Ctrl/⌘, so the page always
+  scrolls. A node links to its row in List view (`#skill-<id>`), which is also the print view. A chip per featured
+  project lights its stack, dims the rest, draws its cross-group links and offers "Open case study".
+- Changed (P5-06): `node .harness/skills-check.mjs` checks the page in Chromium (labels in their groups, Tab reach,
+  pan, Agent Harness = 9 skills, 390 first view, List view, no sideways scroll); captures
+  `docs/screenshots/v3/P5-skills-{1280,selected-1280,390,list-390}.png`.
+- Changed (P5-07, review): a press released outside the graph no longer pans on hover or eats the next click; List
+  view rows no longer say "From my roles" (untrue for Java, C++, Tailwind, Framer Motion, Linux, Vercel; D104); the
+  toolbar doesn't print; no whole-drawing tooltip; the help line mentions `0`. The review table is the plan's § Review.
+- Look at (390, then 1280): `$P/skills` opens on Agentic systems; the group chips jump; tap "Agent Harness" and
+  check the nine lit skills are the ones you'd name; List view reads true for every row; print preview shows only
+  the list.
+- Questions: (D98) keep MongoDB off, and are the 15 weight-3 "core" nodes right? (D104) would you rather each
+  project-less row name its source ("Coursework", "This site")?
+
+**Undo.** `git revert` the P5 commits newest first (P5-07 … P5-02; P5-01 is docs only). The old four-group
+`/skills` list, `skillCategories` and their tests come back together; `paths.ts` goes back to 12 marks.

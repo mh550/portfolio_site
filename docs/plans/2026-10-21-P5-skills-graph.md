@@ -201,7 +201,8 @@ featured project has at least two (the test asserts ≥ 2 per featured project; 
 Nodes with no project edge (Copilot Studio, SQL, Java, C++, React, Tailwind CSS, Framer Motion, PostgreSQL, ETL
 pipelines, Linux, Vercel, Edge functions, Specs & decision ledgers, Test-driven development, Requirements, Project
 management, Team onboarding, User-driven design) are on the resume or today's list from Michael's roles, not from a
-project on the site; the list view says "From my roles" for them rather than inventing a project.
+project on the site; the list view says nothing more than weight and since for them rather than inventing a project
+or a source (P5-07, D104: "From my roles" was untrue for Java, C++, Tailwind CSS, Framer Motion, Linux and Vercel).
 
 ## Layout
 
@@ -367,10 +368,10 @@ the server (title cut at its first colon, as `usherTargets` does), so the client
      first), an `<a href="#skill-<id>" aria-label={name} data-node={id}>` holding a `focusRing` rect (shown on
      `:focus-visible`), the `Logo decorative` mark at its size or a dot (`r = size / 4`), and the label `<text>`
      (`lines` as `<tspan>`s; weight 3 foreground and semibold, 2 foreground, 1 muted).
-4. **Instructions**: `<p id="skill-graph-help">Arrow keys pan, plus and minus zoom. Drag to move.</p>` (muted, small).
+4. **Instructions**: `<p id="skill-graph-help">Arrow keys pan, plus and minus zoom, 0 resets. Drag to move.</p>` (muted, small).
 5. **List view** (D101): `<div id="skill-list">` with, per cluster, an `<h2>` and a `<dl>`: `<dt id="skill-<id>"
    tabIndex={-1}>` name, `<dd>` "Core · since 2026 · Used in: Agent Harness, Voice Concierge" (weight 3/2/1 = core /
-   regular / occasional; the project names link `/projects/<slug>`; no project edge → "From my roles"). Its class is
+   regular / occasional; the project names link `/projects/<slug>`; no project edge → weight and since only, D104). Its class is
    `hidden print:block` while off and `block` while on: never the `hidden` attribute, because Tailwind's preflight
    makes `[hidden]` `display: none !important` and print could not show it.
 
@@ -402,7 +403,7 @@ so a hashchange with the list open moves focus and a stale row never steals it; 
 tooltip and a labelled edge its label; the cell rect also draws the focus ring (`group-focus-visible:stroke`: Chrome
 shows it inside the outline, WebKit may draw only this one); a modified click is left to the browser; the hash is
 compared undecoded (no `URIError`); a click or the toggle clears the hover; a `dt` reached by script shows a
-`focus:` outline; `projectSlug`/`projectsOf`/`nodesOf` moved to `src/lib/graph/edges.ts` (re-exported by `skills.ts`)
+`focus:` outline; `projectSlug`/`projectsOf`/`nodesOf` moved to `src/lib/graph/edges.ts` (re-exported by `skills.ts` until P5-07)
 so the component imports only types from `@/lib/data`. Left for P5-05: a next/link to `#skill-<id>` uses pushState
 (no `hashchange`); use a plain `<a>` or listen for it.
 
@@ -522,10 +523,34 @@ graph it covered); the pill stays, as on every chrome page.
 
 ## Review
 
-Filled by P5-07 (`$HARNESS_SCRATCH/P5.diff`).
+Filled by P5-07: an Opus review of `$HARNESS_SCRATCH/P5.diff` (`git diff <HARNESS: after P5-01>^..HEAD` over the
+P5 paths, 3850 lines). Checked and sound: the wheel (returns unless Ctrl/⌘ or focus inside; a no-op zoom isn't
+prevented; one `passive: false` listener, removed), no window listeners, `pointercancel`/`lostpointercapture`,
+hydration without a mismatch, every node an `<a>` in DOM order, reveal on focus, and the data (every project edge
+traces to a `techStack`, a resume bullet or the deep-dive; every `since` to a resume date; nothing from brand.md's
+never-publish list). Line numbers are `SkillGraph.tsx` before the fixes.
 
 | # | Severity | File:line | Finding | Resolution |
 |---|---|---|---|---|
+| 1 | Important | `SkillGraph.tsx:262` | A press released outside the graph before the 4 px slop left `drag.current` set (capture is taken only after the slop, and `onPointerMove` never read `buttons`): hovering back panned the view and the next click on a node was swallowed | Fixed test-first: a move with `buttons === 0` drops the drag ("a press released outside before the slop is forgotten"); the other pointer tests now send `buttons: 1`, as a real press does |
+| 2 | Important | `SkillGraph.tsx:658` | "From my roles" on every node without a project edge was untrue for Java and C++ (coursework, § 8 only), Tailwind CSS and Framer Motion (this site), Linux, Vercel | Fixed test-first: such a row says only its weight and since (D104), nothing invented |
+| 3 | Minor | `SkillGraph.tsx:83` | Before hydration at 390 the 3-column drawing shows with "Infra & operations" pressed, then switches (a ~77 px layout shift) | Left: the server has no width; reserving the narrow height would need the view in CSS too, and the jump happens once, before any input (recorded in P5-04) |
+| 4 | Minor | `SkillGraph.tsx:397` | The List view toggle printed | Fixed test-first: the whole toolbar row is `print:hidden` (its two inner `print:hidden`s went); print-check PASS, no button visible under print media |
+| 5 | Minor | `SkillGraph.tsx:491` | The svg's root `<title>` was the hover tooltip for every gap and cluster heading | Fixed test-first: the group's name is a `hidden` `<span id="skill-graph-title">` (aria-labelledby reads hidden text; nothing reads it twice); no root `<title>` |
+| 6 | Minor (plausible) | `SkillGraph.tsx:569, 590` | A node's `aria-label` and its `<title>` tooltip are the same text, so a reader might say it twice | Left: Chromium drops a description equal to the name, and the `<title>` is the mouse tooltip P5-03's review asked for |
+| 7 | Minor (plausible) | `SkillGraph.tsx:298` | Tab to a node outside the narrow view might scroll the page before `reveal` re-centres | Checked in Chromium, not a defect: at 390 Tab Copilot Studio → TypeScript kept `scrollY` 390 → 390 with the view re-centred (`248 -24 348 308`) and the node inside the container; at 1280 zoomed in, six Tabs moved `scrollY` by 0 after the first |
+| 8 | Minor | — | The graph is 52 tab stops with no skip; the help line didn't mention `0` | Help line now "Arrow keys pan, plus and minus zoom, 0 resets. Drag to move." (test-first). No skip link: List view, before the graph in Tab order, replaces it with a list of 51 rows that need no Tab |
+| 9 | Minor | `layout.ts:17` | `layoutGraph` never read `GraphData.edges`, a needless memo dependency | Fixed: `GraphData` is `{ clusters, nodes }`; the memo drops `edges` |
+| 10 | Minor | `SkillGraph.tsx:203` | The hash handler copied `openRow` | Fixed: it calls `openRow` (state setters only, so the mount-time closure is current) |
+| 11 | Minor (P5-05/06 notes) | `SkillGraph.tsx:137` | The controls' `transition-colors` wasn't `motion-safe:` | Fixed test-first: every button's transitions are `motion-safe:` |
+| 12 | Minor (P5-03/06 notes) | — | Chrome draws a node's focus twice (the `focusRing` outline and the cell rect's stroke); the fixed pill covers one label at scroll 0 (Tailwind CSS at 1280, Copilot Studio at 390) | Left: WebKit may draw no outline on an svg link, so the rect stroke stays with the shared ring; the pill is fixed on every chrome page (D87) and moves off the label with any scroll or pan |
+
+**Simplification pass**: every function in `src/lib/graph/` is called from `SkillGraph.tsx` or by one that is
+(`labelLines`, `columnsFor` and `clampView` through `layoutGraph`, `zoomAt`, `panBy`, the fits and `centerOn`), so
+none was removed. Un-exported as module-internal: `CLUSTER_W`, `TITLE_H`, `INSET`, `CELL_W`, `CELL_H`, `CELLS`,
+`BOTTOM` (layout.ts) and `MIN_VIEW_W`, `VIEW_PAD`, `FIT_PAD` (view.ts); `skills.ts`'s re-export of the edge helpers
+(read only by `skills-data.test.ts`, which now imports `@/lib/graph/edges`) is gone; `GraphData.edges` dropped (#9).
+`npx eslint .` clean.
 
 ## Decisions
 

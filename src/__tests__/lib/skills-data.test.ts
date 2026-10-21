@@ -1,4 +1,5 @@
-import { clusters, nodes, edges, projects, projectSlug, projectsOf, nodesOf } from '@/lib/data';
+import { clusters, nodes, edges, projects } from '@/lib/data';
+import { projectSlug, projectsOf, nodesOf } from '@/lib/graph/edges';
 import { logoPaths } from '@/components/logos/paths';
 import { labelLines } from '@/lib/graph/layout';
 

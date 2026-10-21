@@ -705,3 +705,8 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   one `role="group"`, named by the svg's `<title>`, and each cluster is a nested group with its name.
   View changes (zoom, pan, chips, reset) are instant at every motion setting, so reduced motion has no viewBox
   animation to turn off; only the highlight fade is `motion-safe:`. Supersedes nothing.
+- **D104** *default* (P5-07 review): a list-view row for a skill with no project edge shows only its weight and
+  since; the "From my roles" suffix (P5-01's plan) goes, because it was untrue for Java and C++ (coursework, on the
+  resume's skills line), Tailwind CSS and Framer Motion (this site), Linux and Vercel. Question for Michael: would
+  you rather a per-node source line ("Coursework", "This site", "Home server")? Reversible: one optional field on
+  `SkillNode` and one `dd` clause. Supersedes P5-01's "From my roles".

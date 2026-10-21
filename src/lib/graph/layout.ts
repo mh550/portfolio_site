@@ -17,7 +17,6 @@ export interface Rect {
 export interface GraphData {
   clusters: Cluster[];
   nodes: SkillNode[];
-  edges: SkillEdge[];
 }
 
 export interface ClusterBox extends Rect {
@@ -61,13 +60,13 @@ export interface EdgePath {
 
 export const PAD = 16;
 export const GAP = 24;
-export const CLUSTER_W = 324;
-export const TITLE_H = 44;
-export const INSET = 6;
-export const CELL_W = 104;
-export const CELL_H = 76;
-export const CELLS = 3;
-export const BOTTOM = 12;
+const CLUSTER_W = 324;
+const TITLE_H = 44;
+const INSET = 6;
+const CELL_W = 104;
+const CELL_H = 76;
+const CELLS = 3;
+const BOTTOM = 12;
 /** CSS px of the viewport from which the drawing has three columns */
 export const WIDE_MIN = 1024;
 /** The label lines' baselines below a node's point (12-unit text, two lines at most) */

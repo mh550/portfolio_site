@@ -134,7 +134,7 @@ interface Drag {
 const fade = 'motion-safe:transition-opacity';
 const dimmed = 'opacity-25 focus-visible:opacity-100';
 
-const control = `rounded-full border text-sm font-medium transition-colors ${focusRing}`;
+const control = `rounded-full border text-sm font-medium motion-safe:transition-colors ${focusRing}`;
 const controlOff = 'border-white/15 text-[var(--color-foreground)] hover:border-white/30';
 const controlOn = 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent)]/10';
 
@@ -143,8 +143,8 @@ const controlOn = 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[v
 export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGraphProps) {
   const viewport = useSyncExternalStore(subscribeViewport, viewportSnapshot, serverViewport);
   const layout = useMemo(
-    () => layoutGraph({ clusters, nodes, edges }, viewport === 'wide' ? WIDE_MIN : WIDE_MIN - 1),
-    [clusters, nodes, edges, viewport],
+    () => layoutGraph({ clusters, nodes }, viewport === 'wide' ? WIDE_MIN : WIDE_MIN - 1),
+    [clusters, nodes, viewport],
   );
   const bounds = useMemo(() => ({ w: layout.width, h: layout.height }), [layout]);
 
@@ -199,10 +199,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
       const { hash } = window.location;
       if (!hash.startsWith(ROW_PREFIX)) return;
       const id = hash.slice(ROW_PREFIX.length);
-      if (!nodes.some((n) => n.id === id)) return;
-      setHover(null);
-      setListOn(true);
-      setRowRequest((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
+      if (nodes.some((n) => n.id === id)) openRow(id);
     };
     follow();
     window.addEventListener('hashchange', follow);
@@ -262,6 +259,11 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d || d.pointerId !== e.pointerId) return;
+    // no button held: the press ended outside before capture, so this is a hover, not a drag
+    if (e.buttons === 0) {
+      drag.current = null;
+      return;
+    }
     const dx = e.clientX - d.x;
     const dy = e.clientY - d.y;
     if (!d.moving) {
@@ -394,14 +396,14 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
           ) : null}
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3 print:hidden">
         {listOn ? null : (
           <>
             {/* below 640 the view starts on one cluster: these jump to the others (D102); they scroll in their row */}
             <div
               role="group"
               aria-label="Jump to a group"
-              className="flex sm:hidden w-full gap-2 overflow-x-auto p-1 print:hidden"
+              className="flex sm:hidden w-full gap-2 overflow-x-auto p-1"
             >
               {layout.clusters.map((c) => (
                 <button
@@ -417,7 +419,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                 </button>
               ))}
             </div>
-            <div className="flex gap-2 print:hidden">
+            <div className="flex gap-2">
               <button
                 type="button"
                 aria-label="Zoom in"
@@ -480,6 +482,10 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
         onDragStart={(e) => e.preventDefault()}
         className={`${listOn ? 'hidden' : 'block'} print:hidden rounded-xl touch-pan-y touch-pinch-zoom select-none cursor-grab active:cursor-grabbing ${focusRing}`}
       >
+        {/* the group's name: hidden, since aria-labelledby reads it anyway; an svg <title> would be every gap's tooltip */}
+        <span id="skill-graph-title" hidden>
+          {title}
+        </span>
         <svg
           ref={svgRef}
           role="none"
@@ -488,8 +494,6 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
           className="block w-full h-auto"
           style={{ aspectRatio: `${view.w} / ${view.h}` }}
         >
-          <title id="skill-graph-title">{title}</title>
-
           {/* Paint order: every cluster's container, then every edge, then every node, so an edge never covers a
               node and a container never covers an edge. */}
           <g aria-hidden="true">
@@ -630,7 +634,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
         id="skill-graph-help"
         className={`${listOn ? 'hidden' : 'block'} print:hidden mt-3 text-sm text-[var(--color-muted)]`}
       >
-        Arrow keys pan, plus and minus zoom. Drag to move.
+        Arrow keys pan, plus and minus zoom, 0 resets. Drag to move.
       </p>
 
       {/* Never the hidden attribute: preflight makes [hidden] display:none !important, and print shows this list */}
@@ -655,9 +659,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                       <dd className="text-[var(--color-muted)] text-sm sm:text-base">
                         {WEIGHT_WORD[n.weight]}
                         {n.since ? ` · since ${n.since}` : null}
-                        {used.length === 0 ? (
-                          ' · From my roles'
-                        ) : (
+                        {used.length > 0 ? (
                           <>
                             {' · Used in: '}
                             {used.map((slug, i) => (
@@ -669,7 +671,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                               </Fragment>
                             ))}
                           </>
-                        )}
+                        ) : null}
                       </dd>
                     </Fragment>
                   );
