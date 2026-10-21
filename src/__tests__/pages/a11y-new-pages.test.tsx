@@ -9,6 +9,7 @@ import CardQrPage from '@/app/card/qr/page';
 import ContactPage from '@/app/contact/page';
 import EvidencePage from '@/app/evidence/page';
 import ExperiencePage from '@/app/experience/page';
+import SkillsPage from '@/app/skills/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
@@ -31,6 +32,7 @@ const pages: [string, () => ReactElement][] = [
   ['/contact', () => <ContactPage />],
   ['/evidence', () => <EvidencePage />],
   ['/experience', () => <ExperiencePage />],
+  ['/skills', () => <SkillsPage />],
   [
     '/talk',
     () => (

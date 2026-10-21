@@ -1,18 +1,26 @@
 import type { Metadata } from 'next';
-import { skillCategories } from '@/lib/data';
+import { clusters, edges, nodes, projects } from '@/lib/data';
 import ScrollReveal from '@/components/ScrollReveal';
+import SkillGraph, { type GraphProject } from '@/components/skills/SkillGraph';
 
 export const metadata: Metadata = {
   title: 'Skills — Michael Herron',
-  description: 'The tools and practices behind the agentic systems, integrations and apps I build, grouped by capability.',
+  description:
+    'The stack behind the agentic systems, integrations and apps I build, as a graph: pick a project to see what it used.',
 };
 
-export default function SkillsPage() {
-  const featured = skillCategories.find((c) => c.featured);
-  const rest = skillCategories.filter((c) => !c.featured);
+// Short titles on the server, so SkillGraph's bundle never imports projects.ts
+const graphProjects: GraphProject[] = projects.map(({ slug, title, featured, order }) => ({
+  slug,
+  title: title.split(':')[0].trim(),
+  featured,
+  order,
+}));
 
+// The stack as a graph (P5-03) with project chips (P5-05); the featured Differentiator block went with D98
+export default function SkillsPage() {
   return (
-    <main className="max-w-5xl mx-auto px-6 py-20">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
       <ScrollReveal>
         <p className="font-mono text-[var(--color-accent)] text-sm tracking-[0.3em] uppercase mb-4">
           Skills
@@ -20,69 +28,12 @@ export default function SkillsPage() {
         <h1 className="text-5xl sm:text-6xl font-bold leading-tight mb-4">
           Tech Stack
         </h1>
-        <p className="text-[var(--color-muted)] text-lg mb-16 max-w-xl">
-          Grouped by what I do, with the tools I use for each.
+        <p className="text-[var(--color-muted)] text-lg mb-10 max-w-xl">
+          What I build with, grouped by what it&apos;s for. Pick a project to see the parts it used.
         </p>
       </ScrollReveal>
 
-      {/* Featured: Process & delivery (D20) */}
-      {featured && (
-        <ScrollReveal delay={0.05}>
-          <div className="relative mb-12 p-8 rounded-xl border border-[var(--color-accent)]/40 bg-[var(--color-surface-alt)] glow-accent overflow-hidden">
-            {/* Background accent glow */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[var(--color-accent)]/10 blur-3xl pointer-events-none"
-            />
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-2 h-8 rounded-full bg-[var(--color-accent)]" />
-                <h2 id={`skills-${featured.id}`} className="text-2xl font-bold text-[var(--color-accent)]">
-                  {featured.name}
-                </h2>
-                <span className="ml-auto font-mono text-xs text-[var(--color-accent)]/80 tracking-widest uppercase">
-                  Differentiator
-                </span>
-              </div>
-
-              <ul role="list" aria-labelledby={`skills-${featured.id}`} className="flex flex-wrap gap-3">
-                {featured.skills.map((skill) => (
-                  <li
-                    key={skill}
-                    className="px-4 py-2 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 text-[var(--color-accent)] text-sm font-medium"
-                  >
-                    {skill}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </ScrollReveal>
-      )}
-
-      {/* Other groups, stacked full width */}
-      <div className="grid gap-6">
-        {rest.map((cat, i) => (
-          <ScrollReveal key={cat.id} delay={0.05 + i * 0.05}>
-            <div className="p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-white/15 transition-colors">
-              <h2 id={`skills-${cat.id}`} className="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
-                {cat.name}
-              </h2>
-              <ul role="list" aria-labelledby={`skills-${cat.id}`} className="flex flex-wrap gap-2">
-                {cat.skills.map((skill) => (
-                  <li
-                    key={skill}
-                    className="px-3 py-1.5 rounded-full bg-white/5 border border-white/8 text-[var(--color-muted)] text-sm hover:text-[var(--color-foreground)] hover:border-white/15 transition-colors"
-                  >
-                    {skill}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </ScrollReveal>
-        ))}
-      </div>
+      <SkillGraph clusters={clusters} nodes={nodes} edges={edges} projects={graphProjects} />
     </main>
   );
 }

@@ -58,7 +58,9 @@ describe('FloatingLogos', () => {
   it('draws every mark from the generated paths on a 24×24 box', () => {
     const { container } = render(<FloatingLogos />);
     const ds = [...container.querySelectorAll('path')].map((p) => p.getAttribute('d'));
-    expect(ds.sort()).toEqual(Object.values(logoPaths).map((l) => l.path).sort());
+    const hero = Object.values(logoPaths).filter((l) => LABELS.includes(l.title));
+    expect(hero).toHaveLength(12);
+    expect(ds.sort()).toEqual(hero.map((l) => l.path).sort());
     for (const svg of container.querySelectorAll('svg')) expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
   });
 

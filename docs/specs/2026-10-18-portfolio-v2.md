@@ -678,3 +678,35 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   is a departure from them, not only from the spec. Question for Michael: keep it, or download LinkedIn's official
   "in" asset from their brand page into `extra.ts`? The tiles take their names from their text, the new-tab note in
   an `sr-only` span like every other new-tab link (no `aria-label`).
+- **D98** *default* (P5-01): `src/lib/data/skills.ts` becomes a graph (v3 spec § 10): `clusters` (six: Agentic
+  systems, Languages, Web & mobile, Data & integration, Infra & operations, Process & delivery), `nodes` (51, each
+  with `cluster`, `weight` 1–3, an optional `logo` key and `since` year) and `edges` (node ↔ node, and node →
+  `project:<slug>`). A node is a § 8 skills-line item, an item of the old list not dropped, or a tool a resume bullet
+  or a project's `techStack` names; Ruby, R, Ruby on Rails, Flask, MongoDB, PowerShell and WSL are dropped, Zapier
+  stays at weight 1. Supersedes D20 (the featured Process & delivery group) and M2-04's four capability groups
+  (`skillCategories`). Tables in `docs/plans/2026-10-21-P5-skills-graph.md` § Data. Question for Michael: MongoDB is
+  in Cherished's `techStack` (Cherished is not featured); keep it off the graph? And are the weight-3 ("core") nodes
+  the right ones? Reversible: edit the node rows.
+- **D99** *default* (P5-01): no d3-force. The graph is a hand layout from pure functions (`src/lib/graph/`): three
+  columns of clusters from 1024 px, two below, three nodes a row inside each, and at small widths the first view is
+  one cluster at about 1:1. Reconsider (with the spec's pre-approved exact pin) only if a cluster passes 15 nodes or
+  nodes must be placed by their connections (the merged projects-and-stack graph, P6 option A). Supersedes nothing.
+- **D100** *default* (P5-01): the wheel zooms the graph only while focus is inside it or with Ctrl/⌘ held (a
+  trackpad pinch); a plain wheel scrolls the page and is never `preventDefault`ed. Touch is `touch-action: pan-y
+  pinch-zoom`: a sideways swipe pans the graph, a vertical one scrolls the page, a pinch zooms the page. Supersedes nothing.
+- **D101** *default* (P5-01): each graph node is an `<a href="#skill-<id>">` to its row in the list view (weight,
+  since, projects); following it opens the list view there and focuses the row, and `/skills#skill-<id>` opens it on
+  load. Supersedes nothing.
+- **D102** *default* (P5-01): the small-screen graph (first view = the first cluster, a cluster chip row that pans
+  to each) applies below 640 px (`sm`), not only at ≤ 390 as spec § 10 and P5-04 say: the two-column drawing is too
+  small to read at any phone width. Reversible: one media query.
+- **D103** *default* (P5-01): the graph's `<svg>` is `role="none"`, not `role="img"` (P5-03's step): `img` makes
+  its children presentational, which would hide the node links from screen readers. The focusable container is the
+  one `role="group"`, named by the svg's `<title>`, and each cluster is a nested group with its name.
+  View changes (zoom, pan, chips, reset) are instant at every motion setting, so reduced motion has no viewBox
+  animation to turn off; only the highlight fade is `motion-safe:`. Supersedes nothing.
+- **D104** *default* (P5-07 review): a list-view row for a skill with no project edge shows only its weight and
+  since; the "From my roles" suffix (P5-01's plan) goes, because it was untrue for Java and C++ (coursework, on the
+  resume's skills line), Tailwind CSS and Framer Motion (this site), Linux and Vercel. Question for Michael: would
+  you rather a per-node source line ("Coursework", "This site", "Home server")? Reversible: one optional field on
+  `SkillNode` and one `dd` clause. Supersedes P5-01's "From my roles".

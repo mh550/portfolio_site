@@ -11,16 +11,24 @@ interface LogoProps {
   /** Hidden from assistive tech, with no <title> (for marks next to their own label) */
   decorative?: boolean;
   className?: string;
+  /** Placement inside an outer svg (the /skills graph), in its units */
+  x?: number;
+  y?: number;
+  size?: number;
 }
 
 // One mark from the generated paths (D78) or the authored ones in extra.ts (D97); Server-Component-safe
-export default function Logo({ name, decorative = false, className }: LogoProps) {
+export default function Logo({ name, decorative = false, className, x, y, size }: LogoProps) {
   const { title, path, fillRule } = marks[name];
   return (
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
       className={className}
+      x={x}
+      y={y}
+      width={size}
+      height={size}
       {...(decorative ? { 'aria-hidden': true } : { role: 'img' })}
     >
       {decorative ? null : <title>{title}</title>}

@@ -1,57 +1,67 @@
-import { render, screen, within } from '@testing-library/react';
-import { skillCategories } from '@/lib/data';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { clusters, nodes } from '@/lib/data';
 import SkillsPage, { metadata } from '@/app/skills/page';
 
+// /skills draws the graph (P5-03); the list view under the toggle is its text alternative and print view (D101)
 describe('SkillsPage', () => {
   it('renders the heading', () => {
     render(<SkillsPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Tech Stack');
   });
 
-  it('renders the four capability groups as headings', () => {
+  it('renders the graph, one group per cluster', () => {
     render(<SkillsPage />);
-    for (const name of ['Process & delivery', 'Systems & architecture', 'Build', 'Operate & verify']) {
-      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
-    }
+    const graph = screen.getByRole('group', { name: /^Tech stack:/ });
+    for (const c of clusters) expect(within(graph).getByRole('group', { name: c.name })).toBeInTheDocument();
+    expect(within(graph).getAllByRole('link')).toHaveLength(nodes.length);
   });
 
-  it('renders Process & delivery in the featured panel', () => {
+  it('has every node name in the list view, under its cluster <h2>, in order', () => {
     render(<SkillsPage />);
-    const panel = screen.getByRole('heading', { name: 'Process & delivery' }).closest('div.glow-accent');
-    expect(panel).not.toBeNull();
-    expect(panel).toContainElement(screen.getByText('Differentiator'));
-    expect(panel).toContainElement(screen.getByText('Linear'));
-    expect(document.querySelectorAll('div.glow-accent')).toHaveLength(1);
-  });
-
-  it('renders the other groups outside the featured panel', () => {
-    render(<SkillsPage />);
-    for (const name of ['Systems & architecture', 'Build', 'Operate & verify']) {
-      expect(screen.getByRole('heading', { name }).closest('div.glow-accent')).toBeNull();
-    }
-  });
-
-  it('spot-checks skills in their groups', () => {
-    render(<SkillsPage />);
-    const groupOf = (name: string) => screen.getByRole('list', { name });
-    expect(within(groupOf('Build')).getByText('TypeScript')).toBeInTheDocument();
-    expect(within(groupOf('Systems & architecture')).getByText('Docker')).toBeInTheDocument();
-    expect(within(groupOf('Process & delivery')).getByText('Linear')).toBeInTheDocument();
-  });
-
-  it('renders each group as a list named by its heading, one item per skill', () => {
-    render(<SkillsPage />);
-    for (const cat of skillCategories) {
-      const items = within(screen.getByRole('list', { name: cat.name })).getAllByRole('listitem');
-      expect(items.map((li) => li.textContent)).toEqual(cat.skills);
-    }
-  });
-
-  it('describes the page by capability, in the agentic-systems angle (P1-06)', () => {
-    expect(metadata.description).toBe(
-      'The tools and practices behind the agentic systems, integrations and apps I build, grouped by capability.',
+    fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+    const list = document.getElementById('skill-list')!;
+    expect(within(list).getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(
+      clusters.map((c) => c.name),
     );
+    for (const n of nodes) {
+      const dt = document.getElementById(`skill-${n.id}`)!;
+      expect(dt.tagName).toBe('DT');
+      expect(dt).toHaveTextContent(n.name);
+      expect(list).toContainElement(dt);
+    }
+  });
+
+  it('links a row to the projects that used it, by their short titles', () => {
     render(<SkillsPage />);
-    expect(screen.getByText('Grouped by what I do, with the tools I use for each.')).toBeInTheDocument();
+    const dd = document.getElementById('skill-harness-engineering')!.nextElementSibling as HTMLElement;
+    expect(within(dd).getByRole('link', { name: 'Agent Harness' })).toHaveAttribute('href', '/projects/agent-harness');
+  });
+
+  it('prints the list, not the graph', () => {
+    render(<SkillsPage />);
+    expect(document.getElementById('skill-list')).toHaveClass('print:block');
+    expect(screen.getByRole('group', { name: /^Tech stack:/ })).toHaveClass('print:hidden');
+  });
+
+  it('has no featured Differentiator block (D98)', () => {
+    render(<SkillsPage />);
+    expect(screen.queryByText('Differentiator')).toBeNull();
+    expect(document.querySelector('.glow-accent')).toBeNull();
+  });
+
+  it('describes the stack as a graph, in the agentic-systems angle (P1-06), and offers the project chips', () => {
+    expect(metadata.description).toMatch(/agentic systems/);
+    expect(metadata.description).toMatch(/as a graph/);
+    expect(metadata.description).toMatch(/pick a project/);
+    render(<SkillsPage />);
+    expect(screen.getByText(/Pick a project to see the parts it used/)).toBeInTheDocument();
+  });
+
+  it('selecting Agent Harness lights at least three nodes and offers its case study (P5-05)', () => {
+    const { container } = render(<SkillsPage />);
+    const chips = screen.getByRole('group', { name: "Highlight a project's stack" });
+    fireEvent.click(within(chips).getByRole('button', { name: 'Agent Harness' }));
+    expect(container.querySelectorAll('a[data-node][data-active="true"]').length).toBeGreaterThanOrEqual(3);
+    expect(screen.getByRole('link', { name: 'Open case study' })).toHaveAttribute('href', '/projects/agent-harness');
   });
 });
