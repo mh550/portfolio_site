@@ -9,8 +9,7 @@
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "qr": "node scripts/make-qr.mjs",
-    "booth-bundle": "node scripts/build-booth-bundle.mjs"
+    "qr": "node scripts/make-qr.mjs"
   },
   "dependencies": {
     "@livekit/components-react": "2.9.24",

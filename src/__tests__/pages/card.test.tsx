@@ -136,6 +136,7 @@ describe('CardPage', () => {
   it('renders no conference note when profile.conferenceNote is empty', () => {
     jest.replaceProperty(profile, 'conferenceNote', '');
     render(<CardPage />);
+    expect(screen.queryByText(/Glad we met/)).not.toBeInTheDocument();
     const section = screen.getByRole('heading', { level: 2, name: 'Selected work' }).parentElement!;
     expect(section.querySelector('p')).toBeNull();
     expect(section.firstElementChild).toHaveTextContent('Selected work');

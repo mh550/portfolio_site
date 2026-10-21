@@ -1,3 +1,5 @@
+Removed 2026-10-21 (P0-01): the booth harness bundle and its route were deleted (D75); kept below for history.
+
 # B1 · Booth harness (`public/b/mh_harness/`)
 
 Spec: `docs/specs/2026-10-20-booth-harness-bundle.md` (§3 design, §4 tests, §5 PROMPTS.md, §7 decisions D41–D51).

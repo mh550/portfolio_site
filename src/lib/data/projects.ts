@@ -158,7 +158,11 @@ merge_one() {
   git fetch -q origin "$MAIN_BRANCH" || return 1
   if git merge-base --is-ancestor "$c" "origin/$MAIN_BRANCH"; then touch "$STATE/merged-$m"; note "$m merged into $MAIN_BRANCH (already there)"; return 0; fi
   if ! tree=$(git merge-tree --write-tree "origin/$MAIN_BRANCH" "$c" 2>/dev/null | head -1); then
-    note "$m conflicts with $MAIN_BRANCH; not merged (needs Michael)"; notify "$m needs Michael: conflicts with $MAIN_BRANCH"; return 1
+    # once per main: merge_milestones runs again after every verify and at the end
+    [[ $(cat "$STATE/conflict-$m" 2>/dev/null) == "$(git rev-parse "origin/$MAIN_BRANCH")" ]] && return 1
+    git rev-parse "origin/$MAIN_BRANCH" > "$STATE/conflict-$m"
+    note "$m conflicts with $MAIN_BRANCH; not merged (needs Michael)"; commit_all "HARNESS: $m conflicts with $MAIN_BRANCH"; sync
+    needs_you "$m" "conflicts with $MAIN_BRANCH" harness-log.md; return 1
   fi
   [[ $tree == "$(git rev-parse "$c^{tree}")" ]] || return 3`,
         },
