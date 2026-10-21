@@ -13,6 +13,17 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 04:00 · verify P0
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P0-01 | 1 | `git ls-files` on booth paths; `grep booth-bundle package.json`; `grep booth|/b/h.tgz CLAUDE.md`; `grep suites CLAUDE.md` | all empty; CLAUDE.md line 40 says 80 suites (test count 1115 there vs 1111 actual, not a step) | yes |
+| P0-01 | 2 | `head -1` on the three booth spec/plan files | each starts 'Removed 2026-10-21 (P0-01): …' | yes |
+| P0-01 | 3 | grep profile.ts; `npx jest card.test.tsx components/card`; read card.test.tsx:139 | `conferenceNote: ''`; 3 suites/37 tests pass; line 139 asserts queryByText(/Glad we met/) not in document | yes |
+| P0-01 | 4 | diffed projects.ts excerpt vs driver.sh lines 204–220; jest case-study-agent-harness; grep Corrections | verbatim, 17 lines, ends `|| return 3`; suite passes, none skipped; dated 2026-10-21 Corrections line present | yes |
+| P0-01 | 5 | tail of v2 spec; grep '^## v3 decisions' | section at line 444, first entry D75 *default*, names D50 and D39, reversible via git revert | yes |
+| P0-01 | 6 | `.harness/check.sh`; `npx jest`; `node .harness/smoke.mjs` (twice) | 'check: lint ok · jest ok · build ok'; 80 suites/1111 tests pass; smoke exit 0, no FAIL lines | yes |
+
 ### 2026-10-21 03:00 · P0-01 · passes
 
 Removed the booth (public/b, build script, its test, booth-bundle.md, npm script, CLAUDE.md route/command rows); added "Removed" lines to the three booth spec/plan files. `profile.conferenceNote` is now `''`; card.test asserts "Glad we met" is absent. Re-copied `merge_one` (17 lines) into the agent-harness excerpt, plus a Corrections line. Recorded D75 *default* in a new v3 section of the v2 spec.
