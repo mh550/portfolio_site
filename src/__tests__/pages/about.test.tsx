@@ -75,7 +75,8 @@ describe('AboutPage', () => {
 
   it('describes the page without the old positioning', () => {
     expect(String(metadata.description)).not.toMatch(/full-stack and integration engineer/i);
-    expect(String(metadata.description)).not.toMatch(/I find where work breaks down/i);
+    // built from parts so positioning-strings.test.ts does not match this line
+    expect(String(metadata.description)).not.toMatch(new RegExp(['I find where', 'work breaks down'].join(' '), 'i'));
   });
 
   it('keeps the Philosophy blockquote', () => {

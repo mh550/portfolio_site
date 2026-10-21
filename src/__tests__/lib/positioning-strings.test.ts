@@ -9,7 +9,12 @@ const ROOT = path.resolve(__dirname, '../../..');
 // Any run of spaces or hyphens between words, and '&' as '&', '&amp;' or 'and'.
 const GAP = '[\\s-]+';
 const OLD = new RegExp(
-  [`systems${GAP}(?:&|&amp;|and)${GAP}process`, `process${GAP}engineer`].join('|'),
+  [
+    `systems${GAP}(?:&|&amp;|and)${GAP}process`,
+    `process${GAP}engineer`,
+    // the 10-18 subline (D76 supersedes it)
+    `find${GAP}where${GAP}work${GAP}breaks`,
+  ].join('|'),
   'i',
 );
 const BINARY = /\.(ico|png|jpe?g|gif|webp|avif|mp4|webm|mov|woff2?|ttf|otf|pdf|zip|tgz)$/i;
