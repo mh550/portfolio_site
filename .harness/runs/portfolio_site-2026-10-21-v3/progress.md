@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P4-03 · passes
+
+- Opus review of P4 (`$HARNESS_SCRATCH/P4.diff` per the step, plus `P4-full.diff` from P4-01's parent): 0 Critical, 2 Important, 7 Minor; all rows in `docs/plans/2026-10-21-P4-contact.md` § Review. Fixed test-first: tile names come from their text with an `sr-only` "(opens in new tab)" like the rest of the site (no `aria-label`; Chrome aria snapshot: "Email mherron734@gmail.com", "LinkedIn linkedin.com/in/mherron734 (opens in new tab)"); `<wbr>` after each `@` and `/` so the 640–767 px three-column tiles wrap "mherron734@ / gmail.com" instead of mid-word. `contact-check.mjs`: names from the label, try/finally (dead port → `contact-check: 1 FAIL`, exit 1), screenshot dir resolved from the repo root.
+- Docs: `## P4 (v3)` in `docs/review-guide.md`; CLAUDE.md `/contact` row "one screen, three tiles"; D97 gains the brand-guidelines note. Captures re-taken (same geometry). Tests 1642 → 1646.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `node .harness/smoke.mjs` exit 0 (0 FAIL); `contact-check.mjs` ok (Footer 776/844, 710/800); print-check /contact PASS.
+- Question for Michael (D97): LinkedIn's brand guidelines ask people not to recreate the "in" mark; keep the hand-drawn one or swap in their official asset (one path in `extra.ts`)?
+- Proposed change: P4-03 step 1's base (`HARNESS: after P4-01`'s parent) is the WIP commit after P4-01's code, so its diff holds only P4-02; a build milestone's review should diff from the parent of its first `P<n>-01:` commit (`--grep='^P4-01:'`). P5-07 is fine as written (P5-01 is the plan, its code starts at P5-02).
+
 ### 2026-10-21 · P4-02 · passes
 
 - New `.harness/contact-check.mjs`: loads /contact as a first visitor at 390×844 and 1280×800, prints `scrollHeight <= innerHeight: true` (844 ≤ 844, 800 ≤ 800), the Footer's bottom edge (776 → 68 px spare; 710 → 90 px spare, since scrollHeight never goes below the viewport), panel closed (0 dialogs, pill aria-expanded false), pill and tile boxes (pill 238,780–374,828 vs last tile bottom 491 at 390; 1128,736–1264,784 vs GitHub tile 813–1128 × 287–429 at 1280: no intersection), no callout (Footer in sight), no console errors; exit 0.

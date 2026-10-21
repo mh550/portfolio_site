@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { Metadata } from 'next';
 import ScrollReveal from '@/components/ScrollReveal';
 import Logo from '@/components/logos/Logo';
@@ -11,6 +12,15 @@ export const metadata: Metadata = {
 
 // 'https://www.linkedin.com/in/x/' → 'linkedin.com/in/x'
 const display = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
+
+// A line break after each @ and /, so a narrow tile (three columns at sm) wraps 'mherron734@' 'gmail.com', not mid-word
+const breakable = (value: string) =>
+  value.split(/(?<=[@/])/).map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ));
 
 const tiles = [
   { label: 'Email', glyph: 'mail', value: profile.email, href: `mailto:${profile.email}`, external: false },
@@ -34,7 +44,6 @@ export default function ContactPage() {
               key={label}
               href={href}
               {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-              aria-label={`${label}: ${value}${external ? ' (opens in new tab)' : ''}`}
               className={`group flex sm:flex-col items-center sm:items-start gap-4 p-4 sm:p-6 rounded-xl border border-white/8 bg-[var(--color-surface)] hover:border-[var(--color-accent)]/40 hover:bg-[var(--color-surface-alt)] transition-colors ${focusRing}`}
             >
               <Logo
@@ -44,9 +53,12 @@ export default function ContactPage() {
               />
               <span className="min-w-0">
                 <span className="block font-mono text-xs text-[var(--color-muted)] tracking-widest uppercase">
-                  {label}
+                  {label}{' '}
                 </span>
-                <span className="block mt-1 font-medium text-[var(--color-foreground)] wrap-anywhere">{value}</span>
+                <span className="block mt-1 font-medium text-[var(--color-foreground)] wrap-anywhere">
+                  {breakable(value)}
+                </span>
+                {external && <span className="sr-only"> (opens in new tab)</span>}
               </span>
             </a>
           ))}

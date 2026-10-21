@@ -337,3 +337,29 @@ cached memory shows to anyone on the same browser before Connect (D96 question).
 `readGuideMe()` returning true only for a stored `'on'` (`ConciergeProvider.tsx`, and `useState(false)` for it); the callout goes by deleting `<Callout />`
 in `SiteChrome.tsx`; the cached memory by not calling `loadMemory` in the provider. Turning the concierge off entirely
 needs no deploy of code: remove the `LIVEKIT_*` env from the environment and the pill's Connect reads offline.
+
+## P4 (v3)
+
+Same run and branch as P0–P3, plan `docs/plans/2026-10-21-P4-contact.md` (§ What Michael will see by P4-02, § Review
+by P4-03). Decision D97 is in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P3; P4 touches only
+`/contact`, `profile.ts` (`availability`) and `components/logos/`, so it also merges cleanly on its own after P1.
+
+- Changed (P4-01, D97): `/contact` is one screen: "Let's Talk", the line "Durham, NC · open to remote, hybrid or
+  relocation." (`profile.location` · new `profile.availability`), then three tiles (Email, LinkedIn, GitHub), each one
+  link with a glyph, the label and the value. The eyebrow, subheader and closing note are gone. The mail and LinkedIn
+  glyphs are hand-drawn in `src/components/logos/extra.ts` (simple-icons has no LinkedIn mark); GitHub is generated.
+- Changed (P4-02): `node .harness/contact-check.mjs` asserts no vertical scroll at 390×844 and 1280×800 (the Footer
+  ends at 776 and 710), the panel closed and the pill clear of every tile; captures
+  `docs/screenshots/v3/P4-contact-{390,1280}.png` (viewport only).
+- Changed (P4-03, review): the tiles take their names from their text with an `sr-only` "(opens in new tab)", like
+  every other new-tab link (no `aria-label`); each value can break after `@` and `/`, so the three columns at 640–767
+  px wrap "mherron734@ / gmail.com" instead of mid-word; the check script survives a dead server. The review table is
+  the plan's § Review.
+- Look at (390, then a desktop window narrowed to ~700 px): `$P/contact` fits without scrolling; each tile opens
+  mail, LinkedIn or GitHub (the last two in a new tab); at ~700 px the values wrap at `@` and `/`.
+- Question (D97): the LinkedIn "in" is drawn here, not LinkedIn's artwork, and their brand guidelines ask people not
+  to recreate it. Keep it, or swap in their official asset (one path in `extra.ts`)?
+
+**Undo.** `git revert` the P4 commits newest first (P4-03, P4-02, P4-01, and the WIP commit between P4-01 and its
+harness commit); the old contact page, its copy and test come back together. To keep the layout but drop the authored
+LinkedIn glyph, replace its path in `extra.ts`.

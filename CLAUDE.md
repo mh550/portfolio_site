@@ -23,7 +23,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 | `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
 | `/projects/[slug]/opengraph-image` | 1200×630 PNG via `next/og`: title + first metric (D38); bundled font only, so →/↔ are SVG arrows |
 | `/experience` | roles with linked bullets, resume projects, Earlier, education: resume v4 (v3 spec § 8) through `BulletWithLinks`; a project's name links its deep-dive, its repo line GitHub (new-tab links carry an sr-only "(opens in new tab)"); Earlier is one line per role, no bullets (D82) |
-| `/contact` | Contact: one screen (D97): h1, one line (`profile.location` · `profile.availability`), three tiles (mail, LinkedIn, GitHub), each one link with a `Logo` glyph |
+| `/contact` | Contact: one screen, three tiles (D97): h1, one line (`profile.location` · `profile.availability`), then mail, LinkedIn and GitHub tiles, each one link with a `Logo` glyph; `node .harness/contact-check.mjs` asserts no vertical scroll at 390×844 and 1280×800 |
 | `/approach` | permanent redirect to /about#how-i-work (D79): 308 from `next.config.ts` `redirects()`, pinned by `src/__tests__/app/approach-redirect.test.ts`; no page, off the Navbar, sitemap and smoke routes |
 | `/evidence` | Noindex, off the Navbar: six `competencies` × 2–4 linked items via `resolvedItems` (`competencies.ts`, D7; rubric stub `docs/notes/maxx-level-4.md`) |
 | `/card` | Conference contact card (no Navbar/Footer, via `SiteChrome`) |
@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1642 tests, 97 suites after P4-01)
+npm test             # Jest unit/integration tests (1646 tests, 97 suites after P4-03)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```

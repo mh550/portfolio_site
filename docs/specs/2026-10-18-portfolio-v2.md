@@ -674,3 +674,7 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   `paths.ts` stays generated); GitHub keeps the generated path. Supersedes spec § 6's "simple-icons paths for LinkedIn"
   and the pre-v3 contact copy. Height budget in `docs/plans/2026-10-21-P4-contact.md` § Layout. Reversible: swap the
   path in `extra.ts`, or put the copy back.
+  P4-03 review: LinkedIn's brand guidelines ask people not to recreate or alter the "in" mark, so the authored glyph
+  is a departure from them, not only from the spec. Question for Michael: keep it, or download LinkedIn's official
+  "in" asset from their brand page into `extra.ts`? The tiles take their names from their text, the new-tab note in
+  an `sr-only` span like every other new-tab link (no `aria-label`).

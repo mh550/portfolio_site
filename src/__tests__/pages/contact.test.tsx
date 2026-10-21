@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { render, screen, within } from '@testing-library/react';
 import ContactPage, { metadata } from '@/app/contact/page';
 import { profile } from '@/lib/data';
@@ -23,13 +22,40 @@ describe('ContactPage', () => {
     expect(screen.getAllByRole('link')).toHaveLength(3);
   });
 
+  // jsdom's name computation puts a space at each <wbr>; Chrome doesn't (its names match these, checked in P4-03)
+  const named = (expected: string) => (name: string) => name.replace(/([@/]) /g, '$1') === expected;
+
   it.each([
-    ['Email: mherron734@gmail.com', `mailto:${profile.email}`],
-    ['LinkedIn: linkedin.com/in/mherron734 (opens in new tab)', profile.linkedin],
-    ['GitHub: github.com/mh550 (opens in new tab)', profile.github],
+    ['Email mherron734@gmail.com', `mailto:${profile.email}`],
+    ['LinkedIn linkedin.com/in/mherron734 (opens in new tab)', profile.linkedin],
+    ['GitHub github.com/mh550 (opens in new tab)', profile.github],
   ])('links %s to %s', (name, href) => {
     render(<ContactPage />);
-    expect(screen.getByRole('link', { name })).toHaveAttribute('href', href);
+    expect(screen.getByRole('link', { name: named(name) })).toHaveAttribute('href', href);
+  });
+
+  // P4-03 review: names come from the tile's own text, like every other link on the site (no aria-label to drift
+  // from what is shown), with the sr-only separator and the sr-only new-tab note the Footer and /card use
+  it('names each tile from its visible text, the new-tab note in an sr-only span', () => {
+    render(<ContactPage />);
+    for (const link of screen.getAllByRole('link')) expect(link).not.toHaveAttribute('aria-label');
+    for (const name of [/^LinkedIn/, /^GitHub/]) {
+      const note = within(screen.getByRole('link', { name })).getByText('(opens in new tab)');
+      expect(note).toHaveClass('sr-only');
+    }
+    expect(within(screen.getByRole('link', { name: /^Email/ })).queryByText('(opens in new tab)')).toBeNull();
+  });
+
+  // at sm (640–767 px) a tile's value column is ~140 px: break after @ and / rather than mid-word
+  it.each([
+    ['mherron734@gmail.com', ['mherron734@', 'gmail.com']],
+    ['linkedin.com/in/mherron734', ['linkedin.com/', 'in/', 'mherron734']],
+    ['github.com/mh550', ['github.com/', 'mh550']],
+  ])('offers a line break in %s after each @ and /', (value, parts) => {
+    const { container } = render(<ContactPage />);
+    const span = [...container.querySelectorAll('span')].find(s => s.textContent === value)!;
+    expect(span.querySelectorAll('wbr')).toHaveLength(parts.length - 1);
+    expect([...span.childNodes].filter(n => n.nodeType === Node.TEXT_NODE).map(n => n.textContent)).toEqual(parts);
   });
 
   it('opens LinkedIn and GitHub in a new tab with noopener noreferrer, mail in place', () => {
@@ -73,8 +99,6 @@ describe('ContactPage', () => {
     for (const gone of ['Whether you have', 'Currently based', 'always up for', 'Best way to reach me']) {
       expect(container).not.toHaveTextContent(gone);
     }
-    const source = fs.readFileSync('src/app/contact/page.tsx', 'utf8');
-    expect(source).not.toMatch(/Whether you have|Currently based|always up for/);
   });
 
   it('describes the page for the agentic-systems angle', () => {

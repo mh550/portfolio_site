@@ -6,10 +6,13 @@
 // the Footer's bottom edge is printed too: that is how much of the screen the page really uses.
 import { createRequire } from 'node:module';
 import { statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 const require = createRequire(`${process.env.HARNESS_PW ?? '/tmp/harness/pw'}/`);
 const { chromium } = require('playwright');
 const base = `http://localhost:${process.env.HARNESS_PORT ?? 7835}`;
-const shots = process.argv[2] ?? 'docs/screenshots/v3';
+const root = fileURLToPath(new URL('..', import.meta.url));
+const shots = resolve(root, process.argv[2] ?? 'docs/screenshots/v3');
 
 const SIZES = [{ width: 390, height: 844 }, { width: 1280, height: 800 }];
 
@@ -19,6 +22,7 @@ const check = (ok, what) => { console.log(`${ok ? 'OK  ' : 'FAIL'} ${what}`); if
 const fmt = b => (b ? `${b.left},${b.top},${b.right},${b.bottom}` : 'none');
 const hits = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
+try {
 for (const viewport of SIZES) {
   const size = `${viewport.width}×${viewport.height}`;
   const context = await browser.newContext({ viewport });
@@ -43,7 +47,8 @@ for (const viewport of SIZES) {
       innerHeight: window.innerHeight,
       scrollWidth: document.documentElement.scrollWidth,
       footer: box(document.querySelector('footer')),
-      tiles: [...document.querySelectorAll('main a')].map(a => ({ name: a.getAttribute('aria-label'), ...box(a) })),
+      // a tile's label (Email, LinkedIn, GitHub): the first text in it, since its name comes from its content
+      tiles: [...document.querySelectorAll('main a')].map(a => ({ name: a.querySelector('span span')?.textContent?.trim() ?? '?', ...box(a) })),
       pill: box(document.getElementById('concierge-pill')),
       callout: box(document.querySelector('[role="note"]')),
       dialogs: document.querySelectorAll('[role="dialog"]').length,
@@ -64,7 +69,7 @@ for (const viewport of SIZES) {
   for (const t of m.tiles) {
     const over = [['pill', m.pill], ['callout', m.callout]].filter(([, b]) => b && hits(t, b)).map(([n]) => n);
     console.log(`  tile     ${fmt(t)}  ${t.name}${over.length ? `  COVERED BY ${over.join(', ')}` : ''}`);
-    check(over.length === 0, `${size}: ${t.name.split(':')[0]} tile clear of the pill${m.callout ? ' and the callout' : ''}`);
+    check(over.length === 0, `${size}: ${t.name} tile clear of the pill${m.callout ? ' and the callout' : ''}`);
   }
 
   const file = `P4-contact-${viewport.width}.png`;
@@ -74,7 +79,10 @@ for (const viewport of SIZES) {
   check(errors.length === 0, `${size}: no console/page errors (${JSON.stringify(errors)})`);
   await context.close();
 }
-
-await browser.close();
+} catch (e) {
+  check(false, `threw: ${e.message}`);
+} finally {
+  await browser.close();
+}
 console.log(failed === 0 ? 'contact-check: ok' : `contact-check: ${failed} FAIL`);
 process.exit(failed === 0 ? 0 : 1);
