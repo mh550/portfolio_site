@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1407 tests, 92 suites after P3-05)
+npm test             # Jest unit/integration tests (1496 tests, 95 suites after P3-06)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -99,11 +99,12 @@ Single source of truth for all page content — no content is hardcoded in compo
   `ChromeWidget`); shown on every chrome page (`/evidence` too) but not on `/talk` or `/card*`
 - `components/card/ConferenceNote.tsx` — `/card`'s optional line above Selected work from `profile.conferenceNote` (`''` renders nothing, D39)
 - `components/focusRing.ts` — the shared `focus-visible` accent outline class string (card, about, evidence); `components/textLink.ts` — the underlined in-text link look built on it (`/evidence`, `/experience`, `BulletWithLinks`)
-- `components/talk/` — `/talk` panels inside `TalkPanel` (bordered section + h2): `MemoryPanel`, `LatencyPanel`
-  (Server-Component-safe, nulls render `–` via `format.ts`), `Transcript` (`role="log"`, aria-busy while a line is
-  non-final) and `ForgetMeButton` (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
+- `components/talk/` — `Transcript` (`role="log"` inside `TalkPanel`, a bordered section + h2; aria-busy while a line
+  is non-final), `LatencyPanel` (the Latency tab's content, no heading of its own; Server-Component-safe, nulls render
+  `–` via `format.ts`, which also holds `count`, `dateTime`, `day` and `LEARNED_AT_FORMAT`) and `ForgetMeButton`
+  (confirm step) (`"use client"`); fixtures in `src/__tests__/fixtures/concierge.ts`.
   `TalkSession` (`"use client"`) is only the `/talk` view over `useConcierge()`: `CallControls`, the transcript with
-  `MessageBox` (keyed on `sessionCount`), the panels and Forget me; `sessionReducer.ts` the
+  `MessageBox` (keyed on `sessionCount`), then `MemoryStrip` + `PanelTabs` (beside it from lg); `sessionReducer.ts` the
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
 - `components/concierge/` — `ConciergeProvider.tsx` (`"use client"`, D85) owns the one call above the pages: the
   reducer, the session ref, the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`; also in
@@ -115,8 +116,16 @@ Single source of truth for all page content — no content is hardcoded in compo
   panel or Connect sets `concierge.callout_seen`; shown only at `scrollY 0` with the Footer out of sight. `ConciergePanel.tsx`
   (D86): the non-modal drawer (`role="dialog" aria-modal="false"`, 420 px right at `lg`, a bottom sheet under the
   Navbar below, `z-[45]`, in the DOM only while open): title (focused on open), Minimize, `CallControls`,
-  `DeepDiveLink` (offline/busy, shared with `/talk`), `Transcript fill` + `MessageBox`; Esc (unless a control
-  `preventDefault`s it) and Minimize close it and keep the call; reaching `/talk` closes it. `CallControls.tsx` (the one Connect/Leave button, it keeps focus; the mic
+  `DeepDiveLink` (offline/busy, shared with `/talk`), `Transcript fill` + `MessageBox`, then `MemoryStrip` +
+  `PanelTabs compact`; Esc (unless a control
+  `preventDefault`s it) and Minimize close it and keep the call; reaching `/talk` closes it. The memory view (D90):
+  `MemoryStrip.tsx` (five chips Profile · Episodes · Events · Knowledge · Working with counts from `stripCounts`, `–`
+  titled "not reported by this agent version" from a v1 body; they wrap; a changed count pulses once, `motion-safe:`,
+  kept in state by the previous-props pattern), `PanelTabs.tsx` (WAI-ARIA tabs Memory · Latency · Privacy, roving
+  tabindex, arrows/Home/End; `compact` caps the panel at 25 vh, 40 vh at lg); both callers put the strip and tabs in
+  a `section` under an `sr-only` h2 (`memoryView.heading`) and `MemoryView.tsx` (the Memory tab: About you
+  and About the agent from a v2 body, the v1 fallback, Forget me always at its foot, disabled with "Connect to erase
+  what it remembers" before a call). `CallControls.tsx` (the one Connect/Leave button, it keeps focus; the mic
   toggle; Turn on sound; the status line), `status.ts` (`statusLine`, `forgetLine`), `buttons.ts`. Tests render
   `/talk` through `renderTalk()` in `src/__tests__/helpers/concierge.tsx`
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw; contract v2
@@ -162,6 +171,10 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 - `--color-surface` / `--color-surface-alt`: card backgrounds
 - `--color-accent`: `#00d4ff` (electric cyan)
 - `--color-muted`: `#8888a0`
+- The concierge's memory view, one per kind (D90; each ≥ 4.5:1 on surface and background, `design-tokens.test.ts`):
+  `--color-mem-profile` `#00d4ff`, `--color-mem-episode` `#fbbf24`, `--color-mem-event` `#4ade80`,
+  `--color-mem-event-rejected` `#f87171`, `--color-mem-knowledge` `#a78bfa`, `--color-mem-working` `#f472b6`
+  (Cache uses `--color-muted`)
 - Use `var(--color-accent)` etc. in Tailwind classes: `text-[var(--color-accent)]`
 
 ## Skills Available

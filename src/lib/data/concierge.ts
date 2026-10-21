@@ -49,19 +49,46 @@ export const talkPage = {
     forgetFailed: "Forget me didn't go through. Try again.",
     forgetFailedEnded: "Forget me didn't go through. Connect again to retry.",
   },
-  headings: { transcript: 'Transcript', memory: 'What it remembers', latency: 'Latency', privacy: 'Privacy' },
+  // memory, latency and privacy name the three tabs under the memory strip (D90); /talk's own privacy h2 keeps "Privacy"
+  headings: { transcript: 'Transcript', memory: 'Memory', latency: 'Latency', privacy: 'Privacy' },
   empty: {
     transcript: 'Nothing said yet.',
     memory: 'Nothing remembered yet',
     latency: 'No turns yet.',
     newVisitor: 'a new visitor',
   },
-  // The memory panel: "Talking to {name} · visit {visits}", then one row per fact.
+  // The Memory tab's first line, "Talking to {name} · visit {visits}", and its labels.
   memory: {
     talkingTo: 'Talking to',
     visit: 'visit',
     summary: 'Summary',
     fact: { channel: 'Channel', source: 'Source', learnedAt: 'Learned', confidence: 'Confidence' },
+  },
+  // The Memory tab and the strip (D90, plan § Memory view): the v2 body's six kinds of memory in two sections.
+  memoryView: {
+    // The strip and the tabs' section: a visually hidden h2, so heading navigation reaches them
+    heading: 'Memory, latency and privacy',
+    strip: 'What it remembers, by kind',
+    tabs: 'Memory, latency and privacy',
+    aboutYou: 'About you',
+    aboutAgent: 'About the agent',
+    kinds: {
+      profile: 'Profile',
+      episodes: 'Episodes',
+      events: 'Events',
+      knowledge: 'Knowledge',
+      working: 'Working',
+      cache: 'Cache',
+    },
+    notReported: 'not reported by this agent version',
+    inProgress: 'in progress',
+    // Before a gate_rejected event's sentence, for screen readers: the row's red marks it for everyone else
+    rejected: 'Not kept:',
+    forgetHint: 'Connect to erase what it remembers',
+    retention: (days: number) => `Kept ${days} days after your last visit`,
+    knowledge: { words: 'Words', estTokens: 'Est. tokens', sections: 'Sections', source: 'Source' },
+    working: { items: 'Items', estTokens: 'Est. tokens', compacted: 'Compacted', compactions: 'Compactions' },
+    cachedShare: 'Prompt tokens from cache',
   },
   speakers: { visitor: 'You', agent: 'Concierge' },
 };

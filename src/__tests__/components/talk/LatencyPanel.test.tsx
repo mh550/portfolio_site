@@ -12,9 +12,10 @@ const row = (label: string) => {
 const item = (label: string) => screen.getByText(label).nextElementSibling?.textContent;
 
 describe('LatencyPanel', () => {
-  it('has an h2 heading and an empty line before the first turn', () => {
+  // P3-06: it is the Latency tab's content, and the tab names it (PanelTabs), so it has no heading of its own.
+  it('has no heading of its own, and an empty line before the first turn', () => {
     render(<LatencyPanel turns={[]} />);
-    expect(screen.getByRole('heading', { level: 2, name: 'Latency' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading')).toBeNull();
     expect(screen.getByText('No turns yet.')).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });

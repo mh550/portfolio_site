@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TalkPage, { metadata } from '@/app/talk/page';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
@@ -94,6 +94,17 @@ describe('TalkPage', () => {
     expect(items.map((li) => li.textContent)).toEqual(privacyNote);
     const connect = screen.getByRole('button', { name: talkPage.labels.connect });
     expect(connect.compareDocumentPosition(privacy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  // P3-06, D90: the strip and the tabs on /talk too; the Privacy tab repeats the note, and the page keeps its own section.
+  it('shows the memory strip and the Memory · Latency · Privacy tabs, and keeps its own Privacy section', () => {
+    renderPage();
+    expect(screen.getByRole('list', { name: talkPage.memoryView.strip })).toBeInTheDocument();
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Memory', 'Latency', 'Privacy']);
+    fireEvent.click(screen.getByRole('tab', { name: 'Privacy' }));
+    const tabPanel = screen.getByRole('tabpanel', { name: 'Privacy' });
+    expect(within(tabPanel).getAllByRole('listitem').map((li) => li.textContent)).toEqual(privacyNote);
+    expect(screen.getByRole('region', { name: talkPage.headings.privacy })).toBeInTheDocument();
   });
 
   it('is a Server Component that imports nothing from LiveKit', () => {

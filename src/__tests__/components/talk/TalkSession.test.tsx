@@ -77,11 +77,23 @@ describe('TalkSession: before Connect', () => {
     expect(localStorage.getItem(VISITOR_ID_KEY)).toBeNull();
   });
 
-  it('renders the three panels, empty', () => {
+  // P3-06, D90: the transcript, then the memory strip and the Memory · Latency · Privacy tabs.
+  it('renders the transcript, the memory strip and the three tabs, empty', () => {
     renderTalk();
-    for (const name of ['Transcript', 'What it remembers', 'Latency']) {
-      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
-    }
+    expect(screen.getByRole('heading', { level: 2, name: 'Transcript' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: talkPage.memoryView.strip })).toBeInTheDocument();
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Memory', 'Latency', 'Privacy']);
+    expect(screen.getByRole('tabpanel', { name: 'Memory' })).toHaveTextContent(talkPage.empty.memory);
+  });
+
+  it('puts the strip and the tabs after the message box, with no height cap (not compact)', () => {
+    renderTalk();
+    const box = screen.getByRole('textbox', { name: talkPage.labels.message });
+    const strip = screen.getByRole('list', { name: talkPage.memoryView.strip });
+    expect(box.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('tabpanel', { name: 'Memory' }).className).not.toMatch(/max-h/);
+    // Its own h2 (visually hidden), so heading navigation reaches the memory view on /talk.
+    expect(screen.getByRole('region', { name: talkPage.memoryView.heading })).toContainElement(strip);
   });
 });
 
@@ -568,18 +580,21 @@ describe('TalkSession: the text streams feed the panels', () => {
     return room;
   }
 
-  it('a memory body renders in the memory panel', async () => {
+  it('a memory body renders in the Memory tab and the strip', async () => {
     const room = await liveRoom();
     await act(() => pushText(room, 'concierge.memory', memoryJson));
-    const panel = screen.getByRole('region', { name: 'What it remembers' });
+    const strip = screen.getByRole('list', { name: talkPage.memoryView.strip });
+    expect(strip.querySelector('[data-kind="profile"] [data-count]')).toHaveTextContent('3');
+    const panel = screen.getByRole('tabpanel', { name: 'Memory' });
     expect(within(panel).getByText('Talking to a new visitor · visit 2')).toBeInTheDocument();
     expect(within(panel).getByText('Lisbon')).toBeInTheDocument();
   });
 
-  it('a metrics body renders in the latency panel', async () => {
+  it('a metrics body renders in the Latency tab', async () => {
     const room = await liveRoom();
     await act(() => pushText(room, 'concierge.metrics', metricsFullJson));
-    const panel = screen.getByRole('region', { name: 'Latency' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Latency' }));
+    const panel = screen.getByRole('tabpanel', { name: 'Latency' });
     expect(within(panel).getByText('Turn 1')).toBeInTheDocument();
     expect(within(panel).getAllByText('830 ms').length).toBeGreaterThan(0);
   });

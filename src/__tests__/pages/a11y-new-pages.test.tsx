@@ -10,6 +10,7 @@ import ExperiencePage from '@/app/experience/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
+import { colour, ratio } from '@/__tests__/helpers/contrast';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { getProjectBySlug } from '@/lib/data';
 
@@ -131,6 +132,15 @@ describe('the concierge panel, open', () => {
     expect(missing).toEqual([]);
   });
 
+  // P3-06: the strip and the tabs are in it; with a v2 body the Memory tab adds h3s and h4s under the panel's h2s.
+  it('holds the memory strip and the tabs, every tab and panel with the focus style', () => {
+    const { getByRole } = openPanel();
+    const panel = getByRole('dialog');
+    const tabs = panel.querySelectorAll('[role="tab"], [role="tabpanel"]');
+    expect(tabs.length).toBe(6);
+    for (const el of tabs) expect(el.getAttribute('class')).toMatch(/\bfocus-visible:outline/);
+  });
+
   it('keeps the outline: one h1, no skipped heading level', () => {
     const levels = headingLevels(openPanel().container);
     expect(levels.filter((l) => l === 1)).toHaveLength(1);
@@ -141,20 +151,6 @@ describe('the concierge panel, open', () => {
 });
 
 describe('dark-theme text contrast (WCAG AA, 4.5:1)', () => {
-  const css = fs.readFileSync(path.join(process.cwd(), 'src/app/globals.css'), 'utf8');
-  const colour = (name: string) => css.match(new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, 'i'))![1];
-  const luminance = (hex: string) => {
-    const [r, g, b] = [1, 3, 5].map((i) => {
-      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const ratio = (a: string, b: string) => {
-    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-    return (hi + 0.05) / (lo + 0.05);
-  };
-
   it.each(['muted', 'foreground', 'accent', 'accent-dim'])('%s text on every dark surface', (fg) => {
     for (const bg of ['background', 'surface', 'surface-alt']) {
       expect(ratio(colour(fg), colour(bg))).toBeGreaterThanOrEqual(4.5);

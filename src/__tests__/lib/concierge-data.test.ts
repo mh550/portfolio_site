@@ -1,4 +1,4 @@
-import { introText, latencyLabels, privacyNote, talkPage } from '@/lib/data';
+import { introText, latencyLabels, privacyNote, talkPage, talkWidget } from '@/lib/data';
 
 describe('talkPage', () => {
   it('has the exact offline sentence and the deep-dive link', () => {
@@ -80,5 +80,55 @@ describe('privacyNote', () => {
       expect(entry).not.toMatch(/\.net/);
       expect(entry.replace(/\b30\b/g, '')).not.toMatch(/\d/);
     }
+  });
+});
+
+// P3-06, D90: the memory view's copy and the tab names (plan § Copy).
+describe('talkPage.memoryView and the tab names', () => {
+  it('names the three tabs Memory, Latency, Privacy', () => {
+    expect(talkPage.headings).toMatchObject({ memory: 'Memory', latency: 'Latency', privacy: 'Privacy' });
+  });
+
+  it('has the sections, the six kinds, and the exact fallback and hint lines', () => {
+    const view = talkPage.memoryView;
+    expect(view.aboutYou).toBe('About you');
+    expect(view.aboutAgent).toBe('About the agent');
+    expect(view.kinds).toEqual({
+      profile: 'Profile',
+      episodes: 'Episodes',
+      events: 'Events',
+      knowledge: 'Knowledge',
+      working: 'Working',
+      cache: 'Cache',
+    });
+    expect(view.notReported).toBe('not reported by this agent version');
+    expect(view.inProgress).toBe('in progress');
+    expect(view.forgetHint).toBe('Connect to erase what it remembers');
+    expect(view.rejected).toBe('Not kept:');
+    expect(view.heading).toBe('Memory, latency and privacy');
+    expect(view.retention(30)).toBe('Kept 30 days after your last visit');
+  });
+});
+
+// v3 spec § 4.4: the copy names the control only as it is labelled. Every string here that says "forget" says
+// "Forget me", capital F, and nothing else ("forget your data", "Forget Me", "forget-me" all fail).
+describe('the Forget me spelling', () => {
+  const strings = (value: unknown): string[] =>
+    typeof value === 'string'
+      ? [value]
+      : typeof value === 'function'
+        ? []
+        : value && typeof value === 'object'
+          ? Object.values(value).flatMap(strings)
+          : [];
+  const all = [...strings(talkPage), ...strings(privacyNote), ...strings(talkWidget), ...strings(latencyLabels)];
+
+  it('finds the strings that mention it', () => {
+    expect(all.filter((s) => /forget/i.test(s)).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it.each(all.filter((s) => /forget/i.test(s)))('"%s" spells it "Forget me"', (s) => {
+    const mentions = s.match(/forget[\w-]*(\s+\w+)?/gi)!;
+    for (const m of mentions) expect(m).toBe('Forget me');
   });
 });

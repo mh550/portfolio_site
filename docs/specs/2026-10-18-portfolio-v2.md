@@ -576,7 +576,18 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   strip counts Knowledge as sections and Working as items; a v1 body shows Profile and the summary and "not
   reported by this agent version" for the rest; Forget me is always in the Memory tab, disabled with "Connect to
   erase what it remembers" before a call. `MemoryPanel` is replaced by `MemoryView`. Supersedes VC2's separate
-  "What it remembers" panel. Reversible: `git revert` P3-06. (Plan § Memory view; P3-06 builds.)
+  "What it remembers" panel. Reversible: `git revert` P3-06. (Plan § Memory view; P3-06 builds.) *As built
+  (P3-06):* the strip and the tabs follow the message box in a `section` under an `sr-only` h2 "Memory, latency
+  and privacy", in the drawer (`PanelTabs compact`: the tab panel capped at 25 vh below lg, not the plan's 35 vh, so
+  a v2 body leaves the transcript room on a 390 × 844 sheet; 40 vh at lg) and on `/talk` (right column from lg, no cap; `/talk` keeps its own Privacy section);
+  `LatencyPanel` lost its h2 (the tab names it); a strip chip pulses only when its new count is reported and differs
+  (none on first render, none going back to `–`); the chips wrap rather than scroll sideways (a scroll container
+  with nothing focusable can't be scrolled by keyboard); only the newest open episode is "in progress"; a
+  `gate_rejected` event carries an `sr-only` "Not kept:" and every event time, learned-at and the Knowledge section
+  names are `sr-only` text as well as `title`; Esc in Forget me's confirm step closes the step, not the drawer; a v1 body's "not reported" line reads "Episodes · Events: not
+  reported by this agent version"; Profile chips show slot, value, the channel glyph (voice, text) and the source,
+  learned-at in `title` and `sr-only`; `retention_days` adds "Kept {n} days after your last visit"; the Forget me
+  line (`forgetLine`) sits under the button in the Memory tab.
 - **D91** *default*: the last `concierge.memory` body is cached in `localStorage` under `concierge.memory.<visitor_id>`
   as `{ v: 1, savedAt, body: <the raw JSON text> }` and re-parsed with `parseMemory` on load; `readVisitorId` reads
   the id without creating one, so D45's "no id stored before Connect" holds; Forget me clears it. Supersedes

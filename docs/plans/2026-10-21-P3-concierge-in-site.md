@@ -310,6 +310,13 @@ fixed corner, `bottom` offset above the pill: `bottom-[calc(max(1rem,env(safe-ar
 
 ## Memory view
 
+*Built in P3-06* as below (D90 *As built*): `globals.css` tokens, `design-tokens.test.ts` (ratio helper in
+`src/__tests__/helpers/contrast.ts`), `MemoryStrip.tsx`, `PanelTabs.tsx` (`compact` in the drawer), `MemoryView.tsx`;
+`MemoryPanel.tsx` and its test are gone; `LatencyPanel` has no heading of its own. On `/talk` the strip and tabs
+are the right column from lg (after the message box in the DOM, under it below lg). Changed by the review: the strip
+wraps (no `overflow-x-auto`), the compact cap is 25 vh below lg, and both callers wrap strip + tabs in a `section`
+with an `sr-only` h2.
+
 P3-06. Six kinds, two sections (spec § 5). New tokens in `globals.css` `@theme inline` (named `--color-mem-*` so
 Tailwind exposes them and `a11y-new-pages`' `--color-<name>` reader finds them). Ratios computed with the WCAG
 relative-luminance formula `a11y-new-pages.test.tsx` uses:
@@ -542,6 +549,16 @@ Filled by P3-10 (one row per finding).
 | P3-05-10 | Minor | `ConciergeProvider.test.tsx` | new Connect while speaking untested | fixed: test added (offline can't follow an agent join) |
 | P3-05-11 | Minor | `VoiceWidget.test.tsx` | the unmount test passed for any scroll handler; a matchMedia restore outside `finally` | fixed: asserts the same handler; `try/finally` |
 | P3-05-12 | Minor | `VoiceWidget.tsx` dot | the collapsed dot sits off the circle | fixed: `right-1.5 top-1.5` |
+| P3-06-1 | Important | `MemoryView.tsx` Forget me | the live Forget me swaps to a disabled button when the call ends: focus could fall to `<body>` | already handled: CallControls' call-ended effect hands lost focus (body or a disabled control) to Connect; drawer tests added for focus on Forget me and in the confirm step |
+| P3-06-2 | Minor | `MemoryView.tsx` forget line | the `aria-live` line sits in a tab panel that can be hidden or unmounted | kept: the RPC answers within 10 s while the visitor is on the control; the line stays in the Memory tab |
+| P3-06-3 | Minor | `ForgetMeButton.tsx` | Esc in the confirm step closed the whole drawer | fixed test-first: the step handles Esc (`preventDefault`, back to Forget me) |
+| P3-06-4 | Minor | `ConciergePanel.tsx`, `TalkSession.tsx` | h3 "About you" sat under h2 "Transcript"; `/talk` lost its memory h2 | fixed test-first: strip + tabs in a `section` with an `sr-only` h2 |
+| P3-06-5 | Minor | `MemoryView.tsx`, `MemoryStrip.tsx` | run-together accessible text ("Lisbonvoice", "Profile3") | fixed test-first: separators, "(voice)" |
+| P3-06-6 | Minor | `MemoryView.tsx` events, knowledge | time, section names and `gate_rejected` only in `title` or colour | fixed test-first: `sr-only` text, "Not kept:" |
+| P3-06-7 | Minor | `MemoryView.tsx`, `MemoryStrip.tsx` | long unbroken name/summary could widen `/talk`; the strip scrolled with nothing focusable | fixed test-first: `break-words`; the chips wrap |
+| P3-06-8 | Minor | `PanelTabs.tsx` compact | at 390 × 844 a v2 body pushes the transcript to its minimum | fixed: 25 vh below lg (P3-09 captures a v2 body to confirm) |
+| P3-06-9 | Minor | `MemoryView.tsx` episodes | every open episode read "in progress" | fixed test-first: only the newest |
+| P3-06-10 | Minor | tests | no StrictMode strip test, no drawer outline with a v2 body | fixed: both added |
 
 ## Decisions
 

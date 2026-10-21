@@ -287,17 +287,20 @@ describe('TalkSession live: Forget me', () => {
     await flush();
   }
 
-  it('is only offered while live', async () => {
+  // P3-06 (v3 spec § 4.4): always in the Memory tab, enabled only while live.
+  it('is always shown, but enabled only while live', async () => {
     const user = userEvent.setup();
     renderTalk();
-    expect(screen.queryByRole('button', { name: labels.forgetMe })).toBeNull();
+    expect(button(labels.forgetMe)).toBeDisabled();
+    expect(button(labels.forgetMe)).toHaveAccessibleDescription(talkPage.memoryView.forgetHint);
     await user.click(button(labels.connect));
     await flush();
-    expect(screen.queryByRole('button', { name: labels.forgetMe })).toBeNull();
+    expect(button(labels.forgetMe)).toBeDisabled();
     await act(async () => {
       addAgent(lastRoom());
     });
-    expect(button(labels.forgetMe)).toBeInTheDocument();
+    expect(button(labels.forgetMe)).toBeEnabled();
+    expect(screen.queryByText(talkPage.memoryView.forgetHint)).toBeNull();
   });
 
   it('once confirmed, calls the RPC on the agent exactly once', async () => {
@@ -322,7 +325,7 @@ describe('TalkSession live: Forget me', () => {
   it('on {ok: true} the memory panel clears and "Forgotten" shows', async () => {
     const { room, user } = await goLive();
     await act(() => pushText(room, 'concierge.memory', memoryJson));
-    const panel = screen.getByRole('region', { name: 'What it remembers' });
+    const panel = screen.getByRole('tabpanel', { name: 'Memory' });
     expect(within(panel).getByText('Lisbon')).toBeInTheDocument();
     await erase(user);
     expect(within(panel).queryByText('Lisbon')).toBeNull();
@@ -478,6 +481,6 @@ describe('TalkSession live: Leave', () => {
     expect(screen.queryByText('Turn 1')).toBeNull();
     expect(screen.queryByTestId('room-audio-renderer')).toBeNull();
     expect(screen.queryByRole('button', { name: labels.micOn })).toBeNull();
-    expect(screen.queryByRole('button', { name: labels.forgetMe })).toBeNull();
+    expect(button(labels.forgetMe)).toBeDisabled();
   });
 });

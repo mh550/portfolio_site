@@ -1,8 +1,9 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import SiteChrome from '@/components/SiteChrome';
 import ConciergePanel from '@/components/concierge/ConciergePanel';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
-import { addAgent, lastRoom, removeParticipant, resetRooms } from '@/__mocks__/livekit-client';
+import { addAgent, lastRoom, pushText, removeParticipant, resetRooms } from '@/__mocks__/livekit-client';
+import { memoryV2Json } from '@/__tests__/fixtures/concierge';
 import { talkPage, talkWidget } from '@/lib/data/concierge';
 
 // P3-04, D86: the widget opens a non-modal drawer with the call controls, the transcript and the message box;
@@ -239,6 +240,51 @@ describe('ConciergePanel', () => {
     expect(screen.getByRole('link', { name: talkPage.deepDiveLabel })).toHaveAttribute('href', talkPage.deepDiveHref);
   });
 
+  // P3-06, D90: the strip and the three tabs sit under the message box.
+  it('under the message box: the memory strip, then Memory · Latency · Privacy, Memory first', () => {
+    renderChrome();
+    const panel = open();
+    const box = within(panel).getByRole('textbox', { name: talkPage.labels.message });
+    const strip = within(panel).getByRole('list', { name: talkPage.memoryView.strip });
+    const tablist = within(panel).getByRole('tablist');
+    expect(box.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(strip.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(tablist).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Memory', 'Latency', 'Privacy']);
+    expect(within(panel).getByRole('tab', { name: 'Memory' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('the strip and the tabs are a section under their own (visually hidden) h2, after the transcript', () => {
+    renderChrome();
+    const panel = open();
+    const section = within(panel).getByRole('region', { name: talkPage.memoryView.heading });
+    expect(within(section).getByRole('heading', { level: 2 })).toHaveClass('sr-only');
+    expect(within(section).getByRole('list', { name: talkPage.memoryView.strip })).toBeInTheDocument();
+    expect(within(section).getByRole('tablist')).toBeInTheDocument();
+  });
+
+  it('caps the tab panel so the transcript keeps the height (compact tabs)', () => {
+    renderChrome();
+    const panel = open();
+    expect(within(panel).getByRole('tabpanel', { name: 'Memory' }).className).toMatch(/max-h-\[25vh\]/);
+  });
+
+  it('before a call the Memory tab shows Forget me disabled, with the hint', () => {
+    renderChrome();
+    const panel = open();
+    const forget = within(panel).getByRole('button', { name: talkPage.labels.forgetMe });
+    expect(forget).toBeDisabled();
+    expect(forget).toHaveAccessibleDescription(talkPage.memoryView.forgetHint);
+  });
+
+  it('Esc from a focused tab minimizes it too', () => {
+    renderChrome();
+    const panel = open();
+    const tab = within(panel).getByRole('tab', { name: 'Memory' });
+    tab.focus();
+    fireEvent.keyDown(tab, { key: 'Escape' });
+    expect(dialog()).toBeNull();
+  });
+
   it('renders nothing outside an open panel even when mounted directly', () => {
     const { container } = render(
       <ConciergeProvider configured={false}>
@@ -309,6 +355,64 @@ describe('ConciergePanel', () => {
       const connect = screen.getByRole('button', { name: talkPage.labels.connect });
       expect(screen.getByRole('dialog')).toContainElement(connect);
       expect(connect).toHaveFocus();
+    });
+
+    it('a v2 memory body fills the strip and the Memory tab; Forget me is enabled', async () => {
+      const room = await goLive();
+      await act(() => pushText(room, 'concierge.memory', memoryV2Json));
+      const panel = screen.getByRole('dialog');
+      const strip = within(panel).getByRole('list', { name: talkPage.memoryView.strip });
+      expect(within(strip).getAllByRole('listitem').map((li) => li.querySelector('[data-count]')!.textContent)).toEqual([
+        '3',
+        '2',
+        '5',
+        '4',
+        '14',
+      ]);
+      const memory = within(panel).getByRole('tabpanel', { name: 'Memory' });
+      expect(within(memory).getByText('Lisbon')).toBeInTheDocument();
+      expect(within(memory).getByRole('button', { name: talkPage.labels.forgetMe })).toBeEnabled();
+    });
+
+    // P3-06 review: Forget me turns into the disabled one when the call ends; focus must not fall to <body>.
+    it('a call that ends with focus on Forget me hands focus to Connect in the panel', async () => {
+      const room = await goLive();
+      screen.getByRole('button', { name: talkPage.labels.forgetMe }).focus();
+      await act(async () => {
+        removeParticipant(room, 'agent-1');
+      });
+      await flush();
+      const connect = screen.getByRole('button', { name: talkPage.labels.connect });
+      expect(screen.getByRole('dialog')).toContainElement(connect);
+      expect(connect).toHaveFocus();
+    });
+
+    it('a call that ends during the confirm step hands focus to Connect in the panel', async () => {
+      const room = await goLive();
+      fireEvent.click(screen.getByRole('button', { name: talkPage.labels.forgetMe }));
+      expect(screen.getByRole('button', { name: talkPage.labels.cancel })).toHaveFocus();
+      await act(async () => {
+        removeParticipant(room, 'agent-1');
+      });
+      await flush();
+      expect(screen.queryByRole('button', { name: talkPage.labels.cancel })).toBeNull();
+      expect(screen.getByRole('button', { name: talkPage.labels.connect })).toHaveFocus();
+    });
+
+    it('Esc in the confirm step closes the step, not the panel', async () => {
+      await goLive();
+      fireEvent.click(screen.getByRole('button', { name: talkPage.labels.forgetMe }));
+      fireEvent.keyDown(screen.getByRole('button', { name: talkPage.labels.cancel }), { key: 'Escape' });
+      expect(dialog()).not.toBeNull();
+      expect(screen.queryByRole('button', { name: talkPage.labels.erase })).toBeNull();
+      expect(screen.getByRole('button', { name: talkPage.labels.forgetMe })).toHaveFocus();
+    });
+
+    it('with a v2 body the panel outline has no skipped level (h2 title, h2s, h3 sections, h4 kinds)', async () => {
+      const room = await goLive();
+      await act(() => pushText(room, 'concierge.memory', memoryV2Json));
+      const levels = [...screen.getByRole('dialog').querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h) => Number(h.tagName[1]));
+      expect(levels).toEqual([2, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4]);
     });
 
     it('Leave in the panel ends the call and keeps the panel open', async () => {
