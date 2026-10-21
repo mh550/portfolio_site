@@ -525,6 +525,9 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   `talkWidget.liveLabel`, "Live call with my concierge: back to it", and a red dot), so Leave and the mic toggle are
   one click away on every page; and a bfcache `pageshow` resets only a call that `pagehide` actually ended (an ended,
   offline or Forgotten state comes back as it was).
+  *As built (P3-10):* the provider makes its Room with `disconnectOnPageLeave: false`: LiveKit's own page-leave
+  listener fires on `beforeunload`, which a `mailto:` link raises without leaving; the provider's `pagehide` teardown
+  is the one page-leave path.
 - **D86** *default*: the concierge panel is a non-modal drawer (`role="dialog" aria-modal="false"`, labelled by its
   title): 420 px on the right at ≥ 1024 px, a full-height bottom sheet under the Navbar below that, `z-[45]`
   (Navbar `z-50`, pill `z-40`), rendered only while open, no focus trap, no `inert`, no scroll lock; Esc and
@@ -618,6 +621,9 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   Michael: `reason: 'visitor'` is the address bucket, not the visitor id, so on shared Wi-Fi a neighbour's call shows
   B "Closing your earlier conversation…" for a minute, then the "another tab" line; have the route compare the room's
   `visitor_id` and say `'self'`, or soften the copy ("Waiting for an earlier conversation on this network…")?
+  *As built (P3-10):* the 60 s deadline runs on `performance.now()`. Also accepted: a second tab's Connect while the
+  first is live reads the closing line for the minute before "another tab" (the route can't tell closing from live);
+  a cross-tab "live" flag in `localStorage` would skip it, part of the question above.
 - **D93** *default*: `talkPage.intro` becomes "A voice agent I designed on LiveKit and built with my agent harness.
   It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to
   the work it's talking about." ("my agent harness" still links `/projects/agent-harness`) and "Talk or type. The

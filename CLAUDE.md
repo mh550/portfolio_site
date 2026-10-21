@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1627 tests, 97 suites after P3-09)
+npm test             # Jest unit/integration tests (1629 tests, 97 suites after P3-10)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -107,7 +107,8 @@ Single source of truth for all page content — no content is hardcoded in compo
   `MessageBox` (keyed on `sessionCount`), then `MemoryStrip` + `PanelTabs` (beside it from lg); `sessionReducer.ts` the
   phases (a 429 `busy`/`site` is its own phase with the reason's line and no retry, D66; `busy`/`visitor` is `closing`, D92) (Jest mocks: see Testing)
 - `components/concierge/` — `ConciergeProvider.tsx` (`"use client"`, D85) owns the one call above the pages: the
-  reducer, the session ref, the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`; also in
+  reducer, the session ref, the one `Room` (made in the Connect handler, D45, after `import('livekit-client')`, with
+  `disconnectOnPageLeave: false` so only its own `pagehide` teardown ends a call; also in
   state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the actions (connect, leave,
   toggleMic, startAudio, sendMessage over lk.chat, forgetMe RPC), `pagehide` teardown and a bfcache `pageshow` reset;
   `useConcierge()` throws outside it; it also holds `panel` (`openPanel`, `minimizePanel`), `agentSpeaking` (from
@@ -134,11 +135,11 @@ Single source of truth for all page content — no content is hardcoded in compo
   `MemoryStrip.tsx` (five chips Profile · Episodes · Events · Knowledge · Working with counts from `stripCounts`, `–`
   titled "not reported by this agent version" from a v1 body; they wrap; a changed count pulses once, `motion-safe:`,
   kept in state by the previous-props pattern), `PanelTabs.tsx` (WAI-ARIA tabs Memory · Latency · Privacy, roving
-  tabindex, arrows/Home/End; `compact` caps the panel at 25 vh, 40 vh at lg); both callers put the strip and tabs in
-  a `section` under an `sr-only` h2 (`memoryView.heading`) and `MemoryView.tsx` (the Memory tab: About you
+  tabindex, arrows/Home/End; `compact` caps the panel at 25 vh, 40 vh at lg); `MemorySection.tsx` puts the strip and tabs in
+  a `section` under an `sr-only` h2 (`memoryView.heading`) for both callers, the drawer and `/talk`; and `MemoryView.tsx` (the Memory tab: About you
   and About the agent from a v2 body, the v1 fallback, Forget me always at its foot, disabled with "Connect to erase
   what it remembers" before a call). `CallControls.tsx` (the one Connect/Leave button, it keeps focus; the mic
-  toggle; Turn on sound; the status line), `status.ts` (`statusLine`, `forgetLine`), `buttons.ts`. Tests render
+  toggle; Turn on sound; the status line), `status.ts` (`statusLine`, `forgetLine`), `buttons.ts` (also Forget me's `quietSmall`, `danger`). Tests render
   `/talk` through `renderTalk()` in `src/__tests__/helpers/concierge.tsx`
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw; contract v2
   (v3 spec § 7, D95): `parseMemory` reads the optional v2 keys, left off a v1 body's result; `parseNavigate` for

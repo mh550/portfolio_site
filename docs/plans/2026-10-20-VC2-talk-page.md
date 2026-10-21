@@ -14,7 +14,7 @@ section before building on it.
 **As of P3** (v3 run, plan `docs/plans/2026-10-21-P3-concierge-in-site.md`, D85–D96). This plan records how `/talk`
 was first built; read it for the contract, the LiveKit calls and the state machine, but where it says TalkSession
 owns the Room, the handlers or the timers, `ConciergeProvider` (`src/components/concierge/`, mounted in `SiteChrome`)
-owns them now (D85), and `TalkSession.tsx` is a 42-line view over `useConcierge()`. Since then: the controls are
+owns them now (D85), and `TalkSession.tsx` is a 29-line view over `useConcierge()`. Since then: the controls are
 `CallControls`, `MemoryPanel` is gone (the memory strip, `PanelTabs` and `MemoryView`, D90), the reducer has a
 `closing` phase for a 429 busy/visitor (D92), contract v2 bodies parse alongside v1 (D95), the last memory is cached in
 `localStorage` (D91, D96) and the provider follows `concierge.navigate` (D94). The same call shows in the drawer the

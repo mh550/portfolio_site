@@ -300,7 +300,7 @@ The site accepts contract v1 and v2 bodies (D95), so it can merge before or afte
 - Changed (P3-02, D95): `contract.ts` reads contract v2 (`about_visitor`, `about_agent`, `retention_days`, the
   `concierge.navigate` topic); a v1 body parses as before. `memoryCache.ts` keeps the last body per visitor id.
 - Changed (P3-03, D85): the call lives in `ConciergeProvider` above every chrome page (not `/card*`), so it keeps
-  going across client navigations; `/talk`'s `TalkSession` is markup over `useConcierge()` (471 → 42 lines).
+  going across client navigations; `/talk`'s `TalkSession` is markup over `useConcierge()` (471 → 29 lines after P3-10).
 - Changed (P3-04, P3-05, D86–D89): the "Ask my site" pill on every chrome page but `/talk` opens a non-modal drawer
   (420 px right at `lg`, a bottom sheet below); a first-visit callout above it; Talk is off the Navbar (six links).
 - Changed (P3-06, D90): the memory strip (five chips with counts) and the Memory · Latency · Privacy tabs, in the
