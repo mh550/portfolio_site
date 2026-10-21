@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import Logo from '@/components/logos/Logo';
 import { logoPaths, type LogoKey } from '@/components/logos/paths';
 
 interface LogoEntry {
@@ -40,7 +41,7 @@ export default function FloatingLogos() {
   return (
     <div aria-hidden="true" className="absolute inset-0 hidden xl:block print:hidden pointer-events-none overflow-hidden">
       {logos.map((logo) => {
-        const { title, path } = logoPaths[logo.id];
+        const { title } = logoPaths[logo.id];
         return (
           // Outer div: continuous y float only (none with reduced motion)
           <motion.div
@@ -67,9 +68,7 @@ export default function FloatingLogos() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
             >
               <span className={`block ${ICON_SPAN}`}>
-                <svg role="img" viewBox="0 0 24 24" fill="currentColor" className="w-full h-full" aria-label={title}>
-                  <path d={path} />
-                </svg>
+                <Logo name={logo.id} className="w-full h-full" />
               </span>
             </motion.div>
           </motion.div>

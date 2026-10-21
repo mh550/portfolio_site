@@ -40,6 +40,14 @@ describe('FloatingLogos', () => {
     expect(container.querySelectorAll('svg')).toHaveLength(12);
   });
 
+  // One renderer for a mark (D78): each svg carries Logo's <title>, not an aria-label of its own
+  it('draws each mark with Logo (a <title> per svg)', () => {
+    const { container } = render(<FloatingLogos />);
+    const titles = [...container.querySelectorAll('svg > title')].map((t) => t.textContent);
+    expect(titles.sort()).toEqual([...LABELS].sort());
+    for (const svg of container.querySelectorAll('svg')) expect(svg).not.toHaveAttribute('aria-label');
+  });
+
   it('drops the old marks', () => {
     render(<FloatingLogos />);
     for (const label of ['Zapier', 'Supabase', 'Linear', 'Pipedream', 'React', 'Vercel', 'Claude']) {
