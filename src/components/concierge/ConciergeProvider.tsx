@@ -105,8 +105,14 @@ interface ConciergeActions {
   forgetMe: () => Promise<void>;
 }
 
+export type PanelState = 'closed' | 'open';
+
 export interface ConciergeValue extends ConciergeActions {
   state: SessionState;
+  // The drawer (D86): 'closed' on every first render. Opening and minimizing it never touch the call.
+  panel: PanelState;
+  openPanel: () => void;
+  minimizePanel: () => void;
   // The same Room as the session's, for RoomAudio during render (a ref can't be read in render).
   room: Room | null;
   // Connects so far: MessageBox is keyed on it, so each session starts with an empty box.
@@ -133,6 +139,11 @@ export default function ConciergeProvider({ configured, children }: { configured
   // Set and cleared with sessionRef's Room: made in connect(), gone on Leave, offline or a dropped call.
   const [room, setRoom] = useState<Room | null>(null);
   const [sessionCount, setSessionCount] = useState(0);
+  const [panel, setPanel] = useState<PanelState>('closed');
+  const panelActions = useMemo(
+    () => ({ openPanel: () => setPanel('open'), minimizePanel: () => setPanel('closed') }),
+    []
+  );
 
   // The actions only touch the session ref and stable setters, so they are made once (per `configured`) and a
   // consumer that only calls them doesn't depend on the transcript.
@@ -410,8 +421,8 @@ export default function ConciergeProvider({ configured, children }: { configured
   }, [leave]);
 
   const value = useMemo<ConciergeValue>(
-    () => ({ state, room, sessionCount, configured, ...actions }),
-    [state, room, sessionCount, configured, actions]
+    () => ({ state, room, sessionCount, configured, panel, ...actions, ...panelActions }),
+    [state, room, sessionCount, configured, panel, actions, panelActions]
   );
 
   return (

@@ -529,7 +529,18 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   title): 420 px on the right at ≥ 1024 px, a full-height bottom sheet under the Navbar below that, `z-[45]`
   (Navbar `z-50`, pill `z-40`), rendered only while open, no focus trap, no `inert`, no scroll lock; Esc and
   Minimize close it without ending the call; never on `/talk` or `/card*`. Supersedes nothing (new). Reversible:
-  drop `ConciergePanel` from `SiteChrome`. (Plan § Panel; P3-04 builds.)
+  drop `ConciergePanel` from `SiteChrome`. (Plan § Panel; P3-04 builds.) *As built (P3-04):* the provider holds
+  `panel` (`'closed'` on first render) with `openPanel`/`minimizePanel`; `ConciergePanel.tsx` renders the h2 title
+  (`tabIndex -1`, focused on open), Minimize, `CallControls`, the deep-dive link when offline or busy
+  (`DeepDiveLink.tsx`, shared with `/talk`) and `Transcript fill` (the log is the `flex-1` region) with `MessageBox`;
+  Esc closes unless a control already called `preventDefault` (the contract for P3-06's Forget me confirm step) or
+  the Esc ends an IME composition. `VoiceWidget` is a `<button aria-expanded>` (`aria-controls` only while open)
+  that toggles the panel, is `invisible` while it is open (the panel covers its corner at every width, so it leaves
+  the tab order) and takes focus back when the panel closes with focus on `<body>`; until P3-05's pill it keeps the
+  mic disc, and its live name is now "Live call with my concierge" (`aria-expanded` carries open/closed). An open
+  panel stays open across client-side navigation; reaching `/talk` closes it. "Read how it works" in the panel
+  closes it on click. The sheet scrolls on a short screen (the transcript section keeps a `min-h-52` floor), the
+  log has `overscroll-contain`.
 - **D87** *default*: the widget is the "Ask my site" pill: a `<button aria-expanded>` that toggles the panel, a
   three-bar sound glyph that moves only while the agent speaks (`motion-safe:`), a live dot and the accessible
   names "Ask my site: listening" / "Ask my site: speaking" during a call, collapsed to the glyph at ≤ 390 px once

@@ -93,10 +93,13 @@ export const latencyLabels = {
   columns: { label: 'Step', last: 'This turn', median: 'Median' },
 };
 
-// The floating link to /talk on every other chrome page (D61, VoiceWidget): the label is its accessible name.
+// The floating widget on every chrome page but /talk (D61, VoiceWidget): the label is its accessible name. Since
+// P3-04 it opens the concierge panel (D86); `href` is the page SiteChrome leaves both off.
 export const talkWidget = {
   label: 'Talk to my voice concierge',
-  // While a call is on (it outlives /talk, D85): the widget leads back to Leave and the mic toggle.
-  liveLabel: 'Live call with my concierge: back to it',
+  // While a call is on (it outlives every page, D85); aria-expanded says whether the panel, with Leave in it, is open.
+  liveLabel: 'Live call with my concierge',
+  panelTitle: 'Ask my site',
+  minimize: 'Minimize',
   href: '/talk',
 };

@@ -70,14 +70,14 @@ describe('SiteChrome', () => {
     const { queryByRole } = renderAt('/card');
     expect(queryByRole('link', { name: 'Skip to content' })).toBeNull();
   });
-  // VC4-03, D61: the floating link to /talk, last in the chrome, everywhere but /talk and /card*
-  const widget = () => screen.queryByRole('link', { name: 'Talk to my voice concierge' });
+  // VC4-03, D61: the floating widget, last in the chrome, everywhere but /talk and /card*; a button since P3-04 (D86)
+  const widget = () => screen.queryByRole('button', { name: 'Talk to my voice concierge' });
 
   it.each(['/', '/about', '/projects/agent-harness'])('%s: the voice widget comes after the Footer', (path) => {
     const { container } = renderAt(path);
     const link = widget();
     expect(link).not.toBeNull();
-    expect(link).toHaveAttribute('href', '/talk');
+    expect(link).toHaveAttribute('aria-expanded', 'false');
     const footer = container.querySelector('footer')!;
     expect(footer.compareDocumentPosition(link!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(footer).not.toContainElement(link);
@@ -127,7 +127,7 @@ describe('SiteChrome', () => {
   });
 
   // D85: a client-side navigation changes the pathname and the page under SiteChrome; the provider, and the call,
-  // stay. The widget on the next page shows the call is still on and leads back to Leave.
+  // stay. The widget on the next page shows the call is still on and opens the panel with Leave in it.
   describe('a live call across a navigation', () => {
     const realFetch = global.fetch;
     beforeEach(() => {
@@ -173,13 +173,13 @@ describe('SiteChrome', () => {
       );
       expect(room.disconnect).not.toHaveBeenCalled();
       expect(screen.getByTestId('concierge')).toHaveTextContent('live true');
-      expect(screen.getByRole('link', { name: talkWidget.liveLabel })).toHaveAttribute('href', '/talk');
+      expect(screen.getByRole('button', { name: talkWidget.liveLabel })).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('with no call the widget keeps its usual name', () => {
       renderAt('/about');
-      expect(screen.getByRole('link', { name: talkWidget.label })).toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: talkWidget.liveLabel })).toBeNull();
+      expect(screen.getByRole('button', { name: talkWidget.label })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: talkWidget.liveLabel })).toBeNull();
     });
   });
 });

@@ -17,8 +17,17 @@ export interface TranscriptLine {
 // Client only to keep the newest line in view: the log scrolls, so it is also focusable for keyboard scrolling.
 // While a line is still being spoken the log is aria-busy, so a screen reader reads it once it is final, not every
 // partial fragment over the agent's voice.
-// `children` is the message box, which sits under the log in the same section.
-export default function Transcript({ lines, children }: { lines: TranscriptLine[]; children?: ReactNode }) {
+// `children` is the message box, which sits under the log in the same section. `fill`: in the concierge panel the log
+// is the region that grows (flex-1) and scrolls, instead of /talk's fixed heights.
+export default function Transcript({
+  lines,
+  fill = false,
+  children,
+}: {
+  lines: TranscriptLine[];
+  fill?: boolean;
+  children?: ReactNode;
+}) {
   const logRef = useRef<HTMLDivElement>(null);
   // Follow new lines only while the reader is at the bottom; someone who scrolled up to reread stays put.
   const atBottom = useRef(true);
@@ -32,7 +41,11 @@ export default function Transcript({ lines, children }: { lines: TranscriptLine[
   };
 
   return (
-    <TalkPanel id="talk-transcript" heading={talkPage.headings.transcript}>
+    <TalkPanel
+      id="talk-transcript"
+      heading={talkPage.headings.transcript}
+      className={fill ? 'flex min-h-52 flex-1 flex-col p-4' : undefined}
+    >
       <div
         ref={logRef}
         role="log"
@@ -41,7 +54,7 @@ export default function Transcript({ lines, children }: { lines: TranscriptLine[
         onScroll={onScroll}
         aria-labelledby="talk-transcript"
         tabIndex={0}
-        className={`max-h-80 overflow-y-auto rounded-md border border-white/10 bg-[var(--color-background)] p-4 lg:h-[28rem] lg:max-h-none ${focusRing}`}
+        className={`${fill ? 'min-h-0 flex-1 overscroll-contain' : 'max-h-80 lg:h-[28rem] lg:max-h-none'} overflow-y-auto rounded-md border border-white/10 bg-[var(--color-background)] p-4 ${focusRing}`}
       >
         {lines.length === 0 ? (
           <p className="text-[var(--color-muted)]">{talkPage.empty.transcript}</p>

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { ReactElement } from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
@@ -85,19 +85,58 @@ describe('the site chrome around those pages', () => {
     expect(missing).toEqual([]);
   });
 
-  // VC4-03: the voice widget is one more link, not a landmark or a heading
+  // VC4-03: the voice widget is one more control, not a landmark or a heading (a button since P3-04, D86)
   it('adds the voice widget without a landmark or a heading', () => {
     const { container, getByRole, queryAllByRole } = render(
       <SiteChrome>
         <p>page</p>
       </SiteChrome>
     );
-    expect(getByRole('link', { name: 'Talk to my voice concierge' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Talk to my voice concierge' })).toBeInTheDocument();
     expect(queryAllByRole('navigation')).toHaveLength(1);
     expect(queryAllByRole('contentinfo')).toHaveLength(1);
     expect(queryAllByRole('region')).toHaveLength(0);
     expect(queryAllByRole('complementary')).toHaveLength(0);
     expect(headingLevels(container)).toEqual([]);
+  });
+});
+
+// P3-04, D86: the concierge panel, opened from the widget over a page
+describe('the concierge panel, open', () => {
+  const openPanel = () => {
+    const result = render(
+      <SiteChrome>
+        <h1>page</h1>
+      </SiteChrome>
+    );
+    fireEvent.click(result.getByRole('button', { name: 'Talk to my voice concierge' }));
+    return result;
+  };
+
+  it('is one dialog, named, not modal', () => {
+    const { getAllByRole } = openPanel();
+    const dialogs = getAllByRole('dialog');
+    expect(dialogs).toHaveLength(1);
+    expect(dialogs[0]).toHaveAttribute('aria-modal', 'false');
+    expect(dialogs[0]).toHaveAccessibleName('Ask my site');
+  });
+
+  it('gives every link and button, the panel\'s included, a focus-visible style', () => {
+    const { container, getByRole } = openPanel();
+    const panelControls = interactive(getByRole('dialog'));
+    expect(panelControls.length).toBeGreaterThanOrEqual(4);
+    const missing = interactive(container)
+      .filter((el) => !/\bfocus-visible:outline/.test(el.getAttribute('class') ?? ''))
+      .map((el) => `<${el.tagName.toLowerCase()}> ${accessibleName(el)}`);
+    expect(missing).toEqual([]);
+  });
+
+  it('keeps the outline: one h1, no skipped heading level', () => {
+    const levels = headingLevels(openPanel().container);
+    expect(levels.filter((l) => l === 1)).toHaveLength(1);
+    levels.forEach((level, i) => {
+      if (i > 0) expect(level).toBeLessThanOrEqual(levels[i - 1] + 1);
+    });
   });
 });
 

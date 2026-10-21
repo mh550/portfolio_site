@@ -165,6 +165,12 @@ Also in P3-02:
 
 `src/components/concierge/ConciergePanel.tsx` (`'use client'`, P3-04; the strip and tabs come in P3-06).
 
+*Built in P3-04* as below (D86 *As built*), plus: offline or busy shows "Read how it works" under the controls
+(`DeepDiveLink.tsx`, the same link `/talk` shows; in the panel its click minimizes); the transcript is `Transcript
+fill`; the sheet adds the safe-area inset at its bottom and scrolls on a short screen. Esc: inner handlers that own
+an Esc call `preventDefault` (not `stopPropagation`); an IME composition's Esc is ignored. The widget is `invisible`
+while the panel is open, and reaching `/talk` closes the panel. The Footer padding change waits for the pill (P3-05).
+
 At ≥ 1024 px (`lg`), a 420 px drawer on the right, from under the Navbar to the bottom of the viewport:
 
 ```

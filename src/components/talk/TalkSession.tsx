@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { talkPage } from '@/lib/data/concierge';
-import { focusRing } from '@/components/focusRing';
 import CallControls from '@/components/concierge/CallControls';
 import { useConcierge } from '@/components/concierge/ConciergeProvider';
+import DeepDiveLink from '@/components/concierge/DeepDiveLink';
 import { forgetLine } from '@/components/concierge/status';
 import ForgetMeButton from './ForgetMeButton';
 import LatencyPanel from './LatencyPanel';
@@ -22,16 +20,7 @@ export default function TalkSession() {
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
       <div className="space-y-6">
         <CallControls />
-        {(phase === 'offline' || phase === 'busy') && (
-          <p>
-            <Link
-              href={talkPage.deepDiveHref}
-              className={`text-[var(--color-accent)] underline underline-offset-4 hover:decoration-2 ${focusRing}`}
-            >
-              {talkPage.deepDiveLabel}
-            </Link>
-          </p>
-        )}
+        <DeepDiveLink phase={phase} />
         <Transcript lines={state.lines}>
           <MessageBox key={sessionCount} disabled={phase !== 'live'} onSend={sendMessage} />
         </Transcript>
