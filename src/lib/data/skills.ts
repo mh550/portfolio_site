@@ -179,17 +179,5 @@ export const edges: SkillEdge[] = [
   ),
 ];
 
-/** The slug of a `project:<slug>` edge end, or null for a node id. */
-export function projectSlug(to: EdgeTo): string | null {
-  return to.startsWith('project:') ? to.slice('project:'.length) : null;
-}
-
-/** The slugs of the projects a node is linked to, in edge order. */
-export function projectsOf(list: SkillEdge[], nodeId: string): string[] {
-  return list.flatMap((e) => (e.from === nodeId ? (projectSlug(e.to) ?? []) : []));
-}
-
-/** The node ids a project is linked to, in edge order. */
-export function nodesOf(list: SkillEdge[], slug: string): string[] {
-  return list.filter((e) => e.to === `project:${slug}`).map((e) => e.from);
-}
+// The edge helpers live with the graph math (data-free), so SkillGraph's bundle doesn't carry these arrays twice
+export { projectSlug, projectsOf, nodesOf } from '@/lib/graph/edges';

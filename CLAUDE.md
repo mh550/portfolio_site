@@ -17,7 +17,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 |---|---|
 | `/` | Hero: eyebrow `profile.positioning` ("Agentic Systems Engineer", D76), tagline, subline, the loop strip (`MethodStrip`, `loopSteps` Spec → Learn, D77), twelve FloatingLogos at `xl` (D78); then Recent work (`getTopProjects(3)`) |
 | `/about` | About: `aboutIntro` (the v3 subline + the five loop labels), the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
-| `/skills` | Skills & Tech Stack |
+| `/skills` | Tech Stack as a graph (P5-03): `SkillGraph` draws `skills.ts` (six cluster containers, node links `#skill-<id>`, intra-cluster edges; a node's cross-cluster edges on hover/focus) and a List view toggle (`#skill-list`, a `dl` per cluster, also the print view); pan/zoom and project chips land in P5-04/P5-05 |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
 | `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1777 tests, 99 suites after P5-02)
+npm test             # Jest unit/integration tests (1807 tests, 100 suites after P5-03)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -152,6 +152,11 @@ Single source of truth for all page content — no content is hardcoded in compo
   rects and node points, 3 columns from 1024 px, else 2; `labelLines`, `curvePath`, `edgePaths`, `projectChain`,
   `clusterAt`) and the view math (`view.ts`: `clampView`, `zoomAt`, `panBy`, `fitCluster`, `fitAll`, `centerOn`,
   `clientToDrawing`, `contains`, `viewBoxFor`, `wheelFactor`); no d3-force (D99); tests in `graph-math.test.ts`
+- `components/skills/SkillGraph.tsx` — the /skills graph (`"use client"`, D98–D103): `useSyncExternalStore` over two
+  `matchMedia` queries (server snapshot `'wide'`) picks 3 or 2 columns for `layoutGraph`; the svg is `role="none"`
+  inside the one `role="group"` named by its `<title>`; a node click opens the list view and focuses its `dt`; takes
+  `projects` as `GraphProject` (short titles) built in `app/skills/page.tsx`, and imports only types from `@/lib/data` (the
+  edge helpers `projectSlug`/`projectsOf`/`nodesOf` live in `lib/graph/edges.ts`, re-exported by `skills.ts`), so its bundle carries no data module
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

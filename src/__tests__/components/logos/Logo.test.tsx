@@ -48,6 +48,20 @@ describe('Logo with an authored mark', () => {
     expect(container.querySelector('path')).not.toHaveAttribute('fill-rule');
   });
 
+  it('places itself inside an outer svg with x, y and size (the /skills graph), and sets none of them by default', () => {
+    const { container } = render(
+      <svg>
+        <Logo name="python" decorative x={10} y={20} size={28} />
+      </svg>,
+    );
+    const mark = container.querySelector('svg svg')!;
+    expect([mark.getAttribute('x'), mark.getAttribute('y')]).toEqual(['10', '20']);
+    expect([mark.getAttribute('width'), mark.getAttribute('height')]).toEqual(['28', '28']);
+
+    const plain = render(<Logo name="python" />).container.querySelector('svg')!;
+    for (const attr of ['x', 'y', 'width', 'height']) expect(plain).not.toHaveAttribute(attr);
+  });
+
   it('keeps extra.ts keys apart from the generated ones', () => {
     for (const key of Object.keys(extraPaths)) expect(Object.keys(logoPaths)).not.toContain(key);
   });

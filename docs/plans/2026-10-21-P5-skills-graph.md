@@ -389,6 +389,23 @@ holding the last snapshot, compared during render), not an effect. The list view
 grep). The list
 view and print never depend on it.
 
+**Built in P5-03** (deviations from the above): the paint order needs every container under every edge and every
+edge under every node, so a cluster is two `g`s: an `aria-hidden` `g[data-cluster-box]` (rect + title) in the first
+layer, and the `g[data-cluster] role="group" aria-label` holding its node links in the last; edges sit between them.
+Each node link holds a transparent cell rect (its hit area and the box its `focusRing` outline draws around). Until
+P5-04 the first view is `fitAll` at every width (2 columns below 1024, the whole drawing at 390); the narrow
+`fitCluster` start, the container's `tabIndex`, the help line and `aria-describedby` come with pan and zoom. A
+`hashchange` to `#skill-<id>` opens the list like a load with it. The intro and metadata leave out "pick a project"
+until P5-05 builds the chips. `Logo` takes `x`, `y` and `size` to place a mark inside the graph's svg.
+An Opus review of P5-03 (1 Important, 12 Minor) led to: the row to focus is state (`rowRequest`), cleared by the toggle,
+so a hashchange with the list open moves focus and a stale row never steals it; each node has its own `<title>`
+tooltip and a labelled edge its label; the cell rect also draws the focus ring (`group-focus-visible:stroke`: Chrome
+shows it inside the outline, WebKit may draw only this one); a modified click is left to the browser; the hash is
+compared undecoded (no `URIError`); a click or the toggle clears the hover; a `dt` reached by script shows a
+`focus:` outline; `projectSlug`/`projectsOf`/`nodesOf` moved to `src/lib/graph/edges.ts` (re-exported by `skills.ts`)
+so the component imports only types from `@/lib/data`. Left for P5-05: a next/link to `#skill-<id>` uses pushState
+(no `hashchange`); use a plain `<a>` or listen for it.
+
 ## Interaction
 
 | Input | Where | What happens | Never |
