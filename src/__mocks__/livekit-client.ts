@@ -57,7 +57,13 @@ export class Room {
   textHandlers = new Map<string, TextHandler>();
   private listeners = new Map<string, Set<Listener>>();
 
-  constructor() {
+  // Like the real one, a Room made without `disconnectOnPageLeave: false` disconnects itself on `beforeunload`
+  // (livekit-client listens for it and `pagehide` once connected).
+  options: { disconnectOnPageLeave?: boolean };
+  private onPageLeave = () => void this.disconnect();
+
+  constructor(options: { disconnectOnPageLeave?: boolean } = {}) {
+    this.options = options;
     Room.instances.push(this);
     Room.setup?.(this);
   }
@@ -84,12 +90,14 @@ export class Room {
 
   connect = jest.fn<(url: string, token: string) => Promise<void>>(async () => {
     this.state = ConnectionState.Connected;
+    if (this.options.disconnectOnPageLeave !== false) window.addEventListener('beforeunload', this.onPageLeave);
   });
 
   // Like the real one, a room already disconnected emits nothing.
   disconnect = jest.fn(async () => {
     if (this.state === ConnectionState.Disconnected) return;
     this.state = ConnectionState.Disconnected;
+    window.removeEventListener('beforeunload', this.onPageLeave);
     this.emit(RoomEvent.Disconnected);
   });
 

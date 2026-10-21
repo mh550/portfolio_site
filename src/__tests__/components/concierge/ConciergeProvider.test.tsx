@@ -161,6 +161,18 @@ describe('ConciergeProvider: ending the call', () => {
     expect(room.textHandlers.size).toBe(0);
   });
 
+  // P3-10 review: LiveKit's own page-leave disconnect fires on `beforeunload`, which a mailto: link (the Footer's)
+  // raises in some browsers without leaving the page; the provider's pagehide teardown covers real leaves.
+  it('a beforeunload that does not leave the page keeps the call live', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => {
+      window.dispatchEvent(new Event('beforeunload'));
+    });
+    expect(room.disconnect).not.toHaveBeenCalled();
+    expect(phase()).toBe('live');
+  });
+
   it('pagehide with no call does nothing', () => {
     renderProbe();
     expect(() => window.dispatchEvent(new Event('pagehide'))).not.toThrow();

@@ -434,7 +434,9 @@ export default function ConciergeProvider({
       const { ConnectionState, ParticipantKind, RoomEvent } = lk;
       const isAgent = (p: Pick<RemoteParticipant, 'kind'>) => p.kind === ParticipantKind.AGENT;
 
-      const room = new lk.Room();
+      // Not LiveKit's own page-leave disconnect: it fires on beforeunload, which a mailto: link raises without leaving
+      // the page (and it keeps Firefox's bfcache away). The provider's own pagehide teardown covers real leaves.
+      const room = new lk.Room({ disconnectOnPageLeave: false });
       session.room = room;
       setRoom(room);
 
