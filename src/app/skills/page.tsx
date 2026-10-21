@@ -5,7 +5,8 @@ import SkillGraph, { type GraphProject } from '@/components/skills/SkillGraph';
 
 export const metadata: Metadata = {
   title: 'Skills — Michael Herron',
-  description: 'The stack behind the agentic systems, integrations and apps I build, as a graph grouped by what it is for.',
+  description:
+    'The stack behind the agentic systems, integrations and apps I build, as a graph: pick a project to see what it used.',
 };
 
 // Short titles on the server, so SkillGraph's bundle never imports projects.ts
@@ -16,7 +17,7 @@ const graphProjects: GraphProject[] = projects.map(({ slug, title, featured, ord
   order,
 }));
 
-// The stack as a graph (P5-03); the featured Differentiator block went with D98
+// The stack as a graph (P5-03) with project chips (P5-05); the featured Differentiator block went with D98
 export default function SkillsPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
@@ -28,7 +29,7 @@ export default function SkillsPage() {
           Tech Stack
         </h1>
         <p className="text-[var(--color-muted)] text-lg mb-10 max-w-xl">
-          What I build with, grouped by what it&apos;s for.
+          What I build with, grouped by what it&apos;s for. Pick a project to see the parts it used.
         </p>
       </ScrollReveal>
 

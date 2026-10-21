@@ -2,9 +2,11 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import SkillGraph, { type GraphProject } from '@/components/skills/SkillGraph';
 import { clusters, edges, nodes } from '@/lib/data/skills';
 import { projects as allProjects } from '@/lib/data/projects';
-import { clusterAt, edgePaths, layoutGraph, NARROW_ASPECT } from '@/lib/graph/layout';
+import { clusterAt, curvePath, edgePaths, layoutGraph, NARROW_ASPECT, projectChain } from '@/lib/graph/layout';
+import { nodesOf } from '@/lib/graph/edges';
 import {
   centerOn,
+  contains,
   fitAll,
   fitCluster,
   PAN_STEP,
@@ -804,5 +806,253 @@ describe('SkillGraph: its bundle (review #12)', () => {
     const dataImports = src.split('\n').filter((l) => /^import .*from '@\/lib\/data/.test(l));
     expect(dataImports.length).toBeGreaterThan(0);
     dataImports.forEach((l) => expect(l).toMatch(/^import type /));
+  });
+});
+
+describe('SkillGraph: project chips (P5-05)', () => {
+  const featured = [...projects].filter((p) => p.featured).sort((a, b) => a.order - b.order);
+  const chipRow = () => screen.getByRole('group', { name: "Highlight a project's stack" });
+  const chip = (name: string) => within(chipRow()).getByRole('button', { name });
+  const nodeLinks = (c: HTMLElement) => Array.from(c.querySelectorAll('a[data-node]'));
+  const activeIds = (c: HTMLElement) =>
+    nodeLinks(c)
+      .filter((a) => a.getAttribute('data-active') === 'true')
+      .map((a) => a.getAttribute('data-node'));
+  const harness = nodesOf(edges, 'agent-harness');
+  const chainCross = (slug: string) =>
+    projectChain(wide, nodesOf(edges, slug)).filter(([a, b]) => wide.nodes[a].cluster !== wide.nodes[b].cluster);
+  const live = () => document.querySelector('[aria-live="polite"]')!;
+
+  it('has a chip per featured project, in order, each aria-pressed false; the row never prints', () => {
+    renderGraph();
+    const chips = within(chipRow()).getAllByRole('button');
+    expect(chips.map((b) => b.textContent)).toEqual(featured.map((p) => p.title));
+    expect(chips[0]).toHaveTextContent('Agent Harness');
+    chips.forEach((b) => expect(b).toHaveAttribute('aria-pressed', 'false'));
+    expect(chipRow()).toHaveClass('overflow-x-auto');
+    expect(chipRow().parentElement).toHaveClass('print:hidden');
+  });
+
+  it('sits above the graph and the zoom controls', () => {
+    renderGraph();
+    const follows = (a: Element, b: Element) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(chipRow(), button('Zoom in'))).toBe(true);
+    expect(follows(chipRow(), graph())).toBe(true);
+  });
+
+  it("selecting one marks its nodes data-active and dims every other node and edge", () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'true');
+    expect(activeIds(container).sort()).toEqual([...harness].sort());
+    expect(harness.length).toBeGreaterThanOrEqual(3);
+    for (const a of nodeLinks(container)) {
+      const on = harness.includes(a.getAttribute('data-node')!);
+      expect(a.getAttribute('data-active')).toBe(on ? 'true' : null);
+      expect(a.getAttribute('data-dim')).toBe(on ? null : 'true');
+    }
+    // an intra edge is the project's when both its ends are; every other edge is dimmed
+    for (const e of intra) {
+      const path = Array.from(svg(container).querySelectorAll('path[data-edge]:not([data-cross])')).find(
+        (p) => p.getAttribute('d') === e.d,
+      )!;
+      const on = harness.includes(e.from) && harness.includes(e.to);
+      expect(path.getAttribute('data-active')).toBe(on ? 'true' : null);
+      expect(path.getAttribute('data-dim')).toBe(on ? null : 'true');
+    }
+  });
+
+  it("draws the project's cross-cluster chain as data-active paths", () => {
+    const { container } = renderGraph();
+    expect(svg(container).querySelectorAll('path[data-cross]')).toHaveLength(0);
+    fireEvent.click(chip('Agent Harness'));
+    const drawn = Array.from(svg(container).querySelectorAll('path[data-cross][data-active="true"]'));
+    const want = chainCross('agent-harness');
+    expect(want.length).toBeGreaterThan(0);
+    expect(drawn.map((p) => p.getAttribute('d'))).toEqual(want.map(([a, b]) => curvePath(wide.nodes[a], wide.nodes[b])));
+  });
+
+  it('shows "<title> · N skills" and an Open case study link, and announces it politely', () => {
+    renderGraph();
+    expect(screen.queryByRole('link', { name: 'Open case study' })).toBeNull();
+    expect(live()).toHaveClass('sr-only');
+    expect(live().textContent).toBe('');
+    fireEvent.click(chip('Agent Harness'));
+    expect(screen.getByRole('link', { name: 'Open case study' })).toHaveAttribute('href', '/projects/agent-harness');
+    expect(screen.getByText(`Agent Harness · ${harness.length} skills`)).toBeInTheDocument();
+    expect(live().textContent).toBe(`Agent Harness: ${harness.length} skills highlighted.`);
+  });
+
+  it('a second click on the chip clears everything; another chip switches', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    fireEvent.click(chip('Voice Concierge'));
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'false');
+    expect(chip('Voice Concierge')).toHaveAttribute('aria-pressed', 'true');
+    expect(activeIds(container).sort()).toEqual([...nodesOf(edges, 'voice-concierge')].sort());
+    expect(screen.getByRole('link', { name: 'Open case study' })).toHaveAttribute('href', '/projects/voice-concierge');
+
+    fireEvent.click(chip('Voice Concierge'));
+    expect(chip('Voice Concierge')).toHaveAttribute('aria-pressed', 'false');
+    expect(container.querySelectorAll('[data-active], [data-dim]')).toHaveLength(0);
+    expect(svg(container).querySelectorAll('path[data-cross]')).toHaveLength(0);
+    expect(screen.queryByRole('link', { name: 'Open case study' })).toBeNull();
+    expect(live().textContent).toBe('Highlight cleared.');
+  });
+
+  it('Esc clears the selection (prevented); with nothing selected it passes through', () => {
+    const { container } = renderGraph();
+    const a = container.querySelector('a[data-node="python"]')!;
+    expect(fireEvent.keyDown(a, { key: 'Escape' })).toBe(true);
+
+    fireEvent.click(chip('Agent Harness'));
+    fireEvent.focus(a);
+    expect(fireEvent.keyDown(a, { key: 'Escape' })).toBe(false);
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'false');
+    expect(container.querySelectorAll('[data-active], [data-dim], [data-hover]')).toHaveLength(0);
+
+    // from a chip too
+    fireEvent.click(chip('HitList'));
+    expect(fireEvent.keyDown(chip('HitList'), { key: 'Escape' })).toBe(false);
+    expect(chip('HitList')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('in the list view Esc is not the graph\'s: it passes through and the selection stays (review #2)', () => {
+    renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    fireEvent.click(listToggle());
+    expect(fireEvent.keyDown(document.getElementById('skill-python')!, { key: 'Escape' })).toBe(true);
+    fireEvent.click(listToggle());
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('announces a switch and a clear, not only a selection (review #3)', () => {
+    renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    fireEvent.click(chip('Voice Concierge'));
+    expect(live().textContent).toBe(`Voice Concierge: ${nodesOf(edges, 'voice-concierge').length} skills highlighted.`);
+    fireEvent.keyDown(chip('Voice Concierge'), { key: 'Escape' });
+    expect(live().textContent).toBe('Highlight cleared.');
+    fireEvent.click(chip('Agent Harness'));
+    expect(live().textContent).toBe(`Agent Harness: ${harness.length} skills highlighted.`);
+  });
+
+  it('says "1 skill" for a project with one node (review #5)', () => {
+    const one = [{ slug: 'solo', title: 'Solo', featured: true, order: 1 }];
+    render(
+      <SkillGraph clusters={clusters} nodes={nodes} edges={[...edges, { from: 'python', to: 'project:solo' }]} projects={one} />,
+    );
+    fireEvent.click(chip('Solo'));
+    expect(screen.getByText('Solo · 1 skill')).toBeInTheDocument();
+    expect(live().textContent).toBe('Solo: 1 skill highlighted.');
+  });
+
+  it('a hover with a project selected adds the node\'s cross edges and keeps the selection', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    const before = activeIds(container);
+    const a = container.querySelector(`a[data-node="${hub.id}"]`)!;
+    fireEvent.mouseEnter(a);
+    expect(a).toHaveAttribute('data-hover', 'true');
+    expect(svg(container).querySelectorAll('path[data-cross][data-hover="true"]')).toHaveLength(crossOf(hub.id).length);
+    expect(activeIds(container)).toEqual(before);
+    fireEvent.mouseLeave(a);
+    expect(svg(container).querySelectorAll('path[data-cross][data-hover="true"]')).toHaveLength(0);
+    expect(activeIds(container)).toEqual(before);
+    expect(svg(container).querySelectorAll('path[data-cross][data-active="true"]')).toHaveLength(
+      chainCross('agent-harness').length,
+    );
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('a dimmed node shows at full opacity while hovered or focused', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    const dimmed = nodeLinks(container).find((a) => a.getAttribute('data-dim') === 'true')!;
+    expect(dimmed.getAttribute('class')).toMatch(/(^| )opacity-25( |$)/);
+    expect(dimmed.getAttribute('class')).toMatch(/focus-visible:opacity-100/);
+    fireEvent.mouseEnter(dimmed);
+    expect(dimmed).toHaveAttribute('data-dim', 'true');
+    expect(dimmed.getAttribute('class')).not.toMatch(/(^| )opacity-25( |$)/);
+    fireEvent.mouseLeave(dimmed);
+    // keyboard focus sets the hover too, so the class goes the same way
+    fireEvent.focus(dimmed);
+    expect(dimmed).toHaveAttribute('data-dim', 'true');
+    expect(dimmed.getAttribute('class')).not.toMatch(/(^| )opacity-25( |$)/);
+  });
+
+  it('fades highlight changes only under motion-safe: (no bare transition on nodes or edges)', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    const els = [...nodeLinks(container), ...Array.from(svg(container).querySelectorAll('path'))];
+    for (const el of els) {
+      const classes = (el.getAttribute('class') ?? '').split(/\s+/);
+      expect(classes.filter((c) => /transition/.test(c) && !c.startsWith('motion-safe:'))).toEqual([]);
+    }
+    expect(nodeLinks(container)[0].getAttribute('class')).toMatch(/motion-safe:transition-opacity/);
+  });
+
+  it('the chips leave with the zoom controls while the list view is on, and the selection comes back', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('Agent Harness'));
+    fireEvent.click(listToggle());
+    expect(screen.queryByRole('group', { name: "Highlight a project's stack" })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Open case study' })).toBeNull();
+    fireEvent.click(listToggle());
+    expect(chip('Agent Harness')).toHaveAttribute('aria-pressed', 'true');
+    expect(activeIds(container).length).toBe(harness.length);
+  });
+
+  it('never moves the view from 640 px up', () => {
+    const { container } = renderGraph();
+    fireEvent.click(chip('React Native Paint Estimator'));
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+  });
+});
+
+describe('SkillGraph: project chips below 640 px (P5-05)', () => {
+  useViewportMock();
+  const first = fitCluster(narrow, 'agentic', NARROW_ASPECT);
+  const chip = (name: string) =>
+    within(screen.getByRole('group', { name: "Highlight a project's stack" })).getByRole('button', { name });
+  const inView = (v: View, slug: string) => nodesOf(edges, slug).some((id) => contains(v, narrow.nodes[id]));
+
+  it("moves the view to the chain's first cluster when none of the project's nodes is in view", () => {
+    width = 390;
+    const { container } = renderGraph();
+    // home-media-server: none of its nodes is in the agentic cluster
+    expect(inView(first, 'home-media-server')).toBe(false);
+    fireEvent.click(chip('Self-hosted music library & DJ crate pipeline'));
+    const [head] = projectChain(narrow, nodesOf(edges, 'home-media-server'))[0];
+    const want = fitCluster(narrow, narrow.nodes[head].cluster, first.h / first.w);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(want));
+    expect(inView(want, 'home-media-server')).toBe(true);
+  });
+
+  it('leaves the view alone when one of its nodes is already in view', () => {
+    width = 390;
+    const { container } = renderGraph();
+    expect(inView(first, 'agent-harness')).toBe(true);
+    fireEvent.click(chip('Agent Harness'));
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(first));
+  });
+
+  it('counts a node as in view only when its whole cell is, as Tab does (review #4)', () => {
+    width = 390;
+    const p = narrow.nodes['python'];
+    const py = [{ slug: 'py', title: 'Py', featured: true, order: 1 }];
+    const { container } = render(
+      <SkillGraph clusters={clusters} nodes={nodes} edges={[...edges, { from: 'python', to: 'project:py' }]} projects={py} />,
+    );
+    // ArrowRight until python's centre is inside the view but its cell is still cut off at the right edge
+    let at = first;
+    while (!contains(at, p)) {
+      fireEvent.keyDown(graph(), { key: 'ArrowRight' });
+      at = panBy(at, PAN_STEP * at.w, 0, narrowBounds);
+    }
+    expect(contains(at, { x: p.box.x + p.box.w, y: p.box.y + p.box.h })).toBe(false);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(at));
+    fireEvent.click(chip('Py'));
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(fitCluster(narrow, p.cluster, at.h / at.w)));
   });
 });

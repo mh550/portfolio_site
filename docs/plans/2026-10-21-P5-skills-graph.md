@@ -442,6 +442,27 @@ hydration switches to the narrow one (a jump of about 77 px at 390, by design si
 | List view toggle | toolbar | shows the list, hides the graph (and back); focus stays on the toggle | |
 | Reduced motion | everywhere | the same: view changes are instant anyway; highlight fades are `motion-safe:` only | no animated viewBox |
 
+**Built** (P5-03 drew the hover, P5-04 the pan and zoom, P5-05 the project chips): every row above holds. P5-05's
+deviations: the chip row (`role="group"` "Highlight a project's stack", short titles, featured projects with an edge,
+in `order`) scrolls in its row below `sm` and wraps from it, and leaves the DOM with the zoom controls while the list
+view is on; the selection stays in state, so it comes back with the graph. Only the chain's **cross-cluster** pairs
+are drawn as new paths (`data-cross data-active`); an intra edge whose ends are both the project's turns accent and
+`data-active`, every other edge `data-dim`. A dimmed node is back at full opacity while hovered as well as on
+keyboard focus (its `opacity-25` class leaves while it is the hover; `focus-visible:opacity-100` covers a focus the
+mouse has left). The visible line is "<title> · N skills · Open case study"; the `sr-only` `aria-live="polite"`
+status, always in the DOM so it is announced, reads "<title>: N skills highlighted." Reset view keeps the selection.
+Esc is handled on the section's wrapper `div`, so it works from a chip, the toolbar or a node, but not from the list
+view (where the selection isn't shown: it passes through there).
+An Opus review of P5-05 (0 Critical, 0 Important, 10 Minor) led to, test-first: Esc from the list view passes through
+and keeps the selection; a clear is announced ("Highlight cleared."); a chip below 640 counts a node in view only
+when its whole cell is (`inView`, shared with Tab's `reveal`); "1 skill" singular; one `partOf` drives a node's and an
+edge's attributes and classes; one `print:hidden`. Left, with reasons: Safari doesn't focus a clicked button, so
+there Esc after a mouse click on a chip reaches `body` and does nothing (the second click clears; a `document`
+listener would also clear on an Esc meant for the concierge panel); "Open case study" is the feature's wording though
+four featured projects have the classic page; hover paths under a selection carry `data-hover` only (a hover adds,
+it doesn't join the selection); at 390 the longest chip ("Self-hosted music library & DJ crate pipeline") nearly
+fills the scrolling row, and the chips' own `transition-colors` predates P5-05: both for P5-07's look.
+
 ## Accessibility and list view
 
 - Every node is an `<a>` with `aria-label` = its full name and `href="#skill-<id>"`, its row in the list view (D101):

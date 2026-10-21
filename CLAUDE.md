@@ -17,7 +17,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 |---|---|
 | `/` | Hero: eyebrow `profile.positioning` ("Agentic Systems Engineer", D76), tagline, subline, the loop strip (`MethodStrip`, `loopSteps` Spec → Learn, D77), twelve FloatingLogos at `xl` (D78); then Recent work (`getTopProjects(3)`) |
 | `/about` | About: `aboutIntro` (the v3 subline + the five loop labels), the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
-| `/skills` | Tech Stack as a graph (P5-03): `SkillGraph` draws `skills.ts` (six cluster containers, node links `#skill-<id>`, intra-cluster edges; a node's cross-cluster edges on hover/focus) and a List view toggle (`#skill-list`, a `dl` per cluster, also the print view); pan and zoom (P5-04: Zoom in/out/Reset, arrows, `+`/`-`/`0`, drag, a wheel only with focus inside or Ctrl/⌘, D100); below 640 px it starts on the first cluster with a "Jump to a group" chip row (D102); project chips land in P5-05 |
+| `/skills` | Tech Stack as a graph (P5-03): `SkillGraph` draws `skills.ts` (six cluster containers, node links `#skill-<id>`, intra-cluster edges; a node's cross-cluster edges on hover/focus) and a List view toggle (`#skill-list`, a `dl` per cluster, also the print view); pan and zoom (P5-04: Zoom in/out/Reset, arrows, `+`/`-`/`0`, drag, a wheel only with focus inside or Ctrl/⌘, D100); below 640 px it starts on the first cluster with a "Jump to a group" chip row (D102); a chip per featured project above it (P5-05: its nodes `data-active`, the rest `data-dim`, its cross-cluster chain drawn, "Open case study"; a second click or Esc clears) |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
 | `/projects/voice-concierge` | The concierge deep-dive: case study, no metrics until measured (`docs/notes/voice-concierge-todo.md`), `architectureDiagram: 'voice-concierge'` (`diagrams/index.tsx`); linked from `/card` and `/talk` |
@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1837 tests, 100 suites after P5-04)
+npm test             # Jest unit/integration tests (1856 tests, 100 suites after P5-05)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -72,7 +72,8 @@ Single source of truth for all page content — no content is hardcoded in compo
 - `projects.ts` — `Project[]` with slug, title, categories, techStack, detail sections; `getProjectBySlug()`, `getProjectsByCategory()`
 - `skills.ts` — the /skills graph (D98): six `clusters` (Agentic systems → Process & delivery, layout order), 51
   `nodes` (`weight` 1–3, optional `logo` key of `logoPaths` and `since`) and `edges` (node ↔ node, or node →
-  `project:<slug>`); `skillCategories` and D20's featured group are gone; `skills-data.test.ts` holds the § 8 names
+  `project:<slug>`, which feed /skills's project chips and its list view's "Used in"); `skillCategories` and D20's
+  featured group are gone; `skills-data.test.ts` holds the § 8 names
 - `experience.ts` — resume v4 line for line: `Bullet` (a string, or `{ text, links }` spans; `bulletText`), `roles` (MAXX, Builder Clarity), `resumeProjects` (two bullets each, D84), `earlierRoles` (D82) and `education`
 - `profile.ts` — `profile`: name, positioning, contact, `availability` (/contact, D97) and `siteUrl`; the single source for the vCard, `/card`, metadata and sitemap
 - `approach.ts` — `methodSteps` (Diagnose → Simplify, the case studies' spine) next to `loopSteps` (Spec → Learn, the
@@ -157,7 +158,10 @@ Single source of truth for all page content — no content is hardcoded in compo
   inside the one `role="group"` (`tabIndex 0`, described by `#skill-graph-help`) named by its `<title>`; the view is
   state (the svg's `viewBox`, reset by a viewport change with the previous-value pattern) moved only through
   `lib/graph/view.ts`; the one non-React listener is the non-passive `wheel` on the container; a drag uses pointer
-  capture (no window listeners) and swallows the click that ends it; a node click opens the list view and focuses its `dt`; takes
+  capture (no window listeners) and swallows the click that ends it; a node click opens the list view and focuses its `dt`; the project chips (featured, in `order`) hold one
+  selection (`nodesOf`: nodes `data-active`, every other node and edge `data-dim` at `opacity-25`, back to full on
+  hover or focus, fades `motion-safe:` only; the `projectChain`'s cross pairs drawn `data-active`; an `aria-live`
+  line; Esc on the section clears it; below 640 a project with no node in view moves the view to its first cluster); takes
   `projects` as `GraphProject` (short titles) built in `app/skills/page.tsx`, and imports only types from `@/lib/data` (the
   edge helpers `projectSlug`/`projectsOf`/`nodesOf` live in `lib/graph/edges.ts`, re-exported by `skills.ts`), so its bundle carries no data module
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)

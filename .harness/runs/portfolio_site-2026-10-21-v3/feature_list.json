@@ -570,7 +570,7 @@
       "after": [
         "P5-04"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P5-06",

@@ -15,8 +15,18 @@ import Logo from '@/components/logos/Logo';
 import { focusRing } from '@/components/focusRing';
 import { textLink } from '@/components/textLink';
 import type { Cluster, SkillEdge, SkillNode, Weight } from '@/lib/data/skills';
-import { projectsOf } from '@/lib/graph/edges';
-import { clusterAt, edgePaths, layoutGraph, LABEL_DY, NARROW_ASPECT, WIDE_MIN, type GraphLayout } from '@/lib/graph/layout';
+import { nodesOf, projectsOf } from '@/lib/graph/edges';
+import {
+  clusterAt,
+  curvePath,
+  edgePaths,
+  layoutGraph,
+  LABEL_DY,
+  NARROW_ASPECT,
+  projectChain,
+  WIDE_MIN,
+  type GraphLayout,
+} from '@/lib/graph/layout';
 import {
   centerOn,
   clientToDrawing,
@@ -120,6 +130,10 @@ interface Drag {
   moving: boolean;
 }
 
+// A highlight fades only where motion is welcome; a dimmed node is back at full opacity on keyboard focus
+const fade = 'motion-safe:transition-opacity';
+const dimmed = 'opacity-25 focus-visible:opacity-100';
+
 const control = `rounded-full border text-sm font-medium transition-colors ${focusRing}`;
 const controlOff = 'border-white/15 text-[var(--color-foreground)] hover:border-white/30';
 const controlOn = 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent)]/10';
@@ -160,6 +174,14 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
 
   const [listOn, setListOn] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
+  // The project chip pressed (a slug): its nodes data-active, the rest data-dim, its chain drawn (P5-05)
+  const [selected, setSelected] = useState<string | null>(null);
+  // set by a clear, so the live line says so instead of going quiet
+  const [cleared, setCleared] = useState(false);
+  const chips = useMemo(
+    () => projects.filter((p) => p.featured && nodesOf(edges, p.slug).length > 0).sort((a, b) => a.order - b.order),
+    [projects, edges],
+  );
   // The row to focus once the list is on screen (a node click, or a #skill-<id>); `n` makes the same row twice a
   // new request. The toggle clears it, so turning the list on by hand leaves focus on the toggle.
   const [rowRequest, setRowRequest] = useState<{ id: string; n: number } | null>(null);
@@ -269,23 +291,109 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
 
   // Tab onto a node outside the view brings it into view, so a keyboard user always sees what has focus; a press
   // (which focuses the link too) leaves the view to the pointer
+  const inView = (v: View, id: string) => {
+    const { box } = layout.nodes[id];
+    return contains(v, { x: box.x, y: box.y }) && contains(v, { x: box.x + box.w, y: box.y + box.h });
+  };
   const reveal = (id: string) => {
     if (drag.current) return;
-    const { box } = layout.nodes[id];
-    setView((v) =>
-      contains(v, { x: box.x, y: box.y }) && contains(v, { x: box.x + box.w, y: box.y + box.h })
-        ? v
-        : centerOn(v, layout.nodes[id], bounds),
-    );
+    setView((v) => (inView(v, id) ? v : centerOn(v, layout.nodes[id], bounds)));
   };
 
   const pressedCluster = clusterAt(layout, centre(view));
+
+  const active = useMemo(
+    () => new Set(selected ? nodesOf(edges, selected).filter((id) => id in layout.nodes) : []),
+    [selected, edges, layout],
+  );
+  // the selection's cross-cluster links, in cluster order: k clusters cross k − 1 times
+  const chainPaths = useMemo(
+    () =>
+      projectChain(layout, [...active])
+        .filter(([a, b]) => layout.nodes[a].cluster !== layout.nodes[b].cluster)
+        .map(([a, b]) => ({ key: `${a}>${b}`, d: curvePath(layout.nodes[a], layout.nodes[b]) })),
+    [layout, active],
+  );
+  const selectedTitle = selected ? titleOf.get(selected) : undefined;
+  const skills = `${active.size} skill${active.size === 1 ? '' : 's'}`;
+  const status = selectedTitle ? `${selectedTitle}: ${skills} highlighted.` : cleared ? 'Highlight cleared.' : '';
+  // a node's or edge's part in the selection: null with none, else whether it is the project's
+  const partOf = (...ids: string[]) => (selected ? ids.every((id) => active.has(id)) : null);
+  const stateAttrs = (on: boolean | null) =>
+    on === null ? {} : on ? { 'data-active': 'true' } : { 'data-dim': 'true' };
+
+  const clear = () => {
+    setSelected(null);
+    setCleared(true);
+  };
+
+  // A chip toggles its project; below 640, where the view holds one cluster, a project with no node in view moves it
+  // to its chain's first cluster
+  const select = (slug: string) => {
+    if (selected === slug) return clear();
+    setSelected(slug);
+    setCleared(false);
+    if (viewport !== 'narrow') return;
+    // layout.nodes is in cluster then drawing order, so its first match is the chain's head
+    const ids = Object.keys(layout.nodes).filter((id) => nodesOf(edges, slug).includes(id));
+    const [head] = ids;
+    if (!head) return;
+    setView((v) =>
+      ids.some((id) => inView(v, id))
+        ? v
+        : fitCluster(layout, layout.nodes[head].cluster, v.h / v.w),
+    );
+  };
+
+  // Esc in the graph's part of the section clears a selection (and the hover); with nothing selected, or from the
+  // list view (where the selection isn't shown), it is someone else's
+  const onSectionKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Escape' || !selected || listOn) return;
+    e.preventDefault();
+    clear();
+    setHover(null);
+  };
 
   const hoverPaths = hover ? paths.filter((e) => e.cross && (e.from === hover || e.to === hover)) : [];
   const title = `Tech stack: ${nodes.length} skills in ${clusters.length} groups. The list view has the same data as text.`;
 
   return (
-    <div>
+    <div onKeyDown={onSectionKeyDown}>
+      <p aria-live="polite" className="sr-only">
+        {status}
+      </p>
+      {listOn ? null : (
+        <div className="mb-3 print:hidden">
+          <div
+            role="group"
+            aria-label="Highlight a project's stack"
+            className="flex gap-2 overflow-x-auto sm:flex-wrap p-1"
+          >
+            {chips.map((p) => (
+              <button
+                key={p.slug}
+                type="button"
+                aria-pressed={selected === p.slug}
+                onClick={() => select(p.slug)}
+                className={`shrink-0 min-h-11 px-4 whitespace-nowrap ${control} ${
+                  selected === p.slug ? controlOn : controlOff
+                }`}
+              >
+                {p.title}
+              </button>
+            ))}
+          </div>
+          {selected ? (
+            <p className="mt-2 px-1 text-sm text-[var(--color-muted)]">
+              <span>{`${selectedTitle} · ${skills}`}</span>
+              {' · '}
+              <Link href={`/projects/${selected}`} className={textLink}>
+                Open case study
+              </Link>
+            </p>
+          ) : null}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         {listOn ? null : (
           <>
@@ -412,10 +520,29 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
             {paths
               .filter((e) => !e.cross)
               .map((e) => (
-                <path key={`${e.from}>${e.to}`} data-edge="" d={e.d} className="stroke-white/15">
+                <path
+                  key={`${e.from}>${e.to}`}
+                  data-edge=""
+                  {...stateAttrs(partOf(e.from, e.to))}
+                  d={e.d}
+                  className={`${fade} ${
+                    partOf(e.from, e.to) ? 'stroke-[var(--color-accent)]/60' : 'stroke-white/15'
+                  } ${partOf(e.from, e.to) === false ? dimmed : ''}`}
+                >
                   {e.label ? <title>{e.label}</title> : null}
                 </path>
               ))}
+            {chainPaths.map((e) => (
+              <path
+                key={`chain:${e.key}`}
+                data-edge=""
+                data-cross=""
+                data-active="true"
+                d={e.d}
+                strokeWidth="1.5"
+                className={`${fade} stroke-[var(--color-accent)]`}
+              />
+            ))}
             {hoverPaths.map((e) => (
               <path
                 key={`${e.from}>${e.to}`}
@@ -434,6 +561,7 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                 .filter((n) => n.cluster === c.id)
                 .map((n) => {
                   const p = layout.nodes[n.id];
+                  const on = partOf(n.id);
                   return (
                     <a
                       key={n.id}
@@ -441,7 +569,8 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                       aria-label={n.name}
                       data-node={n.id}
                       data-hover={hover === n.id ? 'true' : undefined}
-                      className={`group ${focusRing}`}
+                      {...stateAttrs(on)}
+                      className={`group ${fade} ${on === false && hover !== n.id ? dimmed : ''} ${focusRing}`}
                       onClick={(e) => {
                         // a modified click (new tab or window) is the browser's
                         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;

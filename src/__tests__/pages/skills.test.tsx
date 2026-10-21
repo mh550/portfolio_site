@@ -49,8 +49,19 @@ describe('SkillsPage', () => {
     expect(document.querySelector('.glow-accent')).toBeNull();
   });
 
-  it('describes the stack as a graph, in the agentic-systems angle (P1-06)', () => {
+  it('describes the stack as a graph, in the agentic-systems angle (P1-06), and offers the project chips', () => {
     expect(metadata.description).toMatch(/agentic systems/);
     expect(metadata.description).toMatch(/as a graph/);
+    expect(metadata.description).toMatch(/pick a project/);
+    render(<SkillsPage />);
+    expect(screen.getByText(/Pick a project to see the parts it used/)).toBeInTheDocument();
+  });
+
+  it('selecting Agent Harness lights at least three nodes and offers its case study (P5-05)', () => {
+    const { container } = render(<SkillsPage />);
+    const chips = screen.getByRole('group', { name: "Highlight a project's stack" });
+    fireEvent.click(within(chips).getByRole('button', { name: 'Agent Harness' }));
+    expect(container.querySelectorAll('a[data-node][data-active="true"]').length).toBeGreaterThanOrEqual(3);
+    expect(screen.getByRole('link', { name: 'Open case study' })).toHaveAttribute('href', '/projects/agent-harness');
   });
 });
