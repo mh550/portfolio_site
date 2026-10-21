@@ -13,6 +13,31 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · verify P6
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P6-01 | 1 | grep for script/link/img/@import in the HTML; Chromium via /tmp/render.mjs at 1280 and 390 | 0 matches; 0 console/page/request errors; scrollWidth 1280/1280 and 390/390; footer records the check command | yes |
+| P6-01 | 2 | read h2/h3 of options A, B, C; counted refs, token hexes | each option has Hiring manager 10 s, Cost to build, What others have done (3, 4, 5 refs), Risks; mockups use the four tokens and real titles (Agent Harness, Voice Concierge) | yes |
+| P6-01 | 3 | curl -sIL on all 46 unique URLs across the three files; read trailing comment and Sources | all 200; comment lists codes; Sources section present | yes |
+| P6-01 | 4 | read h2 'Recommendation: B' and h3 'What option A would share with the P5 graph' | both present | yes |
+| P6-01 | 5 | `.harness/check.sh` | 1859 passed; `check: lint ok · jest ok · build ok` | yes |
+| P6-02 | 1 | grep script/link/@import; Chromium at 1280 and 390; progress.md grep | 0 external refs, 0 errors, no horizontal scroll at 390; progress.md mentions frontend-design | yes |
+| P6-02 | 2 | read h3s per direction d1–d3; python recomputed WCAG ratios of the 16 contrast rows per direction | palette 8/8/7 hexes; type, motion (scanlines/reduced motion), concierge+memory colours, VU meter present; 0 stated ratios off by >0.1 | yes |
+| P6-02 | 3 | read h2s; grep token-only | Best practices, comparison table, Recommendation: 1 with 'token-only pass first' all present | yes |
+| P6-02 | 4 | read trailing comment (18 URLs, all 200); grep img/.png/.jpg | URL codes listed and all 200 on my curl; 0 images | yes |
+| P6-02 | 5 | `.harness/check.sh` | same run: green | yes |
+| P6-03 | 1 | read table (6 rows) and URL code block; curl all URLs | 6 projects with URL, licence, stack, last activity; all 200 | yes |
+| P6-03 | 2 | read '### 1.'–'### 6.' porting sections | concrete steps plus hour ranges (6–10 up to 80–120) with assumptions paragraph | yes |
+| P6-03 | 3 | read Recommendation and line 66; ran jest | borrow from WebTUI paired with direction 1; quotes 1859 tests, matching my run | yes |
+| P6-03 | 4 | `npx jest src/__tests__/lib/content-guard.test.ts`; grep private/.env | 20 passed; no private links | yes |
+| P6-03 | 5 | `.harness/check.sh` | green | yes |
+| P6-04 | 1 | read ## Review section; re-curled 46 URLs | script and result recorded; all 200 | yes |
+| P6-04 | 2 | read review table (line ~263) and grep of script/link/img | sentences with digits sourced; 0 external script/link/img | yes |
+| P6-04 | 3 | ran my own Chromium script | 0 errors, scrollWidth <= innerWidth at 390 for both files | yes |
+| P6-04 | 4 | grep '## P6' docs/review-guide.md; read Review section | '## P6 (v3): recommendations' at line 397; findings section says none to fix | yes |
+| P6-04 | 5 | `.harness/check.sh` | green | yes |
+
 ### 2026-10-21 · P6-04 · passes
 - Reviewed the three P6 files; added `## Review (P6-04)` to `docs/notes/2026-10-21-framework-options.md` and `## P6 (v3): recommendations` to `docs/review-guide.md`. No code changed; tests 1859 → 1859.
 - URLs: 46 unique, all 200 by `curl -sIL`. HTML files: no external script/link/img/@import.
