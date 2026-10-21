@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import type { RemoteParticipant, Room, TextStreamHandler, TextStreamReader } from 'livekit-client';
+import type { Participant, RemoteParticipant, Room, TextStreamHandler, TextStreamReader } from 'livekit-client';
 import { isForgotten, parseMemory, parseMetrics, RPC_FORGET_ME, TOPIC } from '@/lib/concierge/contract';
 import { browserStorage, getOrCreateVisitorId } from '@/lib/concierge/visitorId';
 import {
@@ -21,11 +21,33 @@ const RoomAudio = dynamic(() => import('@/components/talk/RoomAudio'), { ssr: fa
 export const AGENT_JOIN_TIMEOUT_MS = 10_000;
 // Spec §4: the agent answers concierge.forget_me at once; the RPC gives up after 10 s.
 const FORGET_TIMEOUT_MS = 10_000;
+// The agent counts as speaking until it has been out of the speakers list this long: a pause between words doesn't
+// flip the pill's name (a screen reader re-reads a focused button's name each time it changes) or stop the bars.
+export const AGENT_QUIET_MS = 500;
 const TOKEN_ROUTE = '/api/concierge/token';
 const STREAM_TOPICS = [TOPIC.memory, TOPIC.metrics, TOPIC.transcription];
 // Attribute names on lk.transcription streams (@livekit/components-core's ParticipantAgentAttributes).
 const SEGMENT_ID = 'lk.segment_id';
 const TRANSCRIPTION_FINAL = 'lk.transcription_final';
+// The first-visit callout (D88): set once the visitor closes it or opens the panel.
+export const CALLOUT_KEY = 'concierge.callout_seen';
+
+// A storage that throws (blocked, private mode) reads as a first visit; one that won't write leaves it to this page.
+function readCalloutSeen(): boolean {
+  try {
+    return browserStorage()?.getItem(CALLOUT_KEY) != null;
+  } catch {
+    return false;
+  }
+}
+
+function writeCalloutSeen() {
+  try {
+    browserStorage()?.setItem(CALLOUT_KEY, '1');
+  } catch {
+    // hidden for this page's life, shown again next load
+  }
+}
 
 // One Connect's worth of LiveKit: everything teardown has to release. `alive` turns false once, at teardown, and
 // every async continuation and stream handler checks it, so a session that is over can't change the page.
@@ -33,6 +55,7 @@ interface Session {
   alive: boolean;
   room: Room | null;
   timer: ReturnType<typeof setTimeout> | undefined;
+  quietTimer: ReturnType<typeof setTimeout> | undefined; // pending agentSpeaking → false
   agentIdentity: string | null;
   removeListeners: () => void;
   sent: number; // typed messages so far: each one's transcript key
@@ -46,6 +69,7 @@ function teardown(session: Session) {
   if (!session.alive) return;
   session.alive = false;
   clearTimeout(session.timer);
+  clearTimeout(session.quietTimer);
   const room = session.room;
   session.room = null;
   if (!room) return;
@@ -113,6 +137,11 @@ export interface ConciergeValue extends ConciergeActions {
   panel: PanelState;
   openPanel: () => void;
   minimizePanel: () => void;
+  // The first-visit callout (D88): true until mount has read the key, so no server or first client render has it.
+  calloutSeen: boolean;
+  dismissCallout: () => void;
+  // The agent is among LiveKit's active speakers: the pill's bars move (D87). False whenever there is no live call.
+  agentSpeaking: boolean;
   // The same Room as the session's, for RoomAudio during render (a ref can't be read in render).
   room: Room | null;
   // Connects so far: MessageBox is keyed on it, so each session starts with an empty box.
@@ -140,10 +169,29 @@ export default function ConciergeProvider({ configured, children }: { configured
   const [room, setRoom] = useState<Room | null>(null);
   const [sessionCount, setSessionCount] = useState(0);
   const [panel, setPanel] = useState<PanelState>('closed');
-  const panelActions = useMemo(
-    () => ({ openPanel: () => setPanel('open'), minimizePanel: () => setPanel('closed') }),
-    []
-  );
+  const [calloutSeen, setCalloutSeen] = useState(true);
+  const [agentSpeaking, setAgentSpeaking] = useState(false);
+  // Opening the panel counts as having seen the callout (D88).
+  const panelActions = useMemo(() => {
+    const dismissCallout = () => {
+      setCalloutSeen(true);
+      writeCalloutSeen();
+    };
+    return {
+      openPanel: () => {
+        setPanel('open');
+        dismissCallout();
+      },
+      minimizePanel: () => setPanel('closed'),
+      dismissCallout,
+    };
+  }, []);
+  const { dismissCallout } = panelActions;
+
+  // After mount, never during render: localStorage doesn't exist on the server.
+  useEffect(() => {
+    if (!readCalloutSeen()) setCalloutSeen(false);
+  }, []);
 
   // The actions only touch the session ref and stable setters, so they are made once (per `configured`) and a
   // consumer that only calls them doesn't depend on the transcript.
@@ -151,6 +199,7 @@ export default function ConciergeProvider({ configured, children }: { configured
     function release(session: Session) {
       teardown(session);
       setRoom(null);
+      setAgentSpeaking(false);
     }
 
     // The session stays in sessionRef after offline or a drop, so a Forget me answer that lands later is still shown.
@@ -185,6 +234,7 @@ export default function ConciergeProvider({ configured, children }: { configured
         alive: true,
         room: null,
         timer: undefined,
+        quietTimer: undefined,
         agentIdentity: null,
         removeListeners: () => {},
         sent: 0,
@@ -194,6 +244,8 @@ export default function ConciergeProvider({ configured, children }: { configured
       };
       sessionRef.current = session;
       setSessionCount((n) => n + 1);
+      // A visitor who connects has found the concierge: the first-visit callout is done (D88).
+      dismissCallout();
       dispatch({ type: 'connect' });
       const send = (action: SessionAction) => {
         if (session.alive) dispatch(action);
@@ -282,6 +334,7 @@ export default function ConciergeProvider({ configured, children }: { configured
       // alone. One that finally fails ends with RoomEvent.Disconnected.
       const onParticipantDisconnected = (p: RemoteParticipant) => {
         if (p.identity !== session.agentIdentity) return;
+        quiet();
         queueMicrotask(() => {
           if (room.state !== ConnectionState.Reconnecting) dropped();
         });
@@ -291,19 +344,45 @@ export default function ConciergeProvider({ configured, children }: { configured
         if (session.agentIdentity && !room.remoteParticipants.has(session.agentIdentity)) dropped();
       };
       const onPlayback = () => send({ type: 'audio', blocked: !room.canPlaybackAudio });
+      // Before the agent has joined there is no identity to look for: nobody counts as the agent. Speaking starts at
+      // once and ends AGENT_QUIET_MS after the agent last left the list.
+      const quiet = () => {
+        clearTimeout(session.quietTimer);
+        session.quietTimer = undefined;
+        setAgentSpeaking(false);
+      };
+      const onSpeakers = (speakers: Participant[]) => {
+        if (!session.alive) return;
+        const agent = session.agentIdentity;
+        if (agent !== null && speakers.some((p) => p.identity === agent)) {
+          clearTimeout(session.quietTimer);
+          session.quietTimer = undefined;
+          setAgentSpeaking(true);
+        } else if (session.quietTimer === undefined) {
+          session.quietTimer = setTimeout(quiet, AGENT_QUIET_MS);
+        }
+      };
+      // An outage sends no speaker update: the bars stop with it.
+      const onReconnecting = () => {
+        if (session.alive) quiet();
+      };
       room
         .on(RoomEvent.ParticipantConnected, onParticipantConnected)
         .on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
         .on(RoomEvent.Reconnected, onReconnected)
         .on(RoomEvent.Disconnected, dropped)
-        .on(RoomEvent.AudioPlaybackStatusChanged, onPlayback);
+        .on(RoomEvent.AudioPlaybackStatusChanged, onPlayback)
+        .on(RoomEvent.ActiveSpeakersChanged, onSpeakers)
+        .on(RoomEvent.Reconnecting, onReconnecting);
       session.removeListeners = () => {
         room
           .off(RoomEvent.ParticipantConnected, onParticipantConnected)
           .off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
           .off(RoomEvent.Reconnected, onReconnected)
           .off(RoomEvent.Disconnected, dropped)
-          .off(RoomEvent.AudioPlaybackStatusChanged, onPlayback);
+          .off(RoomEvent.AudioPlaybackStatusChanged, onPlayback)
+          .off(RoomEvent.ActiveSpeakersChanged, onSpeakers)
+          .off(RoomEvent.Reconnecting, onReconnecting);
       };
 
       try {
@@ -383,7 +462,7 @@ export default function ConciergeProvider({ configured, children }: { configured
     }
 
     return { connect, leave, toggleMic, startAudio, sendMessage, forgetMe };
-  }, [configured]);
+  }, [configured, dismissCallout]);
 
   // Release the room when the provider goes: leaving the chrome (/card*) or the tab closing. Under StrictMode's
   // first, simulated unmount there is none yet.
@@ -405,6 +484,7 @@ export default function ConciergeProvider({ configured, children }: { configured
       const session = sessionRef.current;
       if (!session?.alive) return;
       teardown(session);
+      setAgentSpeaking(false);
       endedOnHide = true;
     };
     const onPageShow = (event: PageTransitionEvent) => {
@@ -421,8 +501,8 @@ export default function ConciergeProvider({ configured, children }: { configured
   }, [leave]);
 
   const value = useMemo<ConciergeValue>(
-    () => ({ state, room, sessionCount, configured, panel, ...actions, ...panelActions }),
-    [state, room, sessionCount, configured, panel, actions, panelActions]
+    () => ({ state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, ...actions, ...panelActions }),
+    [state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, actions, panelActions]
   );
 
   return (

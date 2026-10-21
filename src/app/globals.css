@@ -22,6 +22,29 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* The "Ask my site" pill's bars while the agent speaks, and the first-visit callout's entrance (D87, D88). Used only
+   through motion-safe: utilities, so reduced motion never runs them. */
+@keyframes concierge-bar {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes concierge-callout {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;

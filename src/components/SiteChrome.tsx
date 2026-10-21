@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { talkWidget } from '@/lib/data';
+import { talkWidget } from '@/lib/data/concierge';
 import ConciergeProvider, { useConcierge } from './concierge/ConciergeProvider';
-import { inRoom } from './talk/sessionReducer';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import VoiceWidget from './VoiceWidget';
 import ConciergePanel from './concierge/ConciergePanel';
+import Callout from './concierge/Callout';
 import { focusRing } from './focusRing';
 
 // /card and /card/* are standalone (D6, D15): no Navbar, no 64 px offset, no Footer
@@ -16,13 +16,15 @@ function isCardPath(pathname: string) {
   return pathname === '/card' || pathname.startsWith('/card/');
 }
 
-// The widget reads the call and the panel, so it sits inside the provider SiteChrome renders.
+// The pill reads the call and the panel, so it sits inside the provider SiteChrome renders. Live (listening or
+// speaking, D87) only once the agent is there: before that the panel's status line says how far Connect got.
 function ChromeWidget() {
-  const { state, panel, openPanel, minimizePanel } = useConcierge();
+  const { state, panel, agentSpeaking, openPanel, minimizePanel } = useConcierge();
   const expanded = panel === 'open';
   return (
     <VoiceWidget
-      live={inRoom(state.phase)}
+      live={state.phase === 'live'}
+      speaking={agentSpeaking}
       expanded={expanded}
       onToggle={expanded ? minimizePanel : openPanel}
     />
@@ -63,11 +65,12 @@ export default function SiteChrome({
         {children}
       </div>
       <Footer />
-      {/* Last in the DOM, so last in the tab order: the panel (open only) then the widget (D86). Neither on /talk, the
-          full-page view of the same call (D61) */}
+      {/* Last in the DOM, so last in the tab order: the panel (open only), the first-visit callout (D88), then the pill
+          it introduces (D86, D87). None of them on /talk, the full-page view of the same call (D61) */}
       {pathname !== talkWidget.href ? (
         <>
           <ConciergePanel />
+          <Callout />
           <ChromeWidget />
         </>
       ) : (

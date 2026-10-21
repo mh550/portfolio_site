@@ -3,9 +3,9 @@ import { profile } from '@/lib/data';
 import { focusRing } from '@/components/focusRing';
 
 export default function Footer() {
-  // pb-24 below xl: the links row clears the floating VoiceWidget (D61)
+  // pb-24 at every width: the links row clears the floating "Ask my site" pill (D61, D87)
   return (
-    <footer className="border-t border-white/5 pt-8 pb-24 xl:pb-8 mt-16">
+    <footer className="border-t border-white/5 pt-8 pb-24 mt-16">
       <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-[var(--color-muted)] text-sm font-mono">
           {profile.name} &copy; {new Date().getFullYear()}

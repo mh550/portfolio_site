@@ -10,8 +10,10 @@ export const RoomEvent = {
   Disconnected: 'disconnected',
   ParticipantConnected: 'participantConnected',
   ParticipantDisconnected: 'participantDisconnected',
+  Reconnecting: 'reconnecting',
   Reconnected: 'reconnected',
   AudioPlaybackStatusChanged: 'audioPlaybackChanged',
+  ActiveSpeakersChanged: 'activeSpeakersChanged',
 } as const;
 
 export const ConnectionState = {
@@ -161,4 +163,17 @@ export function removeParticipant(room: Room, identity: string) {
   const participant = room.remoteParticipants.get(identity);
   room.remoteParticipants.delete(identity);
   room.emit(RoomEvent.ParticipantDisconnected, participant);
+}
+
+// What the SFU's speaker updates do: RoomEvent.ActiveSpeakersChanged with the participants speaking now, loudest
+// first (the local one included when it is speaking). An empty list is silence.
+export function setSpeakers(room: Room, identities: string[]) {
+  const speakers = identities.map(
+    (identity) =>
+      room.remoteParticipants.get(identity) ??
+      (identity === room.localParticipant.identity
+        ? room.localParticipant
+        : { identity, kind: ParticipantKind.STANDARD })
+  );
+  room.emit(RoomEvent.ActiveSpeakersChanged, speakers);
 }

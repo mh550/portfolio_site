@@ -247,6 +247,9 @@ At 390 px (below `lg`), a full-height bottom sheet under the Navbar (the Navbar 
 
 ## Widget
 
+*Built in P3-05* as below (D87 *As built*); the live states key on `phase === 'live'` (connecting and waiting show
+the idle pill: the panel's status line says how far Connect got), and the dot is red with a background ring.
+
 `src/components/VoiceWidget.tsx` (P3-04 makes it a toggle button, P3-05 the pill). A `<button type="button"
 aria-expanded={panel === 'open'}>` with `aria-controls="concierge-panel"` only while the panel is open (the
 section exists only then), `fixed right-4
@@ -278,6 +281,10 @@ bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 print:hidden`, `rounded-full
 - The old pulsing ring goes (the callout is the one-time invitation now; D87).
 
 ## Callout
+
+*Built in P3-05* as below (D88 *As built*): SiteChrome renders it after the panel and before the pill; after the
+P3-05 review it also goes for good on Esc and Connect, hands focus to the pill when it had it, and shows only at the
+top of a page with the Footer out of sight.
 
 `src/components/concierge/Callout.tsx` (`'use client'`, P3-05), rendered by SiteChrome next to the pill (same
 fixed corner, `bottom` offset above the pill: `bottom-[calc(max(1rem,env(safe-area-inset-bottom))+3.75rem)]`,
@@ -523,6 +530,18 @@ Filled by P3-10 (one row per finding).
 
 | # | Severity | File:line | Finding | Resolution |
 |---|---|---|---|---|
+| P3-05-1 | Important | `Callout.tsx` Close | Close unmounts the bubble with focus in it: focus falls to `<body>` | fixed test-first: focus goes to the pill (`#concierge-pill`) |
+| P3-05-2 | Important | `Callout.tsx`, `Footer.tsx` | the bubble covers the Footer links at the page end (and anything scrolled under it), no Esc | fixed test-first: shown only at `scrollY 0` with the Footer out of view; Esc dismisses |
+| P3-05-3 | Minor | `ConciergeProvider.tsx` speakers | `agentSpeaking` stuck on through a reconnect | fixed: off on `Reconnecting` and when the agent leaves |
+| P3-05-4 | Minor | `VoiceWidget.tsx` name | the name flips with every speaker update | fixed: 500 ms hold before speaking turns off (`AGENT_QUIET_MS`) |
+| P3-05-5 | Minor | `VoiceWidget.tsx` bars | infinite animation vs WCAG 2.2.2 | kept: a real-time status that stops with the speech, `motion-safe:` only; recorded in D87 *As built* |
+| P3-05-6 | Minor | `Callout.tsx` | the callout can show mid-call after navigating | fixed: Connect dismisses it |
+| P3-05-7 | Minor | `VoiceWidget.tsx` collapse | `MediaQueryList.addEventListener` missing before Safari 14 | fixed: `addListener` fallback |
+| P3-05-8 | Minor | `VoiceWidget.tsx` 390 | iPhone 15/16 (393 px) and 16 Pro (402 px) never collapse | kept per the spec; asked of Michael (progress entry) |
+| P3-05-9 | Minor | `ConciergeProvider.tsx` value | speaker flips re-render every consumer | kept: rare with the 500 ms hold; split the context in P3-10 if profiling shows it |
+| P3-05-10 | Minor | `ConciergeProvider.test.tsx` | new Connect while speaking untested | fixed: test added (offline can't follow an agent join) |
+| P3-05-11 | Minor | `VoiceWidget.test.tsx` | the unmount test passed for any scroll handler; a matchMedia restore outside `finally` | fixed: asserts the same handler; `try/finally` |
+| P3-05-12 | Minor | `VoiceWidget.tsx` dot | the collapsed dot sits off the circle | fixed: `right-1.5 top-1.5` |
 
 ## Decisions
 

@@ -334,7 +334,7 @@
       "after": [
         "P3-04"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-06",

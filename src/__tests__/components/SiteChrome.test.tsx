@@ -71,7 +71,7 @@ describe('SiteChrome', () => {
     expect(queryByRole('link', { name: 'Skip to content' })).toBeNull();
   });
   // VC4-03, D61: the floating widget, last in the chrome, everywhere but /talk and /card*; a button since P3-04 (D86)
-  const widget = () => screen.queryByRole('button', { name: 'Talk to my voice concierge' });
+  const widget = () => screen.queryByRole('button', { name: 'Ask my site' });
 
   it.each(['/', '/about', '/projects/agent-harness'])('%s: the voice widget comes after the Footer', (path) => {
     const { container } = renderAt(path);
@@ -93,6 +93,41 @@ describe('SiteChrome', () => {
   it.each(['/card', '/card/qr'])('%s: no voice widget', (path) => {
     renderAt(path);
     expect(widget()).toBeNull();
+  });
+
+  // P3-05, D88: the first-visit callout sits by the pill, before it in the DOM, so it reads as the pill's introduction
+  const callout = () => screen.queryByRole('note');
+
+  describe('the first-visit callout', () => {
+    beforeEach(() => localStorage.clear());
+
+    it.each(['/', '/about', '/evidence'])('%s: shown before the pill, after the Footer', (path) => {
+      const { container } = renderAt(path);
+      const note = callout();
+      expect(note).toHaveTextContent(talkWidget.callout);
+      const footer = container.querySelector('footer')!;
+      expect(footer.compareDocumentPosition(note!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(note!.compareDocumentPosition(widget()!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('/talk: no callout (no pill there)', () => {
+      renderAt('/talk');
+      expect(callout()).toBeNull();
+    });
+
+    it.each(['/card', '/card/qr'])('%s: no callout', (path) => {
+      renderAt(path);
+      expect(callout()).toBeNull();
+    });
+
+    it('opening the panel from the pill hides it, and Minimize does not bring it back', () => {
+      renderAt('/');
+      act(() => widget()!.click());
+      expect(callout()).toBeNull();
+      act(() => screen.getByRole('button', { name: talkWidget.minimize }).click());
+      expect(callout()).toBeNull();
+      expect(localStorage.getItem('concierge.callout_seen')).toBe('1');
+    });
   });
 
   // P3-03, D85: the concierge's call lives around the chrome, so a page's content can read it; /card* has none.
@@ -173,13 +208,13 @@ describe('SiteChrome', () => {
       );
       expect(room.disconnect).not.toHaveBeenCalled();
       expect(screen.getByTestId('concierge')).toHaveTextContent('live true');
-      expect(screen.getByRole('button', { name: talkWidget.liveLabel })).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByRole('button', { name: talkWidget.listening })).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('with no call the widget keeps its usual name', () => {
       renderAt('/about');
       expect(screen.getByRole('button', { name: talkWidget.label })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: talkWidget.liveLabel })).toBeNull();
+      expect(screen.queryByRole('button', { name: talkWidget.listening })).toBeNull();
     });
   });
 });

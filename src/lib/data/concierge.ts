@@ -93,12 +93,15 @@ export const latencyLabels = {
   columns: { label: 'Step', last: 'This turn', median: 'Median' },
 };
 
-// The floating widget on every chrome page but /talk (D61, VoiceWidget): the label is its accessible name. Since
-// P3-04 it opens the concierge panel (D86); `href` is the page SiteChrome leaves both off.
+// The "Ask my site" pill on every chrome page but /talk (D87, VoiceWidget): `label` is its visible text and, idle, its
+// accessible name; while a call is live the name says whether the agent is listening or speaking. It opens the
+// concierge panel (D86); `href` is the page SiteChrome leaves both off. `callout` is the first-visit bubble (D88).
 export const talkWidget = {
-  label: 'Talk to my voice concierge',
-  // While a call is on (it outlives every page, D85); aria-expanded says whether the panel, with Leave in it, is open.
-  liveLabel: 'Live call with my concierge',
+  label: 'Ask my site',
+  listening: 'Ask my site: listening',
+  speaking: 'Ask my site: speaking',
+  callout: 'This site talks. Ask it about my work, by voice or text.',
+  close: 'Close',
   panelTitle: 'Ask my site',
   minimize: 'Minimize',
   href: '/talk',

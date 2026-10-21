@@ -92,7 +92,7 @@ describe('the site chrome around those pages', () => {
         <p>page</p>
       </SiteChrome>
     );
-    expect(getByRole('button', { name: 'Talk to my voice concierge' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Ask my site' })).toBeInTheDocument();
     expect(queryAllByRole('navigation')).toHaveLength(1);
     expect(queryAllByRole('contentinfo')).toHaveLength(1);
     expect(queryAllByRole('region')).toHaveLength(0);
@@ -109,7 +109,7 @@ describe('the concierge panel, open', () => {
         <h1>page</h1>
       </SiteChrome>
     );
-    fireEvent.click(result.getByRole('button', { name: 'Talk to my voice concierge' }));
+    fireEvent.click(result.getByRole('button', { name: 'Ask my site' }));
     return result;
   };
 

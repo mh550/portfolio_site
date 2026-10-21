@@ -547,15 +547,28 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   scrolled; the twice-pulsing ring goes, and the Footer keeps `pb-24` at every width (the pill is wider). Supersedes
   D61's mic disc linking to `/talk`, its ring and `xl:pb-8`; D61's placement (`fixed right-4`, safe-area bottom,
   `z-40`, `print:hidden`, not on `/talk` or `/card*`, kept on `/evidence`) stands. Reversible: `git revert` P3-05's
-  widget commit. (Plan § Widget; P3-04 and P3-05 build.)
+  widget commit. (Plan § Widget; P3-04 and P3-05 build.) *As built (P3-05):* `talkWidget` is `{ label, listening,
+  speaking, callout, close, panelTitle, minimize, href }` (`liveLabel` gone). The live states key on `phase ===
+  'live'` (connecting and waiting show the idle pill; the open panel's status line covers them); the dot is red with
+  a background ring, inset on the collapsed circle. The provider's `agentSpeaking` turns on at once and off 500 ms
+  (`AGENT_QUIET_MS`) after the agent leaves the speakers list, so a pause between words doesn't flip the focused
+  pill's name; it goes off at once on `Reconnecting`, the agent leaving, Leave, a new Connect and `pagehide`. The bars
+  loop while the agent speaks: a real-time status shown alongside its audio that stops when the speech does, and never
+  under reduced motion (WCAG 2.2.2's pause is the OS setting). The collapse listens through `addListener` where
+  `MediaQueryList.addEventListener` is missing (Safari < 14). The pill carries `id="concierge-pill"`.
 - **D88** *default*: a first-visit callout next to the pill, "This site talks. Ask it about my work, by voice or
   text.", with a Close button; `localStorage` key `concierge.callout_seen` (try/catch), set by Close or by opening
   the panel; rendered after mount only, entrance under `motion-safe:` only, never on `/card*`. Supersedes nothing.
-  Reversible: drop `Callout` from `SiteChrome`. (Plan § Callout; P3-05 builds.)
+  Reversible: drop `Callout` from `SiteChrome`. (Plan § Callout; P3-05 builds.) *As built (P3-05):* SiteChrome renders
+  it after the panel and before the pill. Also dismissed for good by Esc (from anywhere, unless a control already
+  `preventDefault`ed it) and by Connect; Close or Esc with focus in the bubble hands focus to the pill. It shows only at
+  `scrollY 0` with the `<footer>` out of sight (an `IntersectionObserver`), without setting the key, so it never
+  covers the Footer's links or a focused control the page scrolls under it (WCAG 2.4.11); it comes back at the top.
 - **D89** *default*: the Navbar has six links: Home, About, Skills, Projects, Experience, Contact. `/talk` stays in
   the sitemap and the smoke routes and is reached from `/card`, the deep-dive and the panel's call. Supersedes D60
   (Talk on the Navbar) and D79's "seven links"; the v3 spec § 4.1's "seven links" counted Approach, gone since P1.
-  Reversible: one entry in `Navbar.tsx`. (Plan § Widget; P3-05 builds.)
+  Reversible: one entry in `Navbar.tsx`. (Plan § Widget; P3-05 builds.) *As built (P3-05):* six links in the desktop
+  list and the mobile menu; on `/talk` no link is current.
 - **D90** *default*: the memory view shows six kinds (Profile, Episodes, Events, Knowledge, Working, Cache) in About
   you / About the agent, coloured by new `globals.css` tokens `--color-mem-profile` `#00d4ff`, `--color-mem-episode`
   `#fbbf24`, `--color-mem-event` `#4ade80`, `--color-mem-event-rejected` `#f87171`, `--color-mem-knowledge`

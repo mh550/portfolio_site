@@ -5,7 +5,17 @@ import ConciergeProvider, {
   useConcierge,
   type ConciergeValue,
 } from '@/components/concierge/ConciergeProvider';
-import { MockRoom, addAgent, lastRoom, resetRooms } from '@/__mocks__/livekit-client';
+import {
+  MockRoom,
+  RoomEvent,
+  addAgent,
+  lastRoom,
+  removeParticipant,
+  resetRooms,
+  restart,
+  setSpeakers,
+} from '@/__mocks__/livekit-client';
+import { AGENT_QUIET_MS } from '@/components/concierge/ConciergeProvider';
 import { talkPage } from '@/lib/data/concierge';
 import { renderTalk } from '@/__tests__/helpers/concierge';
 
@@ -254,5 +264,173 @@ describe('ConciergeProvider: one Room at a time', () => {
     expect(phase()).toBe('offline');
     expect(fetchMock).not.toHaveBeenCalled();
     expect(MockRoom.instances).toHaveLength(0);
+  });
+});
+
+// P3-05, D87: the pill's bars move while the agent speaks. LiveKit's ActiveSpeakersChanged lists who speaks now.
+describe('ConciergeProvider: agentSpeaking', () => {
+  it('is false before a call and false while live until the agent speaks', async () => {
+    renderProbe();
+    expect(ctx.agentSpeaking).toBe(false);
+    await goLive();
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('follows the agent identity in the speakers list', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    expect(ctx.agentSpeaking).toBe(true);
+    act(() => setSpeakers(room, ['visitor-test', 'agent-1']));
+    expect(ctx.agentSpeaking).toBe(true);
+    act(() => setSpeakers(room, ['visitor-test']));
+    // A pause between words is not the end of the reply: speaking holds AGENT_QUIET_MS (review: a screen reader
+    // re-reads a focused button's name each time it changes)
+    expect(ctx.agentSpeaking).toBe(true);
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, AGENT_QUIET_MS + 50));
+    });
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('holds through a short pause, and a pause that lasts turns it off', async () => {
+    jest.useFakeTimers();
+    try {
+      renderProbe();
+      const room = await goLive();
+      act(() => setSpeakers(room, ['agent-1']));
+      act(() => setSpeakers(room, []));
+      act(() => jest.advanceTimersByTime(AGENT_QUIET_MS - 100));
+      act(() => setSpeakers(room, ['agent-1']));
+      act(() => jest.advanceTimersByTime(AGENT_QUIET_MS));
+      expect(ctx.agentSpeaking).toBe(true);
+      act(() => setSpeakers(room, []));
+      act(() => jest.advanceTimersByTime(AGENT_QUIET_MS - 1));
+      expect(ctx.agentSpeaking).toBe(true);
+      act(() => jest.advanceTimersByTime(1));
+      expect(ctx.agentSpeaking).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('goes false at once when the room starts reconnecting', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    await act(async () => {
+      restart(room);
+      room.emit(RoomEvent.Reconnecting);
+    });
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('goes false on a new Connect while the agent speaks', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    await act(async () => {
+      await ctx.connect();
+    });
+    expect(room.disconnect).toHaveBeenCalled();
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('another participant speaking is not the agent', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['someone-else']));
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('speakers before the agent joined count for nothing', async () => {
+    renderProbe();
+    await act(async () => {
+      await ctx.connect();
+    });
+    await flush();
+    const room = lastRoom();
+    act(() => setSpeakers(room, ['agent-1']));
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('goes false on Leave, and the listener comes off', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    expect(ctx.agentSpeaking).toBe(true);
+    act(() => ctx.leave());
+    expect(ctx.agentSpeaking).toBe(false);
+    expect(room.listenerCount('activeSpeakersChanged')).toBe(0);
+  });
+
+  it('goes false when the agent drops mid-sentence', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    await act(async () => {
+      removeParticipant(room, 'agent-1');
+    });
+    await flush();
+    expect(phase()).toBe('ended');
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+
+  it('goes false on pagehide', async () => {
+    renderProbe();
+    const room = await goLive();
+    act(() => setSpeakers(room, ['agent-1']));
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    expect(ctx.agentSpeaking).toBe(false);
+  });
+});
+
+// P3-05, D88: the first-visit callout's state lives here, so opening the panel hides it for good on this page too.
+describe('ConciergeProvider: the callout', () => {
+  const KEY = 'concierge.callout_seen';
+
+  it('reads the key after mount: absent means not seen', () => {
+    renderProbe();
+    expect(ctx.calloutSeen).toBe(false);
+  });
+
+  it('a stored key means seen', () => {
+    localStorage.setItem(KEY, '1');
+    renderProbe();
+    expect(ctx.calloutSeen).toBe(true);
+  });
+
+  it('dismissCallout() sets the key and hides it', () => {
+    renderProbe();
+    act(() => ctx.dismissCallout());
+    expect(ctx.calloutSeen).toBe(true);
+    expect(localStorage.getItem(KEY)).toBe('1');
+  });
+
+  it('openPanel() dismisses it too', () => {
+    renderProbe();
+    act(() => ctx.openPanel());
+    expect(ctx.panel).toBe('open');
+    expect(ctx.calloutSeen).toBe(true);
+    expect(localStorage.getItem(KEY)).toBe('1');
+  });
+
+  it('a storage whose getItem throws reads as a first visit, with no error', () => {
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    renderProbe();
+    expect(ctx.calloutSeen).toBe(false);
+  });
+
+  it('a storage whose setItem throws still hides it for this page', () => {
+    jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+    renderProbe();
+    act(() => ctx.dismissCallout());
+    expect(ctx.calloutSeen).toBe(true);
   });
 });

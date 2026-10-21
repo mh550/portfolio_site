@@ -276,7 +276,7 @@ describe('ConciergePanel', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Minimize' }));
       expect(dialog()).toBeNull();
       expect(room.disconnect).not.toHaveBeenCalled();
-      const live = screen.getByRole('button', { name: talkWidget.liveLabel });
+      const live = screen.getByRole('button', { name: talkWidget.listening });
       expect(live).toHaveFocus();
       fireEvent.click(live);
       expect(screen.getByRole('button', { name: talkPage.labels.leave })).toBeInTheDocument();
@@ -290,13 +290,13 @@ describe('ConciergePanel', () => {
       fireEvent.keyDown(input, { key: 'Escape' });
       expect(dialog()).toBeNull();
       expect(room.disconnect).not.toHaveBeenCalled();
-      expect(screen.getByRole('button', { name: talkWidget.liveLabel })).toHaveFocus();
+      expect(screen.getByRole('button', { name: talkWidget.listening })).toHaveFocus();
     });
 
     it('the live widget is named for the call whether the panel is open or not', async () => {
       await goLive();
-      expect(screen.getByRole('button', { name: talkWidget.liveLabel })).toHaveAttribute('aria-expanded', 'true');
-      expect(talkWidget.liveLabel).toBe('Live call with my concierge');
+      expect(screen.getByRole('button', { name: talkWidget.listening })).toHaveAttribute('aria-expanded', 'true');
+      expect(talkWidget.listening).toBe('Ask my site: listening');
     });
 
     it('a dropped call with focus on the message box hands focus to Connect in the panel', async () => {
