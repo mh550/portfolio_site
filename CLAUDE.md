@@ -14,7 +14,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | Route | Section |
 |---|---|
 | `/` | Hero / Landing |
-| `/about` | About |
+| `/about` | About: `aboutIntro`, the story, How I work (`#how-i-work`: `MethodStrip showLines` + one `loopStepExample` link per step, D80), Philosophy |
 | `/skills` | Skills & Tech Stack |
 | `/projects` | Projects index (filterable) |
 | `/projects/[slug]` | Individual project deep-dive (static, from `lib/data/projects.ts`; `order` per D59: agent-harness, voice-concierge, ghl-jobtread-integration first) |
@@ -37,7 +37,7 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1141 tests, 82 suites after P1-03)
+npm test             # Jest unit/integration tests (1155 tests, 82 suites after P1-04)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -98,7 +98,7 @@ Single source of truth for all page content — no content is hardcoded in compo
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
 - `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
-- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md) and `/approach` (`showLines`: lines at every width)
+- `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); hero (labels only below md), `/approach` and `/about` (`showLines`: lines at every width; `/about` passes `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)
 - `components/projects/ProjectsGrid.tsx` — client filter + grid (sorted by `order`) using `ProjectCard` + `ScrollReveal` (`"use client"`)
 - `components/projects/ProjectDetail.tsx` — the `/projects/[slug]` body (Server Component); `page.tsx` only resolves

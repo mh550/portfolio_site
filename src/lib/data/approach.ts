@@ -260,3 +260,14 @@ export function exampleHref(example: PrincipleExample): string | undefined {
   if (!example.projectSlug) return undefined;
   return `/projects/${example.projectSlug}${example.anchor ? `#${example.anchor}` : ''}`;
 }
+
+/** A loop step's one link on /about How I work (D80): the first example of its principle that has a page, named by
+ *  that example's first sentence. Throws when there is none, so a data change that breaks it fails the build. */
+export function loopStepExample(step: LoopStep): { href: string; text: string } {
+  const principle = principles.find((p) => p.id === step.principle);
+  for (const example of principle ? resolvedExamples(principle) : []) {
+    const href = exampleHref(example);
+    if (href) return { href, text: example.text.split(/(?<=\.)\s/)[0] };
+  }
+  throw new Error(`loop step ${step.id}: principle ${step.principle} has no example with a page`);
+}

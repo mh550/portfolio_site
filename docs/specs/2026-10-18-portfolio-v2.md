@@ -478,4 +478,5 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   redirect, `git revert` P1-05. (P1-05 builds.)
 - **D80** *default*: `/about` gains a "How I work" section (`#how-i-work`) between the story and Philosophy: the loop
   strip with lines at every width and one case-study link per step. Extends D13 (About keeps Michael's story); the
-  intro stays three sentences. (P1-04 builds.)
+  intro stays three sentences. (*Built in P1-04*: `loopStepExample` in `approach.ts`, `MethodStrip`'s `examples`;
+  the narrative bullets are `docs/notes/about-narrative-bullets.md`.)

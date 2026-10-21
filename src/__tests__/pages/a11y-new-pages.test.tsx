@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
+import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
 import ApproachPage from '@/app/approach/page';
@@ -17,6 +18,7 @@ jest.mock('next/navigation', () => ({ usePathname: () => '/approach' }));
 const caseStudy = (slug: string) => <ProjectDetail project={getProjectBySlug(slug)!} />;
 
 const pages: [string, () => ReactElement][] = [
+  ['/about', () => <AboutPage />],
   ['/card', () => <CardPage />],
   ['/card/qr', () => <CardQrPage />],
   ['/approach', () => <ApproachPage />],

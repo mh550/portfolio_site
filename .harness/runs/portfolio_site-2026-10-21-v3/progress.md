@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 07:20 · P1-04 · passes
+
+`/about` has `<section id="how-i-work" aria-labelledby="how-i-work-heading">` (h2 How I work, `scroll-mt-24`) between the story and Philosophy: `MethodStrip showLines label="The loop" examples=…`, one link per step from the new `loopStepExample(step)` in `approach.ts` (first linkable example of the step's principle → `{ href, text: first sentence }`, throws if none). `MethodStrip` gains an optional `examples` prop (hero passes none, unchanged). New `docs/notes/about-narrative-bullets.md`: 14 sourced bullets, 2 failure stories. Tests: about (+6), MethodStrip (+2), approach lib (+3), a11y-new-pages now covers `/about`: 1141 → 1155 tests, 82 suites. D80 marked built in the v2 spec and plan; CLAUDE.md /about row, MethodStrip line, test count.
+Verified: about tests red first (5 failing); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; step-4 jest command 4 suites/123 tests green; smoke exit 0, 42 PASS; Sonnet browser check: `/about#how-i-work` at 390 puts the h2 at top 96 under a 65 px navbar, no horizontal scroll, five steps in one row at 1280, accent focus outline, no console errors; 390 screenshot looked at. Opus review: 2 Important + 5 Minor, all fixed (bullets said "first two overnight runs" for Oct 17 → "first two harness v2 runs"; facts only in § 8 now cite it too; dropped sub-bullets with sources outside the allowed set; a redundant claims test removed).
+Next session (P1-05): How I work is ready for the `/approach` redirect target. Note: full-page smoke screenshots don't trigger ScrollReveal, so sections below the fold look empty in them; scroll the section into view to look at it. Next free decision: **D81**.
+Question for Michael: the Covid/Colorado detour in the current story has no note under docs/notes/, so the bullets leave it out; it stays on the page. Keep it in the rewrite?
+Proposed change: at md+ the five columns in `max-w-3xl` are ~131 px wide, so the longer link texts wrap to ~6 lines of 12 px; P6's design notes could consider a wider section or a stacked layout.
+
 ### 2026-10-21 06:30 · P1-03 · passes
 
 `scripts/logos.mjs` (`npm run logos`) writes `src/components/logos/paths.ts` (`logoPaths`, 12 keys, `LogoKey`; header: simple-icons 16.9.0, CC0, brand guidelines apply); `Logo.tsx` (title or `decorative`); `FloatingLogos` reads `logoPaths` in four columns outside the text column (plan § Logos); `pipedreamPath` and `public/pipedream.svg` gone; `simple-icons` moved to devDependencies at exactly 16.9.0. New `.harness/logos-check.mjs`. Tests: paths.test, Logo.test (new), FloatingLogos.test (12 names, none of the dropped six): 1122 → 1141 tests, 80 → 82 suites. CLAUDE.md Commands/Components/Code rules, D78 marked as built in the spec and plan.

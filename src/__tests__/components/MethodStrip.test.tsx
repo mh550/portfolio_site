@@ -79,3 +79,20 @@ describe('MethodStrip', () => {
     expect(screen.getByRole('list', { name: 'How I work' })).toHaveClass('mb-8');
   });
 });
+
+describe('MethodStrip examples (D80, /about)', () => {
+  it('renders no links without examples (the hero)', () => {
+    render(<MethodStrip />);
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
+  it('renders one focusable link under the step it belongs to', () => {
+    render(<MethodStrip showLines examples={{ build: { href: '/projects/x#simplify', text: 'An example.' } }} />);
+    const link = screen.getByRole('link', { name: 'An example.' });
+    expect(link).toHaveAttribute('href', '/projects/x#simplify');
+    expect(link.className).toMatch(/\bfocus-visible:outline/);
+    const items = screen.getAllByRole('listitem');
+    expect(within(items[2]).getByRole('link')).toBe(link);
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+});

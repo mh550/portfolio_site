@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import LoopingVideo from '@/components/LoopingVideo';
+import MethodStrip from '@/components/MethodStrip';
 import ScrollReveal from '@/components/ScrollReveal';
-import { aboutIntro, profile } from '@/lib/data';
+import { aboutIntro, loopStepExample, loopSteps, profile } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'About — Michael Herron',
   description: `Duke CS grad, first engineer at Builder Clarity, now at MAXX Potential. ${profile.subline}`,
 };
+
+// One case-study link per loop step (D80)
+const loopExamples = Object.fromEntries(loopSteps.map((step) => [step.id, loopStepExample(step)]));
 
 export default function AboutPage() {
   return (
@@ -91,6 +95,21 @@ export default function AboutPage() {
           <div className="clear-both" />
         </div>
       </ScrollReveal>
+
+      {/* Divider */}
+      <ScrollReveal delay={0.05}>
+        <div className="my-16 h-px bg-gradient-to-r from-[var(--color-accent)]/30 via-[var(--color-accent)]/10 to-transparent" />
+      </ScrollReveal>
+
+      {/* How I work — the loop, one case-study link per step (D80); /approach lands here */}
+      <section id="how-i-work" aria-labelledby="how-i-work-heading" className="scroll-mt-24">
+        <ScrollReveal delay={0.05}>
+          <h2 id="how-i-work-heading" className="text-3xl font-bold mb-6">How I work</h2>
+        </ScrollReveal>
+        <ScrollReveal delay={0.1}>
+          <MethodStrip showLines label="The loop" examples={loopExamples} />
+        </ScrollReveal>
+      </section>
 
       {/* Divider */}
       <ScrollReveal delay={0.05}>

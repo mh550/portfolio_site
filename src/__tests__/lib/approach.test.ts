@@ -1,4 +1,15 @@
-import { aboutIntro, loopSteps, methodSteps, principles, profile, type LoopStep, type MethodStep } from '@/lib/data';
+import {
+  aboutIntro,
+  exampleHref,
+  loopStepExample,
+  loopSteps,
+  methodSteps,
+  principles,
+  profile,
+  resolvedExamples,
+  type LoopStep,
+  type MethodStep,
+} from '@/lib/data';
 
 describe('methodSteps', () => {
   it('has the five steps in method order', () => {
@@ -92,5 +103,32 @@ describe('aboutIntro (D13, D32, D77)', () => {
 
   it('no longer names the case-study method', () => {
     expect(aboutIntro.join(' ')).not.toMatch(/Diagnose|Decide|Simplify/);
+  });
+});
+
+describe('loopStepExample (D80)', () => {
+  it("is the first linkable example of the step's principle", () => {
+    for (const step of loopSteps) {
+      const principle = principles.find((p) => p.id === step.principle)!;
+      const first = resolvedExamples(principle).find((e) => exampleHref(e) !== undefined)!;
+      const link = loopStepExample(step);
+      expect(link.href).toBe(exampleHref(first));
+      expect(link.href).toMatch(/^\/projects\//);
+      expect(first.text.startsWith(link.text)).toBe(true);
+    }
+  });
+
+  it("names each link with its example's first sentence", () => {
+    expect(loopSteps.map((s) => loopStepExample(s).text)).toEqual([
+      'The harness keeps a numbered decision ledger.',
+      'In the harness a deterministic bash driver does all the git bookkeeping, because a script does that and a prompt might not.',
+      'I built four download-quality tiers, used them, then replaced them with one rule: lossless or 256 kbps and up.',
+      'After the first night every count matched, 859 = 859 = 859, while 92 titles were still wrong on my phone.',
+      'The harness broke its own rule.',
+    ]);
+  });
+
+  it('throws when a principle has no linkable example', () => {
+    expect(() => loopStepExample({ ...loopSteps[0], principle: 'missing' as LoopStep['principle'] })).toThrow();
   });
 });
