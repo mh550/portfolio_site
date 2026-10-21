@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 11:20 · P6-03 · passes
+
+- New `docs/notes/2026-10-21-framework-options.md` (docs only; tests 1859 → 1859). Six foundations with licence, stack, last push and what each gives: daedalOS (MIT, Next 16 Pages Router + styled-components), `@react95/core` (MIT with a Microsoft-imagery carve-out, so GitHub says NOASSERTION), 98.css, NES.css (last push 2024-01-17), M4TT72 Terminal (Svelte 4), WebTUI (pre-1.0 CSS); plus five left out (ryOS is AGPL-3.0) and why no CRT kit. Each has porting steps and an hour range with its assumption (fork daedalOS 60–90 h, fork M4TT72 80–120 h; borrows 6–30 h).
+- Recommendation: **borrow**, from WebTUI (box rule and grid copied into `@layer components`, never the whole package: it restyles body and bare buttons), paired with P6-02 direction 1, after its token-only pass; NES.css for one page if Michael picks direction 2.
+- Verified: licences/dates via `gh api` and `LICENSE`/`package.json`, versions via `npm view`; all 16 URLs 200 (listed under the table); site counts from `wc`/`grep`/`find` (sources section); `npx jest --silent | tail -5` → 100 suites, 1859 tests; content-guard test 20/20 and the note greps clean of its patterns.
+- Opus review: 3 Important (test-file count 101/56 → 100/55; LiveKit only via RoomAudio; WebTUI import restyles globally and its `utils` layer would beat Tailwind utilities) + 8 Minor, all fixed.
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: borrow as recommended, or do you want a daedalOS fork spiked on a branch first?
+
 ### 2026-10-21 10:50 · P6-02 · passes
 
 - New `docs/design/2026-10-21-design-directions.html` (docs only; tests 1859 → 1859). Three directions, each with the home hero and the Recent work cards drawn at 1280 and 390 in real copy, a 7–8 token palette with a computed contrast table (memory colours checked on each surface), free fonts with licence sources (IBM Plex; Press Start 2P + Atkinson Hyperlegible; Barlow/Barlow Condensed + Space Mono + DSEG7, all OFL), motion rules, and the concierge panel drawn per direction (tmux pane; CRT bezel; rack module with the Latency tab as VU meters). Then best practices, a comparison table, and **recommendation 1, the terminal**, with a token-only first pass (colours, Plex via next/font, radii incl. bare `--radius`, the hard-coded cyan in NodeGraph/FloatingLogos/OG image/themeColor and their pins).
