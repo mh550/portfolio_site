@@ -42,3 +42,9 @@
 - 2026-10-21 09:18 · P5-05 · claude-opus-5-5 · passes=true · 11 min · 31/37 passing
 - 2026-10-21 09:25 · P5-06 · claude-opus-5-5 · passes=true · 6 min · 32/37 passing
 - 2026-10-21 09:48 · P5-07 · claude-opus-5-5 · passes=true · 22 min · 33/37 passing
+- 2026-10-21 09:51 · P5 verified and tagged run/portfolio_site-2026-10-21-v3/P5
+- 2026-10-21 09:51 · P5 proposed for merging · https://github.com/mh550/portfolio_site/pull/27
+- 2026-10-21 10:07 · P6-01 · claude-opus-5-5 · passes=true · 16 min · 34/37 passing
+- 2026-10-21 10:31 · P6-02 · claude-opus-5-5 · passes=true · 24 min · 35/37 passing
+- 2026-10-21 10:43 · P6-03 · claude-opus-5-5 · passes=true · 10 min · 36/37 passing
+- 2026-10-21 10:46 · P6-04 · claude-sonnet-5-5 · passes=true · 2 min · 37/37 passing

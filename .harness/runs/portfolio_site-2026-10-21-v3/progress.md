@@ -13,6 +13,64 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · verify P6
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P6-01 | 1 | grep for script/link/img/@import in the HTML; Chromium via /tmp/render.mjs at 1280 and 390 | 0 matches; 0 console/page/request errors; scrollWidth 1280/1280 and 390/390; footer records the check command | yes |
+| P6-01 | 2 | read h2/h3 of options A, B, C; counted refs, token hexes | each option has Hiring manager 10 s, Cost to build, What others have done (3, 4, 5 refs), Risks; mockups use the four tokens and real titles (Agent Harness, Voice Concierge) | yes |
+| P6-01 | 3 | curl -sIL on all 46 unique URLs across the three files; read trailing comment and Sources | all 200; comment lists codes; Sources section present | yes |
+| P6-01 | 4 | read h2 'Recommendation: B' and h3 'What option A would share with the P5 graph' | both present | yes |
+| P6-01 | 5 | `.harness/check.sh` | 1859 passed; `check: lint ok · jest ok · build ok` | yes |
+| P6-02 | 1 | grep script/link/@import; Chromium at 1280 and 390; progress.md grep | 0 external refs, 0 errors, no horizontal scroll at 390; progress.md mentions frontend-design | yes |
+| P6-02 | 2 | read h3s per direction d1–d3; python recomputed WCAG ratios of the 16 contrast rows per direction | palette 8/8/7 hexes; type, motion (scanlines/reduced motion), concierge+memory colours, VU meter present; 0 stated ratios off by >0.1 | yes |
+| P6-02 | 3 | read h2s; grep token-only | Best practices, comparison table, Recommendation: 1 with 'token-only pass first' all present | yes |
+| P6-02 | 4 | read trailing comment (18 URLs, all 200); grep img/.png/.jpg | URL codes listed and all 200 on my curl; 0 images | yes |
+| P6-02 | 5 | `.harness/check.sh` | same run: green | yes |
+| P6-03 | 1 | read table (6 rows) and URL code block; curl all URLs | 6 projects with URL, licence, stack, last activity; all 200 | yes |
+| P6-03 | 2 | read '### 1.'–'### 6.' porting sections | concrete steps plus hour ranges (6–10 up to 80–120) with assumptions paragraph | yes |
+| P6-03 | 3 | read Recommendation and line 66; ran jest | borrow from WebTUI paired with direction 1; quotes 1859 tests, matching my run | yes |
+| P6-03 | 4 | `npx jest src/__tests__/lib/content-guard.test.ts`; grep private/.env | 20 passed; no private links | yes |
+| P6-03 | 5 | `.harness/check.sh` | green | yes |
+| P6-04 | 1 | read ## Review section; re-curled 46 URLs | script and result recorded; all 200 | yes |
+| P6-04 | 2 | read review table (line ~263) and grep of script/link/img | sentences with digits sourced; 0 external script/link/img | yes |
+| P6-04 | 3 | ran my own Chromium script | 0 errors, scrollWidth <= innerWidth at 390 for both files | yes |
+| P6-04 | 4 | grep '## P6' docs/review-guide.md; read Review section | '## P6 (v3): recommendations' at line 397; findings section says none to fix | yes |
+| P6-04 | 5 | `.harness/check.sh` | green | yes |
+
+### 2026-10-21 · P6-04 · passes
+- Reviewed the three P6 files; added `## Review (P6-04)` to `docs/notes/2026-10-21-framework-options.md` and `## P6 (v3): recommendations` to `docs/review-guide.md`. No code changed; tests 1859 → 1859.
+- URLs: 46 unique, all 200 by `curl -sIL`. HTML files: no external script/link/img/@import.
+- Chromium at 1280 and 390: 0 console errors, scrollWidth == innerWidth on both files.
+- Numbers traced to projects.ts, skills.ts, evidence notes and `wc`/`find` counts (10/8/4, 17/14/3, 51/9, 734/592/1969, 100/55); all matched; mockup counts carry the "illustrative" tag. No findings to fix.
+- `.harness/check.sh`: lint ok · jest ok · build ok.
+
+### 2026-10-21 11:20 · P6-03 · passes
+
+- New `docs/notes/2026-10-21-framework-options.md` (docs only; tests 1859 → 1859). Six foundations with licence, stack, last push and what each gives: daedalOS (MIT, Next 16 Pages Router + styled-components), `@react95/core` (MIT with a Microsoft-imagery carve-out, so GitHub says NOASSERTION), 98.css, NES.css (last push 2024-01-17), M4TT72 Terminal (Svelte 4), WebTUI (pre-1.0 CSS); plus five left out (ryOS is AGPL-3.0) and why no CRT kit. Each has porting steps and an hour range with its assumption (fork daedalOS 60–90 h, fork M4TT72 80–120 h; borrows 6–30 h).
+- Recommendation: **borrow**, from WebTUI (box rule and grid copied into `@layer components`, never the whole package: it restyles body and bare buttons), paired with P6-02 direction 1, after its token-only pass; NES.css for one page if Michael picks direction 2.
+- Verified: licences/dates via `gh api` and `LICENSE`/`package.json`, versions via `npm view`; all 16 URLs 200 (listed under the table); site counts from `wc`/`grep`/`find` (sources section); `npx jest --silent | tail -5` → 100 suites, 1859 tests; content-guard test 20/20 and the note greps clean of its patterns.
+- Opus review: 3 Important (test-file count 101/56 → 100/55; LiveKit only via RoomAudio; WebTUI import restyles globally and its `utils` layer would beat Tailwind utilities) + 8 Minor, all fixed.
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: borrow as recommended, or do you want a daedalOS fork spiked on a branch first?
+
+### 2026-10-21 10:50 · P6-02 · passes
+
+- New `docs/design/2026-10-21-design-directions.html` (docs only; tests 1859 → 1859). Three directions, each with the home hero and the Recent work cards drawn at 1280 and 390 in real copy, a 7–8 token palette with a computed contrast table (memory colours checked on each surface), free fonts with licence sources (IBM Plex; Press Start 2P + Atkinson Hyperlegible; Barlow/Barlow Condensed + Space Mono + DSEG7, all OFL), motion rules, and the concierge panel drawn per direction (tmux pane; CRT bezel; rack module with the Latency tab as VU meters). Then best practices, a comparison table, and **recommendation 1, the terminal**, with a token-only first pass (colours, Plex via next/font, radii incl. bare `--radius`, the hard-coded cyan in NodeGraph/FloatingLogos/OG image/themeColor and their pins).
+- Built by `$HARNESS_SCRATCH/p602/build.py` from `template.html` (bitmap and seven-segment SVG, swatches, contrast tables; it fails on any pair under 4.5/3 and curls every URL: 18 × 200 in the trailing comment). The frontend-design skill was used.
+- Verified: `p602/p6-02-check.mjs` at 1280 and 390, normal and reduced motion: 0 console errors, 0 external requests, scrollWidth 390/390; `rm-check.mjs`: scanlines 5 shown → 0 under reduce, cursor animation none; `grep -c '<script\|<link \|<img\|url(\|@font-face'` → 0; every screen looked at as a PNG.
+- Opus review: 7 Important + 11 Minor, all fixed (vignette removed so the reduced-motion claim and the 5 % texture rule hold; red/blue ratios restated; ProjectCard order change said plainly; token pass gained `--radius`, hard-coded colours, Plex weights; phone text ≥ 15 px; four of the latency rows drawn and why; usher notice now a real target; knobs flagged as a departure from § 11).
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: terminal (1) as recommended, or do you want the cartridge (2) or the desk (3)? If 1, the next step is the token-only PR described at the end of the file (a new D for the fonts).
+
+### 2026-10-21 10:15 · P6-01 · passes
+
+- New `docs/design/2026-10-21-projects-showcase-options.html` (docs only; tests 1859 → 1859). Three options for `/projects`, each drawn at 1280 × 800 and 390 × 844 in the site tokens with real titles, metrics and iteration texts: (A) one graph for projects and stack, Agent Harness selected with its 9 `skills.ts` edges and a side panel / bottom sheet; (B) case-file grid, company tab, a cover standing in for each project's `architectureDiagram`, `metrics[0]` band, today's category chips; (C) a dated log of the 17 `caseStudy.iterations`. Each has a 10-second read, cost (fields reused, new components), 3–5 references and risks; then a comparison table, **recommendation B** (fastest read for hiring managers, cheapest, covers from 9 existing diagrams), and what A shares with the P5 graph (data, `lib/graph`, selection model, List view; D99's d3-force caveat).
+- Verified: frontend-design skill used. `grep -c '<script src\|<link [^>]*href="http'` → 0, no images/fonts fetched; one-off Playwright run (`node $HARNESS_SCRATCH/p6-01-check.mjs <file>`, command in the file's footer): 1280 and 390 both 0 console errors, 0 external requests, scrollWidth 1280/1280 and 390/390. All 12 reference URLs answer 200 with `curl -sIL -o /dev/null -w '%{http_code}'` (codes in the trailing comment). Sources list at the end of the file.
+- An Opus review checked every number and code claim against the repo: 0 untraced numbers, 2 Important + 3 Minor, all fixed (Tailscale → Edge functions as the 6th infra node; the GoHighLevel cover now uses its diagram's own nodes, not techStack; Mirrored Google Calendars and Cherished have no metrics either; D99 d3-force caveat added to A; band wording uses `metrics[0]`, "14 of 17 in October").
+- `.harness/check.sh` → `check: lint ok · jest ok · build ok`; `lib/check.sh` green; smoke exit 0 at session start.
+- Question for Michael: does B (case files) match what you want for `/projects`, or do you prefer A on `/skills` later? Next step if B: render three diagrams at card width and look at 390.
+
 ### 2026-10-21 verify P5
 
 | Feature | Step | What you ran or read | What you saw | Holds |

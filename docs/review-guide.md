@@ -393,3 +393,16 @@ only `/skills`, `skills.ts`, `src/lib/graph/`, `components/skills/`, the logos a
 
 **Undo.** `git revert` the P5 commits newest first (P5-07 … P5-02; P5-01 is docs only). The old four-group
 `/skills` list, `skillCategories` and their tests come back together; `paths.ts` goes back to 12 marks.
+
+## P6 (v3): recommendations
+
+Docs only; nothing on the site changed. Read in this order:
+
+- `docs/design/2026-10-21-projects-showcase-options.html` (P6-01): three ways to rebuild /projects (graph, case files,
+  dated log), drawn at 1280 and 390. Recommends B, the case files.
+- `docs/design/2026-10-21-design-directions.html` (P6-02): three retro looks (terminal, cartridge/CRT, mixing desk) on the
+  real hero and card, with computed contrast. Recommends 1, the terminal, as a token-only first pass.
+- `docs/notes/2026-10-21-framework-options.md` (P6-03): six vintage-OS/console/terminal foundations with licences and
+  hour ranges. Recommends borrowing from WebTUI inside direction 1. Its § Review (P6-04) records the URL, number and
+  render checks: 46 URLs all 200, both HTML files self-contained, 0 console errors, no sideways scroll at 390.
+- Questions: which of the three directions, and is B the /projects you want?

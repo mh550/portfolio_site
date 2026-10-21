@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three ways to show the projects: graph, case files, log</title>
+<style>
+/* ---------- The document: a light review board, so the dark site screens read as screens ---------- */
+:root {
+  --board: #e4e6ec;
+  --sheet: #f3f4f7;
+  --ink: #15161d;
+  --ink-2: #474a59;
+  --rule: #b8bbc7;
+  --note: #1c4fc4;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Charter, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--board);
+  color: var(--ink);
+  font: 17px/1.55 var(--sans);
+}
+.doc { max-width: 1180px; margin: 0 auto; padding: 56px 32px 80px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0; }
+h1 { font-size: 2.6rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.9rem; margin-top: 4.5rem; }
+h3 { font-size: 1.15rem; margin-top: 1.8rem; font-family: var(--sans); font-weight: 650; }
+p, ul, ol { margin: 0.7rem 0 0; }
+ul, ol { padding-left: 1.25rem; }
+li + li { margin-top: 0.3rem; }
+a { color: var(--note); text-underline-offset: 2px; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--note); outline-offset: 2px; border-radius: 2px; }
+code { font: 0.86em var(--mono); background: var(--sheet); padding: 0.05em 0.3em; border-radius: 3px; overflow-wrap: anywhere; }
+.lede { font-size: 1.15rem; color: var(--ink-2); margin-top: 1rem; }
+.byline { color: var(--ink-2); font-size: 0.95rem; margin-top: 0.6rem; }
+.option-head { display: flex; gap: 1rem; align-items: baseline; margin-top: 5rem; border-top: 2px solid var(--ink); padding-top: 1.2rem; }
+.option-head .letter { font: 600 3.2rem/1 var(--serif); color: var(--note); }
+.option-head h2 { margin: 0; }
+.idea { font-size: 1.1rem; margin-top: 0.4rem; color: var(--ink-2); }
+figure { margin: 2rem 0 0; }
+figcaption { font-size: 0.9rem; color: var(--ink-2); margin-top: 0.6rem; max-width: 68ch; }
+.pair { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 3rem; align-items: start; margin-top: 2.5rem; }
+.pair figure { margin: 0; }
+.notes h3:first-child { margin-top: 0; }
+.verdict { background: var(--sheet); border-left: 4px solid var(--note); padding: 1.2rem 1.4rem; margin-top: 1.5rem; max-width: 72ch; }
+.verdict p:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin-top: 1.2rem; }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 0.93rem; background: var(--sheet); }
+th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 650; }
+thead th { border-bottom: 2px solid var(--ink); }
+footer.doc-foot { margin-top: 5rem; border-top: 1px solid var(--rule); padding-top: 1.2rem; font-size: 0.9rem; color: var(--ink-2); }
+footer.doc-foot pre { font: 0.82rem/1.5 var(--mono); background: var(--sheet); padding: 0.8rem 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .pair { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .doc { padding: 32px 16px 56px; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.55rem; }
+  .option-head .letter { font-size: 2.4rem; }
+}
+
+/* ---------- The screens: the site's own tokens, drawn at design size and scaled with container units ---------- */
+.screen {
+  position: relative;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #0a0a0f;
+  color: #e8e8f0;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.4;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #0a0a0f, 0 18px 40px -18px rgba(21, 22, 29, 0.55);
+}
+.w1280 { aspect-ratio: 1280 / 800; --d: calc(100cqw / 1280); }
+.w390 { aspect-ratio: 390 / 844; width: min(390px, 100%); --d: calc(100cqw / 390); }
+.screen * { box-sizing: border-box; }
+.screen p, .screen h1, .screen h2, .screen h3, .screen ul { margin: 0; padding: 0; list-style: none; }
+.abs { position: absolute; left: calc(var(--d) * var(--x)); top: calc(var(--d) * var(--y)); width: calc(var(--d) * var(--w)); height: calc(var(--d) * var(--h)); }
+.t9 { font-size: calc(var(--d) * 9); } .t10 { font-size: calc(var(--d) * 10); } .t11 { font-size: calc(var(--d) * 11); }
+.t12 { font-size: calc(var(--d) * 12); } .t13 { font-size: calc(var(--d) * 13); } .t14 { font-size: calc(var(--d) * 14); }
+.t16 { font-size: calc(var(--d) * 16); } .t18 { font-size: calc(var(--d) * 18); } .t22 { font-size: calc(var(--d) * 22); }
+.t32 { font-size: calc(var(--d) * 32); } .t40 { font-size: calc(var(--d) * 40); } .t56 { font-size: calc(var(--d) * 56); }
+.muted { color: #8888a0; }
+.acc { color: #00d4ff; }
+.bold { font-weight: 700; }
+.mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+.eyebrow { font-family: "Geist Mono", ui-monospace, Menlo, monospace; color: #00d4ff; letter-spacing: 0.3em; text-transform: uppercase; }
+.h1 { font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
+
+/* site chrome */
+.nav { position: absolute; left: 0; top: 0; right: 0; height: calc(var(--d) * 64); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 calc(var(--d) * 88); }
+.w390 .nav { height: calc(var(--d) * 56); padding: 0 calc(var(--d) * 16); }
+.nav .mark { font-family: "Geist Mono", ui-monospace, monospace; font-weight: 700; color: #00d4ff; font-size: calc(var(--d) * 14); }
+.nav .links { display: flex; gap: calc(var(--d) * 32); font-size: calc(var(--d) * 14); color: #8888a0; }
+.nav .links .on { color: #00d4ff; }
+.burger { width: calc(var(--d) * 22); height: calc(var(--d) * 14); border-top: calc(var(--d) * 2) solid #e8e8f0; border-bottom: calc(var(--d) * 2) solid #e8e8f0; position: relative; }
+.burger::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; margin-top: calc(var(--d) * -1); border-top: calc(var(--d) * 2) solid #e8e8f0; }
+.pill-ask { position: absolute; display: flex; align-items: center; justify-content: center; gap: calc(var(--d) * 8); background: #00d4ff; color: #0a0a0f; font-weight: 700; border-radius: 999px; font-size: calc(var(--d) * 14); }
+.bars { display: inline-flex; gap: calc(var(--d) * 2); align-items: center; }
+.bars i { display: block; width: calc(var(--d) * 2); background: #0a0a0f; border-radius: 1px; }
+.bars i:nth-child(1) { height: calc(var(--d) * 6); } .bars i:nth-child(2) { height: calc(var(--d) * 11); } .bars i:nth-child(3) { height: calc(var(--d) * 8); }
+.chip { display: inline-flex; align-items: center; white-space: nowrap; border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; padding: calc(var(--d) * 7) calc(var(--d) * 14); color: #e8e8f0; }
+.chip.on { border-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.08); }
+.row { display: flex; gap: calc(var(--d) * 8); flex-wrap: nowrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: calc(var(--d) * 8) calc(var(--d) * 16); border: 1px solid rgba(255,255,255,0.16); color: #e8e8f0; white-space: nowrap; }
+.btn.primary { background: #00d4ff; color: #0a0a0f; border-color: #00d4ff; font-weight: 700; }
+
+/* option A: the graph */
+.ga { position: absolute; }
+.cl { position: absolute; background: #12121a; border: 1px solid rgba(255,255,255,0.08); border-radius: calc(var(--d) * 12); }
+.ct { position: absolute; left: calc(var(--d) * 14); top: calc(var(--d) * 12); font-family: "Geist Mono", ui-monospace, monospace; font-size: calc(var(--d) * 9.5); color: #00d4ff; letter-spacing: 0.2em; text-transform: uppercase; white-space: nowrap; }
+.more { position: absolute; left: 0; right: 0; bottom: calc(var(--d) * 10); text-align: center; font-size: calc(var(--d) * 9.5); color: #8888a0; }
+.node { position: absolute; left: calc(var(--d) * (var(--x) - 43)); top: calc(var(--d) * (var(--y) - 5)); width: calc(var(--d) * 86); text-align: center; font-size: calc(var(--d) * 10); line-height: 1.2; color: #8888a0; opacity: 0.35; }
+.node i { display: block; width: calc(var(--d) * 10); height: calc(var(--d) * 10); border-radius: 50%; margin: 0 auto calc(var(--d) * 4); background: #0e7490; }
+.node.on { opacity: 1; color: #fff; font-weight: 700; }
+.node.on i { background: #00d4ff; box-shadow: 0 0 0 calc(var(--d) * 3) rgba(0,212,255,0.2); }
+.edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.edges path { fill: none; stroke: #00d4ff; stroke-width: 1.4; }
+.edges .faint { stroke: #8888a0; stroke-opacity: 0.18; stroke-width: 1; }
+.proj { position: absolute; left: calc(var(--d) * 10); width: calc(var(--d) * var(--pw, 180)); top: calc(var(--d) * var(--y)); height: calc(var(--d) * var(--ph, 40)); display: flex; align-items: center; padding: 0 calc(var(--d) * 10); border: 1px solid rgba(255,255,255,0.12); border-radius: calc(var(--d) * 8); font-size: calc(var(--d) * 10.5); line-height: 1.2; color: #e8e8f0; opacity: 0.45; }
+.proj.on { opacity: 1; border-color: #00d4ff; background: rgba(0,212,255,0.1); color: #fff; font-weight: 700; }
+.panel { position: absolute; background: #12121a; border: 1px solid rgba(0,212,255,0.35); border-radius: calc(var(--d) * 12); padding: calc(var(--d) * 20); display: flex; flex-direction: column; gap: calc(var(--d) * 12); }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--d) * 10) calc(var(--d) * 14); }
+.metrics b { display: block; color: #00d4ff; font-size: calc(var(--d) * 20); line-height: 1.1; }
+.metrics span { display: block; color: #8888a0; font-size: calc(var(--d) * 10.5); line-height: 1.25; margin-top: calc(var(--d) * 2); }
+.tags { display: flex; flex-wrap: wrap; gap: calc(var(--d) * 5); }
+.tag { font-family: "Geist Mono", ui-monospace, monospace; font-size: calc(var(--d) * 9.5); color: #8888a0; border: 1px solid rgba(255,255,255,0.12); border-radius: calc(var(--d) * 4); padding: calc(var(--d) * 2) calc(var(--d) * 6); white-space: nowrap; }
+.close { position: absolute; right: calc(var(--d) * 14); top: calc(var(--d) * 12); width: calc(var(--d) * 26); height: calc(var(--d) * 26); border-radius: 50%; border: 1px solid rgba(255,255,255,0.16); }
+.close::before, .close::after { content: ""; position: absolute; left: 25%; right: 25%; top: 50%; border-top: 1px solid #e8e8f0; transform: rotate(45deg); }
+.close::after { transform: rotate(-45deg); }
+
+/* option B: case files */
+.files { display: grid; gap: calc(var(--d) * 24); }
+.file .tabline { display: inline-block; background: #1a1a2e; color: #8888a0; font-family: "Geist Mono", ui-monospace, monospace; font-size: calc(var(--d) * 10); padding: calc(var(--d) * 5) calc(var(--d) * 12); border-radius: calc(var(--d) * 8) calc(var(--d) * 8) 0 0; }
+.file .body { background: #12121a; border: 1px solid rgba(255,255,255,0.08); border-radius: 0 calc(var(--d) * 12) calc(var(--d) * 12) calc(var(--d) * 12); overflow: hidden; }
+.cover { aspect-ratio: 16 / 9; background: #1a1a2e; position: relative; display: flex; align-items: center; justify-content: center; }
+.schem { display: flex; align-items: center; gap: calc(var(--d) * 0); }
+.schem .bx { font-family: "Geist Mono", ui-monospace, monospace; font-size: calc(var(--d) * 9.5); color: #e8e8f0; border: 1px solid rgba(0,212,255,0.55); border-radius: calc(var(--d) * 5); padding: calc(var(--d) * 6) calc(var(--d) * 7); background: #12121a; white-space: nowrap; }
+.schem .bx.hot { background: rgba(0,212,255,0.14); }
+.schem .ln { width: calc(var(--d) * 14); border-top: 1px solid #00d4ff; position: relative; }
+.schem .ln::after { content: ""; position: absolute; right: 0; top: calc(var(--d) * -3.5); border-left: calc(var(--d) * 5) solid #00d4ff; border-top: calc(var(--d) * 3) solid transparent; border-bottom: calc(var(--d) * 3) solid transparent; }
+.schem .ln.two::before { content: ""; position: absolute; left: 0; top: calc(var(--d) * -3.5); border-right: calc(var(--d) * 5) solid #00d4ff; border-top: calc(var(--d) * 3) solid transparent; border-bottom: calc(var(--d) * 3) solid transparent; }
+.stack { display: flex; flex-direction: column; align-items: center; gap: calc(var(--d) * 12); }
+.vline { height: calc(var(--d) * 12); border-left: 1px solid #00d4ff; margin: calc(var(--d) * -12) 0; }
+.band { display: flex; align-items: baseline; gap: calc(var(--d) * 10); padding: calc(var(--d) * 12) calc(var(--d) * 16); background: rgba(0,212,255,0.07); border-top: 1px solid rgba(0,212,255,0.25); border-bottom: 1px solid rgba(0,212,255,0.25); }
+.band b { color: #00d4ff; font-size: calc(var(--d) * 22); line-height: 1; white-space: nowrap; }
+.band span { color: #8888a0; font-size: calc(var(--d) * 12); }
+.band.pending { background: transparent; border-color: rgba(255,255,255,0.08); }
+.band.pending span { font-size: calc(var(--d) * 12); }
+.file .txt { padding: calc(var(--d) * 14) calc(var(--d) * 16) calc(var(--d) * 16); display: flex; flex-direction: column; gap: calc(var(--d) * 8); }
+
+/* option C: the log */
+.ledger { border-left: 1px solid rgba(0,212,255,0.3); }
+.entry { position: relative; padding: 0 0 calc(var(--d) * 22) calc(var(--d) * 26); }
+.entry::before { content: ""; position: absolute; left: calc(var(--d) * -5); top: calc(var(--d) * 5); width: calc(var(--d) * 9); height: calc(var(--d) * 9); border-radius: 50%; background: #0a0a0f; border: calc(var(--d) * 2) solid #00d4ff; }
+.entry .when { font-family: "Geist Mono", ui-monospace, monospace; color: #8888a0; }
+.entry .when .slug { color: #00d4ff; }
+.entry h3 { font-weight: 700; margin-top: calc(var(--d) * 4); }
+.entry .what { color: #c9c9d6; margin-top: calc(var(--d) * 4); line-height: 1.5; }
+.entry .short { display: inline-block; margin-top: calc(var(--d) * 8); font-family: "Geist Mono", ui-monospace, monospace; color: #e8e8f0; border: 1px solid rgba(255,255,255,0.14); border-radius: calc(var(--d) * 4); padding: calc(var(--d) * 2) calc(var(--d) * 8); }
+.month { font-family: "Geist Mono", ui-monospace, monospace; color: #00d4ff; display: flex; align-items: center; gap: calc(var(--d) * 12); }
+.month::after { content: ""; flex: 1; border-top: 1px solid rgba(255,255,255,0.1); }
+.rail li { padding: calc(var(--d) * 5) 0; color: #8888a0; }
+.rail li.on { color: #00d4ff; font-weight: 700; }
+.select { display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.16); border-radius: calc(var(--d) * 8); padding: 0 calc(var(--d) * 14); }
+.select::after { content: ""; border-left: calc(var(--d) * 5) solid transparent; border-right: calc(var(--d) * 5) solid transparent; border-top: calc(var(--d) * 6) solid #8888a0; }
+</style>
+</head>
+<body>
+<main class="doc">
+
+<header class="prose">
+  <h1>Three ways to show the projects</h1>
+  <p class="byline">P6-01 for Michael, 2026-10-21. A recommendation, not a build: nothing on the site changes with this file.</p>
+  <p class="lede">The projects page today is a grid of cards with category chips. This compares three ways to rebuild it: one graph for projects and stack, a grid of case files, and a dated log. Each option has the same page drawn twice in the site's own colours (a 1280 px desktop screen and a 390 px phone screen), then what a hiring manager takes from it in 10 seconds, what it costs on the data the site already has, who has done it well, and what could go wrong. The recommendation is at the end.</p>
+  <p>What the page has to work with, from <code>src/lib/data/projects.ts</code>: 10 projects, 8 of them featured; 4 with a full case study; 9 with an authored architecture diagram; no project thumbnails yet, and the brand rules forbid stock or fake screenshots (<code>docs/notes/brand.md</code>). The readers, in order: hiring managers and recruiters, then MAXX staff, then people Michael meets at conferences, usually on a phone (<code>brand.md</code>, Positioning).</p>
+</header>
+
+<!-- ======================================================================= A -->
+<section aria-labelledby="opt-a">
+  <div class="option-head"><span class="letter" aria-hidden="true">A</span><h2 id="opt-a">One graph for projects and stack</h2></div>
+  <p class="idea prose">The projects become nodes beside the stack graph from <code>/skills</code>. Picking one lights the parts it was built from and opens a panel that stays on the graph.</p>
+
+  <figure>
+    <div class="screen w1280" role="img" aria-label="Option A at 1280 px: a Projects column on the left of six stack clusters; Agent Harness is selected, lines run to its nine parts, and a side panel on the right shows its title, four metrics and Open case study.">
+      <div class="nav"><span class="mark">MH</span><span class="links"><span>Home</span><span>About</span><span>Skills</span><span class="on">Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="abs" style="--x:88;--y:96;--w:760">
+        <p class="h1 t40">Projects</p>
+        <p class="t14 muted" style="margin-top:calc(var(--d)*8)">Ten projects next to the stack they used. Pick one to see what it was built from.</p>
+      </div>
+      <div class="abs row t12" style="--x:88;--y:206;--w:784">
+        <span class="btn">+</span><span class="btn">&minus;</span><span class="btn">Reset view</span>
+        <span class="btn" style="margin-left:auto">List view</span>
+      </div>
+
+      <div class="ga" style="left:calc(var(--d)*88);top:calc(var(--d)*252);width:calc(var(--d)*784);height:calc(var(--d)*520)">
+        <!-- projects column -->
+        <div class="cl" style="left:0;top:0;width:calc(var(--d)*200);height:calc(var(--d)*520)"><span class="ct">Projects</span><span class="more">+2 more in List view</span></div>
+        <!-- stack clusters, as on /skills -->
+        <div class="cl" style="left:calc(var(--d)*216);top:0;width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Agentic systems</span><span class="more">+3 more</span></div>
+        <div class="cl" style="left:calc(var(--d)*410);top:0;width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Languages</span><span class="more">+1 more</span></div>
+        <div class="cl" style="left:calc(var(--d)*604);top:0;width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Web &amp; mobile</span><span class="more">+1 more</span></div>
+        <div class="cl" style="left:calc(var(--d)*216);top:calc(var(--d)*270);width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Data &amp; integration</span><span class="more">+5 more</span></div>
+        <div class="cl" style="left:calc(var(--d)*410);top:calc(var(--d)*270);width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Infra &amp; operations</span><span class="more">+3 more</span></div>
+        <div class="cl" style="left:calc(var(--d)*604);top:calc(var(--d)*270);width:calc(var(--d)*178);height:calc(var(--d)*250)"><span class="ct">Process &amp; delivery</span><span class="more">+2 more</span></div>
+
+        <svg class="edges" viewBox="0 0 784 520" aria-hidden="true" focusable="false">
+          <path class="faint" d="M454 62 L544 62 M454 182 L454 122 M648 62 L738 62 M648 62 L648 122 M260 332 L350 332 M260 452 L350 452 M454 332 L544 332 M454 392 L544 392 M648 332 L738 332 M648 392 L738 392"/>
+          <path d="M260 62 L350 62 M260 62 L260 122 M350 62 L260 122 M260 122 L260 182 M350 122 L350 182" stroke-opacity="0.45"/>
+          <path d="M190 56 C220 56 230 62 260 62"/>
+          <path d="M190 56 C240 40 300 40 350 62"/>
+          <path d="M190 56 C225 60 235 122 260 122"/>
+          <path d="M190 56 C250 70 300 122 350 122"/>
+          <path d="M190 56 C215 70 230 182 260 182"/>
+          <path d="M190 56 C240 90 300 182 350 182"/>
+          <path d="M190 56 C300 20 400 122 454 122"/>
+          <path d="M190 56 C380 0 640 140 738 122"/>
+          <path d="M190 56 C320 120 480 260 544 332"/>
+        </svg>
+
+        <span class="proj on" style="--y:36">Agent Harness</span>
+        <span class="proj" style="--y:82">Voice Concierge</span>
+        <span class="proj" style="--y:128">GoHighLevel ↔ JobTread Integration</span>
+        <span class="proj" style="--y:174">RingCentral ↔ JobTread Integration</span>
+        <span class="proj" style="--y:220">Self-hosted music library &amp; DJ crate pipeline</span>
+        <span class="proj" style="--y:266">Linear Adoption + Agentic Bug Workflow</span>
+        <span class="proj" style="--y:312">HitList</span>
+        <span class="proj" style="--y:358">React Native Paint Estimator</span>
+
+        <span class="node on" style="--x:260;--y:62"><i></i>Harness engineering</span>
+        <span class="node on" style="--x:350;--y:62"><i></i>Context engineering</span>
+        <span class="node on" style="--x:260;--y:122"><i></i>Agent memory</span>
+        <span class="node on" style="--x:350;--y:122"><i></i>Claude Code</span>
+        <span class="node on" style="--x:260;--y:182"><i></i>Durable state</span>
+        <span class="node on" style="--x:350;--y:182"><i></i>Eval gates</span>
+        <span class="node" style="--x:454;--y:62"><i></i>TypeScript</span>
+        <span class="node" style="--x:544;--y:62"><i></i>Python</span>
+        <span class="node on" style="--x:454;--y:122"><i></i>Bash</span>
+        <span class="node" style="--x:544;--y:122"><i></i>SQL</span>
+        <span class="node" style="--x:454;--y:182"><i></i>JavaScript</span>
+        <span class="node" style="--x:544;--y:182"><i></i>Java</span>
+        <span class="node" style="--x:648;--y:62"><i></i>React</span>
+        <span class="node" style="--x:738;--y:62"><i></i>React Native</span>
+        <span class="node" style="--x:648;--y:122"><i></i>Next.js</span>
+        <span class="node on" style="--x:738;--y:122"><i></i>Node.js</span>
+        <span class="node" style="--x:648;--y:182"><i></i>Expo</span>
+        <span class="node" style="--x:738;--y:182"><i></i>Tailwind CSS</span>
+        <span class="node" style="--x:260;--y:332"><i></i>PostgreSQL</span>
+        <span class="node" style="--x:350;--y:332"><i></i>Supabase</span>
+        <span class="node" style="--x:260;--y:392"><i></i>Multi-tenant architecture</span>
+        <span class="node" style="--x:350;--y:392"><i></i>OAuth 2.0</span>
+        <span class="node" style="--x:260;--y:452"><i></i>REST APIs</span>
+        <span class="node" style="--x:350;--y:452"><i></i>Webhooks</span>
+        <span class="node" style="--x:454;--y:332"><i></i>Docker Compose</span>
+        <span class="node on" style="--x:544;--y:332"><i></i>Git/GitHub</span>
+        <span class="node" style="--x:454;--y:392"><i></i>Linux</span>
+        <span class="node" style="--x:544;--y:392"><i></i>CI/CD</span>
+        <span class="node" style="--x:454;--y:452"><i></i>Vercel</span>
+        <span class="node" style="--x:544;--y:452"><i></i>Edge functions</span>
+        <span class="node" style="--x:648;--y:332"><i></i>Specs &amp; decision ledgers</span>
+        <span class="node" style="--x:738;--y:332"><i></i>Test-driven development</span>
+        <span class="node" style="--x:648;--y:392"><i></i>Requirements</span>
+        <span class="node" style="--x:738;--y:392"><i></i>Linear</span>
+        <span class="node" style="--x:648;--y:452"><i></i>AGILE/Scrum</span>
+        <span class="node" style="--x:738;--y:452"><i></i>Project management</span>
+      </div>
+
+      <div class="panel" style="left:calc(var(--d)*888);top:calc(var(--d)*252);width:calc(var(--d)*304);height:calc(var(--d)*468)">
+        <span class="close" aria-hidden="true"></span>
+        <p class="t18 bold" style="padding-right:calc(var(--d)*30);line-height:1.25">Agent Harness: overnight software delivery with verification gates</p>
+        <p class="t11 muted">Personal · open source · Sep – Oct 2026</p>
+        <p class="t12" style="color:#c9c9d6;line-height:1.45">A driver that runs coding agents overnight, one fresh session per feature, and merges only work an independent session has verified.</p>
+        <div class="metrics">
+          <div><b>55</b><span>features passing in one day</span></div>
+          <div><b>52</b><span>verified and merged, 12 PRs</span></div>
+          <div><b>+374</b><span>tests added</span></div>
+          <div><b>≈ $2.53</b><span>per passing feature</span></div>
+        </div>
+        <p class="t11 muted">Built from 9 parts of the stack</p>
+        <div class="row t12" style="margin-top:auto"><span class="btn primary">Open case study</span><span class="btn">GitHub</span></div>
+      </div>
+      <span class="pill-ask" style="left:calc(var(--d)*1128);top:calc(var(--d)*736);width:calc(var(--d)*136);height:calc(var(--d)*48)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</span>
+    </div>
+    <figcaption>1280 × 800, Agent Harness selected. The nine lit nodes are its edges in <code>skills.ts</code>. The clusters show six nodes each here; the real layout has room for all 51, as <code>/skills</code> does.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen w390" role="img" aria-label="Option A at 390 px: the graph zoomed to the Projects column and Agentic systems, Agent Harness selected, a bottom sheet with its title, four metrics and Open case study.">
+        <div class="nav"><span class="mark">MH</span><span class="burger" aria-hidden="true"></span></div>
+        <div class="abs" style="--x:16;--y:76;--w:358">
+          <p class="h1 t32">Projects</p>
+          <p class="t13 muted" style="margin-top:calc(var(--d)*6)">Ten projects next to the stack they used. Pick one to see what it was built from.</p>
+        </div>
+        <div class="abs row t11" style="--x:16;--y:168;--w:358"><span class="btn">Reset view</span><span class="btn" style="margin-left:auto">List view</span></div>
+        <div class="abs row t11" style="--x:16;--y:212;--w:420"><span class="chip on">Projects</span><span class="chip">Agentic systems</span><span class="chip">Languages</span><span class="chip">Web &amp; mobile</span></div>
+        <div class="ga" style="left:calc(var(--d)*16);top:calc(var(--d)*258);width:calc(var(--d)*358);height:calc(var(--d)*300);overflow:hidden;border:1px solid rgba(255,255,255,0.08);border-radius:calc(var(--d)*12)">
+          <div class="cl" style="left:calc(var(--d)*6);top:calc(var(--d)*6);width:calc(var(--d)*150);height:calc(var(--d)*320)"><span class="ct">Projects</span></div>
+          <div class="cl" style="left:calc(var(--d)*170);top:calc(var(--d)*6);width:calc(var(--d)*230);height:calc(var(--d)*280)"><span class="ct">Agentic systems</span></div>
+          <svg class="edges" viewBox="0 0 358 300" aria-hidden="true" focusable="false">
+            <path d="M150 57 C180 57 190 75 216 75"/>
+            <path d="M150 57 C220 40 280 50 316 75"/>
+            <path d="M150 57 C185 70 195 145 216 145"/>
+            <path d="M150 57 C230 80 280 145 316 145"/>
+            <path d="M150 57 C175 80 195 215 216 215"/>
+            <path d="M150 57 C220 120 280 215 316 215"/>
+            <path d="M150 57 C250 250 320 260 360 262" stroke-dasharray="4 3"/>
+            <path d="M150 57 C250 230 320 236 360 238" stroke-dasharray="4 3"/>
+            <path d="M150 57 C260 200 320 212 360 214" stroke-dasharray="4 3"/>
+          </svg>
+          <span class="proj on" style="--y:36;--pw:134;--ph:42">Agent Harness</span>
+          <span class="proj" style="--y:86;--pw:134;--ph:42">Voice Concierge</span>
+          <span class="proj" style="--y:136;--pw:134;--ph:42">GoHighLevel ↔ JobTread Integration</span>
+          <span class="proj" style="--y:186;--pw:134;--ph:42">RingCentral ↔ JobTread Integration</span>
+          <span class="proj" style="--y:236;--pw:134;--ph:42">Self-hosted music library &amp; DJ crate pipeline</span>
+          <span class="node on" style="--x:216;--y:75"><i></i>Harness engineering</span>
+          <span class="node on" style="--x:316;--y:75"><i></i>Context engineering</span>
+          <span class="node on" style="--x:216;--y:145"><i></i>Agent memory</span>
+          <span class="node on" style="--x:316;--y:145"><i></i>Claude Code</span>
+          <span class="node on" style="--x:216;--y:215"><i></i>Durable state</span>
+          <span class="node on" style="--x:316;--y:215"><i></i>Eval gates</span>
+        </div>
+        <span class="pill-ask" style="left:calc(var(--d)*330);top:calc(var(--d)*516);width:calc(var(--d)*44);height:calc(var(--d)*44)"><span class="bars"><i></i><i></i><i></i></span></span>
+        <div class="panel" style="left:0;top:calc(var(--d)*572);width:calc(var(--d)*390);height:calc(var(--d)*290);border-radius:calc(var(--d)*16) calc(var(--d)*16) 0 0;border-bottom:0;padding:calc(var(--d)*14) calc(var(--d)*16);gap:calc(var(--d)*9)">
+          <span style="align-self:center;width:calc(var(--d)*40);height:calc(var(--d)*4);border-radius:2px;background:rgba(255,255,255,0.25)"></span>
+          <p class="t16 bold" style="line-height:1.25">Agent Harness: overnight software delivery with verification gates</p>
+          <div class="metrics" style="gap:calc(var(--d)*6) calc(var(--d)*12)">
+            <div><b>55</b><span>features passing in one day</span></div>
+            <div><b>52</b><span>verified and merged, 12 PRs</span></div>
+            <div><b>+374</b><span>tests added</span></div>
+            <div><b>≈ $2.53</b><span>per passing feature</span></div>
+          </div>
+          <p class="t10 muted">Built from 9 parts of the stack, 3 of them outside this view</p>
+          <div class="row t12"><span class="btn primary">Open case study</span><span class="btn">Close</span></div>
+        </div>
+      </div>
+      <figcaption>390 × 844. The graph starts on the Projects column (the chip row is the one from <code>/skills</code>, D102); the panel becomes a bottom sheet, and the concierge pill sits collapsed above it.</figcaption>
+    </figure>
+
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>Before any click: six cluster names, a column of project titles and a lot of dots. The pitch is that the stack and the work are one picture, which suits "Agentic Systems Engineer". But nothing in the first 10 seconds says what any project achieved: the numbers wait behind a click. A recruiter who doesn't click leaves with a list of titles.</p>
+
+      <h3>Cost to build on the current data</h3>
+      <p><strong>Reuses:</strong> every <code>project:&lt;slug&gt;</code> edge in <code>skills.ts</code> (already written for the <code>/skills</code> project chips), <code>layoutGraph</code>, <code>edgePaths</code> and <code>projectChain</code> in <code>lib/graph/layout.ts</code>, all of <code>lib/graph/view.ts</code>, <code>nodesOf</code> in <code>lib/graph/edges.ts</code>, and <code>SkillGraph</code>'s selection state. From <code>projects.ts</code>: <code>slug</code>, <code>title</code>, <code>company</code>, <code>shortDescription</code>, <code>metrics</code>, <code>githubUrl</code>, <code>featured</code>, <code>order</code>, <code>caseStudy.timeframe</code>.</p>
+      <p><strong>New:</strong> a Projects container in <code>layoutGraph</code>, which breaks its 3 × 2 and 2 × 3 cluster grids, so the layout is redrawn at both column counts; if projects have to sit near the parts they use, the hand layout stops working and D99 says to reconsider <code>d3-force</code> (a new runtime dependency, pre-approved at an exact pin); a <code>ProjectPanel</code> (side panel at desktop, bottom sheet on phones) with focus handling that doesn't fight the concierge panel; a <code>?project=&lt;slug&gt;</code> URL so a selection can be shared; the List view grows a projects section; tests for each.</p>
+      <p><strong>Size:</strong> large. It is P5 again with one more container and a panel, and P5 took seven harness features (<code>feature_list.json</code>, P5-01 to P5-07).</p>
+
+      <h3>What others have done</h3>
+      <ul>
+        <li><a href="https://quartz.jzhao.xyz/features/graph-view">Quartz, Graph View</a>: a static-site generator that draws, on each page, a local graph of the notes linking to and from it, with the global graph one click away. The closest to "a graph next to the thing you are reading".</li>
+        <li><a href="https://help.obsidian.md/plugins/graph">Obsidian, Graph view</a>: a global graph of every note and a local graph of the open one, with filters and colour groups to keep a large graph legible.</li>
+        <li><a href="https://kumu.io">Kumu</a>: a tool for mapping systems and stakeholders, where selecting an element opens a side profile and the map stays put. That is the panel pattern here.</li>
+      </ul>
+
+      <h3>Risks</h3>
+      <ul>
+        <li>The 10-second read is the weakest of the three; the graph rewards people who already decided to look.</li>
+        <li>It overlaps <code>/skills</code>, which already lets a visitor pick a project and see its parts (P5-05). Two graphs that differ by one column will confuse.</li>
+        <li>Two panels on one screen: the project panel and the concierge drawer both want the right edge at desktop and the bottom on phones, and the pill sits over the panel's foot at 1280 unless the panel leaves room.</li>
+        <li>Keyboard and screen-reader cost: the List view has to carry the whole page, as it does on <code>/skills</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= B -->
+<section aria-labelledby="opt-b">
+  <div class="option-head"><span class="letter" aria-hidden="true">B</span><h2 id="opt-b">A grid of case files</h2></div>
+  <p class="idea prose">Each project is a file: a tab with who it was for, a large cover drawn from its own architecture diagram, one number in a band, then the title. The category chips the page has today stay.</p>
+
+  <figure>
+    <div class="screen w1280" role="img" aria-label="Option B at 1280 px: Projects heading, category chips, and three case-file cards for Agent Harness, Voice Concierge and GoHighLevel to JobTread, each with a company tab, a diagram cover, a metric band and a title; the next row starts below.">
+      <div class="nav"><span class="mark">MH</span><span class="links"><span>Home</span><span>About</span><span>Skills</span><span class="on">Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="abs" style="--x:88;--y:100;--w:900">
+        <p class="eyebrow t12">Work</p>
+        <p class="h1 t56" style="margin-top:calc(var(--d)*10)">Projects</p>
+        <p class="t16 muted" style="margin-top:calc(var(--d)*10)">Agentic systems, integrations, full-stack apps and automation.</p>
+      </div>
+      <div class="abs row t13" style="--x:88;--y:252;--w:1104"><span class="chip on">All</span><span class="chip">Integration</span><span class="chip">Full-Stack</span><span class="chip">AI</span><span class="chip">Systems</span><span class="chip">Process</span></div>
+
+      <div class="abs files" style="--x:88;--y:312;--w:1104;grid-template-columns:repeat(3,1fr)">
+        <article class="file">
+          <span class="tabline">Personal · open source</span>
+          <div class="body">
+            <div class="cover"><div class="schem"><span class="bx">feature list</span><span class="ln"></span><span class="bx">fresh session</span><span class="ln"></span><span class="bx">verify</span><span class="ln"></span><span class="bx hot">main</span></div></div>
+            <div class="band"><b>55</b><span>features passing in one day</span></div>
+            <div class="txt"><p class="t16 bold" style="line-height:1.3">Agent Harness: overnight software delivery with verification gates</p><p class="t12 muted">Sep – Oct 2026 · Designer and operator</p><div class="tags"><span class="tag">systems</span><span class="tag">process</span><span class="tag">ai</span></div></div>
+          </div>
+        </article>
+        <article class="file">
+          <span class="tabline">Personal · open source</span>
+          <div class="body">
+            <div class="cover"><div class="schem"><span class="bx">visitor</span><span class="ln two"></span><span class="bx">LiveKit</span><span class="ln two"></span><span class="bx hot">agent</span><span class="ln two"></span><span class="bx">memory</span></div></div>
+            <div class="band pending"><span>Case study; numbers once they are measured</span></div>
+            <div class="txt"><p class="t16 bold" style="line-height:1.3">Voice Concierge: a voice agent that remembers returning visitors</p><p class="t12 muted">Oct 2026 · Designer and operator</p><div class="tags"><span class="tag">ai</span><span class="tag">systems</span></div></div>
+          </div>
+        </article>
+        <article class="file">
+          <span class="tabline">Builder Clarity</span>
+          <div class="body">
+            <div class="cover"><div class="stack"><div class="schem"><span class="bx">GHL contact</span><span class="ln"></span><span class="bx hot">find-or-create</span><span class="ln"></span><span class="bx">JobTread job</span></div><span class="vline"></span><div class="schem"><span class="bx">phone · email · name</span></div></div></div>
+            <div class="band"><b>2 days → ~6 hrs</b><span>client onboarding time</span></div>
+            <div class="txt"><p class="t16 bold" style="line-height:1.3">GoHighLevel ↔ JobTread Integration</p><p class="t12 muted">Mar – Nov 2025</p><div class="tags"><span class="tag">integration</span></div></div>
+          </div>
+        </article>
+        <article class="file"><span class="tabline">Builder Clarity</span><div class="body"><div class="cover"></div></div></article>
+        <article class="file"><span class="tabline">Personal · home server</span><div class="body"><div class="cover"></div></div></article>
+        <article class="file"><span class="tabline">MAXX Potential</span><div class="body"><div class="cover"></div></div></article>
+      </div>
+      <span class="pill-ask" style="left:calc(var(--d)*1128);top:calc(var(--d)*736);width:calc(var(--d)*136);height:calc(var(--d)*48)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</span>
+    </div>
+    <figcaption>1280 × 800, the first row in <code>order</code>. Each cover stands in for the project's existing diagram (<code>architectureDiagram</code>), drawn small; no screenshots. Voice Concierge has no metrics until they are measured, so its band says so. The date on the GoHighLevel card is Michael's Builder Clarity period from <code>experience.ts</code>, since the project has no timeframe of its own.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen w390" role="img" aria-label="Option B at 390 px: Projects heading, a scrolling chip row, then one case-file card per row: Agent Harness with its cover, 55 features passing in one day, title and dates; the next card's tab shows below.">
+        <div class="nav"><span class="mark">MH</span><span class="burger" aria-hidden="true"></span></div>
+        <div class="abs" style="--x:16;--y:80;--w:358">
+          <p class="eyebrow t11">Work</p>
+          <p class="h1 t40" style="margin-top:calc(var(--d)*6)">Projects</p>
+          <p class="t13 muted" style="margin-top:calc(var(--d)*8)">Agentic systems, integrations, full-stack apps and automation.</p>
+        </div>
+        <div class="abs row t12" style="--x:16;--y:206;--w:440"><span class="chip on">All</span><span class="chip">Integration</span><span class="chip">Full-Stack</span><span class="chip">AI</span><span class="chip">Systems</span></div>
+        <div class="abs files" style="--x:16;--y:256;--w:358">
+          <article class="file">
+            <span class="tabline">Personal · open source</span>
+            <div class="body">
+              <div class="cover"><div class="stack"><div class="schem"><span class="bx">feature list</span><span class="ln"></span><span class="bx">fresh session</span></div><div class="schem"><span class="bx">verify</span><span class="ln"></span><span class="bx hot">main</span></div></div></div>
+              <div class="band"><b>55</b><span>features passing in one day</span></div>
+              <div class="txt"><p class="t16 bold" style="line-height:1.3">Agent Harness: overnight software delivery with verification gates</p><p class="t12 muted">Sep – Oct 2026 · Designer and operator</p><div class="tags"><span class="tag">systems</span><span class="tag">process</span><span class="tag">ai</span></div></div>
+            </div>
+          </article>
+          <article class="file"><span class="tabline">Personal · open source</span><div class="body"><div class="cover"><div class="schem"><span class="bx">visitor</span><span class="ln two"></span><span class="bx">LiveKit</span><span class="ln two"></span><span class="bx hot">agent</span></div></div></div></article>
+        </div>
+        <span class="pill-ask" style="left:calc(var(--d)*232);top:calc(var(--d)*780);width:calc(var(--d)*142);height:calc(var(--d)*48)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</span>
+      </div>
+      <figcaption>390 × 844. One file per row; the chip row scrolls sideways inside its own strip, never the page.</figcaption>
+    </figure>
+
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>Three titles, three pictures of how each thing is wired, and three results at desktop before any scroll: 55 features passing in one day, a case study on the way, 2 days to about 6 hours of client onboarding. Who each project was for sits on the tab, so the mix of client work and personal systems shows at a glance. On a phone the first file and its number fit the first screen. Of the three options this is the fastest read.</p>
+
+      <h3>Cost to build on the current data</h3>
+      <p><strong>Reuses:</strong> <code>ProjectsGrid</code> as it is (its <code>FILTERS</code>, <code>sortByOrder</code>, the empty state), <code>ProjectCard</code>'s preview band, which already shows <code>metrics[0]</code> when there is no thumbnail, and the authored diagrams in <code>src/components/projects/diagrams/</code> via each project's <code>architectureDiagram</code> key. Fields: <code>company</code>, <code>title</code>, <code>categories</code>, <code>metrics</code>, <code>caseStudy.timeframe</code> and <code>caseStudy.role</code>, <code>order</code>.</p>
+      <p><strong>New:</strong> a cover rendering of each diagram (static, small, no captions inside; each diagram has to be checked at card width); the tab on <code>ProjectCard</code>; a "not measured yet" band for Voice Concierge, and a choice for Mirrored Google Calendars and Cherished, which have no metrics at all (today's card shows their first category instead); a cover for Cherished, the one project with no diagram; a <code>period</code> on the projects with no case study, or no date line on those cards.</p>
+      <p><strong>Size:</strong> small. One build feature and one check feature; no new state, no new client component.</p>
+
+      <h3>What others have done</h3>
+      <ul>
+        <li><a href="https://www.pentagram.com/work">Pentagram, Work</a>: large project images, each with a one-line description and the client's sector, browsable by type of client; the image carries the card.</li>
+        <li><a href="https://vercel.com/customers">Vercel, Customers</a>: case-study cards that lead with the customer and a one-line outcome, often a number.</li>
+        <li><a href="https://linear.app/customers">Linear, Customers</a>: a grid of customer stories, each a company and a one-line headline.</li>
+        <li><a href="https://stripe.com/customers">Stripe, Customers</a>: case studies browsable by business type and by industry, the closest to the chip row here.</li>
+      </ul>
+
+      <h3>Risks</h3>
+      <ul>
+        <li>The covers carry the page. Diagrams drawn for the deep-dive may not survive shrinking to card width; if most need a second drawing, the cost grows.</li>
+        <li>It looks most like what the site has now. If the brief is "less bland", B fixes the evidence, not the character; that is P6-02's job.</li>
+        <li>Uneven bands: the band shows each project's first metric. Agent Harness and GoHighLevel lead with results, some lead with a phrase ("1 thread" per customer, "3 levels"), Voice Concierge has none until measured, and two projects have no metrics at all.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= C -->
+<section aria-labelledby="opt-c">
+  <div class="option-head"><span class="letter" aria-hidden="true">C</span><h2 id="opt-c">A dated log</h2></div>
+  <p class="idea prose">The projects become entries in one ledger, newest first, written the way the harness writes its progress file: when, which project, what changed and why. A rail filters by project.</p>
+
+  <figure>
+    <div class="screen w1280" role="img" aria-label="Option C at 1280 px: a project filter rail on the left; on the right a dated ledger under October 2026 with entries for Harness v3, the music library's simplification, Harness v2 and the HitList simplification spec.">
+      <div class="nav"><span class="mark">MH</span><span class="links"><span>Home</span><span>About</span><span>Skills</span><span class="on">Projects</span><span>Experience</span><span>Contact</span></span></div>
+      <div class="abs" style="--x:88;--y:96;--w:900">
+        <p class="h1 t56">Projects</p>
+        <p class="t16 muted" style="margin-top:calc(var(--d)*10)">The work as a dated log, newest first: what changed, and why.</p>
+      </div>
+      <ul class="abs rail t13" style="--x:88;--y:236;--w:220">
+        <li class="on">All projects</li>
+        <li>Agent Harness</li>
+        <li>Voice Concierge</li>
+        <li>GoHighLevel ↔ JobTread Integration</li>
+        <li>RingCentral ↔ JobTread Integration</li>
+        <li>Self-hosted music library &amp; DJ crate pipeline</li>
+        <li>Linear Adoption + Agentic Bug Workflow</li>
+        <li>HitList</li>
+        <li>React Native Paint Estimator</li>
+        <li>Mirrored Google Calendars</li>
+        <li>Cherished</li>
+      </ul>
+      <div class="abs" style="--x:348;--y:236;--w:780">
+        <p class="month t12">October 2026</p>
+        <div class="ledger" style="margin-top:calc(var(--d)*18);margin-left:calc(var(--d)*6)">
+          <div class="entry">
+            <p class="when t12"><span class="slug">agent-harness</span> · Oct 17</p>
+            <h3 class="t18">Harness v3</h3>
+            <p class="what t14">Merges verified milestones itself, waits out usage limits for the whole machine, queues runs, and writes a retro and a ledger entry per run.</p>
+            <span class="short t11">Current: it built this update</span>
+          </div>
+          <div class="entry">
+            <p class="when t12"><span class="slug">home-media-server</span> · Oct 17</p>
+            <h3 class="t18">The simplification</h3>
+            <p class="what t14">One download quality, the exact track, the app owns the crate flag. An overnight run of my agent harness then built duplicate-cleanup tooling, health checks and lock-protected backups: 1,359 tests.</p>
+          </div>
+          <div class="entry">
+            <p class="when t12"><span class="slug">agent-harness</span> · Oct 16 night</p>
+            <h3 class="t18">Harness v2</h3>
+            <p class="what t14">Its own repo. "Agents do judgment; the driver does bookkeeping." A worktree per run, repair and continue, an independent verify per milestone, tag + PR, steering from my phone through INBOX.md, metrics.</p>
+            <span class="short t11">Merges still needed a human</span>
+          </div>
+          <div class="entry">
+            <p class="when t12"><span class="slug">hit-list</span> · Oct 16</p>
+            <h3 class="t18">Simplification spec</h3>
+            <p class="what t14">After using it, my feedback became a spec: from 20+ fields to seven, a five-step speed scale instead of stars, no drafts and no gear, with the old details archived, not deleted.</p>
+          </div>
+        </div>
+      </div>
+      <span class="pill-ask" style="left:calc(var(--d)*1128);top:calc(var(--d)*736);width:calc(var(--d)*136);height:calc(var(--d)*48)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</span>
+    </div>
+    <figcaption>1280 × 800. Every entry is a <code>caseStudy.iterations</code> item as written in <code>projects.ts</code> (<code>when</code>, <code>label</code>, <code>what</code>, <code>short</code>); the grey tag is the iteration's <code>short</code> line where the project has one.</figcaption>
+  </figure>
+
+  <div class="pair">
+    <figure>
+      <div class="screen w390" role="img" aria-label="Option C at 390 px: Projects heading, an All projects select, then the October 2026 ledger with Harness v3 and The simplification entries.">
+        <div class="nav"><span class="mark">MH</span><span class="burger" aria-hidden="true"></span></div>
+        <div class="abs" style="--x:16;--y:76;--w:358">
+          <p class="h1 t32">Projects</p>
+          <p class="t13 muted" style="margin-top:calc(var(--d)*6)">The work as a dated log, newest first: what changed, and why.</p>
+        </div>
+        <div class="abs select t13" style="--x:16;--y:160;--w:358;--h:42">All projects</div>
+        <div class="abs" style="--x:16;--y:224;--w:358">
+          <p class="month t11">October 2026</p>
+          <div class="ledger" style="margin-top:calc(var(--d)*14);margin-left:calc(var(--d)*6)">
+            <div class="entry">
+              <p class="when t11"><span class="slug">agent-harness</span> · Oct 17</p>
+              <h3 class="t16">Harness v3</h3>
+              <p class="what t13">Merges verified milestones itself, waits out usage limits for the whole machine, queues runs, and writes a retro and a ledger entry per run.</p>
+              <span class="short t10">Current: it built this update</span>
+            </div>
+            <div class="entry">
+              <p class="when t11"><span class="slug">home-media-server</span> · Oct 17</p>
+              <h3 class="t16">The simplification</h3>
+              <p class="what t13">One download quality, the exact track, the app owns the crate flag. An overnight run of my agent harness then built duplicate-cleanup tooling, health checks and lock-protected backups: 1,359 tests.</p>
+            </div>
+            <div class="entry">
+              <p class="when t11"><span class="slug">agent-harness</span> · Oct 16 night</p>
+              <h3 class="t16">Harness v2</h3>
+            </div>
+          </div>
+        </div>
+        <span class="pill-ask" style="left:calc(var(--d)*232);top:calc(var(--d)*780);width:calc(var(--d)*142);height:calc(var(--d)*48)"><span class="bars"><i></i><i></i><i></i></span>Ask my site</span>
+      </div>
+      <figcaption>390 × 844. The rail becomes a select; the ledger reads like a feed.</figcaption>
+    </figure>
+
+    <div class="notes">
+      <h3>What a hiring manager sees in 10 s</h3>
+      <p>That he ships often and writes down why: four dated changes from one week of October, in plain sentences. It has the most voice of the three and it tells the "agents wrote the code, Michael ran the system" story without saying so. What it hides is range. The 2025 client integrations, the strongest business numbers, sit far below the fold, and nothing on the first screen says what any project is for.</p>
+
+      <h3>Cost to build on the current data</h3>
+      <p><strong>Reuses:</strong> <code>caseStudy.iterations</code> (<code>when</code>, <code>label</code>, <code>what</code>, <code>why</code>, <code>short</code>), <code>caseStudy.timeframe</code>, <code>slug</code>, <code>title</code>, <code>metrics</code>; <code>IterationTimeline</code> already renders the same items on each deep-dive; the role periods in <code>experience.ts</code>.</p>
+      <p><strong>New:</strong> a sortable date on every iteration (<code>when</code> is free text today: "Sep 2026", "Oct 13–15", "Oct 16 eve"), a <code>LedgerEntry</code>, the project filter (rail at desktop, select on phones), month grouping, and one entry each for the projects with no iterations.</p>
+      <p><strong>Size:</strong> medium. A data change across all 17 iterations, then one component and its filter.</p>
+
+      <h3>What others have done</h3>
+      <ul>
+        <li><a href="https://linear.app/changelog">Linear, Changelog</a>: dated entries, each a short headline and a paragraph; the tone is the product's own.</li>
+        <li><a href="https://posthog.com/changelog">PostHog, Changelog</a>: a long dated log where every entry names the team and the product area it belongs to, the job the project label does here.</li>
+        <li><a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>: the convention a log like this would follow: newest first, dated, grouped by kind of change.</li>
+        <li><a href="https://simonwillison.net">Simon Willison's Weblog</a>: a personal site that is a dated log of what he builds and learns, read for the reasoning as much as the result.</li>
+        <li><a href="https://brittanychiang.com/archive">Brittany Chiang, Archive</a>: a developer portfolio that keeps every project in a dated table under the curated cards.</li>
+      </ul>
+
+      <h3>Risks</h3>
+      <ul>
+        <li>The data is lopsided: 17 dated iterations, all in 3 of the 10 projects (Agent Harness, the music library, HitList), and 14 of them from October 2026. The other 7 projects get one line each, so the log reads as a few weeks of October.</li>
+        <li>Two projects have no date at all: Mirrored Google Calendars (freelance) and Cherished (Duke). They need one from Michael, or they can't be placed.</li>
+        <li>Recency wins: whatever changed last week leads, whether or not it is the best work to show.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================= compare + recommend -->
+<section aria-labelledby="compare">
+  <h2 id="compare">Side by side</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Option</th><th scope="col">The 10-second read</th><th scope="col">Reuses</th><th scope="col">New work</th><th scope="col">Size</th><th scope="col">Biggest risk</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">A. One graph</th><td>Titles and stack, no outcomes until a click</td><td>The P5 graph, <code>skills.ts</code> project edges</td><td>Projects container, panel, shareable selection; maybe <code>d3-force</code> (D99)</td><td>Large (P5 took seven features)</td><td>Duplicates <code>/skills</code>; weakest first read</td></tr>
+        <tr><th scope="row">B. Case files</th><td>Three titles, three diagrams, three results</td><td><code>ProjectsGrid</code>, <code>ProjectCard</code>, the diagrams</td><td>Diagram covers, the tab, a "not measured yet" band</td><td>Small (one build, one check)</td><td>Diagrams may not survive card size</td></tr>
+        <tr><th scope="row">C. Dated log</th><td>He ships often and says why</td><td><code>caseStudy.iterations</code>, <code>IterationTimeline</code>'s data</td><td>Sortable dates, ledger entry, filter</td><td>Medium (17 iterations to date)</td><td>3 of 10 projects fill the log</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="recommend">
+  <h2 id="recommend">Recommendation: B, the case files</h2>
+  <div class="verdict">
+    <p><strong>Build B for <code>/projects</code>.</strong> The first readers are hiring managers and recruiters (<code>brand.md</code>), and B is the only option that shows them results before they click or scroll. It is also the cheapest: it reshapes the grid the site already has, and its covers come from the diagrams that already exist for 9 of the 10 projects, so it keeps the rule against fake screenshots with one gap to fill (Cherished).</p>
+    <p><strong>Why not A now:</strong> <code>/skills</code> already answers "which parts did this project use" through its project chips (P5-05). A second graph would repeat that and lose the fast read. If Michael wants the merged picture, it belongs on <code>/skills</code>, as the next step of that graph (the v3 spec, § 12, leaves it to a later run on purpose).</p>
+    <p><strong>Why not C now:</strong> it has the most character, but dated iterations exist for 3 projects out of 10. The log already lives where it is strongest: in each case study's iteration timeline. Revisit C when more projects have dated iterations; it could then be a "Recently" strip above the grid rather than the whole page.</p>
+    <p><strong>To decide first:</strong> whether the diagrams read at card size. One cheap check settles it: render Agent Harness, GoHighLevel ↔ JobTread and the music library's diagrams in a card-width box and look at the 390 px screenshot.</p>
+  </div>
+
+  <h3>What option A would share with the P5 graph</h3>
+  <ul class="prose">
+    <li><strong>The data:</strong> the same <code>clusters</code>, <code>nodes</code> and <code>edges</code> in <code>skills.ts</code>, including every <code>project:&lt;slug&gt;</code> edge. No new data file; A only reads edges P5 already wrote.</li>
+    <li><strong>The layout and view math:</strong> <code>layoutGraph</code> (3 columns from 1024 px, 2 below), <code>edgePaths</code>, <code>curvePath</code>, <code>projectChain</code>, and <code>clampView</code>, <code>zoomAt</code>, <code>panBy</code>, <code>fitCluster</code> in <code>lib/graph/view.ts</code>, with their unit tests.</li>
+    <li><strong>The interaction model:</strong> <code>SkillGraph</code>'s one selection, <code>data-active</code> and <code>data-dim</code>, the cross-cluster chain drawn on selection, Esc and a second click to clear, the <code>aria-live</code> line, the pan and zoom controls and keys (D100), the 640 px chip row (D102), and reduced motion with no tweened view.</li>
+    <li><strong>The text alternative:</strong> the List view as the accessible and print version; A adds a projects section to it.</li>
+    <li><strong>What A does not share:</strong> the layout's shape. D99 kept <code>d3-force</code> out of P5 and names this option as the case for reconsidering it: if projects must be placed by their connections, the hand layout gives way to a force layout.</li>
+    <li><strong>What A adds:</strong> projects promoted from chips to nodes (a seventh container in the layout) and a panel. Which is why, if it is ever built, it should replace the chips on <code>/skills</code> rather than become a second graph on <code>/projects</code>.</li>
+  </ul>
+</section>
+
+<footer class="doc-foot">
+  <h2 style="font-size:1.3rem;margin-top:0">Sources</h2>
+  <ul>
+    <li><code>src/lib/data/projects.ts</code>: every project title, company, category, metric (55; 52 and 12 PRs; +374; ≈ $2.53; 2 days → ~6 hrs; 1,359 tests; 20+ fields to seven), case-study role and timeframe, the iteration entries quoted in option C and their count (17, in 3 projects, 14 dated October), the first metrics shown in B's bands ("1 thread", "3 levels"), the GoHighLevel cover's nodes from <code>src/components/projects/diagrams/index.tsx</code>, the 10 projects, 8 featured, 4 case studies, 9 <code>architectureDiagram</code> keys, no thumbnails.</li>
+    <li><code>src/lib/data/skills.ts</code>: the six clusters, 51 nodes, the per-cluster counts behind "+n more", and Agent Harness's 9 project edges.</li>
+    <li><code>src/lib/data/experience.ts</code>: Builder Clarity, March 2025 – November 2025 (the GoHighLevel card's date).</li>
+    <li><code>src/components/projects/ProjectsGrid.tsx</code>: the filter chips (All, Integration, Full-Stack, AI, Systems, Process); <code>src/app/projects/page.tsx</code>: the current heading and subline, and its metadata description, used as the subline in B and its 390 screen.</li>
+    <li><code>src/lib/graph/layout.ts</code>: 3 columns from 1024 px, else 2. The v2 spec's decisions D99 (no <code>d3-force</code>, reconsidered for option A), D100 (wheel and keys) and D102 (640 px chip row).</li>
+    <li><code>docs/notes/brand.md</code>: the reader order, no fake screenshots or stock images. <code>docs/notes/voice-concierge-todo.md</code>: no concierge metrics until measured.</li>
+    <li><code>docs/specs/2026-10-21-portfolio-v3.md</code> §§ 11 and 12: the three options, the 10-second test, 1280 and 390 px, the merged graph left to a later run. <code>.harness/runs/portfolio_site-2026-10-21-v3/feature_list.json</code>: P5 as seven features.</li>
+    <li>Screen sizes 1280 × 800 and 390 × 844: the viewports of <code>.harness/contact-check.mjs</code> and <code>.harness/skills-check.mjs</code>.</li>
+  </ul>
+  <h2 style="font-size:1.3rem">How this file was checked</h2>
+  <p>Self-contained: inline CSS only, no scripts, no external stylesheets, fonts or images; the site's Geist is named with system fallbacks and never fetched. Rendered in headless Chromium at 1280 and 390 px wide with a one-off Playwright run (the command is below): at both widths, 0 console errors, 0 page errors, 0 requests outside the file, and <code>scrollWidth</code> 390 at 390. Every reference URL was fetched with <code>curl -sIL -o /dev/null -w '%{http_code}'</code>; the codes are in the comment at the end of this file.</p>
+  <pre>node /tmp/harness/portfolio_site/portfolio_site-2026-10-21-v3/p6-01-check.mjs docs/design/2026-10-21-projects-showcase-options.html
+# for each width in 1280, 390: chromium.newPage({ viewport }), page.goto(file://…), count console errors and page errors,
+# print document.documentElement.scrollWidth against innerWidth, save a full-page PNG to the scratch directory</pre>
+</footer>
+
+</main>
+<!-- Reference URL check, 2026-10-21: curl -sIL -o /dev/null -w '%{http_code}' <url> (no user agent; codes after redirects)
+  200 https://brittanychiang.com/archive
+  200 https://help.obsidian.md/plugins/graph
+  200 https://keepachangelog.com/en/1.1.0/
+  200 https://kumu.io
+  200 https://linear.app/changelog
+  200 https://linear.app/customers
+  200 https://posthog.com/changelog
+  200 https://quartz.jzhao.xyz/features/graph-view
+  200 https://simonwillison.net
+  200 https://stripe.com/customers
+  200 https://vercel.com/customers
+  200 https://www.pentagram.com/work
+-->
+</body>
+</html>
