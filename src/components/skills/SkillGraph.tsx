@@ -1,14 +1,37 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react';
 import Link from 'next/link';
 import Logo from '@/components/logos/Logo';
 import { focusRing } from '@/components/focusRing';
 import { textLink } from '@/components/textLink';
 import type { Cluster, SkillEdge, SkillNode, Weight } from '@/lib/data/skills';
 import { projectsOf } from '@/lib/graph/edges';
-import { edgePaths, layoutGraph, LABEL_DY, WIDE_MIN } from '@/lib/graph/layout';
-import { fitAll, viewBoxFor } from '@/lib/graph/view';
+import { clusterAt, edgePaths, layoutGraph, LABEL_DY, NARROW_ASPECT, WIDE_MIN, type GraphLayout } from '@/lib/graph/layout';
+import {
+  centerOn,
+  clientToDrawing,
+  contains,
+  DRAG_SLOP,
+  fitAll,
+  fitCluster,
+  PAN_STEP,
+  panBy,
+  viewBoxFor,
+  wheelFactor,
+  ZOOM_STEP,
+  zoomAt,
+  type View,
+} from '@/lib/graph/view';
 
 /** A project as the graph needs it, built on the server so this bundle never imports projects.ts */
 export interface GraphProject {
@@ -63,6 +86,44 @@ const MARK_CLASS: Record<Weight, string> = {
 
 const ROW_PREFIX = '#skill-';
 
+// The first view, and what Reset view goes back to: the whole drawing from 640 px, the first cluster below (D102),
+// at the narrow aspect so it draws at about one px a unit.
+const firstView = (layout: GraphLayout, viewport: Viewport): View =>
+  viewport === 'narrow'
+    ? fitCluster(layout, layout.clusters[0].id, NARROW_ASPECT)
+    : fitAll(layout, layout.height / layout.width);
+
+const centre = (v: View) => ({ x: v.x + v.w / 2, y: v.y + v.h / 2 });
+
+// A wheel's deltaY in px: Firefox can report lines (deltaMode 1) or pages (2)
+const WHEEL_LINE = 16;
+const WHEEL_PAGE = 800;
+const wheelPx = (e: WheelEvent) => e.deltaY * (e.deltaMode === 1 ? WHEEL_LINE : e.deltaMode === 2 ? WHEEL_PAGE : 1);
+
+// Keys the graph answers while focus is inside it (with no Ctrl, ⌘ or Alt: those are the browser's)
+const KEY_ACTIONS: Record<string, 'left' | 'right' | 'up' | 'down' | 'in' | 'out' | 'reset'> = {
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  '+': 'in',
+  '=': 'in',
+  '-': 'out',
+  '0': 'reset',
+};
+
+interface Drag {
+  pointerId: number;
+  x: number;
+  y: number;
+  start: View;
+  moving: boolean;
+}
+
+const control = `rounded-full border text-sm font-medium transition-colors ${focusRing}`;
+const controlOff = 'border-white/15 text-[var(--color-foreground)] hover:border-white/30';
+const controlOn = 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent)]/10';
+
 // /skills (P5-03, plan docs/plans/2026-10-21-P5-skills-graph.md § Render): the stack as an SVG drawing laid out by
 // src/lib/graph, and the same data as a definition list under the List view toggle, which is also what prints (D101).
 export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGraphProps) {
@@ -71,7 +132,29 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
     () => layoutGraph({ clusters, nodes, edges }, viewport === 'wide' ? WIDE_MIN : WIDE_MIN - 1),
     [clusters, nodes, edges, viewport],
   );
-  const view = fitAll(layout, layout.height / layout.width);
+  const bounds = useMemo(() => ({ w: layout.width, h: layout.height }), [layout]);
+
+  // The view is the svg's viewBox; a new viewport (columns or the narrow start) resets it, during render with the
+  // previous-value pattern rather than in an effect.
+  const [view, setView] = useState(() => firstView(layout, viewport));
+  const [viewFor, setViewFor] = useState(viewport);
+  if (viewFor !== viewport) {
+    setViewFor(viewport);
+    setView(firstView(layout, viewport));
+  }
+  const reset = () => setView(firstView(layout, viewport));
+  const zoomBy = (factor: number) => setView((v) => zoomAt(v, factor, centre(v), bounds));
+
+  // the view on screen, for event handlers that must decide before React renders again (a drag's start, the wheel)
+  const viewRef = useRef(view);
+  useEffect(() => {
+    viewRef.current = view;
+  });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const drag = useRef<Drag | null>(null);
+  // set when a drag ends, so the click that follows it (on a node, say) doesn't open the list
+  const dragged = useRef(false);
   const paths = useMemo(() => edgePaths(layout, edges), [layout, edges]);
   const titleOf = useMemo(() => new Map(projects.map((p) => [p.slug, p.title])), [projects]);
 
@@ -110,12 +193,150 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
     if (rowRequest) document.getElementById(`skill-${rowRequest.id}`)?.focus();
   }, [rowRequest]);
 
+  // The wheel zooms at the cursor only with focus inside the graph or Ctrl/⌘ held (a trackpad pinch), D100; a plain
+  // wheel anywhere else is the page's scroll. React's onWheel is passive and can't preventDefault, hence this one
+  // listener on the element, removed with it.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey || el.contains(document.activeElement))) return;
+      const rect = svgRef.current?.getBoundingClientRect() ?? { left: 0, top: 0, width: 0, height: 0 };
+      const client = { x: e.clientX, y: e.clientY };
+      const factor = wheelFactor(wheelPx(e));
+      const zoom = (v: View) => zoomAt(v, factor, clientToDrawing(v, rect, client), bounds);
+      // a wheel that zooms nothing (a sideways swipe, or past a zoom limit) stays the page's: scroll, back-swipe
+      const now = viewRef.current;
+      if (viewBoxFor(zoom(now)) === viewBoxFor(now)) return;
+      e.preventDefault();
+      setView(zoom);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [bounds]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    dragged.current = false;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.nativeEvent.isComposing) return;
+    const action = KEY_ACTIONS[e.key];
+    if (!action) return;
+    e.preventDefault();
+    if (action === 'reset') return reset();
+    if (action === 'in' || action === 'out') return zoomBy(action === 'in' ? ZOOM_STEP : 1 / ZOOM_STEP);
+    setView((v) => {
+      const dx = action === 'left' ? -PAN_STEP * v.w : action === 'right' ? PAN_STEP * v.w : 0;
+      const dy = action === 'up' ? -PAN_STEP * v.h : action === 'down' ? PAN_STEP * v.h : 0;
+      return panBy(v, dx, dy, bounds);
+    });
+  };
+
+  // A drag pans by the pointer's delta. Pointer capture after the slop keeps the moves on this element, so there is
+  // no window listener to leak; a move under DRAG_SLOP px stays a click.
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    dragged.current = false;
+    if (e.button !== 0) return;
+    drag.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, start: viewRef.current, moving: false };
+  };
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.pointerId !== e.pointerId) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.moving) {
+      if (Math.hypot(dx, dy) < DRAG_SLOP) return;
+      d.moving = true;
+      // from the view on screen now, not at the press (a wheel may have zoomed since)
+      d.start = viewRef.current;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    }
+    const rect = svgRef.current?.getBoundingClientRect();
+    // a box with no size (jsdom, or not laid out yet) has no scale: skip, never a NaN viewBox
+    if (!rect || !(rect.width > 0 && rect.height > 0)) return;
+    const scale = d.start.w / rect.width;
+    setView(panBy(d.start, -dx * scale, -dy * scale, bounds));
+  };
+  const endDrag = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.pointerId !== e.pointerId) return;
+    dragged.current = d.moving;
+    drag.current = null;
+    // the click a drag ends with comes right after pointerup; a touch drag has none, so the flag mustn't outlive it
+    if (d.moving) setTimeout(() => (dragged.current = false), 0);
+  };
+  const cancelDrag = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag.current?.pointerId === e.pointerId) drag.current = null;
+  };
+
+  // Tab onto a node outside the view brings it into view, so a keyboard user always sees what has focus; a press
+  // (which focuses the link too) leaves the view to the pointer
+  const reveal = (id: string) => {
+    if (drag.current) return;
+    const { box } = layout.nodes[id];
+    setView((v) =>
+      contains(v, { x: box.x, y: box.y }) && contains(v, { x: box.x + box.w, y: box.y + box.h })
+        ? v
+        : centerOn(v, layout.nodes[id], bounds),
+    );
+  };
+
+  const pressedCluster = clusterAt(layout, centre(view));
+
   const hoverPaths = hover ? paths.filter((e) => e.cross && (e.from === hover || e.to === hover)) : [];
   const title = `Tech stack: ${nodes.length} skills in ${clusters.length} groups. The list view has the same data as text.`;
 
   return (
     <div>
-      <div className="flex justify-end mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {listOn ? null : (
+          <>
+            {/* below 640 the view starts on one cluster: these jump to the others (D102); they scroll in their row */}
+            <div
+              role="group"
+              aria-label="Jump to a group"
+              className="flex sm:hidden w-full gap-2 overflow-x-auto p-1 print:hidden"
+            >
+              {layout.clusters.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={pressedCluster === c.id}
+                  onClick={() => setView((v) => fitCluster(layout, c.id, v.h / v.w))}
+                  className={`shrink-0 min-h-11 px-4 whitespace-nowrap ${control} ${
+                    pressedCluster === c.id ? controlOn : controlOff
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 print:hidden">
+              <button
+                type="button"
+                aria-label="Zoom in"
+                onClick={() => zoomBy(ZOOM_STEP)}
+                className={`size-11 text-lg ${control} ${controlOff}`}
+              >
+                +
+              </button>
+              <button
+                type="button"
+                aria-label="Zoom out"
+                onClick={() => zoomBy(1 / ZOOM_STEP)}
+                className={`size-11 text-lg ${control} ${controlOff}`}
+              >
+                −
+              </button>
+              <button
+                type="button"
+                aria-label="Reset view"
+                onClick={reset}
+                className={`min-h-11 px-4 ${control} ${controlOff}`}
+              >
+                Reset
+              </button>
+            </div>
+          </>
+        )}
         <button
           type="button"
           aria-pressed={listOn}
@@ -124,22 +345,35 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
             setRowRequest(null);
             setListOn((on) => !on);
           }}
-          className={`min-h-11 sm:min-h-0 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-            listOn
-              ? 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent)]/10'
-              : 'border-white/15 text-[var(--color-foreground)] hover:border-white/30'
-          } ${focusRing}`}
+          className={`ml-auto min-h-11 px-4 ${control} ${listOn ? controlOn : controlOff}`}
         >
           List view
         </button>
       </div>
 
       <div
+        ref={containerRef}
         role="group"
+        tabIndex={0}
         aria-labelledby="skill-graph-title"
-        className={`${listOn ? 'hidden' : 'block'} print:hidden rounded-xl touch-pan-y touch-pinch-zoom`}
+        aria-describedby="skill-graph-help"
+        onKeyDown={onKeyDown}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={cancelDrag}
+        onLostPointerCapture={cancelDrag}
+        onClickCapture={(e) => {
+          if (!dragged.current) return;
+          dragged.current = false;
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onDragStart={(e) => e.preventDefault()}
+        className={`${listOn ? 'hidden' : 'block'} print:hidden rounded-xl touch-pan-y touch-pinch-zoom select-none cursor-grab active:cursor-grabbing ${focusRing}`}
       >
         <svg
+          ref={svgRef}
           role="none"
           viewBox={viewBoxFor(view)}
           preserveAspectRatio="xMidYMid meet"
@@ -217,7 +451,10 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
                       }}
                       onMouseEnter={() => setHover(n.id)}
                       onMouseLeave={() => setHover(null)}
-                      onFocus={() => setHover(n.id)}
+                      onFocus={() => {
+                        setHover(n.id);
+                        reveal(n.id);
+                      }}
                       onBlur={() => setHover(null)}
                     >
                       {/* the node's own tooltip, over the svg's <title>; its name stays the aria-label */}
@@ -259,6 +496,13 @@ export default function SkillGraph({ clusters, nodes, edges, projects }: SkillGr
           ))}
         </svg>
       </div>
+
+      <p
+        id="skill-graph-help"
+        className={`${listOn ? 'hidden' : 'block'} print:hidden mt-3 text-sm text-[var(--color-muted)]`}
+      >
+        Arrow keys pan, plus and minus zoom. Drag to move.
+      </p>
 
       {/* Never the hidden attribute: preflight makes [hidden] display:none !important, and print shows this list */}
       <div id="skill-list" className={listOn ? 'block' : 'hidden print:block'}>

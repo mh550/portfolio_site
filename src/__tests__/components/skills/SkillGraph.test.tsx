@@ -2,8 +2,19 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import SkillGraph, { type GraphProject } from '@/components/skills/SkillGraph';
 import { clusters, edges, nodes } from '@/lib/data/skills';
 import { projects as allProjects } from '@/lib/data/projects';
-import { edgePaths, layoutGraph } from '@/lib/graph/layout';
-import { fitAll, viewBoxFor } from '@/lib/graph/view';
+import { clusterAt, edgePaths, layoutGraph, NARROW_ASPECT } from '@/lib/graph/layout';
+import {
+  centerOn,
+  fitAll,
+  fitCluster,
+  PAN_STEP,
+  panBy,
+  viewBoxFor,
+  wheelFactor,
+  ZOOM_STEP,
+  zoomAt,
+  type View,
+} from '@/lib/graph/view';
 import fs from 'fs';
 import path from 'path';
 
@@ -171,13 +182,17 @@ describe('SkillGraph: the drawing (P5-03)', () => {
   });
 });
 
-describe('SkillGraph: columns follow the viewport (matchMedia)', () => {
-  const realMatchMedia = window.matchMedia;
-  let width = 1280;
-  let listeners: (() => void)[] = [];
-
+// matchMedia at a given CSS width, for the two queries SkillGraph reads; `fire` runs their change listeners
+const realMatchMedia = window.matchMedia;
+let width = 1280;
+let mqListeners: (() => void)[] = [];
+const fireViewport = (w: number) => {
+  width = w;
+  act(() => mqListeners.forEach((l) => l()));
+};
+function useViewportMock() {
   beforeEach(() => {
-    listeners = [];
+    mqListeners = [];
     window.matchMedia = jest.fn((query: string) => ({
       get matches() {
         if (query === '(min-width: 1024px)') return width >= 1024;
@@ -185,31 +200,461 @@ describe('SkillGraph: columns follow the viewport (matchMedia)', () => {
         return false;
       },
       media: query,
-      addEventListener: (_: string, fn: () => void) => listeners.push(fn),
+      addEventListener: (_: string, fn: () => void) => mqListeners.push(fn),
       removeEventListener: (_: string, fn: () => void) => {
-        listeners = listeners.filter((l) => l !== fn);
+        mqListeners = mqListeners.filter((l) => l !== fn);
       },
     })) as unknown as typeof window.matchMedia;
   });
-
   afterEach(() => {
     window.matchMedia = realMatchMedia;
     width = 1280;
   });
+}
+
+describe('SkillGraph: columns follow the viewport (matchMedia)', () => {
+  useViewportMock();
 
   it('draws 2 columns below 1024 px and 3 from 1024, following a change', () => {
-    width = 390;
+    width = 800;
     const { container, unmount } = renderGraph();
     expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(fitAll(narrow, narrow.height / narrow.width)));
     expect(container.querySelector('g[data-cluster-box="web"] rect')).toHaveAttribute('x', '16');
 
-    width = 1280;
-    act(() => listeners.forEach((l) => l()));
+    fireViewport(1280);
     expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
     expect(container.querySelector('g[data-cluster-box="web"] rect')).toHaveAttribute('x', '712');
 
     unmount();
-    expect(listeners).toHaveLength(0);
+    expect(mqListeners).toHaveLength(0);
+  });
+});
+
+// jsdom has no PointerEvent: a MouseEvent with a pointerId, so fireEvent.pointer* carries clientX/Y and button
+const RealPointerEvent = window.PointerEvent;
+beforeAll(() => {
+  class PointerEventShim extends MouseEvent {
+    pointerId: number;
+    constructor(type: string, init: PointerEventInit = {}) {
+      super(type, init);
+      this.pointerId = init.pointerId ?? 1;
+    }
+  }
+  window.PointerEvent = PointerEventShim as unknown as typeof PointerEvent;
+});
+afterAll(() => {
+  window.PointerEvent = RealPointerEvent;
+});
+
+const wideBounds = { w: wide.width, h: wide.height };
+const narrowBounds = { w: narrow.width, h: narrow.height };
+const whole: View = fitAll(wide, wide.height / wide.width);
+const centre = (v: View) => ({ x: v.x + v.w / 2, y: v.y + v.h / 2 });
+const viewOf = (c: HTMLElement): View => {
+  const [x, y, w, h] = svg(c).getAttribute('viewBox')!.split(' ').map(Number);
+  return { x, y, w, h };
+};
+const button = (name: string) => screen.getByRole('button', { name });
+// the svg's on-screen box, which jsdom leaves at zero size (then a drag doesn't pan and a wheel zooms at the centre)
+const sizeSvg = (c: HTMLElement, rect: { left: number; top: number; width: number; height: number }) =>
+  jest.spyOn(svg(c), 'getBoundingClientRect').mockReturnValue({
+    ...rect,
+    x: rect.left,
+    y: rect.top,
+    right: rect.left + rect.width,
+    bottom: rect.top + rect.height,
+    toJSON: () => ({}),
+  } as DOMRect);
+
+describe('SkillGraph: zoom (P5-04)', () => {
+  it('Zoom in / Zoom out zoom at the view centre by ZOOM_STEP; Reset view goes back to the first view', () => {
+    const { container } = renderGraph();
+    const zoomedIn = zoomAt(whole, ZOOM_STEP, centre(whole), wideBounds);
+    fireEvent.click(button('Zoom in'));
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(zoomedIn));
+    expect(viewOf(container).w).toBeLessThan(whole.w);
+
+    const twice = zoomAt(zoomedIn, ZOOM_STEP, centre(zoomedIn), wideBounds);
+    fireEvent.click(button('Zoom in'));
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(twice));
+    fireEvent.click(button('Zoom out'));
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(zoomAt(twice, 1 / ZOOM_STEP, centre(twice), wideBounds)));
+
+    fireEvent.click(button('Reset view'));
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+  });
+
+  it('a plain wheel over an unfocused graph changes nothing and is not prevented: the page scrolls (D100)', () => {
+    const { container } = renderGraph();
+    expect(fireEvent.wheel(graph(), { deltaY: -100 })).toBe(true);
+    expect(fireEvent.wheel(svg(container), { deltaY: 100 })).toBe(true);
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+    // the listener is there: the same wheel with Ctrl zooms (review #11)
+    expect(fireEvent.wheel(graph(), { deltaY: -100, ctrlKey: true })).toBe(false);
+    expect(svg(container)).not.toHaveAttribute('viewBox', '0 0 1052 700');
+  });
+
+  it('leaves a wheel that zooms nothing to the page: a horizontal swipe, or one past a zoom limit (review #2)', () => {
+    const { container } = renderGraph();
+    graph().focus();
+    expect(fireEvent.wheel(graph(), { deltaX: -120, deltaY: 0 })).toBe(true);
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+    // at either zoom limit, a wheel further that way is the page's scroll
+    for (const deltaY of [1000, -1000]) {
+      for (let i = 0; i < 30; i++) fireEvent.wheel(graph(), { deltaY });
+      const v = svg(container).getAttribute('viewBox');
+      expect(fireEvent.wheel(graph(), { deltaY })).toBe(true);
+      expect(svg(container)).toHaveAttribute('viewBox', v);
+    }
+    expect(viewOf(container).w).toBe(160);
+  });
+
+  it('a wheel with Ctrl or ⌘ zooms (at the view centre while the svg has no size) and is prevented', () => {
+    const { container } = renderGraph();
+    expect(fireEvent.wheel(graph(), { deltaY: -100, ctrlKey: true })).toBe(false);
+    const once = zoomAt(whole, wheelFactor(-100), centre(whole), wideBounds);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(once));
+
+    expect(fireEvent.wheel(svg(container), { deltaY: -100, metaKey: true })).toBe(false);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(zoomAt(once, wheelFactor(-100), centre(once), wideBounds)));
+  });
+
+  it('a plain wheel zooms while focus is inside the graph (the container or a node link)', () => {
+    const { container } = renderGraph();
+    graph().focus();
+    expect(fireEvent.wheel(graph(), { deltaY: -100 })).toBe(false);
+    const once = zoomAt(whole, wheelFactor(-100), centre(whole), wideBounds);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(once));
+
+    (container.querySelector('a[data-node="python"]') as HTMLElement).focus();
+    expect(fireEvent.wheel(svg(container), { deltaY: -100 })).toBe(false);
+    expect(viewOf(container).w).toBeLessThan(once.w);
+
+    // focus elsewhere on the page: the wheel is the page's again
+    button('List view').focus();
+    const before = svg(container).getAttribute('viewBox');
+    expect(fireEvent.wheel(graph(), { deltaY: -100 })).toBe(true);
+    expect(svg(container)).toHaveAttribute('viewBox', before);
+  });
+
+  it('zooms at the cursor: the drawing point under it stays under it', () => {
+    const { container } = renderGraph();
+    sizeSvg(container, { left: 0, top: 100, width: 1052, height: 700 });
+    fireEvent.wheel(graph(), { deltaY: -200, ctrlKey: true, clientX: 263, clientY: 275 });
+    const p = { x: 263, y: 175 }; // the client point in drawing units at the whole view (1 unit = 1 px)
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(zoomAt(whole, wheelFactor(-200), p, wideBounds)));
+    const v = viewOf(container);
+    expect(v.x + (263 / 1052) * v.w).toBeCloseTo(p.x, 1);
+    expect(v.y + (175 / 700) * v.h).toBeCloseTo(p.y, 1);
+  });
+
+  it('reads a line-mode wheel (Firefox) in pixels', () => {
+    const { container } = renderGraph();
+    fireEvent.wheel(graph(), { deltaY: -3, deltaMode: 1, ctrlKey: true });
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(zoomAt(whole, wheelFactor(-48), centre(whole), wideBounds)));
+  });
+
+  it('adds one non-passive wheel listener and removes it on unmount', () => {
+    const add = jest.spyOn(HTMLDivElement.prototype, 'addEventListener');
+    const remove = jest.spyOn(HTMLDivElement.prototype, 'removeEventListener');
+    const { unmount } = renderGraph();
+    // React's own root listeners are passive; ours is the one that may preventDefault
+    const wheelAdds = add.mock.calls.filter(
+      ([type, , opts]) => type === 'wheel' && (opts as AddEventListenerOptions)?.passive === false,
+    );
+    expect(wheelAdds).toHaveLength(1);
+    expect(wheelAdds[0][0]).toBe('wheel');
+    unmount();
+    expect(remove.mock.calls.filter(([type, fn]) => type === 'wheel' && fn === wheelAdds[0][1])).toHaveLength(1);
+    add.mockRestore();
+    remove.mockRestore();
+  });
+});
+
+describe('SkillGraph: keyboard and pointer pan (P5-04)', () => {
+  it('the container is focusable and described by the instructions line', () => {
+    renderGraph();
+    expect(graph()).toHaveAttribute('tabindex', '0');
+    expect(graph()).toHaveClass('focus-visible:outline-2');
+    const help = document.getElementById(graph().getAttribute('aria-describedby')!)!;
+    expect(help).toHaveTextContent(/^Arrow keys pan, plus and minus zoom/);
+    expect(help).toHaveClass('print:hidden');
+  });
+
+  it('arrow keys pan by PAN_STEP of the view (and are prevented); + = - zoom and 0 resets', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    fireEvent.click(button('Zoom in'));
+    let v = viewOf(container);
+    const steps: [string, (v: View) => View][] = [
+      ['ArrowRight', (w) => panBy(w, PAN_STEP * w.w, 0, wideBounds)],
+      ['ArrowDown', (w) => panBy(w, 0, PAN_STEP * w.h, wideBounds)],
+      ['ArrowLeft', (w) => panBy(w, -PAN_STEP * w.w, 0, wideBounds)],
+      ['ArrowUp', (w) => panBy(w, 0, -PAN_STEP * w.h, wideBounds)],
+      ['+', (w) => zoomAt(w, ZOOM_STEP, centre(w), wideBounds)],
+      ['-', (w) => zoomAt(w, 1 / ZOOM_STEP, centre(w), wideBounds)],
+      ['=', (w) => zoomAt(w, ZOOM_STEP, centre(w), wideBounds)],
+    ];
+    for (const [key, next] of steps) {
+      const want = next(v);
+      expect(want).not.toEqual(v);
+      expect(fireEvent.keyDown(graph(), { key })).toBe(false);
+      expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(want));
+      v = viewOf(container);
+    }
+    fireEvent.keyDown(graph(), { key: '0' });
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+  });
+
+  it('arrow keys pan from a node link too; with Ctrl, ⌘ or Alt they are the browser\'s', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    const v = viewOf(container);
+    const a = container.querySelector('a[data-node="python"]')!;
+    for (const mod of [{ ctrlKey: true }, { metaKey: true }, { altKey: true }]) {
+      expect(fireEvent.keyDown(a, { key: 'ArrowRight', ...mod })).toBe(true);
+      expect(fireEvent.keyDown(a, { key: '+', ...mod })).toBe(true);
+    }
+    expect(viewOf(container)).toEqual(v);
+    expect(fireEvent.keyDown(a, { key: 'ArrowRight' })).toBe(false);
+    expect(viewOf(container).x).toBeGreaterThan(v.x);
+  });
+
+  it('other keys pass through (Tab, Enter, letters), and so does an IME composition (review #7)', () => {
+    renderGraph();
+    for (const key of ['Tab', 'Enter', 'a', ' ']) expect(fireEvent.keyDown(graph(), { key })).toBe(true);
+    expect(fireEvent.keyDown(graph(), { key: '-', isComposing: true })).toBe(true);
+  });
+
+  it('a pointer drag pans by the pointer delta in drawing units and captures the pointer', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    fireEvent.click(button('Zoom in'));
+    const v = viewOf(container);
+    sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+    const capture = jest.fn();
+    (graph() as HTMLElement & { setPointerCapture?: (id: number) => void }).setPointerCapture = capture;
+    const scale = v.w / 1052;
+
+    fireEvent.pointerDown(graph(), { pointerId: 7, button: 0, clientX: 500, clientY: 300 });
+    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 540, clientY: 330 });
+    expect(capture).toHaveBeenCalledWith(7);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, -40 * scale, -30 * scale, wideBounds)));
+    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 460, clientY: 280 });
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, 40 * scale, 20 * scale, wideBounds)));
+    fireEvent.pointerUp(graph(), { pointerId: 7, clientX: 460, clientY: 280 });
+
+    // released: moving again changes nothing
+    const after = svg(container).getAttribute('viewBox');
+    fireEvent.pointerMove(graph(), { pointerId: 7, clientX: 100, clientY: 100 });
+    expect(svg(container)).toHaveAttribute('viewBox', after);
+  });
+
+  it('a click after a touch drag that had no click of its own still follows the node (review #5)', () => {
+    jest.useFakeTimers();
+    try {
+      const { container } = renderGraph();
+      fireEvent.click(button('Zoom in'));
+      sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+      fireEvent.pointerDown(graph(), { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(graph(), { pointerId: 1, clientX: 160, clientY: 100 });
+      fireEvent.pointerUp(graph(), { pointerId: 1, clientX: 160, clientY: 100 });
+      act(() => jest.runOnlyPendingTimers());
+      fireEvent.click(container.querySelector('a[data-node="python"]')!);
+      expect(listToggle()).toHaveAttribute('aria-pressed', 'true');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('a move under 4 px is not a drag: the view stays and a click still opens the row', () => {
+    const { container } = renderGraph();
+    sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+    const a = container.querySelector('a[data-node="python"]')!;
+    fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(a, { pointerId: 1, clientX: 102, clientY: 102 });
+    fireEvent.pointerUp(a, { pointerId: 1, clientX: 102, clientY: 102 });
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+    fireEvent.click(a);
+    expect(listToggle()).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('a drag that ends on a node does not follow it; the next plain click does', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+    const a = container.querySelector('a[data-node="python"]')!;
+    fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(a, { pointerId: 1, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(a, { pointerId: 1, clientX: 140, clientY: 100 });
+    expect(fireEvent.click(a)).toBe(false);
+    expect(listToggle()).toHaveAttribute('aria-pressed', 'false');
+    expect(window.location.hash).toBe('');
+
+    fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(a, { pointerId: 1, clientX: 140, clientY: 100 });
+    fireEvent.click(a);
+    expect(listToggle()).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('pointercancel and lostpointercapture end a drag; a secondary button never starts one', () => {
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    sizeSvg(container, { left: 0, top: 0, width: 1052, height: 700 });
+    const v = svg(container).getAttribute('viewBox');
+    for (const end of [fireEvent.pointerCancel, fireEvent.lostPointerCapture]) {
+      fireEvent.pointerDown(graph(), { pointerId: 2, button: 0, clientX: 100, clientY: 100 });
+      end(graph(), { pointerId: 2 });
+      fireEvent.pointerMove(graph(), { pointerId: 2, clientX: 200, clientY: 200 });
+      expect(svg(container)).toHaveAttribute('viewBox', v);
+    }
+    fireEvent.pointerDown(graph(), { pointerId: 3, button: 2, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(graph(), { pointerId: 3, clientX: 200, clientY: 200 });
+    expect(svg(container)).toHaveAttribute('viewBox', v);
+  });
+
+  it('without a size (jsdom) a drag skips the pan: never a NaN viewBox', () => {
+    const { container } = renderGraph();
+    fireEvent.pointerDown(graph(), { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
+    fireEvent.pointerMove(graph(), { pointerId: 1, clientX: 200, clientY: 200 });
+    fireEvent.pointerUp(graph(), { pointerId: 1, clientX: 200, clientY: 200 });
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+  });
+
+  it('hides the zoom controls and the instructions while the list view is on', () => {
+    renderGraph();
+    fireEvent.click(listToggle());
+    expect(screen.queryByRole('button', { name: 'Zoom in' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reset view' })).toBeNull();
+    expect(document.getElementById('skill-graph-help')).toHaveClass('hidden');
+    fireEvent.click(listToggle());
+    expect(button('Zoom in')).toBeInTheDocument();
+  });
+
+  it('the controls are 44 px targets at every width (review #4)', () => {
+    renderGraph();
+    for (const name of ['Zoom in', 'Zoom out']) expect(button(name)).toHaveClass('size-11');
+    for (const name of ['Reset view', 'List view']) expect(button(name)).toHaveClass('min-h-11');
+    for (const name of ['Zoom in', 'Zoom out', 'Reset view', 'List view']) {
+      expect(button(name).className).not.toMatch(/sm:(size|min-h)-/);
+    }
+  });
+
+  it('the zoom controls never print', () => {
+    renderGraph();
+    expect(button('Zoom in').closest('.print\\:hidden')).not.toBeNull();
+  });
+});
+
+describe('SkillGraph: below 640 px (P5-04, D102)', () => {
+  useViewportMock();
+  const first = fitCluster(narrow, 'agentic', NARROW_ASPECT);
+  const chips = () => screen.getByRole('group', { name: 'Jump to a group' });
+
+  it('starts on the first cluster at the narrow aspect (4 4 348 308)', () => {
+    width = 390;
+    const { container } = renderGraph();
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(first));
+    expect(svg(container)).toHaveAttribute('viewBox', '4 4 348 308');
+    expect(svg(container).getAttribute('style')).toMatch(/aspect-ratio: 348 \/ 308/);
+  });
+
+  it('has a row of cluster chips, flex below sm and hidden from it, the one under the view centre pressed', () => {
+    width = 390;
+    renderGraph();
+    expect(chips()).toHaveClass('flex', 'sm:hidden', 'overflow-x-auto');
+    const buttons = within(chips()).getAllByRole('button');
+    expect(buttons.map((b) => b.textContent)).toEqual(clusters.map((c) => c.name));
+    expect(buttons.map((b) => b.getAttribute('aria-pressed'))).toEqual(
+      clusters.map((c) => String(c.id === 'agentic')),
+    );
+  });
+
+  it('a chip click fits its cluster and moves aria-pressed; Reset view goes back to the first cluster', () => {
+    width = 390;
+    const { container } = renderGraph();
+    fireEvent.click(within(chips()).getByRole('button', { name: 'Data & integration' }));
+    const data = fitCluster(narrow, 'data', NARROW_ASPECT);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(data));
+    expect(clusterAt(narrow, centre(data))).toBe('data');
+    expect(within(chips()).getByRole('button', { name: 'Data & integration' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(chips()).getByRole('button', { name: 'Agentic systems' })).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(button('Reset view'));
+    expect(svg(container)).toHaveAttribute('viewBox', '4 4 348 308');
+  });
+
+  it('presses no chip when the view centre is in a gap between clusters', () => {
+    width = 390;
+    renderGraph();
+    // the agentic fit, panned down five steps: its centre sits in the 24-unit gap under the first row (y 300 to 324)
+    let v = first;
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(graph(), { key: 'ArrowDown' });
+      v = panBy(v, 0, PAN_STEP * v.h, narrowBounds);
+    }
+    expect(clusterAt(narrow, centre(v))).toBeNull();
+    within(chips())
+      .getAllByRole('button')
+      .forEach((b) => expect(b).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('Tab onto a node outside the view centres it', () => {
+    width = 390;
+    const { container } = renderGraph();
+    const p = narrow.nodes['docker-compose'];
+    fireEvent.focus(container.querySelector('a[data-node="docker-compose"]')!);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(centerOn(first, p, narrowBounds)));
+
+    // a node already in view leaves the view where it is
+    const before = svg(container).getAttribute('viewBox');
+    fireEvent.focus(container.querySelector('a[data-node="git"]')!);
+    expect(svg(container)).toHaveAttribute('viewBox', before);
+  });
+
+  it('the chip row leaves with the zoom controls while the list view is on; its padding keeps focus rings whole', () => {
+    width = 390;
+    renderGraph();
+    expect(chips()).toHaveClass('p-1');
+    fireEvent.click(listToggle());
+    expect(screen.queryByRole('group', { name: 'Jump to a group' })).toBeNull();
+  });
+
+  it('the wheel zooms within the bounds of the layout on screen after a viewport change (review #9)', () => {
+    width = 1280;
+    const { container } = renderGraph();
+    fireViewport(390);
+    fireEvent.wheel(graph(), { deltaY: -100, ctrlKey: true });
+    expect(svg(container)).toHaveAttribute(
+      'viewBox',
+      viewBoxFor(zoomAt(first, wheelFactor(-100), centre(first), narrowBounds)),
+    );
+  });
+
+  it('a drag from a node outside the view pans from the view on screen; pointer focus does not centre it (review #1)', () => {
+    width = 390;
+    const { container } = renderGraph();
+    sizeSvg(container, { left: 0, top: 0, width: 358, height: 317 });
+    const v = viewOf(container);
+    const a = container.querySelector('a[data-node="typescript"]')!; // outside the first view
+    fireEvent.pointerDown(a, { pointerId: 1, button: 0, clientX: 200, clientY: 300 });
+    fireEvent.focus(a); // the browser focuses a pressed link
+    expect(viewOf(container)).toEqual(v);
+    fireEvent.pointerMove(a, { pointerId: 1, clientX: 160, clientY: 300 });
+    fireEvent.pointerUp(a, { pointerId: 1, clientX: 160, clientY: 300 });
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(panBy(v, 40 * (v.w / 358), 0, narrowBounds)));
+  });
+
+  it('a viewport change resets the view: whole drawing from 640, the first cluster below', () => {
+    width = 390;
+    const { container } = renderGraph();
+    fireEvent.click(button('Zoom in'));
+    fireViewport(800);
+    expect(svg(container)).toHaveAttribute('viewBox', viewBoxFor(fitAll(narrow, narrow.height / narrow.width)));
+    fireViewport(1280);
+    expect(svg(container)).toHaveAttribute('viewBox', '0 0 1052 700');
+    fireViewport(390);
+    expect(svg(container)).toHaveAttribute('viewBox', '4 4 348 308');
   });
 });
 

@@ -406,6 +406,21 @@ compared undecoded (no `URIError`); a click or the toggle clears the hover; a `d
 so the component imports only types from `@/lib/data`. Left for P5-05: a next/link to `#skill-<id>` uses pushState
 (no `hashchange`); use a plain `<a>` or listen for it.
 
+**Built in P5-04**: the view is `useState` (reset by a viewport change with the previous-value pattern, as the
+columns are); the toolbar is the cluster chip row (`flex sm:hidden`, full width, `overflow-x-auto`), then `+` /
+`−` / Reset (aria-labels Zoom in, Zoom out, Reset view) and List view (`ml-auto`); the chip row and zoom controls are
+`print:hidden` and leave the DOM while the list view is on, as the help line goes `hidden`. Keys with Ctrl, ⌘ or Alt
+are left to the browser (Ctrl + is page zoom). A line- or page-mode wheel (Firefox `deltaMode` 1 / 2) is read as 16 /
+800 px. Focus on a node whose box is not wholly in view centres it (`contains` on the box's corners). The container
+swallows `dragstart` (a link drag would cancel the pan) and is `select-none`.
+An Opus review of P5-04 (2 Important, 5 Minor, 4 on tests) led to, test-first: the drag starts from the view on
+screen when it crosses the slop (`viewRef`), and a press that focuses a node doesn't `centerOn` it; a wheel that
+zooms nothing (sideways, or past a limit) is not prevented, so the page scrolls and back-swipe works; the click guard
+outlives a drag by one task only (a touch drag has no click); IME keys pass; the controls are 44 px at every width;
+the chip row is `p-1` so focus rings aren't clipped; the tests tie the wheel listener, its bounds after a viewport
+change and the chip row's list-view exit. Left for P5-07: below 640 the server-rendered svg is the wide aspect until
+hydration switches to the narrow one (a jump of about 77 px at 390, by design since the server has no width).
+
 ## Interaction
 
 | Input | Where | What happens | Never |
