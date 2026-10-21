@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P3-02 · passes
+
+- `contract.ts`: contract v2. `MemoryBody` gains optional `v`, `about_visitor`, `about_agent`, `retention_days` (types `Episode`, `MemoryEvent`, `AboutVisitor`, `AboutAgent`); a v1 body parses unchanged with no v2 keys (a lone `"v": 1` stays v1). Also `TOPIC.navigate`, `RPC_GET_MEMORY`, `MEMORY_EVENT_TYPES`, `parseNavigate` (1 KiB cap; `parseObject` takes the limit) and `isAllowedHref`. New `memoryCache.ts` (`saveMemory`/`loadMemory`/`clearMemory`, `memoryCacheKey`, `MemoryStorage`), and `readVisitorId` in `visitorId.ts`, which never writes. Fixtures `memoryV2`, `memoryV2NoAgent` (+ JSON). Tests 1167 → 1252 (86 → 87 suites; new `concierge-memory-cache.test.ts`).
+- Verified: watched each new test fail first (57 contract failures, then the cache module missing); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS). The only existing contract case that changed is 'contract constants' (`navigate`, `RPC_GET_MEMORY`).
+- Opus review of the diff: 0 Critical, 0 Important, 4 Minor. All four fixed test-first: a `v` below 2 on its own no longer turns on the v2 shape; `saveMemory` won't save a body `parseMemory` rejects, so a bad body can't replace a good cached one; ids that aren't UUID v4 are ignored; the storage type is now `MemoryStorage`, not the DOM's `CacheStorage`.
+- Docs: CLAUDE.md `lib/concierge/` line and test count; plan § Contract v2 and § Cache marked built; *As built* notes on D91 and D95. No new decisions (next free is still D96).
+- Next (P3-03): nothing calls the v2 fields, `parseNavigate` or the cache yet. `saveMemory` takes the raw body text, so P3-07 should hand `readBody`'s text through as the plan says.
+- Questions for Michael: none new (D84, D93 still open). Proposed changes: none.
+
 ### 2026-10-21 · P3-01 · passes
 
 - New `docs/plans/2026-10-21-P3-concierge-in-site.md`, all 14 sections: Ownership (the `ConciergeProvider` context table, what moves out of TalkSession.tsx function by function, `configured` from layout.tsx as a prop, `pagehide`/bfcache, StrictMode), Contract v2 (a parse table for every § 7 field; v1 bodies parse unchanged with no v2 keys), Panel/Widget/Callout (ASCII layouts at 1024+ and 390, focus order, z-[45]), Memory view (six `--color-mem-*` tokens, every one ≥ 6.17:1 on all three surfaces), Cache, Busy retry (`closing` transition table), Usher, Copy before/after, Tests per feature. D85–D95 are recorded in the v2 spec § v3 decisions; the next free number is D96. No code changed: 1167 tests, 86 suites, before and after.

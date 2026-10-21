@@ -105,6 +105,10 @@ this safe, all already true of TalkSession and kept:
 
 ## Contract v2
 
+**Built (P3-02):** everything in this section, as written, in `contract.ts`, `memoryCache.ts` and `visitorId.ts`
+(`readVisitorId`); tests in `concierge-contract.test.ts`, `concierge-memory-cache.test.ts` and
+`concierge-visitor-id.test.ts`. Nothing calls the v2 fields, `parseNavigate` or the cache yet (P3-06, P3-07, P3-08).
+
 `src/lib/concierge/contract.ts` (P3-02). The rule for every v2 field: **optional, and never the reason a body is
 rejected.** A v1 body (no `v`, none of the v2 keys) parses to exactly the object it parses to today: the v2 keys are
 left off the result (not set to `null`), so the existing `concierge-contract.test.ts` cases stay `toEqual`-green. A
@@ -356,7 +360,7 @@ MemoryView's Profile chips; `MemoryPanel.test.tsx` becomes `MemoryView.test.tsx`
 
 ## Cache
 
-P3-02 builds the module, P3-07 wires it.
+P3-02 builds the module (built: `src/lib/concierge/memoryCache.ts`), P3-07 wires it.
 
 - **Key per visitor id:** `concierge.memory.<visitor_id>`, the id lower-cased by the key builder (`isUuidV4`
   accepts either case, and the token route lower-cases it too, D43), in `localStorage`.

@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1167 tests, 86 suites after P2-04)
+npm test             # Jest unit/integration tests (1252 tests, 87 suites after P3-02)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -99,7 +99,10 @@ Single source of truth for all page content — no content is hardcoded in compo
   also in state for `RoomAudio`, loaded with `next/dynamic`, so LiveKit is not in the first load), the one
   Connect/Leave button (it keeps focus), the mic toggle, `MessageBox` (lk.chat) and the Forget me RPC; `sessionReducer.ts` the
   phases (a 429 `busy` from the token route is its own phase with the reason's line and no retry, D66) (Jest mocks: see Testing)
-- `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw), latency stats (`latency.ts`), the visitor id (`visitorId.ts`) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
+- `lib/concierge/` — no React, no livekit-client: the §4 contract parsers (`contract.ts`, never throw; contract v2
+  (v3 spec § 7, D95): `parseMemory` reads the optional v2 keys, left off a v1 body's result; `parseNavigate` for
+  `concierge.navigate`, 1 KiB cap; `isAllowedHref(href, slugs)`, the usher's exact-match allowlist), the memory cache
+  (`memoryCache.ts`: `saveMemory`/`loadMemory`/`clearMemory`, the raw body per visitor id, re-parsed on load, D91), latency stats (`latency.ts`), the visitor id (`visitorId.ts`; `readVisitorId` never writes) and the server-only env check (`env.ts`, D46), shared by the token route and `/talk`; for the route's limits (VC5) the Origin allowlist (`origin.ts`), the address bucket and room limits (`limits.ts`, pure) and the server-only room list (`rooms.ts`, `livekit-server-sdk`)
 - `components/LoopingVideo.tsx` — muted looping clip with a pause/play button, paused under reduced motion (`"use client"`)
 - `components/MethodStrip.tsx` — the five `loopSteps` (Spec → Learn, D77; `methodSteps` stays for the case studies) as an `ol` (D23; lines `sr-only` below md, D31); two users: the hero (labels only below md) and `/about`'s How I work (`showLines`: lines at every width; `examples`, one link per step)
 - `components/projects/ProjectCard.tsx` — project card (Server Component); `headingAs="h3"` under a section heading (home)

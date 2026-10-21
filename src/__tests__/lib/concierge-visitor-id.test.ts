@@ -5,6 +5,7 @@ import {
   getOrCreateVisitorId,
   isUuidV4,
   newUuidV4,
+  readVisitorId,
 } from '@/lib/concierge/visitorId';
 
 describe('isUuidV4', () => {
@@ -166,6 +167,42 @@ describe('getOrCreateVisitorId', () => {
   it('returns a fresh valid id without storage', () => {
     expect(isUuidV4(getOrCreateVisitorId())).toBe(true);
     expect(isUuidV4(getOrCreateVisitorId(undefined))).toBe(true);
+  });
+});
+
+describe('readVisitorId', () => {
+  it('returns the stored v4 id, lower-cased, and never writes', () => {
+    const storage = memoryStorage({ [VISITOR_ID_KEY]: STORED.toUpperCase() });
+    expect(readVisitorId(storage)).toBe(STORED);
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+
+  it('returns null and writes nothing when no id is stored (D45: no id before Connect)', () => {
+    const storage = memoryStorage();
+    expect(readVisitorId(storage)).toBeNull();
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(storage.data.size).toBe(0);
+  });
+
+  it('returns null for a malformed stored value, and leaves it there', () => {
+    for (const bad of ['', 'not-a-uuid', '123e4567-e89b-12d3-a456-426614174000', `${STORED} `]) {
+      const storage = memoryStorage({ [VISITOR_ID_KEY]: bad });
+      expect(readVisitorId(storage)).toBeNull();
+      expect(storage.data.get(VISITOR_ID_KEY)).toBe(bad);
+      expect(storage.setItem).not.toHaveBeenCalled();
+    }
+  });
+
+  it('returns null without throwing when getItem throws or there is no storage', () => {
+    const storage: IdStorage = {
+      getItem: () => {
+        throw new DOMException('denied', 'SecurityError');
+      },
+      setItem: jest.fn(),
+    };
+    expect(readVisitorId(storage)).toBeNull();
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(readVisitorId(undefined)).toBeNull();
   });
 });
 

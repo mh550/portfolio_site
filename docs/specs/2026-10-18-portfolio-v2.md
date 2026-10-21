@@ -547,7 +547,10 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
 - **D91** *default*: the last `concierge.memory` body is cached in `localStorage` under `concierge.memory.<visitor_id>`
   as `{ v: 1, savedAt, body: <the raw JSON text> }` and re-parsed with `parseMemory` on load; `readVisitorId` reads
   the id without creating one, so D45's "no id stored before Connect" holds; Forget me clears it. Supersedes
-  nothing. Reversible: stop calling `saveMemory`. (Plan § Cache; P3-02 and P3-07 build.)
+  nothing. Reversible: stop calling `saveMemory`. (Plan § Cache; P3-02 and P3-07 build.) *As built (P3-02):*
+  `src/lib/concierge/memoryCache.ts` exports `memoryCacheKey`, `saveMemory(storage, visitorId, bodyText, savedAt)`,
+  `loadMemory` → `{ body, savedAt } | null` and `clearMemory`; an id that isn't a UUID v4 reads and writes nothing;
+  `visitorId.ts` exports `readVisitorId(storage)` (never writes). Nothing calls them yet (P3-07 wires them).
 - **D92** *default*: a 429 `busy`/`visitor` enters a `closing` phase ("Closing your earlier conversation…") and
   re-POSTs the token route every 5 s, one request in flight, for up to 60 s, then shows the v1 `busyVisitor` line;
   Leave cancels. Supersedes D66 for `reason: 'visitor'` only; D66 stands for `site` and offline, and D71's line is
@@ -570,4 +573,8 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   (v1's `facts` rule, which rejects the body, stands); `concierge.navigate` bodies over 1 KiB are dropped;
   `concierge.get_memory` is named (`RPC_GET_MEMORY`) but not called in P3, since the agent pushes memory at
   session start and the cache covers the time before a call. Extends the 2026-10-19 contract § 4 (its 15 KiB cap
-  stands). Reversible: the parser's v2 branch is one function. (Plan § Contract v2; P3-02 builds.)
+  stands). Reversible: the parser's v2 branch is one function. (Plan § Contract v2; P3-02 builds.) *As built (P3-02):*
+  `contract.ts` exports `TOPIC.navigate`, `RPC_GET_MEMORY`, `MAX_NAVIGATE_BYTES`, `MEMORY_EVENT_TYPES`, the
+  `Episode`, `MemoryEvent`, `AboutVisitor`, `AboutAgent` and `NavigateBody` types, `parseNavigate` and
+  `isAllowedHref`; a list in `about_visitor` that isn't an array is `null`, a `knowledge.sections` that isn't one
+  is `[]`; episodes keep the first 5 good entries and events the first 12.

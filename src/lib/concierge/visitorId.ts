@@ -37,6 +37,17 @@ export function getOrCreateVisitorId(storage?: Pick<Storage, 'getItem' | 'setIte
   return id;
 }
 
+// The stored id, lower-cased, or null; never writes. For reading what belongs to this browser's id (the memory
+// cache) before Connect without making one: D45's "no id stored before Connect" holds.
+export function readVisitorId(storage?: Pick<Storage, 'getItem'>): string | null {
+  try {
+    const stored = storage?.getItem(VISITOR_ID_KEY);
+    return isUuidV4(stored) ? stored.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
 // Reading window.localStorage itself throws (SecurityError) when the browser blocks site storage, before
 // getOrCreateVisitorId's own try/catch could help, so callers pass browserStorage() instead.
 export function browserStorage(): Storage | undefined {
