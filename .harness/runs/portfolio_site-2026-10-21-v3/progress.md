@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P5-01 · passes
+
+- Plan `docs/plans/2026-10-21-P5-skills-graph.md`: Data (6 clusters, 51 nodes each with cluster/weight/logo/since/source, 43 node↔node edges, project edges ≥ 3 per featured project, 13 new simple-icons keys incl. javascript, expo, modelcontextprotocol beyond the step's list; Pipedream has none), Layout (ASCII 1280 = 3 columns, 1052 × 700 units; 390 = 2 columns, 704 × 1008, first view `4 4 348 308` at 1.03 px a unit), Math (`src/lib/graph/layout.ts` + `view.ts` signatures), Render, Interaction table, Accessibility, Tests, empty What Michael will see / Review tables, Decisions. D98–D103 appended to the v2 spec. Docs only: tests 1646 → 1646.
+- Verified: an Opus review of the plan recomputed every layout number (all correct) and found 4 Important / 9 Minor issues, all applied: `touch-action: pan-y pinch-zoom`; jsdom has no `matchMedia`/`setPointerCapture` and zero-size rects (guards specified); `pointercancel` and a post-drag click suppression; Linux project edges and LiveKit's `since` removed as unsourced; MCP gets a mark; clampView lets a tall phone view zoom out to the whole drawing. `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0.
+- Next (P5-02): build from § Data and § Math; `skillCategories` goes (readers: skills page, skills.test, data.test's D20 block).
+- Questions for Michael: (D98) MongoDB is in Cherished's `techStack` but the step drops it: keep it off? Are the weight-3 "core" nodes right (Harness/Context engineering, Agent memory, Claude Code, TypeScript, Python, React, React Native, Next.js, PostgreSQL, Supabase, Multi-tenant, Docker Compose, Git/GitHub, Specs)?
+- Proposed changes: P5-03 step 1 `<svg role="img">` → svg `role="none"` inside a `role="group"` container (D103: `img` hides the node links from screen readers); P5-04 step 3 "≤ 390 / above 390" and "`hidden sm:…`" → "below 640 / from 640" and "`flex sm:hidden`" (D102); P5-03 step 4 is trivially true now, since view changes are instant at every motion setting (D103).
+
 ### 2026-10-21 · verify P4
 
 | Feature | Step | What you ran or read | What you saw | Holds |
