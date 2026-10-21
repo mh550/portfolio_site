@@ -1,7 +1,6 @@
 import type { MetricsBody } from '@/lib/concierge/contract';
 import { TURN_PATH_FIELDS, cachedShare, median, summarise } from '@/lib/concierge/latency';
 import { latencyLabels, talkPage } from '@/lib/data/concierge';
-import TalkPanel from './TalkPanel';
 import { DASH, ms, percent } from './format';
 
 const numberCell = 'whitespace-nowrap py-1.5 pl-3 text-right tabular-nums text-white';
@@ -19,15 +18,11 @@ function Row({ label, last, median }: { label: string; last: string; median: str
 }
 
 // How long each turn took, from the agent's `concierge.metrics` bodies (spec §4): the newest turn beside the running
-// median of every turn this visit.
+// median of every turn this visit. The Latency tab's content (PanelTabs, P3-06): the tab names it, so no heading here.
 export default function LatencyPanel({ turns }: { turns: MetricsBody[] }) {
   const last = turns.at(-1);
   if (!last) {
-    return (
-      <TalkPanel id="talk-latency" heading={talkPage.headings.latency}>
-        <p className="text-[var(--color-muted)]">{talkPage.empty.latency}</p>
-      </TalkPanel>
-    );
+    return <p className="text-[var(--color-muted)]">{talkPage.empty.latency}</p>;
   }
   const summary = summarise(turns);
   // The preload runs once, at connect, so it is shown once: from the first turn that reported it.
@@ -37,7 +32,7 @@ export default function LatencyPanel({ turns }: { turns: MetricsBody[] }) {
   const compacted = flags.includes(true) ? latencyLabels.yes : flags.includes(false) ? latencyLabels.no : DASH;
   const { columns } = latencyLabels;
   return (
-    <TalkPanel id="talk-latency" heading={talkPage.headings.latency}>
+    <>
       <table className="w-full text-sm">
         <caption className="mb-2 text-left text-[var(--color-muted)]">{`${latencyLabels.turn} ${last.turn}`}</caption>
         <thead>
@@ -82,6 +77,6 @@ export default function LatencyPanel({ turns }: { turns: MetricsBody[] }) {
         <dt className="text-white/90">{latencyLabels.compacted}</dt>
         <dd className="whitespace-nowrap text-right text-white">{compacted}</dd>
       </dl>
-    </TalkPanel>
+    </>
   );
 }

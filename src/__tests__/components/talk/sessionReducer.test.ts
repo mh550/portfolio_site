@@ -1,6 +1,7 @@
 import {
   initialSession,
   inRoom,
+  isActive,
   sessionReducer,
   type Phase,
   type SessionAction,
@@ -8,7 +9,7 @@ import {
 } from '@/components/talk/sessionReducer';
 import { memoryBody, metricsFull, metricsNulls } from '../../fixtures/concierge';
 
-const PHASES: Phase[] = ['idle', 'connecting', 'waiting', 'live', 'ended', 'offline', 'busy'];
+const PHASES: Phase[] = ['idle', 'connecting', 'waiting', 'live', 'ended', 'offline', 'busy', 'closing'];
 const at = (phase: Phase, extra: Partial<SessionState> = {}): SessionState => ({ ...initialSession, phase, ...extra });
 const line = (key: string, text: string, final = true) => ({ key, who: 'agent' as const, text, final });
 
@@ -17,10 +18,14 @@ const transitions: [SessionAction, Phase[], Phase][] = [
   [{ type: 'connect' }, ['idle', 'offline', 'ended', 'busy'], 'connecting'],
   [{ type: 'connected' }, ['connecting'], 'waiting'],
   [{ type: 'agentJoined' }, ['connecting', 'waiting'], 'live'],
-  [{ type: 'offline' }, ['connecting', 'waiting'], 'offline'],
+  [{ type: 'offline' }, ['connecting', 'waiting', 'closing'], 'offline'],
   [{ type: 'dropped' }, ['live'], 'ended'],
   [{ type: 'dropped' }, ['connecting', 'waiting'], 'offline'],
-  [{ type: 'busy', reason: 'visitor' }, ['connecting'], 'busy'],
+  [{ type: 'busy', reason: 'visitor' }, ['connecting', 'closing'], 'busy'],
+  [{ type: 'busy', reason: 'site' }, ['connecting', 'closing'], 'busy'],
+  // D92: a 429 busy/visitor waits out the earlier room; a token on a later try goes back to connecting.
+  [{ type: 'closing' }, ['connecting'], 'closing'],
+  [{ type: 'closed' }, ['closing'], 'connecting'],
 ];
 
 describe('sessionReducer', () => {
@@ -102,6 +107,49 @@ describe('sessionReducer', () => {
     expect(sessionReducer(state, { type: 'leave' })).toBe(initialSession);
   });
 
+  // D92 (plan § Busy retry): the earlier conversation is still closing. No Room exists, but the visitor is in a
+  // session: the button reads Leave.
+  describe('closing (a 429 busy/visitor, retried every 5 s for 60 s)', () => {
+    it('enters from connecting with no busy reason, and is active but not in a room', () => {
+      expect(sessionReducer(at('connecting'), { type: 'closing' })).toEqual({ ...initialSession, phase: 'closing' });
+      expect(inRoom('closing')).toBe(false);
+      expect(isActive('closing')).toBe(true);
+    });
+
+    it.each(PHASES.filter((p) => p !== 'closing'))('isActive(%s) is inRoom', (phase) => {
+      expect(isActive(phase)).toBe(inRoom(phase));
+    });
+
+    it('a 200 on a retry goes back to connecting, keeping the session', () => {
+      expect(sessionReducer(at('closing'), { type: 'closed' })).toEqual({ ...initialSession, phase: 'connecting' });
+    });
+
+    it('the 60 s limit shows the visitor busy line', () => {
+      expect(sessionReducer(at('closing'), { type: 'busy', reason: 'visitor' })).toEqual({
+        ...initialSession,
+        phase: 'busy',
+        busyReason: 'visitor',
+      });
+    });
+
+    it('Leave returns to the initial state', () => {
+      expect(sessionReducer(at('closing'), { type: 'leave' })).toBe(initialSession);
+    });
+
+    it.each<SessionAction>([
+      { type: 'connect' },
+      { type: 'connected' },
+      { type: 'agentJoined' },
+      { type: 'dropped' },
+      { type: 'memory', body: memoryBody },
+      { type: 'metrics', body: metricsFull },
+      { type: 'line', line: line('a', 'hi') },
+    ])('ignores %o: no Room yet', (action) => {
+      const state = at('closing');
+      expect(sessionReducer(state, action)).toBe(state);
+    });
+  });
+
   describe('stream bodies', () => {
     it.each(['connecting', 'waiting', 'live'] as Phase[])('land while %s', (phase) => {
       let state = sessionReducer(at(phase), { type: 'memory', body: memoryBody });
@@ -127,6 +175,14 @@ describe('sessionReducer', () => {
         ['v1', false],
         ['a2', false],
       ]);
+    });
+
+    // D94: the usher's notice is the page's line, not a speaker's: the agent's half-spoken line stays as it is.
+    it("a notice doesn't settle the agent's line being spoken", () => {
+      let state = sessionReducer(at('live'), { type: 'line', line: line('a1', 'Let me sh', false) });
+      const notice = { key: 'notice-1', who: 'notice' as const, text: 'Taking you to About', final: true };
+      state = sessionReducer(state, { type: 'line', line: notice });
+      expect(state.lines).toEqual([line('a1', 'Let me sh', false), notice]);
     });
 
     it.each([

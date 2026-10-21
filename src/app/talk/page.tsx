@@ -3,7 +3,6 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/ScrollReveal';
 import { focusRing } from '@/components/focusRing';
 import TalkSession from '@/components/talk/TalkSession';
-import { conciergeEnv } from '@/lib/concierge/env';
 import { introText, privacyNote, talkPage } from '@/lib/data';
 
 export const metadata: Metadata = {
@@ -12,10 +11,9 @@ export const metadata: Metadata = {
 };
 
 // The voice concierge (spec docs/specs/2026-10-19-voice-concierge-page.md W2). This page is server-rendered and
-// imports nothing from LiveKit: TalkSession, the client half, does nothing until Connect is pressed. Without the
-// LiveKit env the token route could only answer 503 (a red console line in every browser), so TalkSession is told and
-// Connect goes straight to offline (D46). The page is prerendered, so this is read at build time; Vercel rebuilds on
-// redeploy, which an env change needs anyway.
+// imports nothing from LiveKit: TalkSession, the client half, is a view of the call ConciergeProvider owns around the
+// chrome (D85), which does nothing until Connect is pressed. Whether LiveKit is configured (D46) is read in
+// layout.tsx and reaches the provider through SiteChrome.
 export default function TalkPage() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-20">
@@ -46,7 +44,7 @@ export default function TalkPage() {
         </div>
       </ScrollReveal>
 
-      <TalkSession configured={conciergeEnv() !== null} />
+      <TalkSession />
 
       <section aria-labelledby="talk-privacy" className="mt-16 max-w-3xl text-sm text-[var(--color-muted)]">
         <h2 id="talk-privacy" className="mb-3 font-mono uppercase tracking-widest text-white">

@@ -2,8 +2,8 @@ import type { MemoryBody, MetricsBody } from '@/lib/concierge/contract';
 import type { TranscriptLine } from './Transcript';
 
 // The /talk session as one pure reducer (plan docs/plans/2026-10-20-VC2-talk-page.md § State machine). No React and
-// no LiveKit here: TalkSession owns the Room and dispatches what happened; this decides what the page shows.
-export type Phase = 'idle' | 'connecting' | 'waiting' | 'live' | 'ended' | 'offline' | 'busy';
+// no LiveKit here: ConciergeProvider owns the Room (D85) and dispatches what happened; this decides what the page shows.
+export type Phase = 'idle' | 'connecting' | 'waiting' | 'live' | 'ended' | 'offline' | 'busy' | 'closing';
 // Why the token route answered 429 (D66): this address already has a live room, or the site is at its cap.
 export type BusyReason = 'visitor' | 'site';
 export type ForgetStatus = 'idle' | 'busy' | 'done' | 'failed';
@@ -23,9 +23,11 @@ export interface SessionState {
 export type SessionAction =
   | { type: 'connect' } // Connect clicked: a fresh session
   | { type: 'connected' } // room.connect() resolved with no agent in the room yet
-  | { type: 'agentJoined' } // TalkSession keeps the agent's identity (the RPC destination) on its session
+  | { type: 'agentJoined' } // the provider keeps the agent's identity (the RPC destination) on its session
   | { type: 'offline' } // 503, non-OK, fetch or connect() rejected, or no agent within 10 s
   | { type: 'busy'; reason: BusyReason } // the token route answered 429 busy: no Room was made, no retry
+  | { type: 'closing' } // a first 429 busy/visitor: this visitor's earlier room is still closing; the provider retries
+  | { type: 'closed' } // a retry got a token: back to connecting, the same session
   | { type: 'dropped' } // the agent left or the room disconnected (not by us)
   | { type: 'leave' }
   | { type: 'memory'; body: MemoryBody }
@@ -58,6 +60,10 @@ const settle = (lines: TranscriptLine[]) =>
 // Phases in which a Room exists and its text streams may still land: the visitor is in a session.
 export const inRoom = (phase: Phase) => phase === 'connecting' || phase === 'waiting' || phase === 'live';
 
+// The visitor is in a session, Room or not: while the earlier conversation closes (D92) there is none yet, but the
+// button reads Leave, which stops the retries.
+export const isActive = (phase: Phase) => inRoom(phase) || phase === 'closing';
+
 // An event that doesn't fit the current phase (a late callback from a session already over) changes nothing.
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
@@ -72,11 +78,18 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         ? { ...state, phase: 'live' }
         : state;
     case 'offline':
-      return state.phase === 'connecting' || state.phase === 'waiting'
+      return state.phase === 'connecting' || state.phase === 'waiting' || state.phase === 'closing'
         ? { ...state, phase: 'offline', lines: settle(state.lines) }
         : state;
     case 'busy':
-      return state.phase === 'connecting' ? { ...state, phase: 'busy', busyReason: action.reason } : state;
+      return state.phase === 'connecting' || state.phase === 'closing'
+        ? { ...state, phase: 'busy', busyReason: action.reason }
+        : state;
+    // D92 (plan § Busy retry): the 60 s of retries end in busy (visitor) above; a token goes back to connecting.
+    case 'closing':
+      return state.phase === 'connecting' ? { ...state, phase: 'closing' } : state;
+    case 'closed':
+      return state.phase === 'closing' ? { ...state, phase: 'connecting' } : state;
     case 'dropped':
       // Before the agent arrived a dropped room reads as offline; after, the call ended and what was said stays.
       if (state.phase === 'live') return { ...state, phase: 'ended', lines: settle(state.lines) };

@@ -260,7 +260,7 @@
       "after": [
         "P1"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-02",
@@ -278,7 +278,7 @@
       "after": [
         "P3-01"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-03",
@@ -297,7 +297,7 @@
       "after": [
         "P3-02"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-04",
@@ -315,7 +315,7 @@
       "after": [
         "P3-03"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-05",
@@ -334,7 +334,7 @@
       "after": [
         "P3-04"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-06",
@@ -354,7 +354,7 @@
       "after": [
         "P3-05"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-07",
@@ -372,7 +372,7 @@
       "after": [
         "P3-06"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-08",
@@ -391,7 +391,7 @@
       "after": [
         "P3-07"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-09",
@@ -409,7 +409,7 @@
       "after": [
         "P3-08"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P3-10",
@@ -427,7 +427,7 @@
       "after": [
         "P3-09"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "P4-01",

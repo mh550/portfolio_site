@@ -2,11 +2,7 @@
 
 import { useId, useRef, useState } from 'react';
 import { talkPage } from '@/lib/data/concierge';
-import { focusRing } from '@/components/focusRing';
-
-const buttonBase = `rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${focusRing}`;
-const quiet = `${buttonBase} border border-white/20 text-white hover:border-white/40`;
-const danger = `${buttonBase} bg-red-700 text-white hover:bg-red-800`;
+import { danger, quietSmall as quiet } from '@/components/concierge/buttons';
 
 // Forget me, with one confirm step so a stray tap can't erase anything. The parent runs the RPC (`onForget`) and
 // holds `busy` until it answers; Erase closes the confirm step at once, so it can only call `onForget` once.
@@ -44,7 +40,17 @@ export default function ForgetMeButton({ onForget, busy }: { onForget: () => voi
     );
   }
   return (
-    <div role="group" aria-labelledby={promptId} className="space-y-3">
+    // Esc steps back out of the confirm step; preventDefault tells the drawer (ConciergePanel) the key is handled.
+    <div
+      role="group"
+      aria-labelledby={promptId}
+      className="space-y-3"
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || event.nativeEvent.isComposing) return;
+        event.preventDefault();
+        show(false);
+      }}
+    >
       <p id={promptId} className="text-white">
         {status.forgetConfirm}
       </p>

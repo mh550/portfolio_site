@@ -41,11 +41,14 @@ describe('Footer accessibility (M8-02)', () => {
   });
 });
 
-describe('Footer clear of the voice widget (VC4-03, D61)', () => {
-  it('pads its bottom by 96 px below xl and 32 px from xl', () => {
+describe('Footer clear of the pill (VC4-03, D61; P3-05, D87)', () => {
+  // The 48 px pill sits 16 px up (more on a phone with a home bar): 96 px clears it at every width, 390 included,
+  // and at xl, where the links row ends under the pill's corner.
+  it('pads its bottom by 96 px at every width', () => {
     const { container } = render(<Footer />);
     const classes = (container.querySelector('footer')!.getAttribute('class') ?? '').split(/\s+/);
-    expect(classes).toEqual(expect.arrayContaining(['pt-8', 'pb-24', 'xl:pb-8']));
+    expect(classes).toEqual(expect.arrayContaining(['pt-8', 'pb-24']));
+    expect(classes.filter((c) => /^[a-z0-9]+:pb-/.test(c))).toEqual([]);
     expect(classes).not.toContain('py-8');
   });
 });

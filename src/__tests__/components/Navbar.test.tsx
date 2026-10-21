@@ -19,7 +19,7 @@ describe('Navbar', () => {
 
   it('renders all nav links', () => {
     render(<Navbar />);
-    const links = ['Home', 'About', 'Skills', 'Projects', 'Talk', 'Experience', 'Contact'];
+    const links = ['Home', 'About', 'Skills', 'Projects', 'Experience', 'Contact'];
     for (const label of links) {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     }
@@ -32,7 +32,6 @@ describe('Navbar', () => {
       About: '/about',
       Skills: '/skills',
       Projects: '/projects',
-      Talk: '/talk',
       Experience: '/experience',
       Contact: '/contact',
     };
@@ -44,16 +43,18 @@ describe('Navbar', () => {
     }
   });
 
-  it('lists the seven links in order in the desktop list and the mobile menu (D60, D79)', async () => {
+  it('lists the six links in order in the desktop list and the mobile menu (D79, D89)', async () => {
     const user = userEvent.setup();
     render(<Navbar />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
-    const order = ['Home', 'About', 'Skills', 'Projects', 'Talk', 'Experience', 'Contact'];
+    const order = ['Home', 'About', 'Skills', 'Projects', 'Experience', 'Contact'];
     const lists = screen.getAllByRole('list');
     expect(lists).toHaveLength(2);
     for (const list of lists) {
       expect(within(list).getAllByRole('link').map((a) => a.textContent)).toEqual(order);
-      expect(within(list).getByRole('link', { name: 'Talk' })).toHaveAttribute('href', '/talk');
+      // D89: /talk is reached from the pill's panel, /card and the deep-dive, not the Navbar
+      expect(within(list).queryByRole('link', { name: 'Talk' })).toBeNull();
+      for (const a of within(list).getAllByRole('link')) expect(a).not.toHaveAttribute('href', '/talk');
     }
     expect(screen.queryByRole('link', { name: /evidence|card|approach/i })).not.toBeInTheDocument();
     for (const a of screen.getAllByRole('link')) expect(a.getAttribute('href')).not.toBe('/approach');
@@ -105,18 +106,26 @@ describe('Navbar on /about (D79)', () => {
   });
 });
 
-describe('Navbar on /talk (VC4, D60)', () => {
-  it('marks only Talk as the current page, in the desktop list and the mobile menu', async () => {
+describe('Navbar on /talk (D89)', () => {
+  it('marks no link as the current page: /talk is off the Navbar', async () => {
     mockPathname = '/talk';
     render(<Navbar />);
     await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
-    const current = screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page');
-    expect(current.map((a) => a.textContent)).toEqual(['Talk', 'Talk']);
-    for (const a of current) expect(a).toHaveAttribute('href', '/talk');
+    expect(screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page')).toEqual([]);
   });
 });
 
-// VC4-06 review: eight links (seven since D79) make the open menu ~370 px; on a short landscape phone it must scroll, not clip Contact.
+describe('Navbar on /projects (D89)', () => {
+  it('marks only Projects as the current page, in the desktop list and the mobile menu', async () => {
+    mockPathname = '/projects';
+    render(<Navbar />);
+    await userEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+    const current = screen.getAllByRole('link').filter((a) => a.getAttribute('aria-current') === 'page');
+    expect(current.map((a) => a.textContent)).toEqual(['Projects', 'Projects']);
+  });
+});
+
+// VC4-06 review: eight links (six since D79 and D89) make the open menu ~370 px; on a short landscape phone it must scroll, not clip Contact.
 describe('Navbar mobile menu height (VC4-06)', () => {
   it('caps the open menu at the viewport below the bar and lets it scroll', async () => {
     mockPathname = '/';

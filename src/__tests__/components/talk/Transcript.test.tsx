@@ -10,6 +10,22 @@ const lines: TranscriptLine[] = [
 const log = () => screen.getByRole('log');
 
 describe('Transcript', () => {
+  // D94: the usher's notice is the page's own line: muted, italic, no speaker label, never aria-busy.
+  it('renders a notice line muted and unattributed', () => {
+    render(
+      <Transcript lines={[...lines.slice(0, 2), { key: 'notice-1', who: 'notice', text: 'Taking you to About', final: true }]} />
+    );
+    const items = within(log()).getAllByRole('listitem');
+    const notice = items[2];
+    expect(notice).toHaveTextContent(/^Taking you to About$/);
+    expect(notice).toHaveAttribute('data-who', 'notice');
+    expect(notice.className).toMatch(/text-\[var\(--color-muted\)\]/);
+    expect(notice.className).toMatch(/\bitalic\b/);
+    expect(within(notice).queryByText('Concierge')).toBeNull();
+    expect(within(notice).queryByText('You')).toBeNull();
+    expect(log()).toHaveAttribute('aria-busy', 'false');
+  });
+
   it('has an h2 heading that names a polite live region', () => {
     render(<Transcript lines={lines} />);
     expect(screen.getByRole('heading', { level: 2, name: 'Transcript' })).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { introText, latencyLabels, privacyNote, talkPage } from '@/lib/data';
+import { introText, latencyLabels, privacyNote, talkPage, talkWidget } from '@/lib/data';
 
 describe('talkPage', () => {
   it('has the exact offline sentence and the deep-dive link', () => {
@@ -9,13 +9,26 @@ describe('talkPage', () => {
   // D62: the harness framing, no hand-written-code claim and no number.
   it('opens the intro with the harness wording, linking the agent-harness case study', () => {
     expect(introText(talkPage.intro[0])).toBe(
-      'A voice agent I designed on LiveKit and built with my agent harness: specs in, verified milestones out. It remembers you between visits.',
+      "A voice agent I designed on LiveKit and built with my agent harness. It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to the work it's talking about.",
     );
     expect(talkPage.intro[0]).toMatchObject({ link: { label: 'my agent harness', href: '/projects/agent-harness' } });
     for (const p of talkPage.intro) {
       expect(introText(p)).not.toMatch(/\d/);
       expect(introText(p)).not.toMatch(/Claude Code agents writing/);
     }
+  });
+
+  // D93 (plan § Copy): the second paragraph names the tabs and the button in the page's own words.
+  it('the second paragraph points at the Latency tab and Forget me on the Memory tab', () => {
+    expect(talkPage.intro[1]).toBe(
+      'Talk or type. The Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you.',
+    );
+  });
+
+  it('drops the harness slogan and "pack" from every concierge string', () => {
+    const all = JSON.stringify([talkPage, talkWidget, privacyNote, latencyLabels]);
+    expect(all).not.toMatch(/specs in/i);
+    expect(all).not.toMatch(/\bpack\b/i);
   });
 
   it('has a title, an intro and the button labels', () => {
@@ -54,9 +67,12 @@ describe('talkPage', () => {
 });
 
 describe('privacyNote', () => {
-  it('has six entries, in the order spec W2 lists them', () => {
-    expect(privacyNote).toHaveLength(6);
-    const [what, where, howLong, id, forget, livekit] = privacyNote;
+  it('has seven entries, in the order spec W2 lists them, with the browser copy after the id (D96)', () => {
+    expect(privacyNote).toHaveLength(7);
+    const [what, where, howLong, id, browserCopy, forget, livekit] = privacyNote;
+    expect(browserCopy).toBe(
+      "This browser keeps a copy of what it last showed you, so the Memory tab has something before you connect. It goes when the server's copy does, or when Forget me runs.",
+    );
     expect(what).toMatch(/facts/);
     expect(what).toMatch(/summary/);
     expect(what).toMatch(/transcript/);
@@ -80,5 +96,55 @@ describe('privacyNote', () => {
       expect(entry).not.toMatch(/\.net/);
       expect(entry.replace(/\b30\b/g, '')).not.toMatch(/\d/);
     }
+  });
+});
+
+// P3-06, D90: the memory view's copy and the tab names (plan § Copy).
+describe('talkPage.memoryView and the tab names', () => {
+  it('names the three tabs Memory, Latency, Privacy', () => {
+    expect(talkPage.headings).toMatchObject({ memory: 'Memory', latency: 'Latency', privacy: 'Privacy' });
+  });
+
+  it('has the sections, the six kinds, and the exact fallback and hint lines', () => {
+    const view = talkPage.memoryView;
+    expect(view.aboutYou).toBe('About you');
+    expect(view.aboutAgent).toBe('About the agent');
+    expect(view.kinds).toEqual({
+      profile: 'Profile',
+      episodes: 'Episodes',
+      events: 'Events',
+      knowledge: 'Knowledge',
+      working: 'Working',
+      cache: 'Cache',
+    });
+    expect(view.notReported).toBe('not reported by this agent version');
+    expect(view.inProgress).toBe('in progress');
+    expect(view.forgetHint).toBe('Connect to erase what it remembers');
+    expect(view.rejected).toBe('Not kept:');
+    expect(view.heading).toBe('Memory, latency and privacy');
+    expect(view.retention(30)).toBe('Kept 30 days after your last visit');
+  });
+});
+
+// v3 spec § 4.4: the copy names the control only as it is labelled. Every string here that says "forget" says
+// "Forget me", capital F, and nothing else ("forget your data", "Forget Me", "forget-me" all fail).
+describe('the Forget me spelling', () => {
+  const strings = (value: unknown): string[] =>
+    typeof value === 'string'
+      ? [value]
+      : typeof value === 'function'
+        ? []
+        : value && typeof value === 'object'
+          ? Object.values(value).flatMap(strings)
+          : [];
+  const all = [...strings(talkPage), ...strings(privacyNote), ...strings(talkWidget), ...strings(latencyLabels)];
+
+  it('finds the strings that mention it', () => {
+    expect(all.filter((s) => /forget/i.test(s)).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it.each(all.filter((s) => /forget/i.test(s)))('"%s" spells it "Forget me"', (s) => {
+    const mentions = s.match(/forget[\w-]*(\s+\w+)?/gi)!;
+    for (const m of mentions) expect(m).toBe('Forget me');
   });
 });

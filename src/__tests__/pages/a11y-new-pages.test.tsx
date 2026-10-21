@@ -1,7 +1,8 @@
 import fs from 'fs';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import path from 'path';
 import type { ReactElement } from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import AboutPage from '@/app/about/page';
 import CardPage from '@/app/card/page';
 import CardQrPage from '@/app/card/qr/page';
@@ -10,9 +11,14 @@ import ExperiencePage from '@/app/experience/page';
 import TalkPage from '@/app/talk/page';
 import ProjectDetail from '@/components/projects/ProjectDetail';
 import SiteChrome from '@/components/SiteChrome';
+import { colour, ratio } from '@/__tests__/helpers/contrast';
+import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { getProjectBySlug } from '@/lib/data';
 
-jest.mock('next/navigation', () => ({ usePathname: () => '/about' }));
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/about',
+  useRouter: () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockRouter,
+}));
 
 // M8-02: the accessibility floor for every page v2 added (web-design-guidelines pass).
 const caseStudy = (slug: string) => <ProjectDetail project={getProjectBySlug(slug)!} />;
@@ -23,7 +29,14 @@ const pages: [string, () => ReactElement][] = [
   ['/card/qr', () => <CardQrPage />],
   ['/evidence', () => <EvidencePage />],
   ['/experience', () => <ExperiencePage />],
-  ['/talk', () => <TalkPage />],
+  [
+    '/talk',
+    () => (
+      <ConciergeProvider configured={false}>
+        <TalkPage />
+      </ConciergeProvider>
+    ),
+  ],
   ['/projects/agent-harness', () => caseStudy('agent-harness')],
   ['/projects/home-media-server', () => caseStudy('home-media-server')],
   ['/projects/hit-list', () => caseStudy('hit-list')],
@@ -77,14 +90,14 @@ describe('the site chrome around those pages', () => {
     expect(missing).toEqual([]);
   });
 
-  // VC4-03: the voice widget is one more link, not a landmark or a heading
+  // VC4-03: the voice widget is one more control, not a landmark or a heading (a button since P3-04, D86)
   it('adds the voice widget without a landmark or a heading', () => {
     const { container, getByRole, queryAllByRole } = render(
       <SiteChrome>
         <p>page</p>
       </SiteChrome>
     );
-    expect(getByRole('link', { name: 'Talk to my voice concierge' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Ask my site' })).toBeInTheDocument();
     expect(queryAllByRole('navigation')).toHaveLength(1);
     expect(queryAllByRole('contentinfo')).toHaveLength(1);
     expect(queryAllByRole('region')).toHaveLength(0);
@@ -93,21 +106,55 @@ describe('the site chrome around those pages', () => {
   });
 });
 
-describe('dark-theme text contrast (WCAG AA, 4.5:1)', () => {
-  const css = fs.readFileSync(path.join(process.cwd(), 'src/app/globals.css'), 'utf8');
-  const colour = (name: string) => css.match(new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, 'i'))![1];
-  const luminance = (hex: string) => {
-    const [r, g, b] = [1, 3, 5].map((i) => {
-      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const ratio = (a: string, b: string) => {
-    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-    return (hi + 0.05) / (lo + 0.05);
+// P3-04, D86: the concierge panel, opened from the widget over a page
+describe('the concierge panel, open', () => {
+  const openPanel = () => {
+    const result = render(
+      <SiteChrome>
+        <h1>page</h1>
+      </SiteChrome>
+    );
+    fireEvent.click(result.getByRole('button', { name: 'Ask my site' }));
+    return result;
   };
 
+  it('is one dialog, named, not modal', () => {
+    const { getAllByRole } = openPanel();
+    const dialogs = getAllByRole('dialog');
+    expect(dialogs).toHaveLength(1);
+    expect(dialogs[0]).toHaveAttribute('aria-modal', 'false');
+    expect(dialogs[0]).toHaveAccessibleName('Ask my site');
+  });
+
+  it('gives every link and button, the panel\'s included, a focus-visible style', () => {
+    const { container, getByRole } = openPanel();
+    const panelControls = interactive(getByRole('dialog'));
+    expect(panelControls.length).toBeGreaterThanOrEqual(4);
+    const missing = interactive(container)
+      .filter((el) => !/\bfocus-visible:outline/.test(el.getAttribute('class') ?? ''))
+      .map((el) => `<${el.tagName.toLowerCase()}> ${accessibleName(el)}`);
+    expect(missing).toEqual([]);
+  });
+
+  // P3-06: the strip and the tabs are in it; with a v2 body the Memory tab adds h3s and h4s under the panel's h2s.
+  it('holds the memory strip and the tabs, every tab and panel with the focus style', () => {
+    const { getByRole } = openPanel();
+    const panel = getByRole('dialog');
+    const tabs = panel.querySelectorAll('[role="tab"], [role="tabpanel"]');
+    expect(tabs.length).toBe(6);
+    for (const el of tabs) expect(el.getAttribute('class')).toMatch(/\bfocus-visible:outline/);
+  });
+
+  it('keeps the outline: one h1, no skipped heading level', () => {
+    const levels = headingLevels(openPanel().container);
+    expect(levels.filter((l) => l === 1)).toHaveLength(1);
+    levels.forEach((level, i) => {
+      if (i > 0) expect(level).toBeLessThanOrEqual(levels[i - 1] + 1);
+    });
+  });
+});
+
+describe('dark-theme text contrast (WCAG AA, 4.5:1)', () => {
   it.each(['muted', 'foreground', 'accent', 'accent-dim'])('%s text on every dark surface', (fg) => {
     for (const bg of ['background', 'surface', 'surface-alt']) {
       expect(ratio(colour(fg), colour(bg))).toBeGreaterThanOrEqual(4.5);

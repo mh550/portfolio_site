@@ -10,8 +10,10 @@ export const RoomEvent = {
   Disconnected: 'disconnected',
   ParticipantConnected: 'participantConnected',
   ParticipantDisconnected: 'participantDisconnected',
+  Reconnecting: 'reconnecting',
   Reconnected: 'reconnected',
   AudioPlaybackStatusChanged: 'audioPlaybackChanged',
+  ActiveSpeakersChanged: 'activeSpeakersChanged',
 } as const;
 
 export const ConnectionState = {
@@ -55,7 +57,13 @@ export class Room {
   textHandlers = new Map<string, TextHandler>();
   private listeners = new Map<string, Set<Listener>>();
 
-  constructor() {
+  // Like the real one, a Room made without `disconnectOnPageLeave: false` disconnects itself on `beforeunload`
+  // (livekit-client listens for it and `pagehide` once connected).
+  options: { disconnectOnPageLeave?: boolean };
+  private onPageLeave = () => void this.disconnect();
+
+  constructor(options: { disconnectOnPageLeave?: boolean } = {}) {
+    this.options = options;
     Room.instances.push(this);
     Room.setup?.(this);
   }
@@ -82,12 +90,14 @@ export class Room {
 
   connect = jest.fn<(url: string, token: string) => Promise<void>>(async () => {
     this.state = ConnectionState.Connected;
+    if (this.options.disconnectOnPageLeave !== false) window.addEventListener('beforeunload', this.onPageLeave);
   });
 
   // Like the real one, a room already disconnected emits nothing.
   disconnect = jest.fn(async () => {
     if (this.state === ConnectionState.Disconnected) return;
     this.state = ConnectionState.Disconnected;
+    window.removeEventListener('beforeunload', this.onPageLeave);
     this.emit(RoomEvent.Disconnected);
   });
 
@@ -161,4 +171,17 @@ export function removeParticipant(room: Room, identity: string) {
   const participant = room.remoteParticipants.get(identity);
   room.remoteParticipants.delete(identity);
   room.emit(RoomEvent.ParticipantDisconnected, participant);
+}
+
+// What the SFU's speaker updates do: RoomEvent.ActiveSpeakersChanged with the participants speaking now, loudest
+// first (the local one included when it is speaking). An empty list is silence.
+export function setSpeakers(room: Room, identities: string[]) {
+  const speakers = identities.map(
+    (identity) =>
+      room.remoteParticipants.get(identity) ??
+      (identity === room.localParticipant.identity
+        ? room.localParticipant
+        : { identity, kind: ParticipantKind.STANDARD })
+  );
+  room.emit(RoomEvent.ActiveSpeakersChanged, speakers);
 }

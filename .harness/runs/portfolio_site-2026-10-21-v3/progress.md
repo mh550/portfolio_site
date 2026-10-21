@@ -13,6 +13,157 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · verify P3
+
+All 10 P3 features hold (56 steps). `passes` unchanged.
+
+| Feature | Step | What you ran or read | What you saw | Holds |
+|---|---|---|---|---|
+| P3-01 | 1 | read plan headings (`grep ^##`) | all 14 sections present (Ownership 12 … Decisions 630); What Michael will see and Review tables filled by later features | yes |
+| P3-01 | 2 | plan § Contract v2 (line 115) | section exists; parser behaviour pinned by concierge-contract.test.ts v2 cases | yes |
+| P3-01 | 3 | plan §§ Panel 164, Widget 248, Callout 283 | present; ConciergePanel.tsx has z-[45], lg:w-[420px], inset-x-0 matching | yes |
+| P3-01 | 4 | plan §§ Memory view 311, Cache 390, Busy retry 420, Usher 457 | present; design-tokens.test.ts passes (contrast) | yes |
+| P3-01 | 5 | plan §§ Copy 503, Tests 523, Decisions 630 | present; D85–D96 in v2 spec cited by plan | yes |
+| P3-01 | 6 | `/home/mh550/projects/agent-harness/lib/check.sh` | `check: green (cached for this code tree, 6 tests)`; eslint no output | yes |
+| P3-02 | 1 | concierge-contract.test.ts | passes: "reads the v2 fixture", "about_agent missing/\"a string\"/7/null/[] → null", "v: 2 but no about_visitor", "keeps an events type outside the seven named ones as its string" | yes |
+| P3-02 | 2 | concierge-contract.test.ts + read lines 403-416 | names test passes; isAllowedHref cases include //evil, /about?x, /about#y; parseNavigate non-JSON → null; 1 KiB drop (usher test) | yes |
+| P3-02 | 3 | concierge-memory-cache.test.ts | passes: "never throws out of save, load or clear", "round-trips a v2 body through parseMemory", other-id/corrupt cases | yes |
+| P3-02 | 4 | CLAUDE.md lib/concierge line; plan | names contract v2, parseNavigate, isAllowedHref, memoryCache.ts | yes |
+| P3-02 | 5 | check.sh | green | yes |
+| P3-03 | 1 | `grep -c "new lk.Room"` on TalkSession.tsx / ConciergeProvider.tsx; ConciergeProvider.test.tsx | 0 / 1; "throws outside a ConciergeProvider" passes; TalkSession.tsx 29 lines | yes |
+| P3-03 | 2 | `grep -rln concierge/env src/components`; SiteChrome tests | prints nothing; configured comes from layout.tsx prop | yes |
+| P3-03 | 3 | ConciergeProvider.test.tsx | "a live call survives TalkSession unmounting and remounting", "pagehide disconnects the room", "two Connects in a row … make one Room" pass | yes |
+| P3-03 | 4 | full jest run (talk/, talk.test, SiteChrome, a11y-new-pages) | all pass, 0 failing suites | yes |
+| P3-03 | 5 | CLAUDE.md components; v2 spec D85 | ConciergeProvider and updated TalkSession/SiteChrome lines present | yes |
+| P3-03 | 6 | check.sh + `node .harness/smoke.mjs` | green; every route PASS at 1280 and 390 | yes |
+| P3-04 | 1 | ConciergePanel.tsx:45 + ConciergePanel.test.tsx | role dialog aria-modal false, z-[45], lg:w-[420px], inset-x-0 bottom sheet; header/log/message box order test passes | yes |
+| P3-04 | 2 | ConciergePanel.test.tsx | "Minimize closes and hands focus back", "Esc inside…", "Minimize keeps the Room and the call" pass | yes |
+| P3-04 | 3 | VoiceWidget/SiteChrome tests | "collapsed: aria-expanded false and no aria-controls"; "no inert, no focus trap, no scroll lock" pass | yes |
+| P3-04 | 4 | SiteChrome/a11y-new-pages tests | panel open one dialog passes; not on /talk or /card* | yes |
+| P3-04 | 5 | check.sh + smoke | green; no horizontal scroll at 390 | yes |
+| P3-05 | 1 | VoiceWidget.test.tsx; ConciergeProvider agentSpeaking tests | "speaking: each bar moves, only under motion-safe", names "Ask my site: speaking/listening" pass | yes |
+| P3-05 | 2 | VoiceWidget.test.tsx "collapse at 390 px" | collapse after scroll, above 390 never collapses, pass | yes |
+| P3-05 | 3 | Callout.test.tsx | exact line + Close, stored key hides, throwing storage OK, Esc, motion-safe pass | yes |
+| P3-05 | 4 | Navbar.test.tsx | "lists the six links in order in the desktop list and the mobile menu" passes; /talk still in smoke routes | yes |
+| P3-05 | 5 | talkWidget in src/lib/data/concierge.ts:130-138; Footer test; CLAUDE.md | label/listening/speaking/callout in data; docs updated | yes |
+| P3-05 | 6 | check.sh + smoke | green | yes |
+| P3-06 | 1 | design-tokens.test.ts; globals.css | passes (each token ≥ 4.5:1); CLAUDE.md lists them | yes |
+| P3-06 | 2 | MemoryStrip.test.tsx | "pulses once the chips whose count changed, and only those", "pulses only through motion-safe", v1 dashes pass | yes |
+| P3-06 | 3 | PanelTabs.test.tsx | tablist Memory/Latency/Privacy, ArrowRight/Left/Home/End pass | yes |
+| P3-06 | 4 | MemoryView.test.tsx | v1+v2 cases; Events at most 12, rejected colour, episodes "in progress" pass | yes |
+| P3-06 | 5 | MemoryView/ForgetMe tests; concierge-data.test.ts; concierge.ts:32-92 | disabled button with hint pre-call; "Forget me" spelling test passes; hint exact | yes |
+| P3-06 | 6 | ConciergePanel/TalkSession/a11y tests | strip+tabs in both via MemorySection; a11y outline passes | yes |
+| P3-06 | 7 | check.sh + smoke | green | yes |
+| P3-07 | 1 | ConciergeProvider.test.tsx | "loads the cached body…", "shows the cached body greyed with as of", MemoryView asOf stale tests pass; concierge-check memory-cached-390 OK | yes |
+| P3-07 | 2 | sessionReducer.test.ts; TalkSession-live; ConciergeProvider retry tests | closing transitions, 5 s retry, 60 s even with clock set back, Leave cancels all pass | yes |
+| P3-07 | 3 | greps; concierge.ts:15-18; case-study-voice-concierge.test.ts | no hit in src for "specs in, verified…" or "pack"; hits only in evidence brief before/after table; intro text matches; test passes | yes |
+| P3-07 | 4 | ran dummy-env dev server + `node .harness/talk-busy-check.mjs`; read header | closing scenarios (header: 5 s POSTs, 60 s busy, Leave) ran; then `.harness/init.sh` restart; output artifacts I created removed | yes |
+| P3-07 | 5 | check.sh + smoke | green | yes |
+| P3-08 | 1 | usher.test.tsx | "registers the navigate handler before connect() and unregisters all four topics", "follows an allowed project href with one push and one notice naming the short title" pass | yes |
+| P3-08 | 2 | usher.test.tsx | 8 s limit, /projects/unknown no push, /talk, Guide me off, "drops a body over 1 KiB" pass | yes |
+| P3-08 | 3 | ConciergePanel.test.tsx; GuideMe tests | switch default on, click off, stored off unchecked, throwing storage on pass; no switch on /talk | yes |
+| P3-08 | 4 | Transcript.test.tsx | "renders a notice line muted and unattributed" passes | yes |
+| P3-08 | 5 | CLAUDE.md usher text; plan § Usher; D94 | present | yes |
+| P3-08 | 6 | check.sh | green | yes |
+| P3-09 | 1 | ran `node .harness/concierge-check.mjs /tmp/p3shots` on dummy-env server, then `.harness/init.sh` and smoke | 54 OK, exit 0; smoke all PASS after restart | yes |
+| P3-09 | 2 | `ls -l docs/screenshots/v3/P3-*` | all 9 named PNGs exist, largest 312886 B < 400 KB | yes |
+| P3-09 | 3 | report.txt from my run | no horizontal scroll, focus on title then pill, no console errors, callout absent on 2nd load: all OK | yes |
+| P3-09 | 4 | plan § What Michael will see lines 550-578 | one row per capture; states live state not captured with named Jest tests | yes |
+| P3-09 | 5 | check.sh | green | yes |
+| P3-10 | 1 | plan § Review; git log | rows P3-05-1…P3-10-6 present with severity/file/resolution; P3-10 review commits exist | yes |
+| P3-10 | 2 | git log | Important fix 81bb8d6 (test-first per message) and Minor b46fef4 each own commit | yes |
+| P3-10 | 3 | `wc -l TalkSession.tsx`; `npx eslint` | 29 lines; eslint clean | yes |
+| P3-10 | 4 | grep docs | review-guide.md:293 "## P3 (v3)"; VC2 "As of P3" at line 14; D85/D92 as-built | yes |
+| P3-10 | 5 | check.sh + smoke | green | yes |
+
+### 2026-10-21 08:10 · P3-10 · passes
+
+- Opus review of `P3.diff` (from 'HARNESS: after P2-04', 11 129 lines): 0 Critical, 1 Important, 5 Minor. Important fixed test-first in its own commit `81bb8d6`: `new lk.Room({ disconnectOnPageLeave: false })` (LiveKit's own `beforeunload` listener ended a live call on a `mailto:` click; the mock now mimics it). Minor: retry deadline on `performance.now()` (`b46fef4`, test-first); 4 kept with reasons (plan § Review P3-10-2…6). A Sonnet docs-vs-code pass found one stale `panelTitle` in D87, fixed.
+- Simplification: `TalkSession.tsx` 471 → 42 → 29 lines; new `concierge/MemorySection.tsx` shared by drawer and `/talk`; duplicated copy (`panelTitle`, `memoryView.tabs`, `memoryView.cachedShare`) and dead `memory.fact.channel/source/confidence` removed; Forget me looks in `buttons.ts`; every reducer action is dispatched (none dead). Tests 1627 → 1629 (97 suites).
+- Docs: `docs/review-guide.md` § P3 (v3) (morning check on a preview: pill → drawer → name → Guide me follow → Forget me; look-at; undo), VC2 plan "As of P3" note, D85/D92 *As built (P3-10)*, CLAUDE.md.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS); new tests failed first (`beforeunload` disconnected; phase stayed `closing` with the clock set back).
+- Questions for Michael: no view shows a fact's `confidence` since MemoryPanel went (P3-06): fine? D84, D92 (now also the second-tab case), D93, D94, D96 still open.
+- Proposed change (carried): `HeroSection` (`'use client'`) imports the `@/lib/data` barrel, so `/` ships projects.ts; import `@/lib/data/<file>`.
+
+### 2026-10-21 07:30 · P3-09 · passes
+
+- New `.harness/concierge-check.mjs` (fresh context per scenario, token POSTs fulfilled by `page.route`, next dev's badge hidden) and `.harness/fixtures/memory-v2.json` (the `memoryV2` fixture as JSON, pinned by new `src/__tests__/harness/concierge-check-fixture.test.ts`). Nine captures in `docs/screenshots/v3/` (28–313 KB): `P3-home-callout-{390,1280}`, `P3-projects-open-{1280,390}`, `P3-projects-minimized-1280`, `P3-memory-cached-390`, `P3-closing-1280`, `P3-talk-{1280,390}`. Plan § What Michael will see: one row per capture + the Jest tests that cover the live state (VoiceWidget speaking, MemoryStrip pulse, usher). CLAUDE.md How to verify. Tests 1625 → 1627 (97 suites).
+- Verified: dev server restarted with dummy `LIVEKIT_*` → script exit 0, report 54 OK / 0 FAIL (focus on `concierge-panel-title` after opening and `concierge-pill` after Esc, scrollWidth 390 with the panel open, callout gone on a second load, the 429 line the only console error, no token POST without Connect); `init.sh` restarted the plain server, smoke exit 0; `.harness/check.sh` → `check: lint ok · jest ok · build ok`. I looked at every capture.
+- Seen in the captures: at 390 with a v2 cached body the transcript keeps ~130 px above the 25 vh tab area (P3-06's open question: room enough). The bottom sheet covers the whole page below `lg` (the D94 question still stands).
+- Next (P3-10): review; the 390 sheet's Forget-me hint sat under next dev's badge only in dev (production has none).
+- Questions for Michael: none new (D84, D92, D93, D94, D96 still open).
+
+### 2026-10-21 07:15 · P3-08 · passes
+
+- Usher (D94): `ConciergeProvider` registers `concierge.navigate` (four topics, all unregistered at teardown) and calls `router.push` only with Guide me on, `isAllowedHref`, from `session.agentIdentity`, not the page already shown, 8 s (`performance.now`) after its last follow and after the visitor's own link click/back-forward, never from `/talk`; then a `who: 'notice'` line "Taking you to <name>". New `lib/concierge/usher.ts` (`usherTargets`, `usherName`, `USHER_INTERVAL_MS`; layout → SiteChrome → provider), `GuideMeSwitch.tsx` (role=switch, `concierge.guide_me`, sr-only hint), Transcript renders notices muted/italic/unattributed, `talkWidget` copy. Tests 1589 → 1625 (96 suites; new `usher.test.tsx`, `helpers/navigation.ts` mocks `next/navigation` in the 11 provider-rendering files).
+- Verified: usher/Transcript/layout/review tests failed first; `.harness/check.sh` green (lint · jest · build); smoke exit 0 (41 PASS). Sonnet browser check on :7835, all PASS at 1280 and 390: switch 107×40 after Connect, Tab from Connect lands on it, click → 'off' stored, survives reload, Space → 'on', scrollWidth 390 with the panel open, no switch on /talk, no console errors; I looked at the 390 capture.
+- Opus review: 0 Critical, 0 Important, 6 Minor, all fixed (plan § Review P3-08-1…6): the visitor's own navigation wins, sender identity checked, monotonic clock, Footer imported the `@/lib/data` barrel so SiteChrome shipped projects.ts on every page incl. /card (now `@/lib/data/profile`; the guard follows imports transitively), a vacuous /talk test, the plan's ref names + switch hint.
+- Next (P3-09): the live usher can't be captured without an agent; `usher.test.tsx` covers it. The Guide me row sits under CallControls in the panel.
+- Questions for Michael: (1) D94: below `lg` the bottom sheet covers the page, so a phone visitor sees the notice, not the page it opened; minimize the sheet on a follow at that width? D84, D93, D96, D92 still open.
+- Proposed change: `/` and `/projects` still ship projects.ts to the client (`/projects` needs it; on `/` the hero's MethodStrip → `approach.ts` → `resolveProjectLink` in projects.ts); resolving `loopSteps` links on the server would drop it from `/`.
+
+### 2026-10-21 07:40 · P3-07 · passes
+
+- Cache (D91): `ConciergeProvider` reads `concierge.memory.<id>` after mount (only for an existing id; never makes one), saves each live body's raw text, clears it on Forget me's `{ok:true}` and ignores the agent's last empty body; `status.ts` `shownMemory` feeds `MemoryStrip` (`asOf` prop) and the Memory tab (`data-stale`, muted via `**:`, "as of <time>"). Busy retry (D92): `closing` phase + `closed` action + `isActive`; a loop in `connect()` re-POSTs every 5 s, one in flight, to 60 s; Leave/pagehide/unmount abort the request and end the wait. Copy (D93): intro both paragraphs, deep-dive `builtWith`, VC-A "knowledge pack" → "what it knows about my work"; evidence § P3 note. Tests 1496 → 1589 (95 suites).
+- Verified: new tests failed first; `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS); `.harness/talk-busy-check.mjs` on a dummy-env server: 34/34 OK (12 POSTs, gaps 5003–5019 ms, max 1 open, busy line at 60 s, focus on Connect, no POST after Leave); cached view at 390: "as of", muted rgb(136,136,160), rejected row keeps #f87171, scrollWidth 390.
+- Opus review: 0 Critical, 1 Important (browser copy never expired, privacy note silent) fixed as **D96 *default*** (expiry by `retention_days`, a 7th privacy line), 8 Minor: 7 fixed (abort, wake, rejected red, strip name "as of", `storage` event, placeholder, test pins), 1 asked (below). Plan § Review rows P3-07-1…9.
+- Gotcha: Tailwind turns `_` in an arbitrary variant into a space; `[data-type=gate_rejected]` built fine in production but made the dev server 500 (now `data-rejected`). Turbopack cached the bad CSS until `rm -rf .next/dev`.
+- Next (P3-08): `STREAM_TOPICS` is where `concierge.navigate` joins; the provider's `Session` now has `requests`/`wake`. talk-busy-check's old busy-visitor screenshots in docs/screenshots/v2 are stale (that state no longer exists); P3-09 captures the closing state.
+- Questions for Michael: (1) D96: on a shared browser the cached memory shows before Connect and only a live call erases it; add a local "Clear this browser's copy" button, or drop the pre-call view? (2) D92: `reason: 'visitor'` is per network address, so a neighbour on conference Wi-Fi sees "Closing your earlier conversation…"; have the route check the room's visitor_id, or soften the line? D84, D93 still open.
+
+### 2026-10-21 06:45 · P3-06 · passes
+
+- New `concierge/MemoryStrip.tsx` (five chips with counts, `–` titled "not reported by this agent version" from a v1 body, a changed count pulses once `motion-safe:`, chips wrap), `PanelTabs.tsx` (WAI-ARIA tabs Memory · Latency · Privacy; `compact` in the drawer caps the panel at 25 vh / 40 vh at lg), `MemoryView.tsx` (About you: Profile/Episodes/Events; About the agent: Knowledge/Working/Cache; v1 fallback; Forget me always at its foot, disabled with "Connect to erase what it remembers"). Six `--color-mem-*` tokens in globals.css (+ `design-tokens.test.ts`, ratio helper in `src/__tests__/helpers/contrast.ts`). `MemoryPanel` and its test removed; `LatencyPanel` has no heading of its own; ForgetMeButton's confirm step handles Esc. Both the drawer and `/talk` render strip + tabs in a `section` with an `sr-only` h2. Tests 1407 → 1496 (92 → 95 suites).
+- Verified: new tests failed first; `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS). Browser (Sonnet script + my re-run on :7835): dot colours rgb(0,212,255)…rgb(244,114,182), arrows/Home/End, Forget me disabled + hint, Esc → focus on the pill, scrollWidth 390 with the drawer open, tab cap 320 px at 1280×800 and 211 px at 390×844, /talk keeps its Privacy section, no console errors.
+- Gotcha for the next session: the dev server on :7835 served a stale Tailwind theme (new `--color-mem-*` missing) from Turbopack's persistent cache, even after `init.sh`, whose `kill` of the npx pid left the `next-server` child on the port. Fix: kill the `next-server` pid (`ss -ltnp | grep :7835`), `rm -rf .next/dev`, rerun `init.sh`. The production build was always right.
+- Opus review: 0 Critical, 1 Important (focus lost when Forget me goes disabled at call end: already handled by CallControls' call-ended effect; drawer tests added), 9 Minor: 8 fixed test-first, 1 kept (the aria-live forget line inside a tab panel). Plan § Review rows P3-06-1…10; D90 *As built*.
+- Next (P3-07): the cached body goes into `MemoryStrip`/`PanelTabs` through `state.memory`'s fallback; `MemoryView` has no `data-stale` yet. P3-09 should capture a v2 body at 390 to confirm the 25 vh cap leaves the transcript room.
+- Proposed change: P3-06's step said `overflow-x-auto` strip in the plan; the chips wrap instead (keyboard users can't scroll a container with nothing focusable). Questions for Michael: none new (D84, D93, the 390/402 px collapse still open).
+
+### 2026-10-21 06:20 · P3-05 · passes
+
+- `VoiceWidget` is the "Ask my site" pill (D87): three-rect bars glyph moving only while the agent speaks (`motion-safe:`, `@keyframes concierge-bar`), live dot, names "Ask my site: listening/speaking" when `phase === 'live'`, collapses to the glyph at ≤ 390 px once scrolled (`data-collapsed`), `id="concierge-pill"`. Provider gains `agentSpeaking` (ActiveSpeakersChanged; 500 ms hold before off; off on Reconnecting/agent leaving/Leave/Connect/pagehide) and `calloutSeen`/`dismissCallout` (read after mount; openPanel and Connect dismiss). New `concierge/Callout.tsx` (D88). Navbar six links (D89); Footer `pb-24` at every width; `talkWidget` copy (`liveLabel` gone); mock gains `setSpeakers`, `RoomEvent.ActiveSpeakersChanged/Reconnecting`. Tests 1342 → 1407 (91 → 92 suites, new `Callout.test.tsx`).
+- Verified: new tests failed first (49, then 16 for the review fixes); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS). Sonnet browser checks on :7835, 9/9 then 6/6 PASS: pill 136×48 at 16 px from the corner (1280), 48×48 collapsed after scroll at 390, callout above the pill, scrollWidth 390, Close → key '1' and focus on the pill, Esc dismisses, no callout at the page bottom, footer links clear the pill at 1280 and 390, nav = 6 links, no console errors.
+- Opus review: 0 Critical, 2 Important (Close dropped focus to body; the bubble covered the Footer links), 10 Minor; all fixed test-first except three kept with reasons (plan § Review rows P3-05-5, -8, -9). Callout now shows only at scrollY 0 with the footer out of view (D88 *As built*).
+- Docs: D87/D88/D89 *As built* in the v2 spec; plan § Widget/§ Callout built, § Review rows; CLAUDE.md (routes /talk row, Navbar, Footer, SiteChrome, VoiceWidget, components/concierge, mock helpers, test count). No new D (next free D96).
+- Next (P3-06): the pill reads `phase === 'live'` only; MemoryStrip/PanelTabs go under the MessageBox in ConciergePanel. `tsc` over tests reports one pre-existing `jest.Mock` type error in ConciergeProvider.test.tsx (not in the build).
+- Question for Michael: the spec's 390 px collapse misses iPhone 15/16 (393 px) and 16 Pro (402 px); widen to `max-width: 402px`? Proposed change (carried): `new Room({ disconnectOnPageLeave: false })`.
+
+### 2026-10-21 05:40 · P3-04 · passes
+
+- New `src/components/concierge/ConciergePanel.tsx` (non-modal `role="dialog"` drawer: h2 title focused on open, Minimize, `CallControls`, deep-dive link when offline/busy, `Transcript fill` + `MessageBox`; 420 px right at `lg`, bottom sheet under the Navbar below, `z-[45]`, in the DOM only while open) and `DeepDiveLink.tsx` (shared with `/talk`). Provider gains `panel`/`openPanel`/`minimizePanel`. `VoiceWidget` is a `<button aria-expanded>` toggling it (refocuses itself on close, `invisible` while open); `SiteChrome` renders panel then widget after the Footer, neither on `/talk` (reaching it closes the panel) or `/card*`. Tests 1303 → 1342 (90 → 91 suites, new `ConciergePanel.test.tsx`; VoiceWidget, SiteChrome, a11y-new-pages updated).
+- Verified: new tests failed first (22, then 7 for the review fixes); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS). Sonnet browser check on :7835, 9/9 PASS at 1280 and 390: drawer x860 w420 top64 at 1280, x0 w390 top64 at 390, scrollWidth = viewport, focus to title / back to widget on Esc and Minimize, open across /projects → /about, absent on /talk and /card, no console errors. My own check at 740×300: the sheet scrolls (331 > 235) and Send is reachable.
+- Opus review: 0 Critical, 1 Important (the deep-dive link opened its page under the sheet: now minimizes), 7 Minor. Fixed: widget invisible while open; `/talk` closes the panel; neutral live label "Live call with my concierge"; sheet scrolls on short screens, log `overscroll-contain`; Esc ignored during IME composition; stronger tests (Tab not trapped, Esc from a focused control, live Esc focus, dropped call refocuses Connect in the panel). Deferred to P3-10: CallControls' "call ended → focus Connect" rule can pull focus into the drawer if the visitor's focus was on `<body>` from clicking page text.
+- Docs: D86 *As built* in the v2 spec (Esc contract: inner handlers `preventDefault`); plan § Panel marked built; CLAUDE.md (SiteChrome, VoiceWidget, `components/concierge/`, /talk route row, test count). No new D (next free D96).
+- Next (P3-05): the pill replaces the disc inside the same `<button>`; keep `expanded`/`onToggle`/`invisible`; Footer `pb-24` at every width is still to do; `talkWidget.liveLabel` goes when the listening/speaking names land. Questions for Michael: none new (D84, D93 still open). Proposed change carried from P3-03: `new Room({ disconnectOnPageLeave: false })`.
+
+### 2026-10-21 05:05 · P3-03 · passes
+
+- New `src/components/concierge/`: `ConciergeProvider.tsx` (reducer, session ref, the one Room, the six actions moved from TalkSession, `RoomAudio`, `pagehide` teardown, bfcache `pageshow` reset; `useConcierge()` throws outside), `CallControls.tsx` (Connect/Leave + focus rule, mic, Turn on sound, status), `status.ts`, `buttons.ts`. `TalkSession.tsx` 471 → 51 lines, markup over the context. `SiteChrome` wraps the chrome in the provider (not `/card*`) with `configured` from `layout.tsx`; `/talk`'s page no longer imports `env.ts`. Tests 1252 → 1303 (87 → 90 suites: `ConciergeProvider.test.tsx`, `status.test.ts`, `layout-concierge.test.tsx`; every TalkSession test renders through `renderTalk()` in `src/__tests__/helpers/concierge.tsx`).
+- Verified: provider tests failed first (module missing); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS); `grep -c 'new lk.Room'` → TalkSession 0, provider 1; `grep -rln concierge/env src/components` → nothing. Sonnet browser check on :7835: Connect (offline, 0 token requests) → Navbar About → Talk, client-side (window marker kept): the offline line survived; a reload cleared it; no console errors.
+- Opus review: 0 Critical, 1 Important, 8 Minor. Important (a call outlives `/talk` with no visible way to Leave until P3-04) fixed test-first: the widget gets `live` (name "Live call with my concierge: back to it", red dot). Minors fixed: `pageshow` resets only a call `pagehide` ended; listener-ref and StrictMode-connect tests; a SiteChrome `/talk` → `/about` test; renamed unmount tests + remount-mid-connect case; server-only guard covers `rooms` and every `'use client'` file; `status.test.ts`; stale comments. One deferred (below).
+- Docs: D85 *As built* in the v2 spec; CLAUDE.md (SiteChrome, `components/talk/`, new `components/concierge/`, VoiceWidget live, test count); plan § Ownership marked built. No new D (next free D96).
+- Next (P3-04): `CallControls` is ready for the panel header; `talkWidget.liveLabel` and `VoiceWidget`'s `live` are a stopgap the button/pill replaces (keep a live state visible). The "suspended inside an act scope" console line in the talk tests predates P3-03.
+- Proposed change (P3-04 or P3-10): livekit-client's own `disconnectOnPageLeave` (default on) also ends a call on `beforeunload`, which a `mailto:` click can fire; now that the provider owns page-leave, consider `new Room({ disconnectOnPageLeave: false })`. Questions for Michael: none new (D84, D93 still open).
+
+### 2026-10-21 · P3-02 · passes
+
+- `contract.ts`: contract v2. `MemoryBody` gains optional `v`, `about_visitor`, `about_agent`, `retention_days` (types `Episode`, `MemoryEvent`, `AboutVisitor`, `AboutAgent`); a v1 body parses unchanged with no v2 keys (a lone `"v": 1` stays v1). Also `TOPIC.navigate`, `RPC_GET_MEMORY`, `MEMORY_EVENT_TYPES`, `parseNavigate` (1 KiB cap; `parseObject` takes the limit) and `isAllowedHref`. New `memoryCache.ts` (`saveMemory`/`loadMemory`/`clearMemory`, `memoryCacheKey`, `MemoryStorage`), and `readVisitorId` in `visitorId.ts`, which never writes. Fixtures `memoryV2`, `memoryV2NoAgent` (+ JSON). Tests 1167 → 1252 (86 → 87 suites; new `concierge-memory-cache.test.ts`).
+- Verified: watched each new test fail first (57 contract failures, then the cache module missing); `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (41 PASS). The only existing contract case that changed is 'contract constants' (`navigate`, `RPC_GET_MEMORY`).
+- Opus review of the diff: 0 Critical, 0 Important, 4 Minor. All four fixed test-first: a `v` below 2 on its own no longer turns on the v2 shape; `saveMemory` won't save a body `parseMemory` rejects, so a bad body can't replace a good cached one; ids that aren't UUID v4 are ignored; the storage type is now `MemoryStorage`, not the DOM's `CacheStorage`.
+- Docs: CLAUDE.md `lib/concierge/` line and test count; plan § Contract v2 and § Cache marked built; *As built* notes on D91 and D95. No new decisions (next free is still D96).
+- Next (P3-03): nothing calls the v2 fields, `parseNavigate` or the cache yet. `saveMemory` takes the raw body text, so P3-07 should hand `readBody`'s text through as the plan says.
+- Questions for Michael: none new (D84, D93 still open). Proposed changes: none.
+
+### 2026-10-21 · P3-01 · passes
+
+- New `docs/plans/2026-10-21-P3-concierge-in-site.md`, all 14 sections: Ownership (the `ConciergeProvider` context table, what moves out of TalkSession.tsx function by function, `configured` from layout.tsx as a prop, `pagehide`/bfcache, StrictMode), Contract v2 (a parse table for every § 7 field; v1 bodies parse unchanged with no v2 keys), Panel/Widget/Callout (ASCII layouts at 1024+ and 390, focus order, z-[45]), Memory view (six `--color-mem-*` tokens, every one ≥ 6.17:1 on all three surfaces), Cache, Busy retry (`closing` transition table), Usher, Copy before/after, Tests per feature. D85–D95 are recorded in the v2 spec § v3 decisions; the next free number is D96. No code changed: 1167 tests, 86 suites, before and after.
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke 0 FAIL; a grep for every item the steps name. An Opus review of the plan against P3-01…P3-08 found 16 issues (1 Critical, 7 Important), all fixed in the plan.
+- Next session (P3-02): the existing 'contract constants' test pins `TOPIC` with `toEqual`. Add `navigate` there; it is the only existing contract case that changes. `readVisitorId` must not write.
+- For P3-03 on: once P3-08 adds `useRouter`, every provider render needs `next/navigation` mocked (plan § Tests). `calloutSeen` lives in the provider, so the callout stays hidden after Minimize. Project slugs and titles reach the provider as `usherTargets` from layout.tsx, so `projects.ts` stays out of the client bundle.
+- Question for Michael (D93): keep the new second intro paragraph ("Talk or type. The Latency tab shows…, and Forget me on the Memory tab erases…"), or cut the intro to the spec's first paragraph?
+- Proposed change: none. P3-04's "`h-dvh` or `max-h-dvh`" is met by `top-16 … max-h-dvh`, so the sheet starts under the z-50 Navbar.
+
 ### 2026-10-21 verify · verify P2
 
 | Feature | Step | What you ran or read | What you saw | Holds |

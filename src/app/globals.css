@@ -13,6 +13,14 @@
   --color-accent-dim: #0099bb;
   --color-accent-glow: rgba(0, 212, 255, 0.15);
 
+  /* The concierge's memory view, one colour per kind (D90); each passes AA on surface and background */
+  --color-mem-profile: #00d4ff;
+  --color-mem-episode: #fbbf24;
+  --color-mem-event: #4ade80;
+  --color-mem-event-rejected: #f87171;
+  --color-mem-knowledge: #a78bfa;
+  --color-mem-working: #f472b6;
+
   /* Tailwind color aliases */
   --color-bg: var(--color-background);
   --color-fg: var(--color-foreground);
@@ -20,6 +28,29 @@
   /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* The "Ask my site" pill's bars while the agent speaks, and the first-visit callout's entrance (D87, D88). Used only
+   through motion-safe: utilities, so reduced motion never runs them. */
+@keyframes concierge-bar {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes concierge-callout {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

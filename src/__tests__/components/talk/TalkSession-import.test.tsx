@@ -1,7 +1,11 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import userEvent from '@testing-library/user-event';
-import TalkSession from '@/components/talk/TalkSession';
+import { renderTalk } from '@/__tests__/helpers/concierge';
 import { talkPage } from '@/lib/data';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // Counts how often the livekit-client module is evaluated. The factory runs once per module registry, so this file
 // holds only these cases: in TalkSession.test.tsx an earlier configured Connect would already have loaded it and made
@@ -37,7 +41,7 @@ describe('TalkSession loads livekit-client only on a configured Connect', () => 
   it('never evaluates livekit-client when the server has no LiveKit env', async () => {
     const fetchMock = jest.fn();
     global.fetch = fetchMock as unknown as typeof fetch;
-    render(<TalkSession configured={false} />);
+    renderTalk({ configured: false });
     await connect();
     expect(screen.getByRole('status')).toHaveTextContent(talkPage.offlineMessage);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -53,7 +57,7 @@ describe('TalkSession loads livekit-client only on a configured Connect', () => 
         token: 'test-token',
       }),
     })) as unknown as typeof fetch;
-    render(<TalkSession />);
+    renderTalk();
     await connect();
     expect(mockLoads).toBe(1);
     expect(mockModule().MockRoom.instances).toHaveLength(1);

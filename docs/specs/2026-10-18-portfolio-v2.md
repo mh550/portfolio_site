@@ -508,3 +508,161 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   projects. Reversible: append the line to `resumeProjects[0].bullets` and change the two-bullet checks in
   `experience-data.test.ts` and `experience.test.tsx`. Question for Michael: add the third bullet, and should the
   project periods use `–` like the roles? (P2-04 review, finding 1; plan `docs/plans/2026-10-21-P2-experience.md` § Review.)
+- **D85** *default*: a `ConciergeProvider` (`src/components/concierge/ConciergeProvider.tsx`, client) mounted by
+  `SiteChrome` on every chrome page owns the one Room, so a call survives client-side navigation; `/talk`'s
+  `TalkSession` reads it through `useConcierge()`. `configured` comes from `src/app/layout.tsx` (`conciergeEnv() !==
+  null`, a Server Component) as a prop through `SiteChrome`, so no client file imports `env.ts`; `pagehide`
+  disconnects and a bfcache `pageshow` resets to idle. Supersedes D46's "the `/talk` page passes `configured` to
+  TalkSession" (the env check stands); D45 (Room and visitor id made in the Connect handler, now the provider's)
+  and D44 (chrome, indexable, sitemap) stand. Reversible: `git revert` P3-03. (P3-01 plan
+  `docs/plans/2026-10-21-P3-concierge-in-site.md` § Ownership; P3-03 builds.) *As built (P3-03):* the provider holds
+  the reducer, the session ref, the Room and the six actions (made once per `configured` in a `useMemo`) and renders
+  `RoomAudio`; the Forget me guard is now a `forgetting` flag on the session, not the reducer's `forget`. `SiteChrome`
+  takes `configured` (default `false`); `status.ts`, `buttons.ts` and `CallControls.tsx` (the Connect/Leave button
+  and its focus rule) moved to `src/components/concierge/` for the drawer to reuse. Tests render through
+  `renderTalk()` (`src/__tests__/helpers/concierge.tsx`); `layout-concierge.test.tsx` pins the layout's prop. From
+  the P3-03 review: until P3-04's drawer, a call that outlives `/talk` is shown by the widget (`live`: the name
+  `talkWidget.liveLabel`, "Live call with my concierge: back to it", and a red dot), so Leave and the mic toggle are
+  one click away on every page; and a bfcache `pageshow` resets only a call that `pagehide` actually ended (an ended,
+  offline or Forgotten state comes back as it was).
+  *As built (P3-10):* the provider makes its Room with `disconnectOnPageLeave: false`: LiveKit's own page-leave
+  listener fires on `beforeunload`, which a `mailto:` link raises without leaving; the provider's `pagehide` teardown
+  is the one page-leave path.
+- **D86** *default*: the concierge panel is a non-modal drawer (`role="dialog" aria-modal="false"`, labelled by its
+  title): 420 px on the right at ≥ 1024 px, a full-height bottom sheet under the Navbar below that, `z-[45]`
+  (Navbar `z-50`, pill `z-40`), rendered only while open, no focus trap, no `inert`, no scroll lock; Esc and
+  Minimize close it without ending the call; never on `/talk` or `/card*`. Supersedes nothing (new). Reversible:
+  drop `ConciergePanel` from `SiteChrome`. (Plan § Panel; P3-04 builds.) *As built (P3-04):* the provider holds
+  `panel` (`'closed'` on first render) with `openPanel`/`minimizePanel`; `ConciergePanel.tsx` renders the h2 title
+  (`tabIndex -1`, focused on open), Minimize, `CallControls`, the deep-dive link when offline or busy
+  (`DeepDiveLink.tsx`, shared with `/talk`) and `Transcript fill` (the log is the `flex-1` region) with `MessageBox`;
+  Esc closes unless a control already called `preventDefault` (the contract for P3-06's Forget me confirm step) or
+  the Esc ends an IME composition. `VoiceWidget` is a `<button aria-expanded>` (`aria-controls` only while open)
+  that toggles the panel, is `invisible` while it is open (the panel covers its corner at every width, so it leaves
+  the tab order) and takes focus back when the panel closes with focus on `<body>`; until P3-05's pill it keeps the
+  mic disc, and its live name is now "Live call with my concierge" (`aria-expanded` carries open/closed). An open
+  panel stays open across client-side navigation; reaching `/talk` closes it. "Read how it works" in the panel
+  closes it on click. The sheet scrolls on a short screen (the transcript section keeps a `min-h-52` floor), the
+  log has `overscroll-contain`.
+- **D87** *default*: the widget is the "Ask my site" pill: a `<button aria-expanded>` that toggles the panel, a
+  three-bar sound glyph that moves only while the agent speaks (`motion-safe:`), a live dot and the accessible
+  names "Ask my site: listening" / "Ask my site: speaking" during a call, collapsed to the glyph at ≤ 390 px once
+  scrolled; the twice-pulsing ring goes, and the Footer keeps `pb-24` at every width (the pill is wider). Supersedes
+  D61's mic disc linking to `/talk`, its ring and `xl:pb-8`; D61's placement (`fixed right-4`, safe-area bottom,
+  `z-40`, `print:hidden`, not on `/talk` or `/card*`, kept on `/evidence`) stands. Reversible: `git revert` P3-05's
+  widget commit. (Plan § Widget; P3-04 and P3-05 build.) *As built (P3-05):* `talkWidget` is `{ label, listening,
+  speaking, callout, close, minimize, href }` (`liveLabel` gone; P3-10 dropped `panelTitle`: the panel's title is `label`; D94 adds the usher's keys). The live states key on `phase ===
+  'live'` (connecting and waiting show the idle pill; the open panel's status line covers them); the dot is red with
+  a background ring, inset on the collapsed circle. The provider's `agentSpeaking` turns on at once and off 500 ms
+  (`AGENT_QUIET_MS`) after the agent leaves the speakers list, so a pause between words doesn't flip the focused
+  pill's name; it goes off at once on `Reconnecting`, the agent leaving, Leave, a new Connect and `pagehide`. The bars
+  loop while the agent speaks: a real-time status shown alongside its audio that stops when the speech does, and never
+  under reduced motion (WCAG 2.2.2's pause is the OS setting). The collapse listens through `addListener` where
+  `MediaQueryList.addEventListener` is missing (Safari < 14). The pill carries `id="concierge-pill"`.
+- **D88** *default*: a first-visit callout next to the pill, "This site talks. Ask it about my work, by voice or
+  text.", with a Close button; `localStorage` key `concierge.callout_seen` (try/catch), set by Close or by opening
+  the panel; rendered after mount only, entrance under `motion-safe:` only, never on `/card*`. Supersedes nothing.
+  Reversible: drop `Callout` from `SiteChrome`. (Plan § Callout; P3-05 builds.) *As built (P3-05):* SiteChrome renders
+  it after the panel and before the pill. Also dismissed for good by Esc (from anywhere, unless a control already
+  `preventDefault`ed it) and by Connect; Close or Esc with focus in the bubble hands focus to the pill. It shows only at
+  `scrollY 0` with the `<footer>` out of sight (an `IntersectionObserver`), without setting the key, so it never
+  covers the Footer's links or a focused control the page scrolls under it (WCAG 2.4.11); it comes back at the top.
+- **D89** *default*: the Navbar has six links: Home, About, Skills, Projects, Experience, Contact. `/talk` stays in
+  the sitemap and the smoke routes and is reached from `/card`, the deep-dive and the panel's call. Supersedes D60
+  (Talk on the Navbar) and D79's "seven links"; the v3 spec § 4.1's "seven links" counted Approach, gone since P1.
+  Reversible: one entry in `Navbar.tsx`. (Plan § Widget; P3-05 builds.) *As built (P3-05):* six links in the desktop
+  list and the mobile menu; on `/talk` no link is current.
+- **D90** *default*: the memory view shows six kinds (Profile, Episodes, Events, Knowledge, Working, Cache) in About
+  you / About the agent, coloured by new `globals.css` tokens `--color-mem-profile` `#00d4ff`, `--color-mem-episode`
+  `#fbbf24`, `--color-mem-event` `#4ade80`, `--color-mem-event-rejected` `#f87171`, `--color-mem-knowledge`
+  `#a78bfa`, `--color-mem-working` `#f472b6` (each ≥ 6.17:1 on every dark surface; Cache uses `--color-muted`); the
+  strip counts Knowledge as sections and Working as items; a v1 body shows Profile and the summary and "not
+  reported by this agent version" for the rest; Forget me is always in the Memory tab, disabled with "Connect to
+  erase what it remembers" before a call. `MemoryPanel` is replaced by `MemoryView`. Supersedes VC2's separate
+  "What it remembers" panel. Reversible: `git revert` P3-06. (Plan § Memory view; P3-06 builds.) *As built
+  (P3-06):* the strip and the tabs follow the message box in a `section` under an `sr-only` h2 "Memory, latency
+  and privacy", in the drawer (`PanelTabs compact`: the tab panel capped at 25 vh below lg, not the plan's 35 vh, so
+  a v2 body leaves the transcript room on a 390 × 844 sheet; 40 vh at lg) and on `/talk` (right column from lg, no cap; `/talk` keeps its own Privacy section);
+  `LatencyPanel` lost its h2 (the tab names it); a strip chip pulses only when its new count is reported and differs
+  (none on first render, none going back to `–`); the chips wrap rather than scroll sideways (a scroll container
+  with nothing focusable can't be scrolled by keyboard); only the newest open episode is "in progress"; a
+  `gate_rejected` event carries an `sr-only` "Not kept:" and every event time, learned-at and the Knowledge section
+  names are `sr-only` text as well as `title`; Esc in Forget me's confirm step closes the step, not the drawer; a v1 body's "not reported" line reads "Episodes · Events: not
+  reported by this agent version"; Profile chips show slot, value, the channel glyph (voice, text) and the source,
+  learned-at in `title` and `sr-only`; `retention_days` adds "Kept {n} days after your last visit"; the Forget me
+  line (`forgetLine`) sits under the button in the Memory tab.
+- **D91** *default*: the last `concierge.memory` body is cached in `localStorage` under `concierge.memory.<visitor_id>`
+  as `{ v: 1, savedAt, body: <the raw JSON text> }` and re-parsed with `parseMemory` on load; `readVisitorId` reads
+  the id without creating one, so D45's "no id stored before Connect" holds; Forget me clears it. Supersedes
+  nothing. Reversible: stop calling `saveMemory`. (Plan § Cache; P3-02 and P3-07 build.) *As built (P3-02):*
+  `src/lib/concierge/memoryCache.ts` exports `memoryCacheKey`, `saveMemory(storage, visitorId, bodyText, savedAt)`,
+  `loadMemory` → `{ body, savedAt } | null` and `clearMemory`; an id that isn't a UUID v4 reads and writes nothing;
+  `visitorId.ts` exports `readVisitorId(storage)` (never writes). Nothing calls them yet (P3-07 wires them).
+  *As built (P3-07):* `ConciergeProvider` reads the cache once after mount (only for an id `readVisitorId` finds) and
+  exposes `cachedMemory`; each parsed live body is saved with the time it arrived under the id the token request
+  sent; Forget me's `{ok: true}` clears it, and the agent's last, empty body after it is neither shown nor saved.
+  `status.ts` `shownMemory(state, cachedMemory)` picks what the strip and the Memory tab show: the session's body,
+  else the cached one with `asOf`, else nothing once forgotten. The cached view has `data-stale="true"`, every line
+  in `--color-muted` (`**:` variant) and dots at 60 %, under "as of <date, time>" (`LEARNED_AT_FORMAT`); the strip is
+  greyed alike and a cached body never pulses its chips (the first live body pulses what differs from it). Once
+  forgotten the tab shows only the "Forgotten" line (no "Nothing remembered yet" above it).
+- **D92** *default*: a 429 `busy`/`visitor` enters a `closing` phase ("Closing your earlier conversation…") and
+  re-POSTs the token route every 5 s, one request in flight, for up to 60 s, then shows the v1 `busyVisitor` line;
+  Leave cancels. Supersedes D66 for `reason: 'visitor'` only; D66 stands for `site` and offline, and D71's line is
+  the final line. Reversible: dispatch `busy` on the first 429 again. (Plan § Busy retry; P3-07 builds.)
+  *As built (P3-07):* `BUSY_RETRY_MS` and `BUSY_RETRY_LIMIT_MS` in `ConciergeProvider.tsx`; the retry is a loop
+  inside the same `connect()` (one visitor id, the LiveKit import already under way), each wait on the session's
+  `timer`, which teardown clears, so Leave, `pagehide` and unmount stop it; the deadline is checked when a wait ends
+  (12 POSTs at most: the first at 0 s, then 5 s … 55 s). A token on a retry dispatches `closed` (closing →
+  connecting) before the Room is made, so the rest of the connect runs from `connecting` as it always did (the
+  plan's table had `connected`/`agentJoined` accepted from `closing`; they aren't needed). `isActive(phase)`
+  (`inRoom` or `closing`) makes the one button read Leave while closing. Review: teardown aborts a token request
+  still out (`AbortController` on the session) and ends the wait at once, so `connect()` settles. Question for
+  Michael: `reason: 'visitor'` is the address bucket, not the visitor id, so on shared Wi-Fi a neighbour's call shows
+  B "Closing your earlier conversation…" for a minute, then the "another tab" line; have the route compare the room's
+  `visitor_id` and say `'self'`, or soften the copy ("Waiting for an earlier conversation on this network…")?
+  *As built (P3-10):* the 60 s deadline runs on `performance.now()`. Also accepted: a second tab's Connect while the
+  first is live reads the closing line for the minute before "another tab" (the route can't tell closing from live);
+  a cross-tab "live" flag in `localStorage` would skip it, part of the question above.
+- **D93** *default*: `talkPage.intro` becomes "A voice agent I designed on LiveKit and built with my agent harness.
+  It remembers you between visits, shows you what it remembers and where each thing came from, and can take you to
+  the work it's talking about." ("my agent harness" still links `/projects/agent-harness`) and "Talk or type. The
+  Latency tab shows how long each turn took, and Forget me on the Memory tab erases what it knows about you."; the
+  deep-dive `builtWith` drops "specs in and verified milestones out", and "knowledge pack" leaves the page.
+  Supersedes D62's copy; D62's `IntroParagraph` shape and link stand. Question for Michael: keep the second
+  paragraph, or cut the intro to the first? Reversible: three strings. (Plan § Copy; P3-07 builds.) *As built
+  (P3-07):* both intro paragraphs as above, the deep-dive `builtWith` and decision VC-A's "knowledge pack" → "what it
+  knows about my work"; `docs/notes/evidence-voice-concierge.md` § P3 note has the before/after (no sentence with a
+  digit).
+- **D94** *default*: the usher follows `concierge.navigate` only while the panel's Guide me switch is on (default
+  on, `localStorage` `concierge.guide_me`), only to `isAllowedHref` targets ('/', '/about', '/skills',
+  '/experience', '/contact', '/projects/<known slug>', exact match; the slugs and short titles come from
+  `layout.tsx` as a prop, so `projects.ts` stays out of the client bundle), at most once per 8 s, never while on `/talk`,
+  with the transcript notice "Taking you to <name>". Supersedes nothing (new). Reversible: unregister the topic.
+  (Plan § Usher; P3-02 and P3-08 build.) *As built (P3-08):* as above, plus three refusals the spec doesn't name: a
+  body for the page already shown, a body from anyone but the agent, and any body within 8 s of the visitor's own
+  navigation (a link clicked in the tab, back or forward), so the agent never overtakes the visitor (no push, no
+  notice, the usher's clock untouched). The switch sits on its own row under the call controls, with a screen-reader
+  hint "Lets the concierge open the pages it talks about"; the 8 s clock is per call and monotonic. Names: a page's from `talkWidget.pageNames`, a project's
+  title up to its first colon (`usherTargets` in `src/lib/concierge/usher.ts`). Question for Michael: the bottom sheet
+  covers the page below `lg`, so on a phone the visitor sees the notice, not the page it opened, until they minimize;
+  minimize the sheet on a follow at that width, or leave it?
+- **D95** *default*: contract v2 parsing: every v2 field is optional and never a reason to reject a body; a v1 body
+  parses to exactly today's object (the v2 keys left off); a malformed entry inside a v2 list is dropped on its own
+  (v1's `facts` rule, which rejects the body, stands); `concierge.navigate` bodies over 1 KiB are dropped;
+  `concierge.get_memory` is named (`RPC_GET_MEMORY`) but not called in P3, since the agent pushes memory at
+  session start and the cache covers the time before a call. Extends the 2026-10-19 contract § 4 (its 15 KiB cap
+  stands). Reversible: the parser's v2 branch is one function. (Plan § Contract v2; P3-02 builds.) *As built (P3-02):*
+  `contract.ts` exports `TOPIC.navigate`, `RPC_GET_MEMORY`, `MAX_NAVIGATE_BYTES`, `MEMORY_EVENT_TYPES`, the
+  `Episode`, `MemoryEvent`, `AboutVisitor`, `AboutAgent` and `NavigateBody` types, `parseNavigate` and
+  `isAllowedHref`; a list in `about_visitor` that isn't an array is `null`, a `knowledge.sections` that isn't one
+  is `[]`; episodes keep the first 5 good entries and events the first 12.
+- **D96** *default* (P3-07 review): the browser's copy of the memory (D91) lives no longer than the server's: it is
+  dropped and removed on load once `retention_days` (30 when a v1 body doesn't say) have passed since it was saved, or
+  when its time is unreadable (`memoryExpired` in `memoryCache.ts`); another tab saving or clearing it (Forget me
+  there) updates this one through the `storage` event; the privacy note gains a seventh line, after the id line:
+  "This browser keeps a copy of what it last showed you, so the Memory tab has something before you connect. It goes
+  when the server's copy does, or when Forget me runs." Supersedes nothing; extends D91 and spec W2's privacy list.
+  Question for Michael: on a shared browser the copy shows before Connect and only a live call can erase it (Forget
+  me is disabled until then, D90); add a local "Clear this browser's copy" control beside the disabled Forget me,
+  or drop the cache before a call entirely? Reversible: delete the line and the `memoryExpired` call.
