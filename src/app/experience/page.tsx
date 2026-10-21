@@ -108,6 +108,7 @@ export default function ExperiencePage() {
                   className={`inline-block font-mono text-[var(--color-accent)] text-sm mb-4 break-all underline decoration-[var(--color-accent)]/40 underline-offset-4 hover:decoration-[var(--color-accent)] ${focusRing}`}
                 >
                   {project.repo.replace('https://', '')}
+                  <span className="sr-only"> (opens in new tab)</span>
                 </a>
                 <Bullets bullets={project.bullets} />
               </article>

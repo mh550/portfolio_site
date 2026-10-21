@@ -22,13 +22,14 @@ describe('BulletWithLinks (P2-01)', () => {
     expect(container).toHaveTextContent('Built a contractor estimating app.');
   });
 
-  it('renders an external link in a new tab with noopener noreferrer', () => {
+  it('renders an external link in a new tab with noopener noreferrer, announced as such', () => {
     render(
       <BulletWithLinks
         bullet={{ text: 'See the repo.', links: [{ text: 'repo', href: 'https://github.com/mh550/agent-harness' }] }}
       />,
     );
-    const link = screen.getByRole('link', { name: 'repo' });
+    // The sr-only cue the Footer, /card and ProjectLinks give every new-tab link (P2-04 review).
+    const link = screen.getByRole('link', { name: 'repo (opens in new tab)' });
     expect(link).toHaveAttribute('href', 'https://github.com/mh550/agent-harness');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');

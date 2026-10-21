@@ -127,7 +127,7 @@ describe('the resume layout (P2-02): roles, Projects, Earlier, Education', () =>
     for (const p of resumeProjects) {
       const heading = projects.getByRole('heading', { level: 3, name: p.name });
       expect(within(heading).getByRole('link', { name: p.name })).toHaveAttribute('href', p.href);
-      const repo = projects.getByRole('link', { name: p.repo.replace('https://', '') });
+      const repo = projects.getByRole('link', { name: `${p.repo.replace('https://', '')} (opens in new tab)` });
       expect(repo).toHaveAttribute('href', p.repo);
       expect(repo).toHaveAttribute('target', '_blank');
       expect(repo).toHaveAttribute('rel', 'noopener noreferrer');

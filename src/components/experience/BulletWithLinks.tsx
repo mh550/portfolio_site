@@ -28,6 +28,7 @@ export default function BulletWithLinks({ bullet }: { bullet: Bullet }) {
       ) : (
         <a key={at} href={href} target="_blank" rel="noopener noreferrer" className={LINK}>
           {text}
+          <span className="sr-only"> (opens in new tab)</span>
         </a>
       ),
     );
