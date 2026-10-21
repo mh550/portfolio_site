@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import SiteChrome from '@/components/SiteChrome';
 import { useConcierge } from '@/components/concierge/ConciergeProvider';
 import TalkSession from '@/components/talk/TalkSession';
@@ -6,7 +7,10 @@ import { addAgent, lastRoom, resetRooms } from '@/__mocks__/livekit-client';
 import { talkPage, talkWidget } from '@/lib/data';
 
 let mockPath = '/';
-jest.mock('next/navigation', () => ({ usePathname: () => mockPath }));
+jest.mock('next/navigation', () => ({
+  usePathname: () => mockPath,
+  useRouter: () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockRouter,
+}));
 
 function renderAt(pathname: string) {
   mockPath = pathname;

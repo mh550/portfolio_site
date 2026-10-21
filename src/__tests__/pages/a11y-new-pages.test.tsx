@@ -1,4 +1,5 @@
 import fs from 'fs';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import path from 'path';
 import type { ReactElement } from 'react';
 import { fireEvent, render } from '@testing-library/react';
@@ -14,7 +15,10 @@ import { colour, ratio } from '@/__tests__/helpers/contrast';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { getProjectBySlug } from '@/lib/data';
 
-jest.mock('next/navigation', () => ({ usePathname: () => '/about' }));
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/about',
+  useRouter: () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockRouter,
+}));
 
 // M8-02: the accessibility floor for every page v2 added (web-design-guidelines pass).
 const caseStudy = (slug: string) => <ProjectDetail project={getProjectBySlug(slug)!} />;

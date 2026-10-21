@@ -1,4 +1,5 @@
 import fs from 'fs';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import path from 'path';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,6 +7,9 @@ import TalkPage, { metadata } from '@/app/talk/page';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
 import { focusRing } from '@/components/focusRing';
 import { introText, privacyNote, talkPage } from '@/lib/data';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 const fetchMock = jest.fn(async () => ({ ok: false, status: 503, json: async () => ({ offline: true }) }));
 const realFetch = global.fetch;

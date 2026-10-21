@@ -1,4 +1,5 @@
 import { act, fireEvent, screen, within } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { renderTalk } from '@/__tests__/helpers/concierge';
 import { BUSY_RETRY_LIMIT_MS, BUSY_RETRY_MS } from '@/components/concierge/ConciergeProvider';
@@ -6,6 +7,9 @@ import { MockRoom, ParticipantKind, addAgent, lastRoom, pushText, resetRooms, re
 import { audioRenderer } from '@/__mocks__/livekit-components-react';
 import { talkPage } from '@/lib/data';
 import { memoryJson, metricsFullJson } from '@/__tests__/fixtures/concierge';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // VC2-05: a live session (plan docs/plans/2026-10-20-VC2-talk-page.md § State machine): the mic, the text box, the
 // transcript, Forget me's RPC, the agent's audio and Leave. The connect and offline paths are TalkSession.test.tsx.

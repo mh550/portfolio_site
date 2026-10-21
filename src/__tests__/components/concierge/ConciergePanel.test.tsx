@@ -1,7 +1,9 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import SiteChrome from '@/components/SiteChrome';
 import ConciergePanel from '@/components/concierge/ConciergePanel';
 import ConciergeProvider from '@/components/concierge/ConciergeProvider';
+import TalkSession from '@/components/talk/TalkSession';
 import { addAgent, lastRoom, pushText, removeParticipant, resetRooms } from '@/__mocks__/livekit-client';
 import { memoryV2Json } from '@/__tests__/fixtures/concierge';
 import { talkPage, talkWidget } from '@/lib/data/concierge';
@@ -10,7 +12,10 @@ import { talkPage, talkWidget } from '@/lib/data/concierge';
 // Minimize and Esc close it and leave the call alone (plan docs/plans/2026-10-21-P3-concierge-in-site.md § Panel).
 
 let mockPath = '/';
-jest.mock('next/navigation', () => ({ usePathname: () => mockPath }));
+jest.mock('next/navigation', () => ({
+  usePathname: () => mockPath,
+  useRouter: () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockRouter,
+}));
 
 const reply = (status: number, body: unknown) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 const realFetch = global.fetch;
@@ -68,13 +73,14 @@ describe('ConciergePanel', () => {
     expect(title).toHaveAttribute('tabindex', '-1');
   });
 
-  it('header: title, Minimize, Connect; then the transcript log, then the message box', () => {
+  it('header: title, Minimize, Connect, Guide me; then the transcript log, then the message box', () => {
     renderChrome();
     const panel = open();
     const order = [
       screen.getByRole('heading', { name: talkWidget.panelTitle }),
       screen.getByRole('button', { name: 'Minimize' }),
       screen.getByRole('button', { name: talkPage.labels.connect }),
+      screen.getByRole('switch', { name: talkWidget.guideMe }),
       screen.getByRole('log'),
       screen.getByRole('textbox', { name: talkPage.labels.message }),
       screen.getByRole('button', { name: talkPage.labels.send }),
@@ -86,6 +92,20 @@ describe('ConciergePanel', () => {
     // No mic toggle before the call is live
     expect(screen.queryByRole('button', { name: talkPage.labels.micOn })).toBeNull();
     expect(screen.queryByRole('button', { name: talkPage.labels.micOff })).toBeNull();
+  });
+
+  // P3-08, D94: the usher's switch, on by default; its state is aria-checked, its name the visible label.
+  it('has the Guide me switch, on by default, and a click turns it off', () => {
+    renderChrome();
+    open();
+    const guideMe = screen.getByRole('switch', { name: talkWidget.guideMe });
+    expect(guideMe).toHaveAttribute('aria-checked', 'true');
+    expect(guideMe).toHaveAttribute('type', 'button');
+    fireEvent.click(guideMe);
+    expect(guideMe).toHaveAttribute('aria-checked', 'false');
+    expect(guideMe).toHaveTextContent(/^Guide me$/);
+    // Review P3-08-6: what it allows, on by default, is said, not only drawn
+    expect(guideMe).toHaveAccessibleDescription(talkWidget.guideMeHint);
   });
 
   it('the transcript is the region that grows', () => {
@@ -430,6 +450,18 @@ describe('ConciergePanel is never on /talk or /card*', () => {
     renderChrome('/talk');
     expect(screen.queryByRole('button', { name: talkWidget.label })).toBeNull();
     expect(dialog()).toBeNull();
+  });
+
+  // The usher never navigates from /talk, so its switch is the panel's only (D94); review P3-08-5: with /talk's view
+  it('/talk: TalkSession has no Guide me switch', () => {
+    mockPath = '/talk';
+    render(
+      <SiteChrome configured>
+        <TalkSession />
+      </SiteChrome>
+    );
+    expect(screen.getByRole('button', { name: talkPage.labels.connect })).toBeInTheDocument();
+    expect(screen.queryByRole('switch')).toBeNull();
   });
 
   // Review (P3-04): /talk is the full view of the call, so reaching it closes the panel for good

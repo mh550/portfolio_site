@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import { renderToString } from 'react-dom/server';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import ConciergeProvider, { useConcierge, type ConciergeValue } from '@/components/concierge/ConciergeProvider';
 import Callout from '@/components/concierge/Callout';
 import { focusRing } from '@/components/focusRing';
 import { talkWidget } from '@/lib/data';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // P3-05, D88: the first-visit callout next to the pill, once per browser.
 const KEY = 'concierge.callout_seen';

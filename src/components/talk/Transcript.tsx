@@ -6,10 +6,11 @@ import { focusRing } from '@/components/focusRing';
 import TalkPanel from './TalkPanel';
 
 // One line of the conversation: a finished segment, or one still being spoken (`final: false`), which the agent's
-// `lk.transcription` stream replaces in place as it firms up.
+// `lk.transcription` stream replaces in place as it firms up. A `notice` is the page's own line, not a speaker's: the
+// usher saying where it is taking the visitor (D94), always final.
 export interface TranscriptLine {
   key: string;
-  who: 'visitor' | 'agent';
+  who: 'visitor' | 'agent' | 'notice';
   text: string;
   final: boolean;
 }
@@ -60,7 +61,12 @@ export default function Transcript({
           <p className="text-[var(--color-muted)]">{talkPage.empty.transcript}</p>
         ) : (
           <ol className="space-y-3">
-            {lines.map((line) => (
+            {lines.map((line) =>
+              line.who === 'notice' ? (
+                <li key={line.key} data-who="notice" data-final="true" className="break-words italic text-[var(--color-muted)]">
+                  {line.text}
+                </li>
+              ) : (
               <li key={line.key} data-final={String(line.final)} className="break-words">
                 <span
                   className={`mr-2 font-mono text-xs uppercase tracking-wide ${
@@ -76,7 +82,8 @@ export default function Transcript({
                   </span>
                 )}
               </li>
-            ))}
+              )
+            )}
           </ol>
         )}
       </div>

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { talkWidget } from '@/lib/data/concierge';
+import type { UsherTarget } from '@/lib/concierge/usher';
 import ConciergeProvider, { useConcierge } from './concierge/ConciergeProvider';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -41,18 +42,21 @@ function ClosePanel() {
 }
 
 // The concierge's call lives here, around the chrome (D85), so it outlives every client-side navigation between chrome
-// pages. `configured` is read on the server, in layout.tsx (D46): only a boolean crosses into this client file.
+// pages. `configured` is read on the server, in layout.tsx (D46): only a boolean crosses into this client file, and
+// the usher's targets (D94) as plain data.
 export default function SiteChrome({
   configured = false,
+  usherTargets,
   children,
 }: {
   configured?: boolean;
+  usherTargets?: readonly UsherTarget[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   if (isCardPath(pathname)) return <>{children}</>;
   return (
-    <ConciergeProvider configured={configured}>
+    <ConciergeProvider configured={configured} usherTargets={usherTargets}>
       <a
         href="#content"
         className={`${focusRing} sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-[var(--color-accent)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[var(--color-background)]`}

@@ -131,6 +131,8 @@ export const latencyLabels = {
 // The "Ask my site" pill on every chrome page but /talk (D87, VoiceWidget): `label` is its visible text and, idle, its
 // accessible name; while a call is live the name says whether the agent is listening or speaking. It opens the
 // concierge panel (D86); `href` is the page SiteChrome leaves both off. `callout` is the first-visit bubble (D88).
+// `guideMe` is the panel's switch for the usher (D94); its transcript notice is `notice` and the destination's name: a
+// page's from `pageNames`, a project's short title.
 export const talkWidget = {
   label: 'Ask my site',
   listening: 'Ask my site: listening',
@@ -139,5 +141,9 @@ export const talkWidget = {
   close: 'Close',
   panelTitle: 'Ask my site',
   minimize: 'Minimize',
+  guideMe: 'Guide me',
+  guideMeHint: 'Lets the concierge open the pages it talks about',
+  notice: 'Taking you to',
+  pageNames: { '/': 'Home', '/about': 'About', '/skills': 'Skills', '/experience': 'Experience', '/contact': 'Contact' },
   href: '/talk',
 };

@@ -633,7 +633,14 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
   '/experience', '/contact', '/projects/<known slug>', exact match; the slugs and short titles come from
   `layout.tsx` as a prop, so `projects.ts` stays out of the client bundle), at most once per 8 s, never while on `/talk`,
   with the transcript notice "Taking you to <name>". Supersedes nothing (new). Reversible: unregister the topic.
-  (Plan § Usher; P3-02 and P3-08 build.)
+  (Plan § Usher; P3-02 and P3-08 build.) *As built (P3-08):* as above, plus three refusals the spec doesn't name: a
+  body for the page already shown, a body from anyone but the agent, and any body within 8 s of the visitor's own
+  navigation (a link clicked in the tab, back or forward), so the agent never overtakes the visitor (no push, no
+  notice, the usher's clock untouched). The switch sits on its own row under the call controls, with a screen-reader
+  hint "Lets the concierge open the pages it talks about"; the 8 s clock is per call and monotonic. Names: a page's from `talkWidget.pageNames`, a project's
+  title up to its first colon (`usherTargets` in `src/lib/concierge/usher.ts`). Question for Michael: the bottom sheet
+  covers the page below `lg`, so on a phone the visitor sees the notice, not the page it opened, until they minimize;
+  minimize the sheet on a follow at that width, or leave it?
 - **D95** *default*: contract v2 parsing: every v2 field is optional and never a reason to reject a body; a v1 body
   parses to exactly today's object (the v2 keys left off); a malformed entry inside a v2 list is dropped on its own
   (v1's `facts` rule, which rejects the body, stands); `concierge.navigate` bodies over 1 KiB are dropped;

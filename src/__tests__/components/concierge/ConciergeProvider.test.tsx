@@ -1,4 +1,5 @@
 import { StrictMode, useEffect } from 'react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import { renderToString } from 'react-dom/server';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import ConciergeProvider, {
@@ -26,6 +27,9 @@ import { parseMemory } from '@/lib/concierge/contract';
 import { memoryCacheKey, saveMemory } from '@/lib/concierge/memoryCache';
 import { VISITOR_ID_KEY } from '@/lib/concierge/visitorId';
 import { emptyMemoryJson, memoryJson, memoryV2Json } from '@/__tests__/fixtures/concierge';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // P3-03, D85: the provider owns the one Room above the pages, so a call outlives the view that started it.
 
@@ -256,7 +260,7 @@ describe('ConciergeProvider: one Room at a time', () => {
     expect(fetchMock).not.toHaveBeenCalled();
     const room = await goLive();
     expect(MockRoom.instances).toHaveLength(1);
-    expect(room.registerTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.registerTextStreamHandler).toHaveBeenCalledTimes(4); // memory, metrics, navigate, transcription
     expect(phase()).toBe('live');
     act(() => {
       window.dispatchEvent(new Event('pagehide'));

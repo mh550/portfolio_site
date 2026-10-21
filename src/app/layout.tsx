@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import SiteChrome from '@/components/SiteChrome';
 import { conciergeEnv } from '@/lib/concierge/env';
-import { profile } from '@/lib/data';
+import { usherTargets } from '@/lib/concierge/usher';
+import { profile, projects } from '@/lib/data';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -43,8 +44,11 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* D46, D85: the env is read here, on the server (prerendered, so at build time; an env change needs a
-            redeploy anyway). Without it the concierge's Connect goes offline with no request, so no 503 is logged. */}
-        <SiteChrome configured={conciergeEnv() !== null}>{children}</SiteChrome>
+            redeploy anyway). Without it the concierge's Connect goes offline with no request, so no 503 is logged.
+            D94: the usher's project slugs and short titles come from here too, as plain data. */}
+        <SiteChrome configured={conciergeEnv() !== null} usherTargets={usherTargets(projects)}>
+          {children}
+        </SiteChrome>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import Transcript from '@/components/talk/Transcript';
 import CallControls from './CallControls';
 import { useConcierge } from './ConciergeProvider';
 import DeepDiveLink from './DeepDiveLink';
+import GuideMeSwitch from './GuideMeSwitch';
 import MemoryStrip from './MemoryStrip';
 import PanelTabs from './PanelTabs';
 import { shownMemory } from './status';
@@ -69,6 +70,7 @@ export default function ConciergePanel() {
           </button>
         </div>
         <CallControls />
+        <GuideMeSwitch />
         <DeepDiveLink phase={state.phase} onFollow={minimizePanel} />
       </div>
       <Transcript lines={state.lines} fill>

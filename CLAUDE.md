@@ -39,7 +39,7 @@ stays the record of decisions: v3 defaults are appended to its `## v3 decisions`
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1589 tests, 95 suites after P3-07)
+npm test             # Jest unit/integration tests (1625 tests, 96 suites after P3-08)
 npm run test:watch   # watch mode
 npm run logos        # regenerate src/components/logos/paths.ts from simple-icons (scripts/logos.mjs, D78)
 ```
@@ -115,7 +115,15 @@ Single source of truth for all page content — no content is hardcoded in compo
   `cachedMemory` (D91: the last memory body for this browser's visitor id, read after mount, saved on each live body,
   cleared by Forget me; `status.ts` `shownMemory` shows it greyed with "as of" before a call). A 429 busy/visitor is
   the `closing` phase (D92): one token POST every `BUSY_RETRY_MS` (5 s) for `BUSY_RETRY_LIMIT_MS` (60 s), then busy;
-  Leave cancels (`isActive(phase)`: Leave while closing). `Callout.tsx`
+  Leave cancels (`isActive(phase)`: Leave while closing). The usher (D94): a `concierge.navigate` handler (four
+  topics now, all unregistered at teardown) calls `router.push(href)` only with `guideMe` on (key
+  `concierge.guide_me`, read after mount, `GuideMeSwitch.tsx` in the panel header only), from the agent's identity,
+  `isAllowedHref`, not the page already shown, 8 s since its last follow and since the visitor's own link click or
+  back/forward (`USHER_INTERVAL_MS`, `performance.now`) and never from `/talk`; then a transcript line
+  `who: 'notice'` "Taking you to <name>" (muted, unattributed). Targets (`usherTargets`, slugs + short titles,
+  `lib/concierge/usher.ts`) come from `layout.tsx` through `SiteChrome`, so nothing SiteChrome imports reaches
+  `projects.ts` or the `@/lib/data` barrel (`layout-concierge.test.tsx` follows the imports; import `@/lib/data/<file>`
+  in anything under it). `Callout.tsx`
   (D88): the first-visit `role="note"` above the pill, `talkWidget.callout` and Close, until Close, Esc, opening the
   panel or Connect sets `concierge.callout_seen`; shown only at `scrollY 0` with the Footer out of sight. `ConciergePanel.tsx`
   (D86): the non-modal drawer (`role="dialog" aria-modal="false"`, 420 px right at `lg`, a bottom sheet under the
@@ -167,6 +175,9 @@ anything else decorative with Tailwind's `print:hidden`; `src/__tests__/lib/prin
   `@/lib/concierge/rooms` with a factory (`mockResolvedValue([])` by default); `concierge-token-route.test.ts` mocks nothing (D42, D69).
   Under fake timers click with `fireEvent` and flush inside one `act` (see `TalkSession.test.tsx`)
 - `next/navigation` mocked in `Navbar.test.tsx` with `jest.mock('next/navigation', () => ({ usePathname: () => '/' }))`
+- The provider calls `useRouter()` (the usher), which throws outside an app router: every test that renders it mocks
+  `next/navigation` with `src/__tests__/helpers/navigation.ts` (`mockNavigation`, `mockRouter.push`,
+  `navigation.pathname`, `resetNavigation`; see `usher.test.tsx`)
 
 ## Design System
 

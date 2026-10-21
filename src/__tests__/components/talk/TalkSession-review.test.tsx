@@ -1,10 +1,14 @@
 import { readdirSync, readFileSync } from 'fs';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import { join } from 'path';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { renderTalk } from '@/__tests__/helpers/concierge';
 import { MockRoom, addAgent, lastRoom, resetRooms, restart } from '@/__mocks__/livekit-client';
 import { talkPage } from '@/lib/data/concierge';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // VC2-07's review fixes (plan docs/plans/2026-10-20-VC2-talk-page.md § Review): focus that survives every phase
 // change, the draft and a failed send, Forget me after the call, a reconnect without the agent, and LiveKit kept out

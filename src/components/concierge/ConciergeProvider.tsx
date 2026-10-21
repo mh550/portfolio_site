@@ -1,9 +1,18 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import { usePathname, useRouter } from 'next/navigation';
 import type { Participant, RemoteParticipant, Room, TextStreamHandler, TextStreamReader } from 'livekit-client';
-import { isForgotten, parseMemory, parseMetrics, RPC_FORGET_ME, TOPIC } from '@/lib/concierge/contract';
+import {
+  isAllowedHref,
+  isForgotten,
+  parseMemory,
+  parseMetrics,
+  parseNavigate,
+  RPC_FORGET_ME,
+  TOPIC,
+} from '@/lib/concierge/contract';
 import {
   clearMemory,
   loadMemory,
@@ -12,7 +21,9 @@ import {
   saveMemory,
   type CachedMemory,
 } from '@/lib/concierge/memoryCache';
+import { USHER_INTERVAL_MS, usherName, type UsherTarget } from '@/lib/concierge/usher';
 import { browserStorage, getOrCreateVisitorId, readVisitorId, VISITOR_ID_KEY } from '@/lib/concierge/visitorId';
+import { talkWidget } from '@/lib/data/concierge';
 import {
   initialSession,
   sessionReducer,
@@ -37,7 +48,7 @@ export const AGENT_QUIET_MS = 500;
 export const BUSY_RETRY_MS = 5_000;
 export const BUSY_RETRY_LIMIT_MS = 60_000;
 const TOKEN_ROUTE = '/api/concierge/token';
-const STREAM_TOPICS = [TOPIC.memory, TOPIC.metrics, TOPIC.transcription];
+const STREAM_TOPICS = [TOPIC.memory, TOPIC.metrics, TOPIC.navigate, TOPIC.transcription];
 // Attribute names on lk.transcription streams (@livekit/components-core's ParticipantAgentAttributes).
 const SEGMENT_ID = 'lk.segment_id';
 const TRANSCRIPTION_FINAL = 'lk.transcription_final';
@@ -61,6 +72,26 @@ function writeCalloutSeen() {
   }
 }
 
+// The usher's switch (D94): on unless this browser stored 'off'. A storage that throws leaves it on; one that won't
+// write keeps the visitor's choice for this page's life.
+export const GUIDE_ME_KEY = 'concierge.guide_me';
+
+function readGuideMe(): boolean {
+  try {
+    return browserStorage()?.getItem(GUIDE_ME_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+function writeGuideMe(on: boolean) {
+  try {
+    browserStorage()?.setItem(GUIDE_ME_KEY, on ? 'on' : 'off');
+  } catch {
+    // kept for this page's life
+  }
+}
+
 // One Connect's worth of LiveKit: everything teardown has to release. `alive` turns false once, at teardown, and
 // every async continuation and stream handler checks it, so a session that is over can't change the page.
 interface Session {
@@ -78,6 +109,8 @@ interface Session {
   visitorId: string | null; // the id the token request sent: the memory cache's key
   requests: AbortController; // aborts a token request still out when the session ends
   wake: (() => void) | undefined; // ends the closing wait early, at teardown, so connect() settles
+  ushered: number | null; // performance.now() of the usher's last follow: the next waits USHER_INTERVAL_MS
+  notices: number; // usher notices so far: each one's transcript key
 }
 
 // Idempotent. Listeners come off before disconnect(), so our own disconnect doesn't read as the call dropping.
@@ -173,6 +206,9 @@ export interface ConciergeValue extends ConciergeActions {
   // The last memory body this browser's visitor id received (D91): read after mount, replaced by each live body,
   // gone after Forget me. The views show it greyed while the session has none.
   cachedMemory: CachedMemory | null;
+  // Guide me (D94): whether a concierge.navigate body may move the visitor. On until mount reads a stored 'off'.
+  guideMe: boolean;
+  setGuideMe: (on: boolean) => void;
 }
 
 const ConciergeContext = createContext<ConciergeValue | null>(null);
@@ -188,7 +224,16 @@ export function useConcierge(): ConciergeValue {
 // Connect, the token route, one Room, the agent's text streams into the reducer, and the offline state. Nothing runs
 // before Connect, so the server HTML and the first client render match. `configured` is false when the server has no
 // LiveKit env (D46, read in layout.tsx): Connect then shows offline with no request, so the browser logs no 503.
-export default function ConciergeProvider({ configured, children }: { configured: boolean; children: ReactNode }) {
+// `usherTargets` (D94) are the project slugs and short titles the usher may take the visitor to, built on the server.
+export default function ConciergeProvider({
+  configured,
+  usherTargets = [],
+  children,
+}: {
+  configured: boolean;
+  usherTargets?: readonly UsherTarget[];
+  children: ReactNode;
+}) {
   const [state, dispatch] = useReducer(sessionReducer, initialSession);
   const sessionRef = useRef<Session | null>(null);
   // Set and cleared with sessionRef's Room: made in connect(), gone on Leave, offline or a dropped call.
@@ -198,6 +243,35 @@ export default function ConciergeProvider({ configured, children }: { configured
   const [calloutSeen, setCalloutSeen] = useState(true);
   const [agentSpeaking, setAgentSpeaking] = useState(false);
   const [cachedMemory, setCachedMemory] = useState<CachedMemory | null>(null);
+  const [guideMe, setGuideMeState] = useState(true);
+  // The navigate handler is registered once, at Connect, and outlives renders: it reads these, kept current by an
+  // effect (never written during render).
+  const pathname = usePathname();
+  const router = useRouter();
+  const usher = useRef({ guideMe, pathname, router, targets: usherTargets });
+  useEffect(() => {
+    usher.current = { guideMe, pathname, router, targets: usherTargets };
+  });
+  // performance.now() of the visitor's own last navigation (a link clicked in this tab, back or forward): the usher
+  // leaves them alone USHER_INTERVAL_MS after it, so a body that lands while their page loads can't overtake it.
+  const visitorNavigated = useRef(-Infinity);
+  useEffect(() => {
+    const now = () => {
+      visitorNavigated.current = performance.now();
+    };
+    // Capture: next/link handles the click (and prevents the default) before it would bubble to the document.
+    const onClick = (event: MouseEvent) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+      if (link instanceof HTMLAnchorElement && (!link.target || link.target === '_self')) now();
+    };
+    document.addEventListener('click', onClick, true);
+    window.addEventListener('popstate', now);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      window.removeEventListener('popstate', now);
+    };
+  }, []);
   // Opening the panel counts as having seen the callout (D88).
   const panelActions = useMemo(() => {
     const dismissCallout = () => {
@@ -218,6 +292,12 @@ export default function ConciergeProvider({ configured, children }: { configured
   // After mount, never during render: localStorage doesn't exist on the server.
   useEffect(() => {
     if (!readCalloutSeen()) setCalloutSeen(false);
+    if (!readGuideMe()) setGuideMeState(false);
+  }, []);
+
+  const setGuideMe = useCallback((on: boolean) => {
+    setGuideMeState(on);
+    writeGuideMe(on);
   }, []);
 
   // The cache is read only for an id this browser already has: reading never makes one (D45). A copy past its
@@ -293,6 +373,8 @@ export default function ConciergeProvider({ configured, children }: { configured
         visitorId: null,
         requests: new AbortController(),
         wake: undefined,
+        ushered: null,
+        notices: 0,
       };
       sessionRef.current = session;
       setSessionCount((n) => n + 1);
@@ -356,7 +438,7 @@ export default function ConciergeProvider({ configured, children }: { configured
       session.room = room;
       setRoom(room);
 
-      // All three handlers before connect(): the agent sends memory as soon as it joins (spec §4).
+      // All four handlers before connect(): the agent sends memory as soon as it joins (spec §4).
       // Each body is shown and kept as this visitor's cached memory (D91), until Forget me has gone through: the
       // agent's last, empty body after it is neither, so "Forgotten" stays and the cache stays empty.
       room.registerTextStreamHandler(TOPIC.memory, (reader) =>
@@ -370,6 +452,29 @@ export default function ConciergeProvider({ configured, children }: { configured
       );
       room.registerTextStreamHandler(TOPIC.metrics, (reader) =>
         readBody(reader, parseMetrics, (body) => send({ type: 'metrics', body }))
+      );
+      // The usher (D94): the agent's show_page tool asks to take the visitor somewhere. Followed only with Guide me
+      // on, to an allowlisted href, USHER_INTERVAL_MS after the last follow, and never away from /talk (the visitor
+      // who opened the full page stays on it). Refused too: a body from anyone but the agent, one for the page already
+      // shown, and any within USHER_INTERVAL_MS of the visitor's own navigation. A refused body changes nothing, the
+      // clock included. performance.now(), not Date.now(): a wall clock set back mid-call would stall it.
+      room.registerTextStreamHandler(TOPIC.navigate, (reader, { identity }) =>
+        readBody(reader, parseNavigate, ({ href }) => {
+          const { guideMe, pathname, router, targets } = usher.current;
+          if (!session.alive || identity !== session.agentIdentity) return;
+          if (!guideMe || pathname === talkWidget.href || pathname === href) return;
+          const slugs = targets.map((target) => target.slug);
+          const name = isAllowedHref(href, slugs) ? usherName(href, targets, talkWidget.pageNames) : null;
+          const now = performance.now();
+          const recent = (at: number | null) => at !== null && now - at < USHER_INTERVAL_MS;
+          if (name === null || recent(session.ushered) || recent(visitorNavigated.current)) return;
+          session.ushered = now;
+          router.push(href);
+          dispatch({
+            type: 'line',
+            line: { key: `notice-${++session.notices}`, who: 'notice', text: `${talkWidget.notice} ${name}`, final: true },
+          });
+        })
       );
       const onTranscription: TextStreamHandler = (reader, { identity }) => {
         const { info } = reader;
@@ -597,10 +702,25 @@ export default function ConciergeProvider({ configured, children }: { configured
       calloutSeen,
       agentSpeaking,
       cachedMemory,
+      guideMe,
+      setGuideMe,
       ...actions,
       ...panelActions,
     }),
-    [state, room, sessionCount, configured, panel, calloutSeen, agentSpeaking, cachedMemory, actions, panelActions]
+    [
+      state,
+      room,
+      sessionCount,
+      configured,
+      panel,
+      calloutSeen,
+      agentSpeaking,
+      cachedMemory,
+      guideMe,
+      setGuideMe,
+      actions,
+      panelActions,
+    ]
   );
 
   return (

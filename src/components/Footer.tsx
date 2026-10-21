@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { profile } from '@/lib/data';
+import { profile } from '@/lib/data/profile';
 import { focusRing } from '@/components/focusRing';
 
 export default function Footer() {

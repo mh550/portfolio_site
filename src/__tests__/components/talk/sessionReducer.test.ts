@@ -177,6 +177,14 @@ describe('sessionReducer', () => {
       ]);
     });
 
+    // D94: the usher's notice is the page's line, not a speaker's: the agent's half-spoken line stays as it is.
+    it("a notice doesn't settle the agent's line being spoken", () => {
+      let state = sessionReducer(at('live'), { type: 'line', line: line('a1', 'Let me sh', false) });
+      const notice = { key: 'notice-1', who: 'notice' as const, text: 'Taking you to About', final: true };
+      state = sessionReducer(state, { type: 'line', line: notice });
+      expect(state.lines).toEqual([line('a1', 'Let me sh', false), notice]);
+    });
+
     it.each([
       ['live', { type: 'dropped' }],
       ['waiting', { type: 'dropped' }],

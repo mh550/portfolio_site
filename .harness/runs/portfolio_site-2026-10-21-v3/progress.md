@@ -13,6 +13,15 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 07:15 · P3-08 · passes
+
+- Usher (D94): `ConciergeProvider` registers `concierge.navigate` (four topics, all unregistered at teardown) and calls `router.push` only with Guide me on, `isAllowedHref`, from `session.agentIdentity`, not the page already shown, 8 s (`performance.now`) after its last follow and after the visitor's own link click/back-forward, never from `/talk`; then a `who: 'notice'` line "Taking you to <name>". New `lib/concierge/usher.ts` (`usherTargets`, `usherName`, `USHER_INTERVAL_MS`; layout → SiteChrome → provider), `GuideMeSwitch.tsx` (role=switch, `concierge.guide_me`, sr-only hint), Transcript renders notices muted/italic/unattributed, `talkWidget` copy. Tests 1589 → 1625 (96 suites; new `usher.test.tsx`, `helpers/navigation.ts` mocks `next/navigation` in the 11 provider-rendering files).
+- Verified: usher/Transcript/layout/review tests failed first; `.harness/check.sh` green (lint · jest · build); smoke exit 0 (41 PASS). Sonnet browser check on :7835, all PASS at 1280 and 390: switch 107×40 after Connect, Tab from Connect lands on it, click → 'off' stored, survives reload, Space → 'on', scrollWidth 390 with the panel open, no switch on /talk, no console errors; I looked at the 390 capture.
+- Opus review: 0 Critical, 0 Important, 6 Minor, all fixed (plan § Review P3-08-1…6): the visitor's own navigation wins, sender identity checked, monotonic clock, Footer imported the `@/lib/data` barrel so SiteChrome shipped projects.ts on every page incl. /card (now `@/lib/data/profile`; the guard follows imports transitively), a vacuous /talk test, the plan's ref names + switch hint.
+- Next (P3-09): the live usher can't be captured without an agent; `usher.test.tsx` covers it. The Guide me row sits under CallControls in the panel.
+- Questions for Michael: (1) D94: below `lg` the bottom sheet covers the page, so a phone visitor sees the notice, not the page it opened; minimize the sheet on a follow at that width? D84, D93, D96, D92 still open.
+- Proposed change: `/` and `/projects` still ship projects.ts to the client (`/projects` needs it; on `/` the hero's MethodStrip → `approach.ts` → `resolveProjectLink` in projects.ts); resolving `loopSteps` links on the server would drop it from `/`.
+
 ### 2026-10-21 07:40 · P3-07 · passes
 
 - Cache (D91): `ConciergeProvider` reads `concierge.memory.<id>` after mount (only for an existing id; never makes one), saves each live body's raw text, clears it on Forget me's `{ok:true}` and ignores the agent's last empty body; `status.ts` `shownMemory` feeds `MemoryStrip` (`asOf` prop) and the Memory tab (`data-stale`, muted via `**:`, "as of <time>"). Busy retry (D92): `closing` phase + `closed` action + `isActive`; a loop in `connect()` re-POSTs every 5 s, one in flight, to 60 s; Leave/pagehide/unmount abort the request and end the wait. Copy (D93): intro both paragraphs, deep-dive `builtWith`, VC-A "knowledge pack" → "what it knows about my work"; evidence § P3 note. Tests 1496 → 1589 (95 suites).

@@ -1,4 +1,5 @@
 import { act, fireEvent, screen, within } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import userEvent from '@testing-library/user-event';
 import { AGENT_JOIN_TIMEOUT_MS } from '@/components/concierge/ConciergeProvider';
 import { renderTalk } from '@/__tests__/helpers/concierge';
@@ -16,7 +17,11 @@ import { isUuidV4, VISITOR_ID_KEY } from '@/lib/concierge/visitorId';
 import { talkPage } from '@/lib/data';
 import { memoryJson, metricsFullJson } from '@/__tests__/fixtures/concierge';
 
-const TOPICS = ['concierge.memory', 'concierge.metrics', 'lk.transcription'];
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
+
+// P3-08 (D94) added concierge.navigate, the usher's topic.
+const TOPICS = ['concierge.memory', 'concierge.metrics', 'concierge.navigate', 'lk.transcription'];
 
 const reply = (status: number, body: unknown) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 const OK = reply(200, { url: 'wss://concierge.test.invalid', token: 'test-token' });
@@ -252,7 +257,7 @@ describe('TalkSession: the room', () => {
     fetchMock.mockResolvedValue(OK);
   });
 
-  it('registers the three text-stream handlers before connect(), with the url and token from the route', async () => {
+  it('registers the four text-stream handlers before connect(), with the url and token from the route', async () => {
     renderTalk();
     await connect();
     const room = lastRoom();
@@ -263,7 +268,7 @@ describe('TalkSession: the room', () => {
     for (const order of room.registerTextStreamHandler.mock.invocationCallOrder) expect(order).toBeLessThan(connectOrder);
   });
 
-  it('on provider unmount (leaving the chrome) unregisters all three and disconnects once', async () => {
+  it('on provider unmount (leaving the chrome) unregisters all four and disconnects once', async () => {
     const { unmount } = renderTalk();
     await connect();
     const room = lastRoom();
@@ -278,10 +283,10 @@ describe('TalkSession: the room', () => {
     await connect();
     expect(MockRoom.instances).toHaveLength(1);
     const room = lastRoom();
-    expect(room.registerTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.registerTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.unregisterTextStreamHandler).not.toHaveBeenCalled();
     unmount();
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.disconnect).toHaveBeenCalledTimes(1);
   });
 
@@ -291,7 +296,7 @@ describe('TalkSession: the room', () => {
     await connect(user);
     const room = lastRoom();
     await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.disconnect).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: 'Connect' })).toBeInTheDocument();
     expect(screen.queryByText(talkPage.offlineMessage)).toBeNull();
@@ -303,7 +308,7 @@ describe('TalkSession: the room', () => {
     await connect();
     expectOffline();
     const room = lastRoom();
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.disconnect).toHaveBeenCalledTimes(1);
     expect(micCalls()).toEqual([]);
   });
@@ -358,7 +363,7 @@ describe('TalkSession: the call drops or reconnects', () => {
       room.emit('disconnected');
     });
     expect(status()).toHaveTextContent(talkPage.status.ended);
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.listenerCount('disconnected')).toBe(0);
     expect(screen.getByText('Lisbon')).toBeInTheDocument();
   });
@@ -479,7 +484,7 @@ describe('TalkSession: Leave or unmount before the room is up', () => {
     expect(status()).toHaveTextContent(talkPage.status.connecting);
     if (how === 'Leave') await user.click(screen.getByRole('button', { name: talkPage.labels.leave }));
     else unmount();
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     expect(room.disconnect).toHaveBeenCalledTimes(1);
     room.remoteParticipants.set('agent-1', { identity: 'agent-1', kind: ParticipantKind.AGENT });
     pending.resolve();
@@ -510,7 +515,7 @@ describe('TalkSession: waiting for the agent', () => {
     act(() => jest.advanceTimersByTime(1));
     expectOffline();
     expect(room.disconnect).toHaveBeenCalledTimes(1);
-    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(3);
+    expect(room.unregisterTextStreamHandler).toHaveBeenCalledTimes(TOPICS.length);
     // The agent never came, so the browser never asked for the microphone (VC5-02).
     expect(micCalls()).toEqual([]);
   });

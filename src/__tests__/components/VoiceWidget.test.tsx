@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import VoiceWidget from '@/components/VoiceWidget';
 import { focusRing } from '@/components/focusRing';
 import { talkWidget } from '@/lib/data';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // VC4-03, D61: the floating widget; P3-04, D86: a button that opens and closes the concierge panel; P3-05, D87: the
 // "Ask my site" pill with the sound-bars glyph and the live states.
@@ -31,6 +35,10 @@ describe('VoiceWidget', () => {
       close: 'Close',
       panelTitle: 'Ask my site',
       minimize: 'Minimize',
+      guideMe: 'Guide me',
+      guideMeHint: 'Lets the concierge open the pages it talks about',
+      notice: 'Taking you to',
+      pageNames: { '/': 'Home', '/about': 'About', '/skills': 'Skills', '/experience': 'Experience', '/contact': 'Contact' },
       href: '/talk',
     });
   });

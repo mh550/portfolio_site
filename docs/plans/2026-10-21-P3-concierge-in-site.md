@@ -458,6 +458,23 @@ POST timestamps 5 s apart (± 500 ms) with never two open, and after 60 s the bu
 
 P3-08. "Guide me": the agent's `show_page` tool sends `concierge.navigate` (§ 7) and the page follows it.
 
+**Built (P3-08):** as written, with these differences. (1) The targets live in `src/lib/concierge/usher.ts`:
+`usherTargets(projects)` (slug + title up to the first `:`), `usherName(href, targets, pageNames)` and
+`USHER_INTERVAL_MS`; `layout.tsx` calls `usherTargets(projects)` and `SiteChrome` passes them to the provider
+(default `[]`). (2) Three more refusals (the last two from the review): a body for the page already shown
+(`pathname === href`), so the transcript never says "Taking you to About" on About; a body from any identity but
+`session.agentIdentity`; and any body within 8 s of the visitor's own navigation (a same-tab link click, seen in the
+capture phase, or `popstate`), so a body that lands while their page loads can't overtake it. Like every refusal
+they leave the usher's clock alone. The clock is `performance.now()`, not `Date.now()`. Instead of `guideMeRef` and
+`pathnameRef` the handler reads one ref, `usher` (`{ guideMe, pathname, router, targets }`), synced in an effect. (3) The
+switch is `GuideMeSwitch.tsx`, its own row under `CallControls` (the controls row is shared with `/talk`, which has
+no switch); the focus order is as § Panel lists. The clock and the notice counter are per session (`Session.ushered`,
+`Session.notices`). (4) The tests' `next/navigation` mock is `src/__tests__/helpers/navigation.ts` (`mockNavigation`,
+`mockRouter`, `navigation.pathname`, `resetNavigation`), not part of `helpers/concierge.tsx`: it has no imports, so a
+`jest.mock` factory can load it first. Tests: `usher.test.tsx` (26), `Transcript.test.tsx`, `sessionReducer.test.ts`,
+`ConciergePanel.test.tsx`, `layout-concierge.test.tsx` (the prop, and no concierge client file imports the projects
+data).
+
 - **Allowlist.** `isAllowedHref(href: string, slugs: readonly string[]): boolean` in `contract.ts`: true only for
   exactly `'/'`, `'/about'`, `'/skills'`, `'/experience'`, `'/contact'`, or `'/projects/<slug>'` with `slug` in
   `slugs` (exact string match, no decoding). False for anything else: `'//evil'`, `'https://…'`, `'/projects/'`,
@@ -574,6 +591,12 @@ Filled by P3-10 (one row per finding).
 | P3-07-7 | Minor | provider cache | another tab's Forget me left this tab showing the erased copy | fixed test-first: `storage` event reloads it |
 | P3-07-8 | Minor | `CLAUDE.md` | a `TESTCOUNT` placeholder | fixed |
 | P3-07-9 | Minor | tests | unmount, Leave → Connect, double click and bfcache during closing unpinned; the rejected-body test thin | fixed: tests added (they passed first: pins, not fixes) |
+| P3-08-1 | Minor | `ConciergeProvider.tsx` handler | a body landing while the visitor's own navigation (a link, even to `/talk`) is pending overrides it: the pathname ref updates only on commit | fixed test-first: a same-tab link click (capture phase) or `popstate` holds the usher off for 8 s |
+| P3-08-2 | Minor | `ConciergeProvider.tsx` handler | the sender's identity is ignored: any participant could move the visitor | fixed test-first: only `session.agentIdentity` |
+| P3-08-3 | Minor | `ConciergeProvider.tsx` clock | `Date.now()` is not monotonic: a clock set back stalls the usher | fixed: `performance.now()` |
+| P3-08-4 | Minor | `Footer.tsx`, `layout-concierge.test.tsx` | "projects.ts stays out of the client bundle" was false: Footer (under SiteChrome) imported the `@/lib/data` barrel; the guard only read direct imports | fixed test-first: Footer imports `@/lib/data/profile`; the guard follows SiteChrome's imports transitively |
+| P3-08-5 | Minor | `ConciergePanel.test.tsx` | the "no switch on /talk" check rendered no TalkSession | fixed: renders SiteChrome with TalkSession on `/talk` |
+| P3-08-6 | Minor | plan § Usher, `GuideMeSwitch.tsx` | the plan named `guideMeRef`/`pathnameRef`; the switch didn't say what it allows | fixed: plan corrected; `aria-describedby` hint `talkWidget.guideMeHint` |
 
 ## Decisions
 

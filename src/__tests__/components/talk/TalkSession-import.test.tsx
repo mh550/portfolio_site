@@ -1,7 +1,11 @@
 import { act, screen } from '@testing-library/react';
+import type { NavigationMock } from '@/__tests__/helpers/navigation';
 import userEvent from '@testing-library/user-event';
 import { renderTalk } from '@/__tests__/helpers/concierge';
 import { talkPage } from '@/lib/data';
+
+// P3-08: the provider calls useRouter() (the usher), so next/navigation is mocked (helpers/navigation.ts).
+jest.mock('next/navigation', () => jest.requireActual<NavigationMock>('@/__tests__/helpers/navigation').mockNavigation);
 
 // Counts how often the livekit-client module is evaluated. The factory runs once per module registry, so this file
 // holds only these cases: in TalkSession.test.tsx an earlier configured Connect would already have loaded it and made
