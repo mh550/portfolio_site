@@ -18,6 +18,20 @@ const ICONS = [
   { key: 'nextjs', exportName: 'siNextdotjs' },
   { key: 'n8n', exportName: 'siN8n' },
   { key: 'github', exportName: 'siGithub' },
+  // The /skills graph's marks (P5-02, D98); FloatingLogos keeps the twelve above
+  { key: 'react', exportName: 'siReact' },
+  { key: 'nodedotjs', exportName: 'siNodedotjs' },
+  { key: 'vercel', exportName: 'siVercel' },
+  { key: 'tailscale', exportName: 'siTailscale' },
+  { key: 'supabase', exportName: 'siSupabase' },
+  { key: 'openjdk', exportName: 'siOpenjdk', title: 'Java' },
+  { key: 'cplusplus', exportName: 'siCplusplus', title: 'C++' },
+  { key: 'linear', exportName: 'siLinear' },
+  { key: 'zapier', exportName: 'siZapier' },
+  { key: 'tailwindcss', exportName: 'siTailwindcss' },
+  { key: 'javascript', exportName: 'siJavascript' },
+  { key: 'expo', exportName: 'siExpo' },
+  { key: 'modelcontextprotocol', exportName: 'siModelcontextprotocol', title: 'MCP' },
 ];
 
 // The package's exports map blocks importing its package.json, so read the file

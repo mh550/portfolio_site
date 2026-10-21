@@ -1,57 +1,34 @@
 import { render, screen, within } from '@testing-library/react';
-import { skillCategories } from '@/lib/data';
+import { clusters, nodes } from '@/lib/data';
 import SkillsPage, { metadata } from '@/app/skills/page';
 
+// Until P5-03 draws the graph, /skills lists the graph's data (P5-02)
 describe('SkillsPage', () => {
   it('renders the heading', () => {
     render(<SkillsPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Tech Stack');
   });
 
-  it('renders the four capability groups as headings', () => {
+  it('renders the six clusters as headings, in order', () => {
     render(<SkillsPage />);
-    for (const name of ['Process & delivery', 'Systems & architecture', 'Build', 'Operate & verify']) {
-      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(clusters.map((c) => c.name));
+  });
+
+  it('lists every node under its cluster, in drawing order', () => {
+    render(<SkillsPage />);
+    for (const c of clusters) {
+      const items = within(screen.getByRole('list', { name: c.name })).getAllByRole('listitem');
+      expect(items.map((li) => li.textContent)).toEqual(nodes.filter((n) => n.cluster === c.id).map((n) => n.name));
     }
   });
 
-  it('renders Process & delivery in the featured panel', () => {
+  it('has no featured Differentiator block (D98)', () => {
     render(<SkillsPage />);
-    const panel = screen.getByRole('heading', { name: 'Process & delivery' }).closest('div.glow-accent');
-    expect(panel).not.toBeNull();
-    expect(panel).toContainElement(screen.getByText('Differentiator'));
-    expect(panel).toContainElement(screen.getByText('Linear'));
-    expect(document.querySelectorAll('div.glow-accent')).toHaveLength(1);
+    expect(screen.queryByText('Differentiator')).toBeNull();
+    expect(document.querySelector('.glow-accent')).toBeNull();
   });
 
-  it('renders the other groups outside the featured panel', () => {
-    render(<SkillsPage />);
-    for (const name of ['Systems & architecture', 'Build', 'Operate & verify']) {
-      expect(screen.getByRole('heading', { name }).closest('div.glow-accent')).toBeNull();
-    }
-  });
-
-  it('spot-checks skills in their groups', () => {
-    render(<SkillsPage />);
-    const groupOf = (name: string) => screen.getByRole('list', { name });
-    expect(within(groupOf('Build')).getByText('TypeScript')).toBeInTheDocument();
-    expect(within(groupOf('Systems & architecture')).getByText('Docker')).toBeInTheDocument();
-    expect(within(groupOf('Process & delivery')).getByText('Linear')).toBeInTheDocument();
-  });
-
-  it('renders each group as a list named by its heading, one item per skill', () => {
-    render(<SkillsPage />);
-    for (const cat of skillCategories) {
-      const items = within(screen.getByRole('list', { name: cat.name })).getAllByRole('listitem');
-      expect(items.map((li) => li.textContent)).toEqual(cat.skills);
-    }
-  });
-
-  it('describes the page by capability, in the agentic-systems angle (P1-06)', () => {
-    expect(metadata.description).toBe(
-      'The tools and practices behind the agentic systems, integrations and apps I build, grouped by capability.',
-    );
-    render(<SkillsPage />);
-    expect(screen.getByText('Grouped by what I do, with the tools I use for each.')).toBeInTheDocument();
+  it('keeps the agentic-systems description (P1-06)', () => {
+    expect(metadata.description).toMatch(/agentic systems/);
   });
 });

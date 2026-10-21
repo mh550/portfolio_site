@@ -198,7 +198,7 @@ featured project has at least two (the test asserts ≥ 2 per featured project; 
 | `mirrored-google-calendars` (not featured: list view only) | nextjs, supabase, pipedream, typescript |
 | `cherished` (not featured: list view only) | nextjs, typescript, agile |
 
-Nodes with no project edge (Copilot Studio, Java, C++, React, Tailwind CSS, Framer Motion, PostgreSQL, ETL
+Nodes with no project edge (Copilot Studio, SQL, Java, C++, React, Tailwind CSS, Framer Motion, PostgreSQL, ETL
 pipelines, Linux, Vercel, Edge functions, Specs & decision ledgers, Test-driven development, Requirements, Project
 management, Team onboarding, User-driven design) are on the resume or today's list from Michael's roles, not from a
 project on the site; the list view says "From my roles" for them rather than inventing a project.
@@ -299,10 +299,15 @@ to 1023 px the 2-column drawing is the first view (720 px wide at 768: 1.02 px a
 |---|---|---|
 | `layoutGraph` | `(data: GraphData, width: number) => GraphLayout` | deterministic cluster rects and node points per the constants above; `GraphData = { clusters, nodes, edges }`; `GraphLayout = { width, height, columns: 2 \| 3, clusters: ClusterBox[], nodes: Record<string, NodePoint> }`, `ClusterBox = { id, name, x, y, w, h }`, `NodePoint = { id, cluster, x, y, size, lines: string[], box: Rect }` |
 | `labelLines` | `(name: string, max = 16) => string[]` | one or two lines, split at the last space that fits |
-| `curvePath` | `(a: Point, b: Point, bend = 0.2) => string` | `M ax ay C c1x c1y c2x c2y bx by`; the controls at ⅓ and ⅔ of the chord, pushed `bend × length` along its left normal; numbers rounded to 0.1 |
+| `curvePath` | `(a: Point, b: Point, bend = 0.2) => string` | `M ax ay C c1x c1y c2x c2y bx by`; the controls at ⅓ and ⅔ of the chord, pushed `bend × length` along the normal `(−dy, dx)` (to the right of a → b in y-down units: a west-to-east edge bows down); numbers rounded to 0.1 |
 | `edgePaths` | `(layout, edges) => EdgePath[]` | the node ↔ node edges as `{ from, to, d, cross }` (`cross` = different clusters); project edges are skipped |
 | `projectChain` | `(layout, nodeIds: string[]) => [string, string][]` | a selected project's nodes sorted by (cluster order, drawing order) and joined in that order: one segment between consecutive nodes, so a project touching k clusters crosses k − 1 times |
 | `clusterAt` | `(layout, p: Point) => ClusterId \| null` | the cluster whose rect holds `p` (for the 390 chip row's `aria-pressed`) |
+
+Built in P5-02 beyond this table (from its review): `NodePoint` also carries `name` and `weight`; `LABEL_DY = [30,
+44]` (the label baselines below the point); `columnsFor(width)` (the column rule); `NARROW_ASPECT` (308 / 348, the svg's
+aspect below 640). `clusterAt` gives null in a gap between clusters: no chip is pressed there. In `skills.ts`:
+`projectSlug(to)`, `projectsOf(edges, nodeId)` (the list view's "Used in") and `nodesOf(edges, slug)` (a chip's nodes).
 
 `view.ts` (`View = { x, y, w, h }`, `Bounds = { w, h }`; every function returns a new view, clamped):
 
@@ -310,7 +315,7 @@ to 1023 px the 2-column drawing is the first view (720 px wide at 768: 1.02 px a
 |---|---|---|
 | `viewBoxFor` | `(view: View) => string` | `"x y w h"`, each rounded to 0.01 |
 | `clampView` | `(view, bounds, pad = 24) => View` | keeps the aspect; `w` in `[160, max(bounds.w + 2·pad, (bounds.h + 2·pad) / aspect)]` (`h` scaled with it, so a tall phone view can still zoom out to the whole drawing); `x` in `[−pad, bounds.w + pad − w]`, `y` likewise; a view wider (taller) than the padded drawing is centred on that axis |
-| `zoomAt` | `(view, factor, point, bounds) => View` | `w' = w / factor`, `x' = p.x − (p.x − x) / factor` (same for y): the point stays under the cursor; then `clampView` |
+| `zoomAt` | `(view, factor, point, bounds) => View` | `w' = w / factor` capped to `[160, max]` first, then `x' = p.x − (p.x − x) / f` with the applied `f = w / w'` (same for y): the point stays under the cursor even at a limit, so a press there changes nothing; a factor that is not a positive number returns the view; then `clampView` |
 | `panBy` | `(view, dx, dy, bounds) => View` | moves by drawing units; then `clampView` |
 | `fitCluster` | `(layout, clusterId, aspect, pad = 12) => View` | the cluster rect ± `pad`, grown on one axis to `aspect = h / w`, centred; then `clampView` (the step's `fitCluster(clusterId)`, with the layout and aspect it needs to stay pure) |
 | `fitAll` | `(layout, aspect) => View` | the whole drawing at that aspect (the first view from 640 px, and Reset there) |

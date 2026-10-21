@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 · P5-02 · passes
+
+- `src/lib/data/skills.ts` is the graph (6 `clusters`, 51 `nodes`, 43 node edges + 58 `project:<slug>` edges from a per-project table; helpers `projectSlug`, `projectsOf`, `nodesOf`); `skillCategories` is gone (data.test's D20 block removed). `src/lib/graph/layout.ts` (`layoutGraph`, `labelLines`, `curvePath`, `edgePaths`, `projectChain`, `clusterAt`, `columnsFor`, `LABEL_DY`, `NARROW_ASPECT`) and `view.ts` (`clampView`, `zoomAt`, `panBy`, `fitCluster`, `fitAll`, `centerOn`, `clientToDrawing`, `contains`, `viewBoxFor`, `wheelFactor`), pure. `scripts/logos.mjs` + 13 keys → `paths.ts` 25 (Java/C++/MCP titles); FloatingLogos test now compares its own twelve. `/skills` lists the new clusters until P5-03 draws the graph (no Differentiator). Tests 1646 → 1777 (new `skills-data.test.ts`, `graph-math.test.ts`).
+- Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 (/skills PASS at 1280 and 390); `node scripts/logos.mjs` twice → identical file; fitCluster('agentic') at 390 = `4 4 348 308`, bounds 1052×700 / 704×1008 as the plan says.
+- An Opus review checked the data against the plan's tables (exact match). It found 1 Important: `zoomAt` drifted at the zoom limits. Fixed test-first: the factor is capped before the fixed point is computed. It also found Minors: non-finite aspect/factor guards; data tests now hold the plan's project table and core-node list; SQL added to the plan's no-project list; curvePath's normal direction documented; the API P5-03..05 need added (`name`/`weight` on NodePoint, `LABEL_DY`, `NARROW_ASPECT`, `columnsFor`, edge helpers). § Math records them. `GraphData.edges` is still unused by `layoutGraph` (the plan's type; kept).
+- Next (P5-03): render from `layoutGraph(…, columns from the matchMedia snapshot via columnsFor)`; the svg aspect below 640 is `NARROW_ASPECT`; the list view's "Used in" is `projectsOf`, a chip's nodes `nodesOf`; `clusterAt` is null in gaps (no chip pressed).
+- Questions for Michael: D98's two questions still stand (MongoDB off? the 15 weight-3 core nodes, now pinned in `skills-data.test.ts`).
+
 ### 2026-10-21 · P5-01 · passes
 
 - Plan `docs/plans/2026-10-21-P5-skills-graph.md`: Data (6 clusters, 51 nodes each with cluster/weight/logo/since/source, 43 node↔node edges, project edges ≥ 3 per featured project, 13 new simple-icons keys incl. javascript, expo, modelcontextprotocol beyond the step's list; Pipedream has none), Layout (ASCII 1280 = 3 columns, 1052 × 700 units; 390 = 2 columns, 704 × 1008, first view `4 4 348 308` at 1.03 px a unit), Math (`src/lib/graph/layout.ts` + `view.ts` signatures), Render, Interaction table, Accessibility, Tests, empty What Michael will see / Review tables, Decisions. D98–D103 appended to the v2 spec. Docs only: tests 1646 → 1646.
