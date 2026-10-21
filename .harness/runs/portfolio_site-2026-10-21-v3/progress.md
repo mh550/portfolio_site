@@ -13,6 +13,12 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 03:00 · P0-01 · passes
+
+Removed the booth (public/b, build script, its test, booth-bundle.md, npm script, CLAUDE.md route/command rows); added "Removed" lines to the three booth spec/plan files. `profile.conferenceNote` is now `''`; card.test asserts "Glad we met" is absent. Re-copied `merge_one` (17 lines) into the agent-harness excerpt, plus a Corrections line. Recorded D75 *default* in a new v3 section of the v2 spec.
+Verified: `lib/check.sh` green; jest 81 → 80 suites, 1117 → 1111 tests, 0 failing; case-study-agent-harness 18 passed, none skipped; smoke passes every route.
+Next session: D76 is the next free decision number. No questions.
+
 ### 2026-10-21 02:30 · initializer
 
 **Scope.** `docs/specs/2026-10-21-portfolio-v3.md` in its § 12 order, per Michael's brief (`brief.md`): P0 cleanup,

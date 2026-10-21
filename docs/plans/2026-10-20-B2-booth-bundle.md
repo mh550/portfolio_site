@@ -1,3 +1,5 @@
+Removed 2026-10-21 (P0-01): the booth harness bundle and its route were deleted (D75); kept below for history.
+
 # B2: the booth bundle (`public/b/h.tgz`)
 
 Spec: `docs/specs/2026-10-20-booth-harness-bundle.md` §2 (B2), D41, D50. Hand-off note: `docs/notes/booth-bundle.md`.

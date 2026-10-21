@@ -440,3 +440,10 @@ Source: `docs/notes/evidence-hit-list.md`. The story: build fast, use it, then s
 2. `/card`: a "Met me at a conference?" one-line note above Selected work (copy in profile.ts, empty by default so
    nothing renders until Michael fills it).
 3. Print stylesheet for case-study pages (clean black-on-white for handing a printout to a reviewer).
+
+## v3 decisions (2026-10-21, from D75)
+
+- **D75** *default*: the booth is removed. `public/b/` (including `/b/h.tgz`), `scripts/build-booth-bundle.mjs`, its test,
+  `docs/notes/booth-bundle.md` and the `booth-bundle` script are deleted, and `profile.conferenceNote` is `''`, so `/card`
+  no longer says "Glad we met!". Supersedes D50 (unlinked booth bundle) and D39 (the card's conference note default).
+  Reversible: `git revert` the P0-01 commit. The three booth spec/plan files keep their content under a "Removed" line.

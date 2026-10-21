@@ -26,5 +26,5 @@ export const profile: Profile = {
   github: 'https://github.com/mh550',
   siteUrl: 'https://michael-herron.vercel.app',
   headshot: '/photos/headshot.png',
-  conferenceNote: "Glad we met! Here's some of what I've been building — I'd love to stay in touch.",
+  conferenceNote: '',
 };

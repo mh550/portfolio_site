@@ -30,7 +30,6 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts` (static routes + every project, from `profile.siteUrl`) and `robots.ts`; both leave out `/evidence` and `/card/qr` |
 | `/talk` | Voice concierge (D44: chrome, sitemap; on the Navbar, D60; the VoiceWidget on every other chrome page links here, D61, and is not shown on `/talk`): server header + privacy note around `TalkSession`; offline (no env: Connect skips the route, D46; a 503 or no agent in 10 s) is the state every check sees (plan `docs/plans/2026-10-20-VC2-talk-page.md`) |
 | `/api/concierge/token` | POST `{visitor_id}` (UUID v4), checked in order: 403 `{error:'forbidden'}` unless the Origin is the site (`profile.siteUrl` or `https://mherron.dev`, its custom domain), this deployment's own Vercel host (`VERCEL_URL`/`VERCEL_BRANCH_URL`, D74) or (dev only) localhost (`origin.ts`); 503 `{offline:true}` without the three `LIVEKIT_*` env vars; 400 on a bad body; 503 if `listRooms` fails (`rooms.ts`); 429 `{error:'busy', reason:'visitor'\|'site'}` when this address (HMAC bucket of `x-forwarded-for`) has a live room or `CONCIERGE_MAX_ROOMS` (default 2) are live (`limits.ts`); else a 10-minute LiveKit token for room `concierge-<addr10>-<12 hex>` (D73) that dispatches agent `concierge` (`route.ts`, plans `docs/plans/2026-10-20-VC1-token-route.md`, `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`) |
-| `/b/h.tgz` | Served file, not a page: the booth harness bundle of `public/b/mh_harness/` (unlinked on purpose, D50; `docs/notes/booth-bundle.md`), rebuilt by `npm run booth-bundle`; `booth-bundle.test.ts` fails on drift |
 
 ## Commands
 
@@ -38,9 +37,8 @@ Michael Herron's personal portfolio site — a bold, expressive multi-page site 
 npm run dev          # start dev server (localhost:3000)
 npm run build        # production build (TypeScript check, prerenders every page; not a static export)
 npm run lint         # ESLint
-npm test             # Jest unit/integration tests (1115 tests, 81 suites after VC5-03)
+npm test             # Jest unit/integration tests (1115 tests, 80 suites after P0-01)
 npm run test:watch   # watch mode
-npm run booth-bundle # rebuild public/b/h.tgz from the git-tracked files of public/b/mh_harness/, then commit it
 ```
 
 To run a single test file:

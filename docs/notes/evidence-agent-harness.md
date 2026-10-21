@@ -103,6 +103,7 @@ throwaway repo (~2 min).
 
 ## Corrections
 
+- 2026-10-21 (P0-01): the `merge_one` excerpt on the agent-harness page was re-copied because `lib/driver.sh` changed (the conflict branch now writes `$STATE/conflict-$m` and calls `needs_you`).
 - 2026-10-18 (M4-01): the Numbers heading said "the first v3 night". `journal/runs/2026-10-17-evaluation.md` calls it
   "the first harness v2 night"; v3 was built that afternoon and the runs' continuations ran on it. The 13.9 h is the
   run time of two overlapping runs, not elapsed time.

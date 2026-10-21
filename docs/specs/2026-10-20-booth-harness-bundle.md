@@ -1,3 +1,5 @@
+Removed 2026-10-21 (P0-01): the booth harness bundle and its route were deleted (D75); kept below for history.
+
 # Booth harness bundle: a test harness Michael can pull onto a demo laptop with one command
 
 Status: design, 2026-10-20. Builder: the agent-harness, top of the queue. **Deadline: live on the production site
