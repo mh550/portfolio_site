@@ -13,6 +13,14 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 05:10 · P1-01 · passes
+
+Wrote `docs/plans/2026-10-21-P1-angle.md` (Positioning table of 10 files before/after, Loop strip type + five rows + step→principle links resolved on this tree, 12 logos with export names, generator, header and 12 positions measured at 1280×720/800/900, About, Approach fold, Site-wide strings, Tests table per feature, empty What Michael will see / Review tables, Decisions) and recorded **D76–D80** *default* in the v2 spec § v3 decisions. Docs only: 1111 tests / 80 suites, unchanged.
+Verified: `.harness/check.sh` → `check: lint ok · jest ok · build ok`; smoke exit 0 at start; Opus review of the plan: 2 Important, 4 Minor and 2 Nit findings, fixed in the plan except Important #2 (below).
+Next session (P1-02): `approach.test.tsx`'s method-label loop must switch to `loopSteps` in P1-02 (the /approach page lives until P1-05) or the suite goes red; about.test's intro assertion is P1-02's. Next free decision: **D81**.
+Question for Michael: Spec and Context both link to `/projects/agent-harness#decisions` under the specified rule (different link texts). Keep that, or give Context a different principle?
+Proposed change: P1-03 step 3 says each logo path starts with 'M'; `siClaude.path` starts with a lowercase `m` (valid relative moveto). Please read that step as `/^[Mm]/`.
+
 ### 2026-10-21 04:00 · verify P0
 
 | Feature | Step | What you ran or read | What you saw | Holds |
