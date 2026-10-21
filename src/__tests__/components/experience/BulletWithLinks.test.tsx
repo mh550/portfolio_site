@@ -36,6 +36,14 @@ describe('BulletWithLinks (P2-01)', () => {
     expect(link.className).toContain(focusRing);
   });
 
+  it('renders a link span missing from the text as plain text, losing no words', () => {
+    const { container } = render(
+      <BulletWithLinks bullet={{ text: 'Shipped the app.', links: [{ text: 'missing phrase', href: '/projects/agent-harness' }] }} />,
+    );
+    expect(container).toHaveTextContent('Shipped the app.');
+    expect(screen.queryByRole('link')).toBeNull();
+  });
+
   it('keeps the text around a mid-sentence link, and several links in text order', () => {
     const text = 'Integrated CRM, incl. a unified per-job communications log, saving time; then the integration platform shipped.';
     const { container } = render(

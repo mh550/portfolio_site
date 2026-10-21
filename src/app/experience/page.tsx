@@ -6,6 +6,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 import TimelineLine from '@/components/TimelineLine';
 import BulletWithLinks from '@/components/experience/BulletWithLinks';
 import { focusRing } from '@/components/focusRing';
+import { textLink } from '@/components/textLink';
 
 export const metadata: Metadata = {
   title: 'Experience — Michael Herron',
@@ -96,7 +97,7 @@ export default function ExperiencePage() {
                 <h3 className="text-xl font-bold mb-0.5">
                   <Link
                     href={project.href}
-                    className={`text-[var(--color-foreground)] underline decoration-[var(--color-accent)]/50 underline-offset-4 hover:text-[var(--color-accent)] ${focusRing}`}
+                    className={textLink}
                   >
                     {project.name}
                   </Link>

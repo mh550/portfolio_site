@@ -8,7 +8,6 @@ export interface Role {
   company: string;
   period: string;
   bullets: Bullet[];
-  type: 'work' | 'education';
 }
 
 // Resume v4, word for word (v3 spec § 8); links per § 3: the site's deep-dive when one exists.
@@ -17,7 +16,6 @@ export const roles: Role[] = [
     title: 'Full-Stack Software Engineer',
     company: 'MAXX Potential',
     period: 'February 2026 – Present',
-    type: 'work',
     bullets: [
       {
         text: 'Shipped React Native, Next.js, edge-function, and Postgres features for a contractor estimating app (~8 issues/week); codified recurring UI fixes into a knowledge source agents load as procedural memory.',
@@ -34,7 +32,6 @@ export const roles: Role[] = [
     title: 'Founding Full-Stack Software Engineer',
     company: 'Builder Clarity',
     period: 'March 2025 – November 2025',
-    type: 'work',
     bullets: [
       {
         text: 'Architected a multi-tenant JobTread ↔ GoHighLevel integration platform with managed multi-org OAuth, replacing per-client builds: 3 clients, onboarding cut from ~2 days to ~6 hours.',

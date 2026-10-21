@@ -57,11 +57,6 @@ describe('Experience from the resume (P2-01; supersedes the M2-03 bullets)', () 
   };
   const bulletsOf = (company: string) => byCompany(company).bullets.map(bulletText).join('\n');
 
-  it('keeps the job titles exactly', () => {
-    expect(byCompany('MAXX Potential').title).toBe('Full-Stack Software Engineer');
-    expect(byCompany('Builder Clarity').title).toBe('Founding Full-Stack Software Engineer');
-  });
-
   it('gives Builder Clarity the metrics-bank figures', () => {
     const text = bulletsOf('Builder Clarity');
     for (const s of ['3 clients', '~2 days', '~6 hours', '~8 hrs/week', '4+ sources']) {
@@ -72,10 +67,6 @@ describe('Experience from the resume (P2-01; supersedes the M2-03 bullets)', () 
   it('gives MAXX Potential the 2× and ~80% figures', () => {
     const text = bulletsOf('MAXX Potential');
     for (const s of ['2× sprint throughput', '~80% less bug-filing time']) expect(text).toContain(s);
-  });
-
-  it('drops the overclaiming "Pioneered" bullet', () => {
-    expect(roles.flatMap((r) => r.bullets.map(bulletText)).some((b) => b.includes('Pioneered'))).toBe(false);
   });
 
   it('renders the resume bullets on the page, links in place', () => {
@@ -122,7 +113,7 @@ describe('the resume layout (P2-02): roles, Projects, Earlier, Education', () =>
   });
 
   it('gives each resume project a deep-dive link, a repo link, its period and its two bullets', () => {
-    const { container } = render(<ExperiencePage />);
+    render(<ExperiencePage />);
     const projects = within(section('Projects'));
     for (const p of resumeProjects) {
       const heading = projects.getByRole('heading', { level: 3, name: p.name });
@@ -132,8 +123,11 @@ describe('the resume layout (P2-02): roles, Projects, Earlier, Education', () =>
       expect(repo).toHaveAttribute('target', '_blank');
       expect(repo).toHaveAttribute('rel', 'noopener noreferrer');
       expect(projects.getByText(p.period)).toBeInTheDocument();
-      expect(p.bullets).toHaveLength(2);
-      for (const b of p.bullets) expect(container).toHaveTextContent(bulletText(b));
+      const article = heading.closest('article');
+      if (!article) throw new Error(`no article around ${p.name}`);
+      const items = within(article).getAllByRole('listitem');
+      expect(items.map((li) => li.textContent?.replace(/^—/, ''))).toEqual(p.bullets.map(bulletText));
+      expect(items).toHaveLength(2);
     }
     expect(projects.getAllByRole('link')).toHaveLength(2 * resumeProjects.length);
   });

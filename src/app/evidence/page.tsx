@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { focusRing } from '@/components/focusRing';
+import { textLink } from '@/components/textLink';
 import ScrollReveal from '@/components/ScrollReveal';
 import { competencies, evidenceIntro, resolvedItems, type EvidenceItem } from '@/lib/data';
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const LINK = `leading-relaxed text-[var(--color-foreground)] underline decoration-[var(--color-accent)]/50 underline-offset-4 hover:text-[var(--color-accent)] ${focusRing}`;
+const LINK = `leading-relaxed ${textLink}`;
 
 function ItemLink({ item }: { item: EvidenceItem }) {
   if (item.href.startsWith('https://')) {

@@ -172,7 +172,6 @@ describe('experience data', () => {
       expect(r.company).toBeTruthy();
       expect(r.period).toBeTruthy();
       expect(r.bullets.length).toBeGreaterThan(0);
-      expect(['work', 'education']).toContain(r.type);
     }
   });
 
