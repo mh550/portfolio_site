@@ -45,6 +45,11 @@ P2-02 builds it; P2-01 only keeps `/experience` rendering (the two roles through
 Order: h1 · the two roles (timeline, as today) · h2 Projects (name → deep-dive, repo line → GitHub, period, two
 bullets) · h2 Earlier (one line each: title · company · period, no list of bullets) · h2 Education.
 
+Built in P2-02 (`src/app/experience/page.tsx`): the role titles stay h2 (as before), Projects / Earlier / Education
+are `section`s labelled by their h2; a project's name is an h3 linked to its deep-dive (underlined like the bullet
+links), the repo line a mono `github.com/…` link in a new tab. Local `Bullets` (the `—` list through
+`BulletWithLinks`, shared by roles and projects), `Divider` and `PERIOD` replace three copies each.
+
 ## Tests
 
 - `src/__tests__/lib/experience-data.test.ts` (new): the § 8 strings verbatim (six role bullets, four project

@@ -13,6 +13,13 @@ D59–D74 the voice-concierge page spec § 7; they already collide, so never ren
 
 ---
 
+### 2026-10-21 04:05 · P2-02 · passes
+
+- `/experience` now renders: h1 · the two roles (bullets via `BulletWithLinks`) · h2 Projects (name h3 → deep-dive, `github.com/…` repo line → GitHub in a new tab, period, two bullets) · h2 Earlier (one `<p>` per role, title · company · period, no `<ul>`) · h2 Education (six resume coursework items). Projects/Earlier/Education are `section`s labelled by their h2. The page now has local `Bullets`, `Divider` and `PERIOD` helpers, so roles and projects share one bullet list.
+- Tests: 1160 → 1168 (86 suites). `experience.test.tsx` covers the h2 order, the four bullet links, the deep-dive and repo links (via `within` the Projects section), Earlier with no `ul`, and the coursework. `a11y-new-pages.test.tsx` now includes `/experience`.
+- Verified: `.harness/check.sh` printed `lint ok · jest ok · build ok`. smoke.mjs exit 0, every route PASS. I looked at captures.mjs full-page shots at 1280 and 390: no scroll, links underlined. Nothing under src/app/card or card.test.tsx changed. CLAUDE.md: Routes row and Data Layer line updated, test count 1168.
+- Next (P2-03): the captures go to docs/screenshots/v3 (`node .harness/captures.mjs docs/screenshots/v3 P2 /experience` gives `P2-experience-*.png`, ~270 KB each). Resume § 8 has a third agent-harness bullet (189 features, ~$3 each) that P2-01 left out because the feature says two bullets each. P2-04 could ask Michael about it.
+
 ### 2026-10-21 · P2-01 · passes
 
 - `experience.ts` now carries resume v4 (§ 8) word for word. `Bullet` (string or `{ text, links }`) and `bulletText`; `roles` holds only MAXX and Builder Clarity, three bullets each, with the four § 3 links. New: `resumeProjects` (agent harness, music server: href, repo, period, two bullets each) and `earlierRoles` (Tahoma, High Cascade: no bullets, D82). Coursework is the six resume items. New `components/experience/BulletWithLinks.tsx` (Server Component); `/experience` renders the bullets through it. Plan: `docs/plans/2026-10-21-P2-experience.md`.
