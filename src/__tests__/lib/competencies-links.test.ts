@@ -19,6 +19,7 @@ const BRIEFS_AND_SPEC = [
   'docs/notes/evidence-media-server.md',
   'docs/notes/evidence-hit-list.md',
   'docs/specs/2026-10-18-portfolio-v2.md',
+  'docs/decisions.md',
 ].map(read);
 
 const ROUTES = ['/', '/about', '/skills', '/projects', '/experience', '/contact', '/card'];

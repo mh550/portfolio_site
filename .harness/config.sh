@@ -6,7 +6,7 @@ POLICY=build-only
 MERGE_POLICY=pr
 MAIN_BRANCH=main
 
-SPEC_FILES="docs/specs/2026-10-18-portfolio-v2.md docs/notes/brand.md docs/notes/evidence-agent-harness.md docs/notes/evidence-hit-list.md docs/notes/evidence-media-server.md"
+SPEC_FILES="docs/specs/2026-10-21-portfolio-v3.md docs/decisions.md docs/specs/2026-10-18-portfolio-v2.md docs/notes/brand.md docs/notes/evidence-agent-harness.md docs/notes/evidence-hit-list.md docs/notes/evidence-media-server.md"
 CHECK_CMD=".harness/check.sh"          # lint + jest + next build (build catches type errors and broken static params)
 INIT_CMD=".harness/init.sh"            # deps, Playwright, a production server on $HARNESS_PORT
 SMOKE_CMD="node .harness/smoke.mjs"    # every route at 1280/390: no page errors, no horizontal scroll at 390

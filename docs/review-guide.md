@@ -152,7 +152,7 @@ Run `portfolio_site-2026-10-20-vc4`, spec `docs/specs/2026-10-20-vc4-order-widge
 
 Same run and spec as VC4, plan `docs/plans/2026-10-20-VC5-mic-limits-server-only.md` (its § Review is the Opus
 review table, § Live check the full staged check). Merge after VC4. Decisions D63–D73 are in
-`docs/specs/2026-10-19-voice-concierge-page.md` § 7.
+`docs/decisions.md`.
 
 - Changed: the browser asks for the microphone only once the concierge has joined, and the Mute button shows only
   when Connected (D65). `POST /api/concierge/token` now checks, in this order: the Origin (403 `{error:'forbidden'}`
@@ -223,7 +223,7 @@ Two things to confirm, not checkable in this run: the agent doesn't parse room n
 
 Run `portfolio_site-2026-10-21-v3`, spec `docs/specs/2026-10-21-portfolio-v3.md`, plan `docs/plans/2026-10-21-P1-angle.md`
 (its § What Michael will see and § Review are filled in by P1-07 and P1-08). Decisions D75–D81 are in
-`docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions.
+`docs/decisions.md`.
 
 **Merge note.** P0 (booth removed, D75) and P1 (positioning, loop strip, logos, About intro and How I work, the
 approach fold) are on branch `harness/portfolio_site-2026-10-21-v3` in commit order; merge them before P2–P5, which
@@ -267,7 +267,7 @@ together.
 ## P2 (v3)
 
 Same run and branch as P0–P1, plan `docs/plans/2026-10-21-P2-experience.md` (§ What Michael will see by P2-03, § Review
-by P2-04). Decisions D82–D84 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P0–P1.
+by P2-04). Decisions D82–D84 are in `docs/decisions.md`. Merge after P0–P1.
 
 - Changed (P2-01): `src/lib/data/experience.ts` carries resume v4 (v3 spec § 8) line for line: the MAXX Potential and
   Builder Clarity bullets (three each; titles, companies and periods unchanged), `resumeProjects` (agent harness,
@@ -293,7 +293,7 @@ and its section.
 ## P3 (v3)
 
 Same run and branch as P0–P2, plan `docs/plans/2026-10-21-P3-concierge-in-site.md` (§ What Michael will see by P3-09,
-§ Review by P3-10). Decisions D85–D96 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P2.
+§ Review by P3-10). Decisions D85–D96 are in `docs/decisions.md`. Merge after P2.
 The site accepts contract v1 and v2 bodies (D95), so it can merge before or after the agent's v2 in
 `mh550/voice-concierge`; the six-kind memory view and Guide me need the v2 agent.
 
@@ -341,7 +341,7 @@ needs no deploy of code: remove the `LIVEKIT_*` env from the environment and the
 ## P4 (v3)
 
 Same run and branch as P0–P3, plan `docs/plans/2026-10-21-P4-contact.md` (§ What Michael will see by P4-02, § Review
-by P4-03). Decision D97 is in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P3; P4 touches only
+by P4-03). Decision D97 is in `docs/decisions.md`. Merge after P3; P4 touches only
 `/contact`, `profile.ts` (`availability`) and `components/logos/`, so it also merges cleanly on its own after P1.
 
 - Changed (P4-01, D97): `/contact` is one screen: "Let's Talk", the line "Durham, NC · open to remote, hybrid or
@@ -367,7 +367,7 @@ LinkedIn glyph, replace its path in `extra.ts`.
 ## P5 (v3)
 
 Same run and branch, plan `docs/plans/2026-10-21-P5-skills-graph.md` (§ What Michael will see by P5-06, § Review by
-P5-07). Decisions D98–D104 are in `docs/specs/2026-10-18-portfolio-v2.md` § v3 decisions. Merge after P4 (P5 touches
+P5-07). Decisions D98–D104 are in `docs/decisions.md`. Merge after P4 (P5 touches
 only `/skills`, `skills.ts`, `src/lib/graph/`, `components/skills/`, the logos and their script).
 
 - Changed (P5-02, D98): `src/lib/data/skills.ts` is a graph: six clusters, 51 nodes (weight 1–3, optional logo and
