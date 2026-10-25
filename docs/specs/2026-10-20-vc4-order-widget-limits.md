@@ -70,7 +70,7 @@ One milestone per section, in this order; each is a PR (Michael merges).
 
 VC4 (VC4-01 – VC4-06) and VC5 (VC5-01 – VC5-07) are built on branch `harness/portfolio_site-2026-10-20-vc4`, plans
 `docs/plans/2026-10-20-VC4-order-widget-nav.md` and `docs/plans/2026-10-20-VC5-mic-limits-server-only.md`, hand-off
-in `docs/review-guide.md` § VC4 and § VC5. Decisions are in `docs/specs/2026-10-19-voice-concierge-page.md` § 7,
+in `docs/review-guide.md` § VC4 and § VC5. Decisions are in `docs/decisions.md`,
 each naming what it supersedes:
 
 - Michael's answers: D59 (project order), D60 (Talk on the Navbar), D62 (harness framing), D67 (`server-only`

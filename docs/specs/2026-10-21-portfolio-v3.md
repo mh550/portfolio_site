@@ -7,7 +7,7 @@ contract both build to, word for word.
 
 Ground rules of `docs/specs/2026-10-18-portfolio-v2.md` still hold (content in `src/lib/data`, no new runtime
 dependency without a `D<n>`, brand.md's voice and never-publish list, the content guard). Record every new default
-below as the next `D<n> *default*` in the v2 spec, naming what it supersedes. **Nothing in this run needs Michael:
+as the next `D<n> *default*` in `docs/decisions.md`, naming what it supersedes. **Nothing in this run needs Michael:
 take the default written here, record it, and never park.** Michael merges the PRs (`MERGE_POLICY=pr`).
 
 One milestone per section, in this order; each is a coherent PR.

@@ -17,9 +17,9 @@ fi
 [[ -d $PW/node_modules/playwright ]] || npm i --prefix "$PW" --no-audit --no-fund playwright@1 > /dev/null
 ls ~/.cache/ms-playwright 2>/dev/null | grep -q '^chromium' || npx --prefix "$PW" playwright install chromium
 
-if [[ -f $SCRATCH/server.pid ]]; then kill "$(cat "$SCRATCH/server.pid")" 2>/dev/null || true; sleep 1; fi
-nohup npx next dev -p "$PORT" > "$SCRATCH/server.log" 2>&1 &
-echo $! > "$SCRATCH/server.pid"
+source .harness/server.sh
+stop_server "$SCRATCH/server.pid"
+start_server "$SCRATCH/server.pid" "$SCRATCH/server.log" npx next dev -p "$PORT"
 
 for _ in $(seq 1 120); do curl -sf -o /dev/null "http://localhost:$PORT/" && break; sleep 0.5; done
 curl -sf -o /dev/null "http://localhost:$PORT/" || { echo "dev server did not start — see $SCRATCH/server.log"; tail -20 "$SCRATCH/server.log"; exit 1; }
