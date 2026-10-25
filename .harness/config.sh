@@ -15,4 +15,3 @@ BASE_PORT=7831
 HOURS=14                               # bounded by `--until` on the queue anyway
 MAX_ATTEMPTS=2
 MAX_VERIFY_ROUNDS=2
-AGENT_SETTINGS=.claude/settings.json

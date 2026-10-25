@@ -267,7 +267,6 @@ CSS custom properties defined in `src/app/globals.css` via `@theme inline`:
 
 ## Off-limits
 - Never deploy: no `vercel` CLI, never push or merge to `main` (pushing `main` deploys production). Michael merges.
-- Other repos (`~/projects/agent-harness`, `hit_list`, `dj-crate-streaming`) are read-only sources, only at the
-  paths the evidence briefs name. Never read `.env` files, `/srv`, `/etc/restic`, or `agent-harness/journal/raw/`.
-- Never weaken `src/__tests__/lib/content-guard.test.ts` (once M0 adds it) to make content pass.
+- Other repos are sources only at the paths the evidence briefs name; never `agent-harness/journal/raw/`.
+- Never weaken `src/__tests__/lib/content-guard.test.ts` to make content pass.
 
