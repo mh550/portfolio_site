@@ -87,6 +87,7 @@ collide, against a running `npm run dev`. In harness runs it isn't installed: us
   line; never a new entry beside a dead one.
 - A fact a fresh session would otherwise rediscover → one line in `## Gotchas` below, edited in place.
 - Tonight's scope → the run brief, never this file. How to work here → Michael's: propose it in `proposed_changes`.
+- A finished change → a PR with its preview URL, never merged by the session: `main` deploys, so Michael merges.
 - Anything the code, git or the suite can tell (test counts, file lists, prop names, constants) → nowhere.
 
 ## Gotchas
