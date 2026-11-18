@@ -1,6 +1,6 @@
 /** @jest-environment node */
 // The agent-harness case study (M4-02): its shape, and proof that its numbers and its code excerpt come from the
-// sources. Copy and traceability: docs/plans/2026-10-18-M4-agent-harness.md. If lib/driver.sh changes, re-copy the
+// sources. Copy and traceability: docs/plans/2026-10-18-M4-agent-harness.md. If the excerpted source file changes, re-copy the
 // excerpt from the file (and update the plan's line numbers); never loosen the verbatim check.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -78,11 +78,11 @@ describe('agent-harness code excerpt', () => {
   it('is one snippet of at most 25 lines, titled with its repo path', () => {
     expect(snippets).toHaveLength(1);
     expect(snippets[0].code.split('\n').length).toBeLessThanOrEqual(25);
-    expect(snippets[0].title).toMatch(/lib\/(driver\.sh|metrics\.mjs)/);
+    expect(snippets[0].title).toMatch(/lib\/(driver\.sh|record\.sh|metrics\.mjs)/);
   });
 
   itWithSource('appears verbatim in its source file', () => {
-    const file = snippets[0].title.match(/lib\/(driver\.sh|metrics\.mjs)/)![0];
+    const file = snippets[0].title.match(/lib\/(driver\.sh|record\.sh|metrics\.mjs)/)![0];
     const source = fs.readFileSync(path.join(AGENT_HARNESS, file), 'utf8');
     expect(source).toContain(snippets[0].code);
   });
