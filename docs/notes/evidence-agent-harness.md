@@ -94,7 +94,7 @@ throwaway repo (~2 min).
 ## Demo material
 
 - Repo link (public). Code excerpts worth showing (short): the usage-limit detection with its captured fixture;
-  the "verified tree == merged tree" check in `lib/driver.sh`; a `feature_list.json` entry.
+  the "verified tree == merged tree" check in `lib/record.sh` (`merge_one`, in `lib/driver.sh` until P1-03); a `feature_list.json` entry.
 - Terminal renders (as styled text blocks, not screenshots): `harness status`, `harness report`.
 - This very site update: the run's PRs on github.com/mh550/portfolio_site are public proof ("this page was built
   by the harness it describes"; link the repo's pull requests filtered by `harness`).
@@ -103,6 +103,7 @@ throwaway repo (~2 min).
 
 ## Corrections
 
+- 2026-11-17: the `merge_one` excerpt was re-copied again: the function moved to `lib/record.sh` (P1-03) and grew to 70 lines. Its contract changed too: the invariant now excludes paths the suite's cache key ignores (`ignored_only`), a 3 means main moved and the lane re-bases (not "held for the next milestone"), and conflicts can be resolved by the lane before Michael hears of them.
 - 2026-10-21 (P0-01): the `merge_one` excerpt on the agent-harness page was re-copied because `lib/driver.sh` changed (the conflict branch now writes `$STATE/conflict-$m` and calls `needs_you`).
 - 2026-10-18 (M4-01): the Numbers heading said "the first v3 night". `journal/runs/2026-10-17-evaluation.md` calls it
   "the first harness v2 night"; v3 was built that afternoon and the runs' continuations ran on it. The 13.9 h is the

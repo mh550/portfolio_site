@@ -126,36 +126,47 @@ links: [
 
 ## Code excerpt
 
-`detail.codeSnippets` holds exactly one snippet. Source: `/home/mh550/projects/agent-harness/lib/driver.sh`, lines
-170–182 (13 lines, the start of `merge_one`, ending at the verified-tree check), quoted verbatim:
+`detail.codeSnippets` holds exactly one snippet. Source: `/home/mh550/projects/agent-harness/lib/record.sh`, lines
+1289–1309 (21 lines: the header comment and the start of `merge_one`), quoted verbatim. (Updated in place 2026-11-17:
+`merge_one` moved from `lib/driver.sh` lines 170–182 at `a586f59` to `lib/record.sh` when the record went to its own
+branch, P1-03; the function is now 70 lines, so the excerpt is its contract and opening rather than the whole gate.)
 
-- `title`: `'lib/driver.sh · the merge gate: only the verified tree lands on main'`
+- `title`: `'lib/record.sh · the merge gate: only the verified tree lands on main'`
 - `language`: `'bash'` (a label only: `CodeBlock` prints it, no highlighter)
-- `code`: the verbatim lines 170–182, as `sed -n 170,182p lib/driver.sh` printed them at agent-harness `a586f59`
-  (M4-02 copies the bytes from the file itself, not from this plan):
+- `code`: the verbatim lines 1289–1309, as `sed -n 1289,1309p lib/record.sh` printed them at agent-harness `e1faae8`
+  (copied from the file itself, not from this plan; it contains backticks, so the data uses a plain template literal
+  with `\``, not `String.raw`):
 ```bash
-# Merge one verified milestone (its tag) into main through a PR. The invariant: the tree that lands on main is the
-# tree that was verified. 0 = merged or proposed · 1 = needs Michael (conflict, refusal) · 3 = held: main has content
-# this milestone wasn't verified with (the next milestone's verify includes it, and its merge carries this one)
+# Merge one verified milestone (its tag, the lane tip) into main through a PR. The invariant: the tree that lands on
+# main is the tree that was verified, outside the paths the suite's cache key ignores (ignored_only). 0 = merged,
+# proposed, or (--open) its PR open and waiting · 1 = needs Michael (conflict, refusal, an outage past the retries: each
+# with its card, once; a re-base already pending says nothing new) · 3 = main moved since the verify
+# (moved-<m> holds that main): its lane re-bases it (lib/lane.sh rebase), once per main, never after it needs Michael;
+# `harness merge` clears moved-* and so tries once more.
+# --open (a dependency not merged yet) skips that test: main moves again when the dependency lands, and the rule runs then.
 merge_one() {
-  local m=$1 tag=run/$RUN_ID/$1 c head url tree
+  local m=$1 tag=run/$RUN_ID/$1 c head url tree mn out ref t
   head=harness-merge/$RUN_ID-$m
   c=$(git rev-list -n1 "$tag") || return 1
-  git fetch -q origin "$MAIN_BRANCH" || return 1
-  if git merge-base --is-ancestor "$c" "origin/$MAIN_BRANCH"; then touch "$STATE/merged-$m"; note "$m merged into $MAIN_BRANCH (already there)"; return 0; fi
-  if ! tree=$(git merge-tree --write-tree "origin/$MAIN_BRANCH" "$c" 2>/dev/null | head -1); then
-    note "$m conflicts with $MAIN_BRANCH; not merged (needs Michael)"; notify "$m needs Michael: conflicts with $MAIN_BRANCH"; return 1
+  # retried: an outage, or another lane's fetch holding refs/remotes/origin/<main>'s lock
+  merge_step "$m" "fetch of $MAIN_BRANCH" fetch_main_ || return 1
+  # a tag the verify's push left local goes before the branch: forced, the local one is the verified one. A refusal (a
+  # rule on run/* tags) holds no merge up: the tag was never what lands
+  if [[ -f $STATE/tag-local-$m ]]; then
+    if tag_push "$m" --force; then note "$m: tag $tag reached origin"
+    elif (( ! ORIGIN_REFUSED )); then merge_failed "$m" "push of tag $tag"; return 1; fi
   fi
-  [[ $tree == "$(git rev-parse "$c^{tree}")" ]] || return 3
+  if git merge-base --is-ancestor "$c" "origin/$MAIN_BRANCH"; then merged_ "$m" " (already there)"; return 0; fi
+  mn=$(git rev-parse "origin/$MAIN_BRANCH")
 ```
 
 Notes for M4-02:
 
-- Why this one and not the limit detection in `lib/metrics.mjs`: the last line *is* the invariant the case study
-  is built on (D-H17, the verify step), and it fits in 13 lines. The limit detection is told in D-H11 and the first
+- Why this one and not the limit detection in `lib/metrics.mjs`: its header comment *is* the invariant the case study
+  is built on (D-H17, the verify step), and it fits in 21 lines. The limit detection is told in D-H11 and the first
   lesson instead.
-- Paste it into a template literal. It contains `$` signs but no `${` and no backtick, so no escaping is needed;
-  check that once with `grep -c '\${' ` on the pasted block (expect 0) or use `String.raw`.
+- Paste it into a template literal. Check the pasted block for `${` and backslashes (`grep -c '\${'`, expect 0);
+  escape backticks as `\``.
 - The verbatim test (M4-02 step 3) compares against the live file, which the harness keeps changing. If
   `driver.sh` moves on, re-copy lines from the current file (and update this plan's line numbers) instead of
   loosening the test. The repo is public, so the excerpt publishes nothing new; it names "Michael" in a comment,
@@ -300,7 +311,7 @@ Every number, date and decision id in the copy above. "Brief" = `docs/notes/evid
 | 14 independent features never ran | lesson 5 | Brief line 89; AH `ledger/debrief.md` line 7 |
 | after lists; "block only on declared dependencies" still proposed | lesson 5 rule | decisions.md D-H20; AH `lib/features.mjs` `deps()` (default: every earlier feature); AH `ledger/debrief.md` line 43 (candidate PR); brief line 90 ("proposed") |
 | tech stack | techStack | Brief line 44 |
-| code excerpt | codeSnippets | AH `lib/driver.sh` lines 170–182 at `a586f59` |
+| code excerpt | codeSnippets | AH `lib/record.sh` lines 1289–1309 at `e1faae8` (was `lib/driver.sh` 170–182 at `a586f59`) |
 
 Numbers deliberately left out: the initializer's "~18% of cost" (brief line 51; the ledger's init roles add up to
 about 9%, init + plan to 18%, so the figure is ambiguous), "83 end-to-end checks" and the first v2 night's
@@ -358,7 +369,7 @@ AH `ledger/runs.jsonl`)
 | "context usage too high" | method, iteration 1 | brief line 24; timeline.md 60–62 | ✓ |
 | ~60-line script | method, iteration 3 | AH `journal/iterations/03-harness-v1.md` line 31 | ✓ |
 | one evidence row per step | method, lesson 3 | brief lines 37–38; 05-harness-v3.md line 25 | ✓ |
-| byte-for-byte verified tree | method, D-H17 | 05-harness-v3.md 40–41; `lib/driver.sh` 182 | ✓ |
+| byte-for-byte verified tree | method, D-H17 | 05-harness-v3.md 40–41; `lib/driver.sh` 182 at `a586f59` (now `lib/record.sh` `merge_one`) | ✓ |
 | D-H1 | decisions | AH `journal/decisions.md` 7–13; brief | ✓ |
 | D-H2 | decisions | decisions.md 16–20; brief line 52 | ✓ |
 | D-H4 | decisions | decisions.md 29–34 | ✓ |

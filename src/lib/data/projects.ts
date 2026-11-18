@@ -146,25 +146,30 @@ export const projects: Project[] = [
         'On Oct 17 the harness ran two projects, starting overnight on v2 and finishing on v3 that day: 71 features planned, 55 passing, 52 verified and merged through 12 PRs, and 374 tests added (1,242 → 1,616). It cost $139.34 in total, about $2.53 per passing feature, across 127 sessions and 13.9 hours of run time. The update to this site is a v3 run too: its pull requests are linked below.',
       codeSnippets: [
         {
-          title: 'lib/driver.sh · the merge gate: only the verified tree lands on main',
+          title: 'lib/record.sh · the merge gate: only the verified tree lands on main',
           language: 'bash',
-          code: String.raw`# Merge one verified milestone (its tag) into main through a PR. The invariant: the tree that lands on main is the
-# tree that was verified. 0 = merged or proposed · 1 = needs Michael (conflict, refusal) · 3 = held: main has content
-# this milestone wasn't verified with (the next milestone's verify includes it, and its merge carries this one)
+          // Verbatim lib/record.sh lines 1289–1309 at agent-harness e1faae8 (case-study-agent-harness.test.ts checks it).
+          code: `# Merge one verified milestone (its tag, the lane tip) into main through a PR. The invariant: the tree that lands on
+# main is the tree that was verified, outside the paths the suite's cache key ignores (ignored_only). 0 = merged,
+# proposed, or (--open) its PR open and waiting · 1 = needs Michael (conflict, refusal, an outage past the retries: each
+# with its card, once; a re-base already pending says nothing new) · 3 = main moved since the verify
+# (moved-<m> holds that main): its lane re-bases it (lib/lane.sh rebase), once per main, never after it needs Michael;
+# \`harness merge\` clears moved-* and so tries once more.
+# --open (a dependency not merged yet) skips that test: main moves again when the dependency lands, and the rule runs then.
 merge_one() {
-  local m=$1 tag=run/$RUN_ID/$1 c head url tree
+  local m=$1 tag=run/$RUN_ID/$1 c head url tree mn out ref t
   head=harness-merge/$RUN_ID-$m
   c=$(git rev-list -n1 "$tag") || return 1
-  git fetch -q origin "$MAIN_BRANCH" || return 1
-  if git merge-base --is-ancestor "$c" "origin/$MAIN_BRANCH"; then touch "$STATE/merged-$m"; note "$m merged into $MAIN_BRANCH (already there)"; return 0; fi
-  if ! tree=$(git merge-tree --write-tree "origin/$MAIN_BRANCH" "$c" 2>/dev/null | head -1); then
-    # once per main: merge_milestones runs again after every verify and at the end
-    [[ $(cat "$STATE/conflict-$m" 2>/dev/null) == "$(git rev-parse "origin/$MAIN_BRANCH")" ]] && return 1
-    git rev-parse "origin/$MAIN_BRANCH" > "$STATE/conflict-$m"
-    note "$m conflicts with $MAIN_BRANCH; not merged (needs Michael)"; commit_all "HARNESS: $m conflicts with $MAIN_BRANCH"; sync
-    needs_you "$m" "conflicts with $MAIN_BRANCH" harness-log.md; return 1
+  # retried: an outage, or another lane's fetch holding refs/remotes/origin/<main>'s lock
+  merge_step "$m" "fetch of $MAIN_BRANCH" fetch_main_ || return 1
+  # a tag the verify's push left local goes before the branch: forced, the local one is the verified one. A refusal (a
+  # rule on run/* tags) holds no merge up: the tag was never what lands
+  if [[ -f $STATE/tag-local-$m ]]; then
+    if tag_push "$m" --force; then note "$m: tag $tag reached origin"
+    elif (( ! ORIGIN_REFUSED )); then merge_failed "$m" "push of tag $tag"; return 1; fi
   fi
-  [[ $tree == "$(git rev-parse "$c^{tree}")" ]] || return 3`,
+  if git merge-base --is-ancestor "$c" "origin/$MAIN_BRANCH"; then merged_ "$m" " (already there)"; return 0; fi
+  mn=$(git rev-parse "origin/$MAIN_BRANCH")`,
         },
       ],
       architectureDiagram: 'agent-harness',
